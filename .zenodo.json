@@ -1,0 +1,13 @@
+{
+  "upload_type": "software",
+  "title": "codemeta-drift",
+  "description": "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree",
+  "creators": [
+    {
+      "name": "van Lierde, Simon",
+      "orcid": "0009-0006-6953-909X"
+    }
+  ],
+  "access_right": "open",
+  "license": "apache-2.0"
+}
