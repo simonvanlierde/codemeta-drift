@@ -3,93 +3,125 @@
 [![python](https://github.com/simonvanlierde/codemeta-drift/actions/workflows/python.yml/badge.svg)](https://github.com/simonvanlierde/codemeta-drift/actions/workflows/python.yml)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Report where [CodeMeta](https://github.com/codemeta/codemeta)'s context, property definitions,
-property table, examples and crosswalks disagree.
+A small checker that finds the places where the CodeMeta standard's own files contradict
+each other.
 
-CodeMeta keeps one vocabulary in several files: `codemeta.jsonld` (the JSON-LD context),
-`codemeta_all.jsonld` (the definitions), `properties_description.csv` (the property table),
-`examples/`, the 46 per-format files in `crosswalks/`, and the generated `crosswalk.csv`.
-CodeMeta's own CI catches some drift: crosswalks whose row count differs from the table, and
-examples that fail a JSON-LD round trip. It doesn't check whether the files name the same
-terms. This tool lists every place they don't.
+## Why this exists
 
-## Usage
+[CodeMeta](https://codemeta.github.io) is a shared vocabulary for describing research
+software: who wrote it, its licence, how to cite it, where the code lives. You put a
+`codemeta.json` file next to your code, and archives such as Software Heritage can read it.
 
-It is not on PyPI. Install it from GitHub with [uv](https://docs.astral.sh/uv/):
+CodeMeta also publishes **crosswalks**: translation tables that say which field in another
+format means the same thing. For example, a crosswalk says which field in a `CITATION.cff`
+file, a PyPI package or a GitHub repository matches CodeMeta's `author` or `license`. There
+are 46 of them, and tools use them to convert metadata from one format to another.
+
+All of this lives in a handful of files that people edit by hand. When one file changes and
+another doesn't, the translations go wrong without anyone noticing. A real example from
+CodeMeta's main branch: the property list dropped `position` and put `maintainer` in its
+place, but all 46 crosswalks still have a `position` row. If you lined them up by row number,
+every format's "position" field would quietly turn into "maintainer".
+
+codemeta-drift reads all those files and lists every place they disagree, so they can be
+fixed before anyone converts metadata with them.
+
+## Try it
+
+It isn't on PyPI. Install it from GitHub with [uv](https://docs.astral.sh/uv/) and point it at
+a copy of the CodeMeta repository:
 
 ```sh
 uv tool install git+https://github.com/simonvanlierde/codemeta-drift
 git clone https://github.com/codemeta/codemeta
-codemeta-drift codemeta              # the working tree
-codemeta-drift codemeta --ref 4.0    # any tag, branch or commit; leaves the working tree alone
-codemeta-drift codemeta --json       # one object per finding: code, file, term, detail
+codemeta-drift codemeta              # check the files as they are
+codemeta-drift codemeta --ref 4.0    # check any release, branch or commit instead
+codemeta-drift codemeta --json       # the same, as JSON
 ```
 
-It prints one line per finding, or nothing (`[]` with `--json`) when the files agree. Line
-numbers in a finding are lines of the file it names. It exits with:
+Each line of output is one problem: what kind it is, the file, the term, and what's wrong.
+For example:
 
-- 0 when the files agree,
-- 1 when they don't,
-- 2 when it can't read the checkout, a file is malformed, or there is no `codemeta.jsonld`
-  or `properties_description.csv` to compare.
+```text
+CROSSWALK_ROWS crosswalks/*.csv (all 46): position: line 44 is not in properties_description.csv; the table has maintainer there
+EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
+AGGREGATE_FORMAT crosswalk.csv: GitLab: no column for crosswalks/GitLab.csv
+```
 
-## What it checks
+When everything agrees, it prints nothing. That makes it usable in CI, where the exit code
+is what counts:
 
-| Code | Disagreement |
-| --- | --- |
-| `TABLE_DUPLICATE` | The same parent type and property on two rows of the property table |
-| `TABLE_NO_TERM` | A property table row with no term in the context |
-| `TERM_NO_ROW` | A context term with no property table row |
-| `TABLE_NAMESPACE` | A row's parent type is `schema:` but the context maps the term to `codemeta:`, or the reverse |
-| `DEFINITION_NO_TERM` | A definition whose label is not a context term |
-| `DEFINITION_IRI` | A definition and the context give one term different IRIs |
-| `EXAMPLE_NO_TERM` | A valid example uses a term the context does not define |
-| `CROSSWALK_ROWS` | A crosswalk's property column differs from the table's (see below) |
-| `CROSSWALK_FORMAT` | Two crosswalk files use one format name |
-| `AGGREGATE_ROWS` | The same as `CROSSWALK_ROWS`, for the committed `crosswalk.csv` |
-| `AGGREGATE_FORMAT` | A crosswalk file with no column in `crosswalk.csv`, or the reverse |
-| `SKIPPED` | A file this release doesn't have, such as `codemeta_all.jsonld` before 4.0. Only the checks that need it skip. It doesn't count as drift |
+- 0: the files agree.
+- 1: they don't.
+- 2: it couldn't check: the vocabulary or the property list is missing, or a file can't be read.
 
-The crosswalk checks match rows by name, not by position. A renamed row shows up as one stray
-row and one missing row, never as a silent remap. When several crosswalks differ from the table
-in the same way, the tool reports them once.
+## What it found in CodeMeta (2026-10-13)
 
-All the rules live in [`checks.py`](src/codemeta_drift/checks.py). It uses only the standard
-library and imports nothing from this package, so the codemeta repository can copy it as is
-and add a short runner for CI. Here, [`cli.py`](src/codemeta_drift/cli.py) is that runner.
+On CodeMeta's main branch (`e62eb75`):
 
-## Drift at 3.1, 4.0 and master (2026-10-13)
+- The property list has three terms (`encoding`, `fileFormat`, `softwareSuggestions`) that the
+  vocabulary file doesn't define, and the vocabulary has three (`archivedAt`,
+  `encodingFormat`, `featureList`) that the list leaves out.
+- The main example uses `softwareSuggestions`, one of the undefined terms.
+- The definitions file has a typo (`contiIntegration` for `contIntegration`) and still defines
+  `embargoDate`, which the vocabulary doesn't have. The vocabulary only has `embargoEndDate`.
+- `funding` and `maintainer` point to different addresses in the definitions and the
+  vocabulary.
+- Every crosswalk is missing the same 12 terms, and still has the old `position` row.
+- The combined table that the website shows has no column for the GitLab and code.json
+  crosswalks.
 
-Findings per check, from `codemeta-drift <clone> --ref <ref>`:
+Number of problems per check, for the last two releases and the main branch:
 
-| Code | 3.1 (`9458ead`) | 4.0 (`3657b0f`) | master (`e62eb75`) |
+| Check | 3.1 | 4.0 | main |
 | --- | --- | --- | --- |
 | `TABLE_NO_TERM` | 0 | 4 | 3 |
 | `TERM_NO_ROW` | 0 | 3 | 3 |
 | `TABLE_NAMESPACE` | 0 | 2 | 2 |
-| `DEFINITION_NO_TERM` | skipped | 2 | 2 |
-| `DEFINITION_IRI` | skipped | 2 | 2 |
+| `DEFINITION_NO_TERM` | not checked | 2 | 2 |
+| `DEFINITION_IRI` | not checked | 2 | 2 |
 | `EXAMPLE_NO_TERM` | 0 | 1 | 1 |
 | `CROSSWALK_ROWS` | 3 | 10 | 13 |
 | `AGGREGATE_ROWS` | 2 | 12 | 15 |
 | `AGGREGATE_FORMAT` | 0 | 2 | 2 |
 
-On master:
+3.1 has no definitions file, so those checks didn't run. The full output for 3.1 and 4.0 is
+in [`tests/fixtures/`](tests/fixtures/).
 
-- The property table has `encoding`, `fileFormat` and `softwareSuggestions`, which the
-  context does not define. The context has `archivedAt`, `encodingFormat` and `featureList`,
-  which have no row.
-- `examples/codemeta.json` uses `softwareSuggestions`.
-- `codemeta_all.jsonld` labels `codemeta:contIntegration` as `contiIntegration`, and still
-  defines `embargoDate` next to `embargoEndDate`. The context has only `embargoEndDate`.
-- `codemeta_all.jsonld` gives `funding` and `maintainer` `codemeta:` IRIs, but the context maps
-  both to `schema:`.
-- Every crosswalk misses the same 12 rows, and still has a `position` row where the table now
-  has `maintainer`. So padding the crosswalks by row count would quietly map each format's
-  `position` term to `maintainer`.
-- `crosswalk.csv` has no GitLab or code.json column.
+## The files it compares
 
-The full output for 3.1 and 4.0 is in [`tests/fixtures/`](tests/fixtures/).
+| File | What it is |
+| --- | --- |
+| `codemeta.jsonld` | The vocabulary: every term and the web address that defines it |
+| `codemeta_all.jsonld` | The definitions of CodeMeta's own terms (since 4.0) |
+| `properties_description.csv` | The property list people read, one row per term |
+| `codemeta.json`, `examples/*.json` | Example metadata that should only use defined terms |
+| `crosswalks/*.csv` | One translation table per format, listing the same terms in the same order |
+| `crosswalk.csv` | All crosswalks combined into one table, which the website shows |
+
+## Every check
+
+| Code | It reports |
+| --- | --- |
+| `TABLE_DUPLICATE` | A term listed twice under the same type in the property list |
+| `TABLE_NO_TERM` | A term in the property list that the vocabulary doesn't define |
+| `TERM_NO_ROW` | A term in the vocabulary that the property list leaves out |
+| `TABLE_NAMESPACE` | A term the property list files under `schema:` but the vocabulary under `codemeta:`, or the other way round |
+| `DEFINITION_NO_TERM` | A definition for a term the vocabulary doesn't have |
+| `DEFINITION_IRI` | A term whose address differs between the definitions and the vocabulary |
+| `EXAMPLE_NO_TERM` | An example that uses an undefined term |
+| `CROSSWALK_ROWS` | A crosswalk whose terms don't match the property list |
+| `CROSSWALK_FORMAT` | Two crosswalks for the same format |
+| `AGGREGATE_ROWS` | The combined table's terms don't match the property list |
+| `AGGREGATE_FORMAT` | A crosswalk missing from the combined table, or a column with no crosswalk |
+| `SKIPPED` | A file this version doesn't have; the checks that need it don't run, and it doesn't count as a problem |
+
+The crosswalk checks compare terms by name, never by position. A renamed term shows up as one
+term that shouldn't be there and one that's missing. When all 46 crosswalks have the same
+problem, it's reported once.
+
+All the checks live in one file, [`checks.py`](src/codemeta_drift/checks.py). It needs
+nothing beyond Python itself, so the CodeMeta repository could copy it into its own CI.
 
 ## Development
 
@@ -104,13 +136,13 @@ just check             # lint, types, tests and the dependency audit (needs netw
 just hooks             # the YAML, Markdown, workflow and citation checks CI also runs
 ```
 
-`tests/fixtures/3.1/` and `tests/fixtures/4.0/` hold the files the checks read, copied byte for
-byte from those CodeMeta tags. The `.expected` files next to them pin the tool's output. When
-you change the output on purpose, check the difference, then regenerate with
-`uv run codemeta-drift tests/fixtures/<tag> > tests/fixtures/<tag>.expected`. It exits 1,
-because both releases have drift.
+The tests run against real files from CodeMeta 3.1 and 4.0, copied byte for byte into
+`tests/fixtures/`. The `.expected` files next to them hold the output the tool should give.
+When you change the output on purpose, check the difference, then regenerate with
+`uv run codemeta-drift tests/fixtures/<tag> > tests/fixtures/<tag>.expected` (it exits 1,
+because both releases have problems).
 
 ## License
 
-Apache-2.0, see [LICENSE](LICENSE). The fixtures are CodeMeta's own files, also Apache-2.0;
-see [NOTICE](NOTICE).
+Apache-2.0, see [LICENSE](LICENSE). The test fixtures are CodeMeta's own files, also
+Apache-2.0; see [NOTICE](NOTICE).
