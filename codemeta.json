@@ -3,6 +3,15 @@
   "@type": "SoftwareSourceCode",
   "name": "codemeta-drift",
   "description": "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree",
+  "version": "0.1.0",
+  "dateCreated": "2026-10-13",
+  "developmentStatus": "https://www.repostatus.org/#active",
+  "keywords": [
+    "CodeMeta",
+    "software metadata",
+    "crosswalk",
+    "JSON-LD"
+  ],
   "author": [
     {
       "@type": "Person",
@@ -15,5 +24,7 @@
   "codeRepository": "https://github.com/simonvanlierde/codemeta-drift",
   "issueTracker": "https://github.com/simonvanlierde/codemeta-drift/issues",
   "license": "https://spdx.org/licenses/Apache-2.0",
-  "programmingLanguage": "Python"
+  "programmingLanguage": "Python",
+  "readme": "https://github.com/simonvanlierde/codemeta-drift#readme",
+  "runtimePlatform": "Python 3.12 or later"
 }

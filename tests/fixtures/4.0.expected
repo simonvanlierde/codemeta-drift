@@ -1,0 +1,38 @@
+TABLE_NO_TERM properties_description.csv: encoding: row has no term in codemeta.jsonld
+TABLE_NO_TERM properties_description.csv: fileFormat: row has no term in codemeta.jsonld
+TABLE_NO_TERM properties_description.csv: position: row has no term in codemeta.jsonld
+TABLE_NO_TERM properties_description.csv: softwareSuggestions: row has no term in codemeta.jsonld
+TERM_NO_ROW codemeta.jsonld: archivedAt: term has no row in properties_description.csv
+TERM_NO_ROW codemeta.jsonld: encodingFormat: term has no row in properties_description.csv
+TERM_NO_ROW codemeta.jsonld: featureList: term has no row in properties_description.csv
+TABLE_NAMESPACE properties_description.csv: maintainer: row codemeta:SoftwareSourceCode,maintainer but codemeta.jsonld maps maintainer to schema:maintainer
+TABLE_NAMESPACE properties_description.csv: funding: row codemeta:SoftwareSourceCode,funding but codemeta.jsonld maps funding to schema:funding
+DEFINITION_NO_TERM codemeta_all.jsonld: contiIntegration: defines codemeta:contIntegration but codemeta.jsonld has no contiIntegration
+DEFINITION_NO_TERM codemeta_all.jsonld: embargoDate: defines codemeta:embargoDate but codemeta.jsonld has no embargoDate
+DEFINITION_IRI codemeta_all.jsonld: funding: defines codemeta:funding but codemeta.jsonld maps it to schema:funding
+DEFINITION_IRI codemeta_all.jsonld: maintainer: defines codemeta:maintainer but codemeta.jsonld maps it to schema:maintainer
+EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
+CROSSWALK_ROWS crosswalks/*.csv (all 46): creditText: no row for properties_description.csv line 27
+CROSSWALK_ROWS crosswalks/*.csv (all 46): funding: no row for properties_description.csv line 35
+CROSSWALK_ROWS crosswalks/*.csv (all 46): maintainer: no row for properties_description.csv line 47
+CROSSWALK_ROWS crosswalks/*.csv (all 46): alternateName: no row for properties_description.csv line 54
+CROSSWALK_ROWS crosswalks/*.csv (all 46): contactPoint: no row for properties_description.csv line 62
+CROSSWALK_ROWS crosswalks/*.csv (all 46): contactType: no row for properties_description.csv line 63
+CROSSWALK_ROWS crosswalks/*.csv (all 46): citeWith: no row for properties_description.csv line 81
+CROSSWALK_ROWS crosswalks/*.csv (all 46): citeAsID: no row for properties_description.csv line 82
+CROSSWALK_ROWS crosswalks/*.csv (all 46): documentation: no row for properties_description.csv line 83
+CROSSWALK_ROWS crosswalks/*.csv (all 46): relatedSoftware: no row for properties_description.csv line 84
+AGGREGATE_ROWS crosswalk.csv: creditText: no row for properties_description.csv line 27
+AGGREGATE_ROWS crosswalk.csv: funding: no row for properties_description.csv line 35
+AGGREGATE_ROWS crosswalk.csv: maintainer: no row for properties_description.csv line 47
+AGGREGATE_ROWS crosswalk.csv: alternateName: no row for properties_description.csv line 54
+AGGREGATE_ROWS crosswalk.csv: contactPoint: no row for properties_description.csv line 62
+AGGREGATE_ROWS crosswalk.csv: contactType: no row for properties_description.csv line 63
+AGGREGATE_ROWS crosswalk.csv: hasSourceCode: no row for properties_description.csv line 79
+AGGREGATE_ROWS crosswalk.csv: isSourceCodeOf: no row for properties_description.csv line 80
+AGGREGATE_ROWS crosswalk.csv: citeWith: no row for properties_description.csv line 81
+AGGREGATE_ROWS crosswalk.csv: citeAsID: no row for properties_description.csv line 82
+AGGREGATE_ROWS crosswalk.csv: documentation: no row for properties_description.csv line 83
+AGGREGATE_ROWS crosswalk.csv: relatedSoftware: no row for properties_description.csv line 84
+AGGREGATE_FORMAT crosswalk.csv: GitLab: no column for crosswalks/GitLab.csv
+AGGREGATE_FORMAT crosswalk.csv: code.json: no column for crosswalks/code-json.csv

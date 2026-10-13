@@ -1,0 +1,2 @@
+# Copies of upstream CodeMeta files: keep their CRLF line endings byte for byte.
+tests/fixtures/*/** -text

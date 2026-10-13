@@ -9,5 +9,11 @@
     }
   ],
   "access_right": "open",
-  "license": "apache-2.0"
+  "license": "apache-2.0",
+  "keywords": [
+    "CodeMeta",
+    "software metadata",
+    "crosswalk",
+    "JSON-LD"
+  ]
 }

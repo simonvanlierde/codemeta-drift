@@ -1,0 +1,6 @@
+SKIPPED codemeta_all.jsonld: : file not present, checks that need it did not run
+CROSSWALK_ROWS crosswalks/MODS.csv: hasSourceCode: no row for properties_description.csv line 73
+CROSSWALK_ROWS crosswalks/MODS.csv: isSourceCodeOf: no row for properties_description.csv line 74
+CROSSWALK_ROWS crosswalks/swMATH.csv: relatedSoftware: line 75 is not in properties_description.csv
+AGGREGATE_ROWS crosswalk.csv: hasSourceCode: no row for properties_description.csv line 73
+AGGREGATE_ROWS crosswalk.csv: isSourceCodeOf: no row for properties_description.csv line 74
