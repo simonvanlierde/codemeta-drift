@@ -9,8 +9,9 @@ property table, examples and crosswalks disagree.
 CodeMeta keeps one vocabulary in several files: `codemeta.jsonld` (the JSON-LD context),
 `codemeta_all.jsonld` (the definitions), `properties_description.csv` (the property table),
 `examples/`, the 46 per-format files in `crosswalks/`, and the generated `crosswalk.csv`.
-CodeMeta's own CI catches some drift (crosswalks whose row count differs from the table, examples that fail a JSON-LD round trip), but
-not whether the files name the same terms. This tool lists every place they don't.
+CodeMeta's own CI catches some drift: crosswalks whose row count differs from the table, and
+examples that fail a JSON-LD round trip. It doesn't check whether the files name the same
+terms. This tool lists every place they don't.
 
 ## Usage
 
