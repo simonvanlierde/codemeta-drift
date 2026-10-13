@@ -40,15 +40,23 @@ def read_dir(root: Path) -> dict[str, str]:
 def read_ref(root: Path, ref: str) -> dict[str, str]:
     """The input files at a commit, read with git without touching the working tree."""
 
-    def git(*args: str) -> str:
-        return subprocess.run(
-            ["git", "-C", str(root), *args], check=True, capture_output=True, text=True, encoding="utf-8"
-        ).stdout
+    def git(*args: str, stdin: bytes = b"") -> bytes:
+        return subprocess.run(["git", "-C", str(root), *args], input=stdin, check=True, capture_output=True).stdout
 
-    commit = git("rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}").strip()
+    commit = git("rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}").strip().decode()
     # -z: without it git quotes names with non-ASCII characters, and they would not match.
-    paths = [p for p in git("ls-tree", "-r", "-z", "--name-only", commit).split("\0") if is_input(p)]
-    return {path: git("show", f"{commit}:{path}") for path in paths}
+    # Each entry is "<mode> <type> <object>\t<path>".
+    entries = [e.decode("utf-8").split("\t", 1) for e in git("ls-tree", "-r", "-z", commit).split(b"\0") if e]
+    blobs = {path: meta.split()[2] for meta, path in entries if meta.split()[1] == "blob" and is_input(path)}
+    # One cat-file process for every file: a git process per file was two thirds of a run.
+    out = git("cat-file", "--batch", stdin="".join(f"{oid}\n" for oid in blobs.values()).encode())
+    files, at = {}, 0
+    for path in blobs:
+        header_end = out.index(b"\n", at)
+        size = int(out[at:header_end].split()[2])
+        files[path] = out[header_end + 1 : header_end + 1 + size].decode("utf-8")
+        at = header_end + 1 + size + 1  # the content is followed by one newline
+    return files
 
 
 def main(argv: list[str] | None = None) -> int:
