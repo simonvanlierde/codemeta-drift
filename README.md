@@ -9,7 +9,8 @@ property table, examples and crosswalks disagree.
 CodeMeta keeps one vocabulary in several files: `codemeta.jsonld` (the JSON-LD context),
 `codemeta_all.jsonld` (the definitions), `properties_description.csv` (the property table),
 `examples/`, the 46 per-format files in `crosswalks/`, and the generated `crosswalk.csv`.
-Nothing checks that they agree, so they drift. This tool names each place they disagree.
+CodeMeta's own CI catches some drift (crosswalks whose row count differs from the table, examples that fail a JSON-LD round trip), but
+not whether the files name the same terms. This tool lists every place they don't.
 
 ## Usage
 
@@ -23,11 +24,13 @@ codemeta-drift codemeta --ref 4.0    # any tag, branch or commit; leaves the wor
 codemeta-drift codemeta --json       # one object per finding: code, file, term, detail
 ```
 
-It prints one line per finding, and nothing (or `[]` with `--json`) when everything agrees.
-It exits 0 when nothing disagrees and 1 when something does. It exits 2 when it cannot read
-the checkout, when a file is malformed, or when the checkout has no `codemeta.jsonld` or
-`properties_description.csv`, because then there is nothing to compare. Line numbers in a
-finding are lines of the file it names.
+It prints one line per finding, or nothing (`[]` with `--json`) when the files agree. Line
+numbers in a finding are lines of the file it names. It exits with:
+
+- 0 when the files agree,
+- 1 when they don't,
+- 2 when it can't read the checkout, a file is malformed, or there is no `codemeta.jsonld`
+  or `properties_description.csv` to compare.
 
 ## What it checks
 
@@ -44,15 +47,15 @@ finding are lines of the file it names.
 | `CROSSWALK_FORMAT` | Two crosswalk files use one format name |
 | `AGGREGATE_ROWS` | The same as `CROSSWALK_ROWS`, for the committed `crosswalk.csv` |
 | `AGGREGATE_FORMAT` | A crosswalk file with no column in `crosswalk.csv`, or the reverse |
-| `SKIPPED` | A file this release does not have, such as `codemeta_all.jsonld` before 4.0. Only the checks that need it skip, and it does not count as drift |
+| `SKIPPED` | A file this release doesn't have, such as `codemeta_all.jsonld` before 4.0. Only the checks that need it skip. It doesn't count as drift |
 
 The crosswalk checks match rows by name, not by position. A renamed row shows up as one stray
 row and one missing row, never as a silent remap. When several crosswalks differ from the table
 in the same way, the tool reports them once.
 
-[`checks.py`](src/codemeta_drift/checks.py) holds every rule. It uses only the standard
+All the rules live in [`checks.py`](src/codemeta_drift/checks.py). It uses only the standard
 library and imports nothing from this package, so the codemeta repository can copy it as is
-and add a short runner as a CI check. [`cli.py`](src/codemeta_drift/cli.py) is that runner here.
+and add a short runner for CI. Here, [`cli.py`](src/codemeta_drift/cli.py) is that runner.
 
 ## Drift at 3.1, 4.0 and master (2026-10-13)
 
@@ -76,15 +79,16 @@ On master:
   context does not define. The context has `archivedAt`, `encodingFormat` and `featureList`,
   which have no row.
 - `examples/codemeta.json` uses `softwareSuggestions`.
-- The definitions label `codemeta:contIntegration` as `contiIntegration` and still define
-  `embargoDate` next to `embargoEndDate`, while the context has only `embargoEndDate`. They
-  give `funding` and `maintainer` `codemeta:` IRIs, while the context maps both to `schema:`.
+- `codemeta_all.jsonld` labels `codemeta:contIntegration` as `contiIntegration`, and still
+  defines `embargoDate` next to `embargoEndDate`. The context has only `embargoEndDate`.
+- `codemeta_all.jsonld` gives `funding` and `maintainer` `codemeta:` IRIs, but the context maps
+  both to `schema:`.
 - Every crosswalk misses the same 12 rows, and still has a `position` row where the table now
-  has `maintainer`. Padding the crosswalks by row count would map each format's `position`
-  term to `maintainer`.
+  has `maintainer`. So padding the crosswalks by row count would quietly map each format's
+  `position` term to `maintainer`.
 - `crosswalk.csv` has no GitLab or code.json column.
 
-The full output for the two releases is in [`tests/fixtures/`](tests/fixtures/).
+The full output for 3.1 and 4.0 is in [`tests/fixtures/`](tests/fixtures/).
 
 ## Development
 
@@ -100,10 +104,10 @@ just hooks             # the YAML, Markdown, workflow and citation checks CI als
 ```
 
 `tests/fixtures/3.1/` and `tests/fixtures/4.0/` hold the files the checks read, copied byte for
-byte from those CodeMeta tags. The `.expected` files next to them pin the tool's output. After a
-deliberate change, review the difference, then regenerate with
-`uv run codemeta-drift tests/fixtures/<tag> > tests/fixtures/<tag>.expected`. That command
-exits 1, because the releases have drift.
+byte from those CodeMeta tags. The `.expected` files next to them pin the tool's output. When
+you change the output on purpose, check the difference, then regenerate with
+`uv run codemeta-drift tests/fixtures/<tag> > tests/fixtures/<tag>.expected`. It exits 1,
+because both releases have drift.
 
 ## License
 

@@ -1,11 +1,11 @@
 """Find where CodeMeta's context, definitions, property table, examples and crosswalks disagree.
 
-Standard library only and no package imports, so this file can be copied as is
-into the codemeta repository as a CI check.
+It uses only the standard library and imports nothing from this package, so the
+codemeta repository can copy it as is for a CI check.
 
-Every check reads files from a mapping of repository-relative path to text. A
-check whose input file is missing reports a ``SKIPPED`` finding instead of
-failing, so the same code runs on every CodeMeta release.
+Every check reads files from a mapping of repository-relative path to text. When
+a check's input file is missing, it reports ``SKIPPED`` instead of failing, so the
+same code runs on every CodeMeta release.
 """
 
 import csv
@@ -70,8 +70,9 @@ def context_terms(files: Mapping[str, str]) -> dict[str, str]:
     terms = {}
     for key, value in context.items():
         iri = value.get("@id") if isinstance(value, dict) else value
-        # Class names (Person, Organization...) start with an upper-case letter; prefixes end in / or #.
-        if key in NOT_PROPERTIES or not key[:1].islower() or not isinstance(iri, str) or iri.endswith(("/", "#")):
+        is_class = not key[:1].islower()  # Person, Organization...
+        is_prefix = isinstance(iri, str) and iri.endswith(("/", "#"))  # schema, spdx...
+        if key in NOT_PROPERTIES or is_class or is_prefix or not isinstance(iri, str):
             continue
         terms[key] = iri
     return terms
@@ -85,6 +86,12 @@ def table_rows(files: Mapping[str, str]) -> list[Row]:
 def crosswalk_paths(files: Mapping[str, str]) -> list[str]:
     """Paths of the per-format crosswalk files, sorted."""
     return sorted(p for p in files if p.startswith("crosswalks/") and p.endswith(".csv"))
+
+
+def format_name(crosswalk: str) -> str:
+    """The format a crosswalk file maps to: the second cell of its header, as in "Property,Zenodo"."""
+    (_, header), *_ = csv_rows(crosswalk)
+    return header[1]
 
 
 def used_terms(node: object, found: set[str]) -> set[str]:
@@ -175,9 +182,11 @@ def check_crosswalks(files: Mapping[str, str]) -> Iterator[Finding]:
     """Each crosswalk file lists the table's properties in the table's order."""
     table = table_rows(files)
     paths = crosswalk_paths(files)
+    # Crosswalks with the same property column share one set of findings.
     groups: dict[tuple[tuple[int, str], ...], list[str]] = {}
     for path in paths:
-        groups.setdefault(tuple((line, row[0]) for line, row in csv_rows(files[path])[1:]), []).append(path)
+        column = tuple((line, row[0]) for line, row in csv_rows(files[path])[1:])
+        groups.setdefault(column, []).append(path)
     for column, members in groups.items():
         label = f"crosswalks/*.csv (all {len(paths)})" if len(members) == len(paths) > 1 else ", ".join(members)
         yield from column_diff("CROSSWALK_ROWS", label, list(column), table)
@@ -196,7 +205,7 @@ def check_aggregate(files: Mapping[str, str]) -> Iterator[Finding]:
         return
     formats: dict[str, list[str]] = {}
     for path in paths:
-        formats.setdefault(csv_rows(files[path])[0][1][1], []).append(path)
+        formats.setdefault(format_name(files[path]), []).append(path)
     columns = set(header[AGGREGATE_FIXED_COLUMNS:])
     for name, members in sorted(formats.items()):
         if len(members) > 1:

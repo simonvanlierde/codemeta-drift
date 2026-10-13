@@ -44,18 +44,27 @@ def read_ref(root: Path, ref: str) -> dict[str, str]:
         return subprocess.run(["git", "-C", str(root), *args], input=stdin, check=True, capture_output=True).stdout
 
     commit = git("rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}").strip().decode()
-    # -z: without it git quotes names with non-ASCII characters, and they would not match.
-    # Each entry is "<mode> <type> <object>\t<path>".
-    entries = [e.decode("utf-8").split("\t", 1) for e in git("ls-tree", "-r", "-z", commit).split(b"\0") if e]
-    blobs = {path: meta.split()[2] for meta, path in entries if meta.split()[1] == "blob" and is_input(path)}
-    # One cat-file process for every file: a git process per file was two thirds of a run.
+
+    # Each entry is "<mode> <type> <object>\t<path>". -z keeps git from quoting
+    # non-ASCII names, which would then not match INPUTS.
+    blobs = {}
+    for entry in git("ls-tree", "-r", "-z", commit).decode("utf-8").split("\0"):
+        if entry:
+            meta, path = entry.split("\t", 1)
+            _, kind, oid = meta.split()
+            if kind == "blob" and is_input(path):
+                blobs[path] = oid
+
+    # One cat-file process reads every file; one git process per file doubles the run time.
+    # Its output is "<object> blob <size>\n<content>\n" per file, in the order asked.
     out = git("cat-file", "--batch", stdin="".join(f"{oid}\n" for oid in blobs.values()).encode())
-    files, at = {}, 0
+    files, pos = {}, 0
     for path in blobs:
-        header_end = out.index(b"\n", at)
-        size = int(out[at:header_end].split()[2])
-        files[path] = out[header_end + 1 : header_end + 1 + size].decode("utf-8")
-        at = header_end + 1 + size + 1  # the content is followed by one newline
+        header_end = out.index(b"\n", pos)
+        start = header_end + 1
+        end = start + int(out[pos:header_end].split()[2])
+        files[path] = out[start:end].decode("utf-8")
+        pos = end + 1
     return files
 
 
@@ -74,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         findings = check(files)
     except subprocess.CalledProcessError as err:
-        print(f"codemeta-drift: cannot read {args.checkout}: {err.stderr.strip()}", file=sys.stderr)
+        print(f"codemeta-drift: cannot read {args.checkout}: {err.stderr.decode().strip()}", file=sys.stderr)
         return 2
     # A malformed file must not exit 1, which means drift.
     except (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError) as err:

@@ -52,8 +52,11 @@ def test_ref_and_working_tree_read_the_same_files(repo: Path, capsys: pytest.Cap
 
 
 @pytest.mark.parametrize("args", [["--ref", "no-such-ref"], ["--ref=--output=x"]])
-def test_bad_ref_exits_2(repo: Path, args: list[str]):
+def test_bad_ref_exits_2(repo: Path, args: list[str], capsys: pytest.CaptureFixture[str]):
     assert main([str(repo), *args]) == 2
+    err = capsys.readouterr().err
+    assert "fatal:" in err
+    assert "b'" not in err  # git's message, decoded
 
 
 def test_directory_without_codemeta_files_exits_2(tmp_path: Path):
