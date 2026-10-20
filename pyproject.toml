@@ -30,7 +30,7 @@ dev = [
 # Research projects are packaged too, so notebooks can `import codemeta_drift`
 # without sys.path edits.
 [build-system]
-requires = ["uv_build>=0.12.19,<0.13.0"]
+requires = ["uv_build>=0.12.19,<0.14.0"]
 build-backend = "uv_build"
 
 # Resolve only releases at least a week old: a compromised release is usually
