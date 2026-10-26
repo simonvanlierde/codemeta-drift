@@ -19,3 +19,16 @@ check:
 # Run every git hook over the whole repo, not just staged files.
 hooks:
     prek run -a
+
+# Mutation-test checks.py with tests/test_checks.py; fails on a survivor not in tests/mutation-baseline.txt.
+mutation:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # mutmut reuses results from mutants/ even after the tests change, so start clean.
+    rm -rf mutants
+    uv run mutmut run >/dev/null
+    survivors=$(uv run mutmut results | sed -n 's/^ *\(.*\): survived$/\1/p' | sort)
+    new=$(comm -23 <(echo "$survivors" | sed '/^$/d') <(grep -v '^#' tests/mutation-baseline.txt | awk '{ print $1 }' | sort))
+    echo "$(echo "$survivors" | grep -c . || true) survivors; not in tests/mutation-baseline.txt:"
+    echo "${new:-none}"
+    [ -z "$new" ]

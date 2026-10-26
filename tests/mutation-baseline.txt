@@ -1,0 +1,3 @@
+# Mutants of checks.py that `just mutation` allows to survive, one per line, then the reason.
+# Mutant numbers shift when their function changes: rerun and recheck each line then.
+codemeta_drift.checks.x_column_diff__mutmut_6  autojunk=None is falsy, so difflib treats it as False
