@@ -113,8 +113,8 @@ def test_table_row_without_property_is_ignored():
     assert check(snapshot(table="\n".join([*TABLE, "schema:Thing,,Text,x"]))) == []
 
 
-def test_csv_rows_number_lines_from_one_and_skip_short_rows():
-    assert csv_rows("a,b\nc\n,d\ne,f\n", key=1) == [(1, ["a", "b"]), (3, ["", "d"]), (4, ["e", "f"])]
+def test_csv_rows_number_lines_from_one_and_skip_short_and_blank_rows():
+    assert csv_rows("a,b\nc\n\n,d\ne,f\n", key=1) == [(1, ["a", "b"]), (4, ["", "d"]), (5, ["e", "f"])]
 
 
 def test_row_with_empty_parent_still_counts():

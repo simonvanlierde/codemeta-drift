@@ -139,7 +139,8 @@ just mutation          # mutation-test checks.py (not in CI)
 
 `just mutation` changes `checks.py` one small step at a time and fails if the tests
 still pass on a change that `tests/mutation-baseline.txt` does not list. A change that
-cannot alter behaviour goes in that file with the reason.
+cannot alter behaviour goes in that file with the reason. It also fails on a listed
+change the tests now catch, so the list stays true.
 
 The tests run against real files from CodeMeta 3.1 and 4.0, copied byte for byte into
 `tests/fixtures/`. The `.expected` files next to them hold the output the tool should give.
