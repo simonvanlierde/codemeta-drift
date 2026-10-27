@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree"
 readme = "README.md"
 requires-python = ">=3.12"
-authors = [{ name = "Simon van Lierde", email = "simonvanlierde2@gmail.com" }]
+authors = [{ name = "Simon van Lierde", email = "code@duinlab.nl" }]
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 dependencies = []
