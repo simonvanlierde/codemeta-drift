@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -10,8 +11,12 @@ from codemeta_drift.cli import is_input, main
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
+# The user's and the system's git config can add hooks or identity rules that reject the test commits.
+HERMETIC_GIT = {**os.environ, "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"}
+
+
 def git(root: Path, *args: str) -> None:
-    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True, env=HERMETIC_GIT)
 
 
 @pytest.fixture
