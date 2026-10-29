@@ -1,47 +1,54 @@
 {
-  "description": "Rows of the CodeMeta 3.1 mapping export that do not read their crosswalk cell: the cell is prose, empty, wrong, or the format has no crosswalk. 'reason' becomes the row's source as curated:<reason>. Format: docs/mapping-export.md.",
+  "description": "Rows of the CodeMeta 3.1 mapping export that do not read their crosswalk cell: the cell is prose, empty, wrong, or the format has no crosswalk. 'cell' is the crosswalk cell the row was written for, left out when the format has no crosswalk; when the cell changes the row is reported as CURATED_STALE. 'reason' becomes the row's source as curated:<reason>. Format: docs/mapping-export.md.",
   "codemeta_tag": "3.1",
   "rows": [
     {
       "format": "cff-1.2.0",
       "term": "author.@id",
       "path": "authors[].orcid",
+      "cell": "person.orcid / identifiers / doi",
       "reason": "the cell lists person.orcid / identifiers / doi; a person's ORCID is orcid"
     },
     {
       "format": "cff-1.2.0",
       "term": "license",
       "path": "license",
+      "cell": "license / license-url",
       "reason": "the cell lists license / license-url; license-url holds a licence URL, not an SPDX id"
     },
     {
       "format": "cff-1.2.0",
       "term": "identifier",
       "path": "doi | identifiers[type=doi].value",
+      "cell": "identifiers / person.orcid / doi",
       "reason": "the cell lists identifiers / person.orcid / doi; the software DOI is doi, or the doi entry of identifiers"
     },
     {
       "format": "zenodo",
       "term": "author.givenName",
       "path": "creators[].name",
+      "cell": "",
       "reason": "no cell; Zenodo keeps one name string per creator, written 'Family, Given'"
     },
     {
       "format": "zenodo",
       "term": "author.familyName",
       "path": "creators[].name",
+      "cell": "",
       "reason": "no cell; Zenodo keeps one name string per creator, written 'Family, Given'"
     },
     {
       "format": "zenodo",
       "term": "author.@id",
       "path": "creators[].orcid",
+      "cell": "ORCID",
       "reason": "the cell says ORCID; the .zenodo.json key is orcid"
     },
     {
       "format": "zenodo",
       "term": "identifier",
       "path": "doi",
+      "cell": "id",
       "reason": "the cell says id, the Zenodo record id; the DOI field is doi",
       "comment": "The GitHub integration mints the DOI and normally leaves doi unset in .zenodo.json."
     },
@@ -49,6 +56,7 @@
       "format": "zenodo",
       "term": "codeRepository",
       "path": "related_identifiers[relation=isSupplementTo].identifier",
+      "cell": "related_identifiers.isSupplementTo",
       "reason": "the cell says related_identifiers.isSupplementTo, a relation, not a key; the URL is the identifier of the entry with that relation"
     },
     {
@@ -122,66 +130,77 @@
       "format": "cargo",
       "term": "name",
       "path": "package.name",
+      "cell": "package.authors",
       "reason": "the cell says package.authors; the crate name is package.name"
     },
     {
       "format": "cargo",
       "term": "author.givenName",
       "path": "package.authors[]",
+      "cell": "",
       "reason": "no cell; Cargo keeps one 'Name <email>' string per author"
     },
     {
       "format": "cargo",
       "term": "author.familyName",
       "path": "package.authors[]",
+      "cell": "",
       "reason": "no cell; Cargo keeps one 'Name <email>' string per author"
     },
     {
       "format": "cargo",
       "term": "author.@id",
       "path": null,
+      "cell": "",
       "reason": "no cell; Cargo has no person identifier"
     },
     {
       "format": "cargo",
       "term": "identifier",
       "path": null,
+      "cell": "",
       "reason": "no cell; Cargo has no DOI field"
     },
     {
       "format": "cargo",
       "term": "description",
       "path": "package.description",
+      "cell": "",
       "reason": "no cell; Cargo has package.description"
     },
     {
       "format": "cargo",
       "term": "keywords",
       "path": "package.keywords",
+      "cell": "package.keyword",
       "reason": "the cell says package.keyword; Cargo's key is package.keywords"
     },
     {
       "format": "npm",
       "term": "author.givenName",
       "path": "author.name",
+      "cell": "",
       "reason": "no cell; the crosswalk's person name row says author.name, one name string"
     },
     {
       "format": "npm",
       "term": "author.familyName",
       "path": "author.name",
+      "cell": "",
       "reason": "no cell; the crosswalk's person name row says author.name, one name string"
     },
     {
       "format": "npm",
       "term": "author.@id",
       "path": null,
+      "cell": "",
       "reason": "no cell; package.json has no person identifier"
     },
     {
       "format": "npm",
       "term": "identifier",
       "path": null,
+      "cell": "name",
       "reason": "the cell says name, the package name; package.json has no DOI field"
     }
   ]

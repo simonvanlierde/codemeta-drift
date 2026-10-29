@@ -4,9 +4,11 @@ Exit status 0 means no drift, 1 means at least one finding (SKIPPED ones do
 not count), 2 means bad arguments, an unreadable or malformed checkout, or one
 without the context and the property table.
 
-``codemeta-drift export [checkout] --tag TAG [--ref REF] [--out FILE] [--schemas DIR]``
-writes the mapping export. It exits 0 when written, 1 when a crosswalk cell has
-no path and no curated row (or a path is not in its format's schema), and 2 as above.
+``codemeta-drift export [checkout] --tag TAG [--out FILE] [--schemas DIR]`` writes the
+mapping export from the commit of tag TAG, never the working tree, since every row says
+it was read from that tag. It exits 0 when written, 1 when a row can't be made (such as a
+crosswalk cell with no path and no curated row, or a path not in its format's schema), and
+2 as above, or when the checkout has no tag TAG or a file can't be read or written.
 """
 
 import argparse
@@ -78,8 +80,7 @@ def export_main(argv: list[str]) -> int:
     """Write the mapping export for one CodeMeta tag, or list the cells that block it."""
     parser = argparse.ArgumentParser(prog="codemeta-drift export", description="Write a mapping export.")
     parser.add_argument("checkout", type=Path, nargs="?", default=Path(), help="root of a codemeta clone (default: .)")
-    parser.add_argument("--tag", required=True, help="the CodeMeta release; picks the curated rows")
-    parser.add_argument("--ref", help="read this commit, tag or branch instead of the working tree")
+    parser.add_argument("--tag", required=True, help="the CodeMeta release tag to read; picks the curated rows")
     parser.add_argument("--out", type=Path, help="write here instead of standard output")
     parser.add_argument("--schemas", type=Path, help="check every path against the format schemas in this directory")
     args = parser.parse_args(argv)
@@ -87,29 +88,35 @@ def export_main(argv: list[str]) -> int:
     if args.tag not in curated_tags():
         print(f"codemeta-drift: no curated rows for {args.tag}; have {', '.join(curated_tags())}", file=sys.stderr)
         return 2
+    # Each step names what it failed on: the checkout, a schema file or the output file.
+    target: object = f"{args.checkout} at tag {args.tag}"
     try:
-        files = read_ref(args.checkout, args.ref) if args.ref else read_dir(args.checkout)
+        files = read_ref(args.checkout, f"refs/tags/{args.tag}")
         if TABLE not in files:
-            print(f"codemeta-drift: {args.checkout} has no {TABLE}", file=sys.stderr)
+            print(f"codemeta-drift: {target} has no {TABLE}", file=sys.stderr)
             return 2
         mapping, findings = export(files, args.tag)
         if args.schemas:
-            schemas = {f: json.loads((args.schemas / name).read_text("utf-8")) for f, name in SCHEMA_FILES.items()}
+            schemas = {}
+            for fmt, name in SCHEMA_FILES.items():
+                target = args.schemas / name
+                schemas[fmt] = json.loads(target.read_text("utf-8"))
             findings += conform(mapping["rows"], schemas)
+        if findings:
+            print("\n".join(map(str, findings)))
+            return 1
+        text = json.dumps(mapping, indent=2, ensure_ascii=False) + "\n"
+        if args.out:
+            target = args.out
+            args.out.write_text(text, encoding="utf-8")
+        else:
+            print(text, end="")
     except subprocess.CalledProcessError as err:
-        print(f"codemeta-drift: cannot read {args.checkout}: {err.stderr.decode().strip()}", file=sys.stderr)
+        print(f"codemeta-drift: cannot read {target}: {err.stderr.decode().strip()}", file=sys.stderr)
         return 2
     except (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError) as err:
-        print(f"codemeta-drift: cannot read {args.checkout}: {type(err).__name__}: {err}", file=sys.stderr)
+        print(f"codemeta-drift: cannot read or write {target}: {type(err).__name__}: {err}", file=sys.stderr)
         return 2
-    if findings:
-        print("\n".join(map(str, findings)))
-        return 1
-    text = json.dumps(mapping, indent=2, ensure_ascii=False) + "\n"
-    if args.out:
-        args.out.write_text(text, encoding="utf-8")
-    else:
-        print(text, end="")
     return 0
 
 
@@ -118,7 +125,11 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if argv[:1] == ["export"]:
         return export_main(argv[1:])
-    parser = argparse.ArgumentParser(prog="codemeta-drift", description="Report where CodeMeta's files disagree.")
+    parser = argparse.ArgumentParser(
+        prog="codemeta-drift",
+        description="Report where CodeMeta's files disagree.",
+        epilog="codemeta-drift export --help describes the mapping export.",
+    )
     parser.add_argument("checkout", type=Path, help="root of a codemeta clone")
     parser.add_argument("--ref", help="read this commit, tag or branch instead of the working tree")
     parser.add_argument("--json", action="store_true", help="print findings as a JSON array")

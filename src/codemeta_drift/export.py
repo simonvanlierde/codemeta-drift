@@ -121,10 +121,23 @@ def build_rows(
     """Export rows for every format and term, and a finding for each row it cannot make.
 
     Rows that can be made are returned even when there are findings, so the raw crosswalk can be
-    checked on its own (``curated=[]``).
+    checked on its own (``curated=[]``). Raises ValueError for a curated row without a required key.
     """
-    overrides = {(c["format"], c["term"]): c for c in curated}
+    name = f"curated-{tag}.json"
+    overrides: dict[tuple[str, str], dict[str, Any]] = {}
     rows, findings = [], []
+    for i, c in enumerate(curated, 1):
+        if missing := sorted({"format", "term", "path", "reason"} - c.keys()):
+            msg = f"{name}: row {i} has no {', '.join(missing)}"
+            raise ValueError(msg)
+        if (c["format"], c["term"]) in overrides:
+            findings.append(Finding("CURATED_DUPLICATE", name, c["term"], f"second row for {c['format']}"))
+        overrides[c["format"], c["term"]] = c
+    findings += [
+        Finding("CURATED_UNUSED", name, term, f"no {fmt} row has this term")
+        for fmt, term in overrides
+        if fmt not in FORMATS or term not in TERMS
+    ]
     for fmt, spoke in FORMATS.items():
         cells = crosswalk_cells(files, spoke.crosswalk) if spoke.crosswalk and spoke.crosswalk in files else {}
         made: dict[str, str | None] = {}
@@ -138,7 +151,29 @@ def build_rows(
             if row:
                 made[term] = row["path"]
                 rows.append(row)
+        findings += shared_paths(spoke.crosswalk or fmt, [r for r in rows if r["format"] == fmt])
     return rows, findings
+
+
+def shared_paths(label: str, rows: list[dict[str, Any]]) -> list[Finding]:
+    """A ``PATH_SHARED`` finding for each two terms whose paths are equal or one holds the other.
+
+    A wrong cell that still looks like a path (npm's identifier cell ``name``) mostly names another
+    term's key. Person sub-terms are left out: they sit inside author's path on purpose.
+    """
+    paths = [
+        (row["term"], alternative)
+        for row in rows
+        if "." not in row["term"] and row["path"]
+        for alternative in row["path"].split(" | ")
+    ]
+    findings = []
+    for i, (term, path) in enumerate(paths):
+        for other, other_path in paths[:i]:
+            a, b = path.replace("[]", ""), other_path.replace("[]", "")
+            if term != other and (a == b or a.startswith(f"{b}.") or b.startswith(f"{a}.")):
+                findings.append(Finding("PATH_SHARED", label, term, f"{path!r} overlaps {other}'s {other_path!r}"))
+    return findings
 
 
 def make_row(
@@ -156,21 +191,38 @@ def make_row(
     if cell is not None and classify(cell) == "path":
         derived = derive(spoke, term, cell.strip(), made)
     if override:
-        if derived is not None and derived == override["path"]:
-            return None, Finding("CURATED_REPEATS", label, term, f"curated row repeats the cell {cell!r}")
+        if finding := curated_finding(label, term, cell, derived, override):
+            return None, finding
         row = {"format": fmt, "term": term, "path": override["path"], "source": f"curated:{override['reason']}"}
         return row | {k: override[k] for k in ("see_also", "comment") if k in override}, None
-    if spoke.crosswalk is None:
-        return None, Finding("CELL_MISSING", fmt, term, "no crosswalk and no curated row")
     if cell is None:
-        return None, Finding("CELL_MISSING", label, term, "no cell joined to the property table, and no curated row")
+        detail = "no cell joined to the property table" if spoke.crosswalk else "no crosswalk"
+        return None, Finding("CELL_MISSING", label, term, f"{detail}, and no curated row")
     if derived is None:
         kind = classify(cell)
+        if kind == "path":
+            detail = f"cell {cell.strip()!r} is relative to author, which has no row"
+            return None, Finding("CELL_NO_AUTHOR", label, term, detail)
         detail = (
             f"{kind} cell {cell.strip()!r}, and no curated row" if kind == "prose" else "empty cell, no curated row"
         )
         return None, Finding(f"CELL_{kind.upper()}", label, term, detail)
     return {"format": fmt, "term": term, "path": derived, "source": f"crosswalk:{spoke.crosswalk}@{tag}"}, None
+
+
+def curated_finding(
+    label: str, term: str, cell: str | None, derived: str | None, override: dict[str, Any]
+) -> Finding | None:
+    """Why a curated row can't be used: its path is malformed, its cell changed, or it repeats the cell."""
+    if override["path"] is not None and not PATH.fullmatch(override["path"]):
+        return Finding("CURATED_PATH", label, term, f"{override['path']!r} is not a path")
+    if (was := override.get("cell")) != (now := cell and cell.strip()):
+        return Finding(
+            "CURATED_STALE", label, term, f"the curated row is for the cell {was!r}, the cell is now {now!r}"
+        )
+    if derived is not None and derived == override["path"]:
+        return Finding("CURATED_REPEATS", label, term, f"curated row repeats the cell {cell!r}")
+    return None
 
 
 def derive(spoke: Spoke, term: str, cell: str, made: Mapping[str, str | None]) -> str | None:

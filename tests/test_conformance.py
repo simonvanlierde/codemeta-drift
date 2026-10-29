@@ -21,6 +21,15 @@ def test_vendored_schemas_match_sources():
         assert hashlib.sha256((FIXTURES / "schemas" / name).read_bytes()).hexdigest() == digest
 
 
+def test_3_1_fixture_matches_its_codemeta_tag():
+    lines = (FIXTURES / "3.1.sha256").read_text().splitlines()
+    manifest = {name: digest for digest, name in (line.split("  ", 1) for line in lines if not line.startswith("#"))}
+    files = {p.relative_to(FIXTURES / "3.1").as_posix(): p for p in (FIXTURES / "3.1").rglob("*") if p.is_file()}
+    assert manifest.keys() == files.keys()
+    for name, digest in manifest.items():
+        assert hashlib.sha256(files[name].read_bytes()).hexdigest() == digest, name
+
+
 def test_example_paths_are_in_their_schemas():
     assert conform(EXAMPLE["rows"], SCHEMAS) == []
 
@@ -45,6 +54,9 @@ def test_raw_crosswalk_paths_fail():
         ("pep621", "project.url", "no 'url'"),
         ("npm", "author.name", None),
         ("cargo", "package.authors[]", None),
+        ("pep621", "project/description", "not a path"),
+        ("pep621", "!!!", "not a path"),
+        ("pep621", "project.urls.Source | project.homepage", "not a path"),  # one alternative at a time
     ],
 )
 def test_resolve(fmt: str, path: str, why: str | None):

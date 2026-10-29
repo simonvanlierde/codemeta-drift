@@ -42,6 +42,7 @@ The header:
 
 - `schema_version` is `"MAJOR.MINOR"`. It is a string, not a number, so `1.10` can't turn into `1.1`.
 - `codemeta_tag` is the codemeta/codemeta tag the crosswalk rows were read from.
+  `codemeta-drift export` reads the tag's commit, never a working tree.
 - `generator` names the tool and version that wrote the file. A hand-written file marks itself
   with a local version label, such as `0.1.0+hand`.
 
@@ -70,6 +71,12 @@ Rows a tool proposed but nobody checked never go in an export.
 
 A (format, term) pair appears at most once. JSON Schema can't say that, so a consumer checks it.
 
+`codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
+`zenodo`, `pep621`, `cargo`, `npm`, and within a format in the order `name`, `version`, `author`,
+`author.givenName`, `author.familyName`, `author.@id`, `license`, `identifier`,
+`codeRepository`, `description`, `keywords`. The same inputs give the same bytes, so a consumer
+can pin the file's sha256. A consumer must not depend on the row order.
+
 ## Path grammar
 
 A path is a list of steps joined by `.`. A step is a key, optionally followed by one selector:
@@ -97,7 +104,9 @@ The schema's `path` pattern accepts exactly this grammar.
 ## Compatibility
 
 A **minor** version (1.0 to 1.1) only adds: an optional field, a new format id, a new term or
-sub-term, or a relaxed pattern. A consumer that knows 1.0 reads a 1.1 file correctly.
+sub-term, or a relaxed pattern. A consumer that knows 1.0 reads a 1.1 file correctly. The schema
+allows fields it doesn't define, in the header, `generator` and each row, so a 1.1 file also
+passes the 1.0 schema a consumer vendors.
 
 A **major** version (1.x to 2.0) is anything else: a renamed or removed field, a new required
 field, a changed meaning, or a change to the path grammar that an old reader would misread.

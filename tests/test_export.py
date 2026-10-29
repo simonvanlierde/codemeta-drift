@@ -1,21 +1,27 @@
 import json
+import shutil
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
 
+from codemeta_drift import export as export_module
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.export import build_rows, classify, crosswalk_cells, export, read_curated
 
 ROOT = Path(__file__).parent.parent
 FIXTURE = ROOT / "tests/fixtures/3.1"
+SCHEMAS = ROOT / "tests/fixtures/schemas"
 SCHEMA = json.loads((ROOT / "src/codemeta_drift/mapping.schema.json").read_text())
-EXAMPLE = json.loads((ROOT / "examples/mapping-3.1.json").read_text())
+EXAMPLE_FILE = ROOT / "examples/mapping-3.1.json"
+EXAMPLE = json.loads(EXAMPLE_FILE.read_text())
 CFF = "crosswalks/Citation File Format 1.2.0.csv"
 
 
-def by_pair(rows: list[dict]) -> list[dict]:
-    return sorted(rows, key=lambda r: (r["format"], r["term"]))
+def without(*pairs: tuple[str, str]) -> list[dict]:
+    """The 3.1 curated rows minus the given (format, term) pairs."""
+    return [c for c in read_curated("3.1") if (c["format"], c["term"]) not in pairs]
 
 
 @pytest.mark.parametrize(
@@ -59,14 +65,11 @@ def test_property_counts_that_differ_get_no_cell():
     assert cells[("schema:Person", "givenName")] == "person.given-names"
 
 
-def test_export_3_1_equals_the_example_but_the_generator():
+def test_export_3_1_equals_the_example_in_order():
     mapping, findings = export(read_dir(FIXTURE), "3.1")
     assert findings == []
     Draft202012Validator(SCHEMA).validate(mapping)
-    assert {k: v for k, v in mapping.items() if k not in {"rows", "generator"}} == {
-        k: v for k, v in EXAMPLE.items() if k not in {"rows", "generator"}
-    }
-    assert by_pair(mapping["rows"]) == by_pair(EXAMPLE["rows"])
+    assert mapping == EXAMPLE
 
 
 def test_cell_paths_get_list_and_person_prefix():
@@ -79,9 +82,7 @@ def test_cell_paths_get_list_and_person_prefix():
 
 
 def test_prose_and_empty_cells_without_a_curated_row_are_refused():
-    dropped = {("cff-1.2.0", "license"), ("cargo", "description")}
-    curated = [c for c in read_curated("3.1") if (c["format"], c["term"]) not in dropped]
-    rows, findings = build_rows(read_dir(FIXTURE), "3.1", curated)
+    rows, findings = build_rows(read_dir(FIXTURE), "3.1", without(("cff-1.2.0", "license"), ("cargo", "description")))
     assert [str(f) for f in findings] == [
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
@@ -90,33 +91,145 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():
-    curated = [*read_curated("3.1"), {"format": "npm", "term": "keywords", "path": "keywords", "reason": "x"}]
-    _, findings = build_rows(read_dir(FIXTURE), "3.1", curated)
+    row = {"format": "npm", "term": "keywords", "path": "keywords", "cell": "keywords", "reason": "x"}
+    _, findings = build_rows(read_dir(FIXTURE), "3.1", [*read_curated("3.1"), row])
     assert [f.code for f in findings] == ["CURATED_REPEATS"]
 
 
-def test_cli_export_writes_the_example(tmp_path: Path):
+def test_curated_row_whose_cell_changed_is_stale():
+    files = read_dir(FIXTURE)
+    files["crosswalks/Cargo.csv"] = files["crosswalks/Cargo.csv"].replace("package.keyword\n", "package.tags\n")
+    _, findings = build_rows(files, "3.1", read_curated("3.1"))
+    assert [str(f) for f in findings] == [
+        (
+            "CURATED_STALE crosswalks/Cargo.csv: keywords: the curated row is for the cell 'package.keyword', "
+            "the cell is now 'package.tags'"
+        ),
+    ]
+
+
+def test_unknown_and_duplicate_curated_rows_are_reported():
+    curated = read_curated("3.1")
+    typo = {"format": "cff-1.2.0", "term": "author.@ID", "path": "authors[].orcid", "reason": "x"}
+    _, findings = build_rows(read_dir(FIXTURE), "3.1", [*curated, typo, curated[0]])
+    assert [str(f) for f in findings] == [
+        "CURATED_DUPLICATE curated-3.1.json: author.@id: second row for cff-1.2.0",
+        "CURATED_UNUSED curated-3.1.json: author.@ID: no cff-1.2.0 row has this term",
+    ]
+
+
+@pytest.mark.parametrize("path", ["project/description", "!!!", "a | b |"])
+def test_curated_path_outside_the_grammar_is_refused(path: str):
+    row = {"format": "pep621", "term": "description", "path": path, "reason": "x"}
+    _, findings = build_rows(read_dir(FIXTURE), "3.1", [*without(("pep621", "description")), row])
+    assert [str(f) for f in findings] == [f"CURATED_PATH pep621: description: {path!r} is not a path"]
+
+
+def test_curated_row_without_a_reason_names_the_file():
+    curated = [
+        {k: v for k, v in c.items() if k != "reason"} if i == 2 else c for i, c in enumerate(read_curated("3.1"))
+    ]
+    with pytest.raises(ValueError, match=r"curated-3\.1\.json: row 3 has no reason"):
+        build_rows(read_dir(FIXTURE), "3.1", curated)
+
+
+def test_wrong_path_shaped_cells_shared_by_two_terms_are_refused():
+    """Without their curated rows, Cargo name and npm identifier read paths of other terms."""
+    _, findings = build_rows(read_dir(FIXTURE), "3.1", without(("cargo", "name"), ("npm", "identifier")))
+    assert [str(f) for f in findings] == [
+        "PATH_SHARED crosswalks/Cargo.csv: author: 'package.authors[]' overlaps name's 'package.authors'",
+        "PATH_SHARED crosswalks/NodeJS.csv: identifier: 'name' overlaps name's 'name'",
+    ]
+
+
+def test_sub_term_without_an_author_row_says_so():
+    files = read_dir(FIXTURE)
+    files[CFF] = files[CFF].replace("author,authors\n", "")
+    _, findings = build_rows(files, "3.1", read_curated("3.1"))
+    assert [str(f) for f in findings] == [
+        f"CELL_MISSING {CFF}: author: no cell joined to the property table, and no curated row",
+        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, which has no row",
+        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, which has no row",
+    ]
+
+
+def test_cli_export_reads_the_tag_and_writes_the_example(repo: Path, tmp_path: Path):
+    """HEAD is 4.0 and the working tree has an edit: the rows must come from tag 3.1."""
+    cargo = repo / "crosswalks/Cargo.csv"
+    cargo.write_text(cargo.read_text().replace("version,package.version", "version,see the docs"))
     out = tmp_path / "mapping.json"
-    schemas = str(ROOT / "tests/fixtures/schemas")
-    assert main(["export", str(FIXTURE), "--tag", "3.1", "--out", str(out), "--schemas", schemas]) == 0
-    assert json.loads(out.read_text()) | {"generator": None} == EXAMPLE | {"generator": None}
+    assert main(["export", str(repo), "--tag", "3.1", "--out", str(out), "--schemas", str(SCHEMAS)]) == 0
+    assert out.read_bytes() == EXAMPLE_FILE.read_bytes()
 
 
-def test_cli_export_lists_refused_cells(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
-    for path, text in read_dir(FIXTURE).items():
-        (tmp_path / path).parent.mkdir(parents=True, exist_ok=True)
-        (tmp_path / path).write_text(text.replace("description,abstract", "description,abstract / summary"))
-    assert main(["export", str(tmp_path), "--tag", "3.1"]) == 1
+def test_cli_export_without_the_tag_exits_2(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    shutil.copytree(FIXTURE, tmp_path, dirs_exist_ok=True)
+    assert main(["export", str(tmp_path), "--tag", "3.1"]) == 2
+    assert "fatal:" in capsys.readouterr().err
+
+
+def test_cli_export_lists_refused_cells(tagged: Callable, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    files = {
+        p: t.replace("description,abstract", "description,abstract / summary") for p, t in read_dir(FIXTURE).items()
+    }
+    out = tmp_path / "out.json"
+    assert main(["export", str(tagged(files)), "--tag", "3.1", "--out", str(out)]) == 1
     assert (
         capsys.readouterr().out
         == f"CELL_PROSE {CFF}: description: prose cell 'abstract / summary', and no curated row\n"
     )
+    assert not out.exists()
 
 
-@pytest.mark.parametrize("args", [["--tag", "9.9"], ["--tag", "../3.1"], ["--tag", "3.1", "--ref", "x"]])
+def test_cli_export_path_not_in_schema_exits_1_and_writes_nothing(repo: Path, tmp_path: Path):
+    schemas = tmp_path / "schemas"
+    shutil.copytree(SCHEMAS, schemas)
+    (schemas / "package.json").write_text('{"type": "object"}')
+    out = tmp_path / "out.json"
+    assert main(["export", str(repo), "--tag", "3.1", "--out", str(out), "--schemas", str(schemas)]) == 1
+    assert not out.exists()
+
+
+def test_cli_export_without_the_property_table_exits_2(tagged: Callable, capsys: pytest.CaptureFixture[str]):
+    files = {p: t for p, t in read_dir(FIXTURE).items() if p != "properties_description.csv"}
+    assert main(["export", str(tagged(files)), "--tag", "3.1"]) == 2
+    assert "properties_description.csv" in capsys.readouterr().err
+
+
+def test_cli_export_bad_schemas_dir_exits_2_and_names_the_file(
+    repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+):
+    assert main(["export", str(repo), "--tag", "3.1", "--schemas", str(tmp_path / "none")]) == 2
+    assert str(tmp_path / "none" / "cff-1.2.0.json") in capsys.readouterr().err
+
+
+def test_cli_export_unwritable_out_exits_2_and_names_the_file(
+    repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+):
+    out = tmp_path / "no-dir" / "out.json"
+    assert main(["export", str(repo), "--tag", "3.1", "--out", str(out)]) == 2
+    assert str(out) in capsys.readouterr().err
+
+
+def test_cli_export_bad_curated_row_exits_2_and_names_the_file(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    rows = [{k: v for k, v in c.items() if k != "reason"} for c in read_curated("3.1")]
+    monkeypatch.setattr(export_module, "read_curated", lambda _: rows)
+    assert main(["export", str(repo), "--tag", "3.1"]) == 2
+    assert "curated-3.1.json: row 1 has no reason" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("args", [["--tag", "9.9"], ["--tag", "../3.1"]])
 def test_cli_export_exits_2(args: list[str], tmp_path: Path):
     assert main(["export", str(tmp_path), *args]) == 2
 
 
 def test_plain_check_still_runs():
     assert main([str(FIXTURE)]) == 1
+
+
+def test_help_names_the_export_subcommand(capsys: pytest.CaptureFixture[str]):
+    with pytest.raises(SystemExit):
+        main(["--help"])
+    assert "codemeta-drift export" in capsys.readouterr().out

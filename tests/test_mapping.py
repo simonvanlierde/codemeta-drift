@@ -5,6 +5,8 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
+from codemeta_drift.export import generator
+
 ROOT = Path(__file__).parent.parent
 SCHEMA = json.loads((ROOT / "src/codemeta_drift/mapping.schema.json").read_text())
 EXAMPLE = json.loads((ROOT / "examples/mapping-3.1.json").read_text())
@@ -60,3 +62,24 @@ def test_path_grammar_rejects_malformed_paths(path: str):
 def test_unknown_schema_major_fails_validation():
     errors = list(Draft202012Validator(SCHEMA).iter_errors({**EXAMPLE, "schema_version": "2.0"}))
     assert [e.json_path for e in errors] == ["$.schema_version"]
+
+
+def test_a_minor_with_new_optional_fields_validates():
+    """A 1.0 consumer validates a 1.1 file that adds optional fields, as the contract promises."""
+    later = {
+        **EXAMPLE,
+        "schema_version": "1.1",
+        "created": "2027-01-01",
+        "generator": {**EXAMPLE["generator"], "url": "https://example.org"},
+        "rows": [{**row, "predicate_id": "skos:exactMatch"} for row in EXAMPLE["rows"]],
+    }
+    Draft202012Validator(SCHEMA).validate(later)
+
+
+def test_example_generator_is_this_release():
+    assert EXAMPLE["generator"] == generator()
+
+
+def test_example_null_rows():
+    nulls = {(row["format"], row["term"]) for row in EXAMPLE["rows"] if row["path"] is None}
+    assert nulls == {(f, t) for f in ("pep621", "cargo", "npm") for t in ("author.@id", "identifier")}

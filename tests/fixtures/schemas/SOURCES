@@ -1,4 +1,5 @@
-# Each file is an unmodified copy, fetched 2026-10-29.
+# Each file is an unmodified copy, fetched 2026-10-29. The schemastore.org URLs are not versioned,
+# so those three files are a snapshot of that day, and a fresh download may differ.
 # file            url                                                                                   sha256
 cff-1.2.0.json    https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json  0b8d22140da702d766df318dcff3a91af2f39521298dcf36d76315fd99cc169b
 pyproject.json    https://json.schemastore.org/pyproject.json                                            82f021a77e8145047c2ad502909734c0786e6ab41fbeaa2a1bcee63a9fd538db

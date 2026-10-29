@@ -131,7 +131,7 @@ A mapping export is a JSON file that says where each CodeMeta term sits in CFF, 
 [examples/mapping-3.1.json](examples/mapping-3.1.json) is the one for CodeMeta 3.1.
 
 ```sh
-codemeta-drift export codemeta --tag 3.1 --ref 3.1 --out mapping-3.1.json
+codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
 ```
 
 A row reads its crosswalk cell when the cell is a path, such as `package.version`. Every other
@@ -143,7 +143,10 @@ the format has no crosswalk (PEP 621). A cell that is none of these is refused, 
 CELL_PROSE crosswalks/Citation File Format 1.2.0.csv: license: prose cell 'license / license-url', and no curated row
 ```
 
-It then exits 1 and writes nothing. Cells are matched to the property list by name, and a name
+It then exits 1 and writes nothing. The rows are read from the tag's commit, not the working
+tree, because each one says which tag it came from. A curated row records the cell it was written
+for, and is reported as `CURATED_STALE` when that cell changes. Two terms whose paths are equal or
+nested, such as Cargo's `name` cell `package.authors` beside `author`, are `PATH_SHARED`. Cells are matched to the property list by name, and a name
 listed twice (`identifier` under Thing and under Person) by its order among the rows with that
 name. Only tags with a curated file can be exported; for now that is 3.1. A checkout directory
 named `export` needs a `./` in front.
@@ -153,7 +156,7 @@ named `export` needs a `./` in front.
 package.json and Cargo.toml are in [`tests/fixtures/schemas/`](tests/fixtures/schemas/), with
 their sources. Zenodo has no current published schema for `.zenodo.json`, so its paths are not
 checked. On the raw 3.1 crosswalk the check finds Cargo's `package.keyword`. It can't find a
-path that exists but means something else, such as Cargo's `name` cell `package.authors`.
+path that exists but means something else, such as Zenodo's `identifier` cell `id`.
 
 ## Development
 

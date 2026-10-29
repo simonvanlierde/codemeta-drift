@@ -12,6 +12,7 @@ from collections.abc import Iterator, Mapping
 from typing import Any
 
 from codemeta_drift.checks import Finding
+from codemeta_drift.export import PATH
 
 SCHEMA_FILES = {
     "cff-1.2.0": "cff-1.2.0.json",
@@ -56,6 +57,8 @@ def child(node: Schema, key: str) -> object:
 
 def resolve(root: Schema, path: str) -> str | None:
     """Why one path alternative (no `` | ``) is not in the schema, or None when every step resolves."""
+    if " | " in path or not PATH.fullmatch(path):
+        return "not a path"
     nodes: list[object] = [root]
     for match in STEP.finditer(path):
         key, selector = match["key"], match[0][len(match["key"]) :]
