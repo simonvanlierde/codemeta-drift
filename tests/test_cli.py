@@ -17,7 +17,11 @@ def test_ref_reads_the_commit_not_the_working_tree(repo: Path, capsys: pytest.Ca
 
 def test_working_tree_and_json_output(repo: Path, capsys: pytest.CaptureFixture[str]):
     assert main([str(repo), "--json"]) == 1
-    findings = json.loads(capsys.readouterr().out)
+    report = json.loads(capsys.readouterr().out)
+    assert set(report) == {"version", "tool", "findings"}
+    assert report["version"] == 1
+    assert report["tool"]["name"] == "codemeta-drift"
+    findings = report["findings"]
     assert all(set(f) == {"code", "file", "term", "detail"} for f in findings)
     assert any(f["code"] == "AGGREGATE_FORMAT" and f["term"] == "GitLab" for f in findings)
 
@@ -80,3 +84,10 @@ def test_star_does_not_cross_directories():
     assert is_input("codemeta.json")
     assert not is_input("crosswalks/old/Zenodo.csv")
     assert not is_input("scripts/data.csv")
+
+
+def test_version(capsys: pytest.CaptureFixture[str]):
+    with pytest.raises(SystemExit) as exc:
+        main(["--version"])
+    assert exc.value.code == 0
+    assert capsys.readouterr().out.startswith("codemeta-drift 0.")

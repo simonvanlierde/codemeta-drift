@@ -238,10 +238,9 @@ def test_cli_export_lists_refused_cells(tagged: Callable, tmp_path: Path, capsys
     }
     out = tmp_path / "out.json"
     assert main(["export", str(tagged(files)), "--tag", "3.1", "--out", str(out), "--schemas", str(SCHEMAS)]) == 1
-    assert (
-        capsys.readouterr().out
-        == f"CELL_PROSE {CFF}: description: prose cell 'abstract / summary', and no curated row\n"
-    )
+    out_text, err = capsys.readouterr()
+    assert out_text == ""  # standard output, often redirected to the export file, stays empty
+    assert err == f"CELL_PROSE {CFF}: description: prose cell 'abstract / summary', and no curated row\n"
     assert not out.exists()
 
 
