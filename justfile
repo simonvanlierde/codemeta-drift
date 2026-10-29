@@ -25,6 +25,8 @@ hooks:
 mutation:
     #!/usr/bin/env bash
     set -euo pipefail
+    # sort and comm must agree on the ǁ in class-method mutant names, so use byte order.
+    export LC_ALL=C
     # mutmut reuses results from mutants/ even after the tests change, so start clean.
     rm -rf mutants
     uv run mutmut run >/dev/null
