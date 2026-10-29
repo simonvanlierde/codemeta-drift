@@ -1,7 +1,7 @@
 # codemeta-drift
 
 [![python](https://github.com/simonvanlierde/codemeta-drift/actions/workflows/python.yml/badge.svg)](https://github.com/simonvanlierde/codemeta-drift/actions/workflows/python.yml)
-[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE)
 
 A small checker that finds the places where the CodeMeta standard's own files contradict
 each other.
@@ -28,11 +28,11 @@ fixed before anyone converts metadata with them.
 
 ## Try it
 
-It isn't on PyPI. Install it from GitHub with [uv](https://docs.astral.sh/uv/) and point it at
-a copy of the CodeMeta repository:
+Install it with [uv](https://docs.astral.sh/uv/) and point it at a copy of the CodeMeta
+repository:
 
 ```sh
-uv tool install git+https://github.com/simonvanlierde/codemeta-drift
+uv tool install codemeta-drift
 git clone https://github.com/codemeta/codemeta
 codemeta-drift codemeta              # check the files as they are
 codemeta-drift codemeta --ref 4.0    # check any release, branch or commit instead
@@ -54,6 +54,13 @@ is what counts:
 - 0: the files agree.
 - 1: they don't.
 - 2: it couldn't check: the vocabulary or the property list is missing, or a file can't be read.
+
+`--json` prints one document: `{"version": 1, "tool": {"name", "version"}, "findings": [...]}`.
+Each finding has a `code`, a `file`, a `term` and a `detail`. `code` and `term` are stable; `file`
+is a label (it can name a group, such as `crosswalks/*.csv (all 46)`), and `detail` is text for a
+person. A minor release may add keys; removing or retyping one bumps `version`. The command line,
+the exit codes, the finding codes and the export format are the interface: the Python modules may
+change in any 0.x release.
 
 ## What it found in CodeMeta (2026-10-13)
 
@@ -86,7 +93,7 @@ Number of problems per check, for the last two releases and the main branch:
 | `AGGREGATE_FORMAT` | 0 | 2 | 2 |
 
 3.1 has no definitions file, so those checks didn't run. The full output for 3.1 and 4.0 is
-in [`tests/fixtures/`](tests/fixtures/).
+in [`tests/fixtures/`](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/).
 
 ## The files it compares
 
@@ -120,22 +127,22 @@ The crosswalk checks compare terms by name, never by position. A renamed term sh
 term that shouldn't be there and one that's missing. When all 46 crosswalks have the same
 problem, it's reported once.
 
-All the checks live in one file, [`checks.py`](src/codemeta_drift/checks.py). It needs
+All the checks live in one file, [`checks.py`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/checks.py). It needs
 nothing beyond Python itself, so the CodeMeta repository could copy it into its own CI.
 
 ## Mapping export
 
 A mapping export is a JSON file that says where each CodeMeta term sits in CFF, codemeta.json,
 .zenodo.json, pyproject.toml, Cargo.toml and package.json, with wrong crosswalk cells corrected.
-[docs/mapping-export.md](docs/mapping-export.md) describes the format, and
-[examples/mapping-3.1.json](examples/mapping-3.1.json) is the one for CodeMeta 3.1.
+[docs/mapping-export.md](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md) describes the format, and
+[examples/mapping-3.1.json](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-3.1.json) is the one for CodeMeta 3.1.
 
 ```sh
 codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
 ```
 
 A row reads its crosswalk cell when the cell is a path, such as `package.version`. Every other
-row comes from [`curated-3.1.json`](src/codemeta_drift/curated-3.1.json), which gives the path and
+row comes from [`curated-3.1.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-3.1.json), which gives the path and
 the reason: the cell is prose (`license / license-url`), empty, or wrong (`package.keyword`), or
 the format has no crosswalk (PEP 621). A cell that is none of these is refused, not guessed:
 
@@ -143,7 +150,7 @@ the format has no crosswalk (PEP 621). A cell that is none of these is refused, 
 CELL_PROSE crosswalks/Citation File Format 1.2.0.csv: license: prose cell 'license / license-url', and no curated row
 ```
 
-It then exits 1 and writes nothing. The rows are read from the tag's commit, not the working
+It then lists them on standard error, exits 1 and writes nothing. The rows are read from the tag's commit, not the working
 tree, because each one says which tag it came from. A curated row records the cell it was written
 for, and is reported as `CURATED_STALE` when that cell changes. Two terms whose paths are equal or
 nested, such as Cargo's `name` cell `package.authors` beside `author`, are `PATH_SHARED`. Cells are matched to the property list by name, and a name
@@ -153,7 +160,7 @@ named `export` needs a `./` in front.
 
 `--schemas DIR` also checks every path against the format's own JSON Schema and reports
 `PATH_NOT_IN_SCHEMA` for a key the schema doesn't have. The schemas for CFF 1.2.0, pyproject.toml,
-package.json and Cargo.toml are in [`tests/fixtures/schemas/`](tests/fixtures/schemas/), with
+package.json and Cargo.toml are in [`tests/fixtures/schemas/`](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/), with
 their sources. Zenodo has no current published schema for `.zenodo.json`, so its paths are not
 checked. On the raw 3.1 crosswalk the check finds Cargo's `package.keyword`. It can't find a
 path that exists but means something else, such as Zenodo's `identifier` cell `id`.
@@ -185,5 +192,5 @@ because both releases have problems).
 
 ## License
 
-Apache-2.0, see [LICENSE](LICENSE). The test fixtures are CodeMeta's own files, also
-Apache-2.0; see [NOTICE](NOTICE).
+Apache-2.0, see [LICENSE](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE). The test fixtures are CodeMeta's own files, also
+Apache-2.0; see [NOTICE](https://github.com/simonvanlierde/codemeta-drift/blob/main/NOTICE).
