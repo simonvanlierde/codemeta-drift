@@ -1,21 +1,29 @@
 # Managed by copier. Do not edit by hand. Run: copier update
-_commit: v0.9.0
+_commit: v0.12.0
 _src_path: gh:simonvanlierde/project-templates
 author_email: code@duinlab.nl
 author_name: Simon van Lierde
 author_orcid: 0009-0006-6953-909X
 codecov: false
+codspeed: false
 copyright_year: '2026'
+customise: false
+dependency_bot: dependabot
 github_user: simonvanlierde
 kind: library
 license: Apache-2.0
 module_name: codemeta_drift
+openssf_badge: none
 project_description: Report where CodeMeta's context, definitions, property table,
     examples and crosswalks disagree
 project_name: codemeta-drift
-publish_to_pypi: false
+public: true
+publish_to_pypi: true
 python_dir: .
+python_layout: src
 python_min: '3.12'
 python_version: '3.14'
 stacks:
 - python
+status: experimental
+test_extras: []

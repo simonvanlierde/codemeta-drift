@@ -1,6 +1,8 @@
-# Dependabot, not Renovate: no app install, and it covers every ecosystem here,
-# including the `rev` pins in .pre-commit-config.yaml. No automerge: that needs a
-# workflow with contents:write.
+# Dependabot, the default `dependency_bot` answer: no app install, and it covers every
+# ecosystem here, including the `rev` pins in .pre-commit-config.yaml. You merge every PR:
+# merging them automatically needs a workflow with `contents: write` and, in a public repo,
+# where `main` asks for an approval, Actions allowed to approve PRs. For updates that merge
+# themselves, answer `dependency_bot=renovate` instead.
 #
 # `cooldown` holds a version update back until the release has been public for a
 # week, long enough for a compromised release to be caught and yanked. Security
@@ -8,31 +10,44 @@
 #
 # No docker ecosystem: it reads FROM lines only, and those tags are copier answers,
 # so its PRs would fight the next `copier update`.
+# `commit-message` gives each PR a Conventional Commits title, `chore(deps): bump ...`, which
+# the pr-title workflow checks.
 version: 2
+
+# Actions and hook revs are all CI and dev tooling, so they share one weekly PR. Fewer
+# PRs means fewer branches to bring up to date, one after another, where main requires it.
+multi-ecosystem-groups:
+  actions-and-hooks:
+    schedule: {interval: weekly}
+    # Members of a group can't set commit-message; the group sets it for them.
+    commit-message: {prefix: chore, include: scope}
+
 updates:
   - package-ecosystem: github-actions
     directory: /
-    schedule: {interval: weekly}
+    multi-ecosystem-group: actions-and-hooks
+    patterns: ["*"]
     cooldown: {default-days: 7}
-    groups:
-      actions: {patterns: ["*"]}
 
   # Version updates only. Dependabot has no security updates for this ecosystem.
-  # Hook revs group wholesale: all dev tooling.
   - package-ecosystem: pre-commit
     directory: /
-    schedule: {interval: weekly}
+    multi-ecosystem-group: actions-and-hooks
+    patterns: ["*"]
     cooldown: {default-days: 7}
-    groups:
-      hooks: {patterns: ["*"]}
 
-  # Dev tooling lands as one PR. A runtime dependency gets its own, so a risky bump
-  # is not buried in lint-tool churn.
+  # Dev tooling lands as one PR and runtime minor and patch bumps as another, so a risky
+  # bump is not buried in lint-tool churn. A runtime major gets its own PR.
   - package-ecosystem: uv
     directory: /
     schedule: {interval: weekly}
     cooldown: {default-days: 7, semver-major-days: 30}
+    commit-message: {prefix: chore, include: scope}
     groups:
+      runtime:
+        dependency-type: production
+        update-types: [minor, patch]
+        patterns: ["*"]
       dev-tooling:
         dependency-type: development
         update-types: [minor, patch]
