@@ -1,0 +1,188 @@
+{
+  "description": "Rows of the CodeMeta 3.1 mapping export that do not read their crosswalk cell: the cell is prose, empty, wrong, or the format has no crosswalk. 'reason' becomes the row's source as curated:<reason>. Format: docs/mapping-export.md.",
+  "codemeta_tag": "3.1",
+  "rows": [
+    {
+      "format": "cff-1.2.0",
+      "term": "author.@id",
+      "path": "authors[].orcid",
+      "reason": "the cell lists person.orcid / identifiers / doi; a person's ORCID is orcid"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "license",
+      "path": "license",
+      "reason": "the cell lists license / license-url; license-url holds a licence URL, not an SPDX id"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "identifier",
+      "path": "doi | identifiers[type=doi].value",
+      "reason": "the cell lists identifiers / person.orcid / doi; the software DOI is doi, or the doi entry of identifiers"
+    },
+    {
+      "format": "zenodo",
+      "term": "author.givenName",
+      "path": "creators[].name",
+      "reason": "no cell; Zenodo keeps one name string per creator, written 'Family, Given'"
+    },
+    {
+      "format": "zenodo",
+      "term": "author.familyName",
+      "path": "creators[].name",
+      "reason": "no cell; Zenodo keeps one name string per creator, written 'Family, Given'"
+    },
+    {
+      "format": "zenodo",
+      "term": "author.@id",
+      "path": "creators[].orcid",
+      "reason": "the cell says ORCID; the .zenodo.json key is orcid"
+    },
+    {
+      "format": "zenodo",
+      "term": "identifier",
+      "path": "doi",
+      "reason": "the cell says id, the Zenodo record id; the DOI field is doi",
+      "comment": "The GitHub integration mints the DOI and normally leaves doi unset in .zenodo.json."
+    },
+    {
+      "format": "zenodo",
+      "term": "codeRepository",
+      "path": "related_identifiers[relation=isSupplementTo].identifier",
+      "reason": "the cell says related_identifiers.isSupplementTo, a relation, not a key; the URL is the identifier of the entry with that relation"
+    },
+    {
+      "format": "pep621",
+      "term": "name",
+      "path": "project.name",
+      "reason": "no PEP 621 crosswalk upstream"
+    },
+    {
+      "format": "pep621",
+      "term": "version",
+      "path": "project.version",
+      "reason": "no PEP 621 crosswalk upstream"
+    },
+    {
+      "format": "pep621",
+      "term": "author",
+      "path": "project.authors[]",
+      "reason": "no PEP 621 crosswalk upstream"
+    },
+    {
+      "format": "pep621",
+      "term": "author.givenName",
+      "path": "project.authors[].name",
+      "reason": "no PEP 621 crosswalk upstream; an author has one name string"
+    },
+    {
+      "format": "pep621",
+      "term": "author.familyName",
+      "path": "project.authors[].name",
+      "reason": "no PEP 621 crosswalk upstream; an author has one name string"
+    },
+    {
+      "format": "pep621",
+      "term": "author.@id",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has no person identifier"
+    },
+    {
+      "format": "pep621",
+      "term": "license",
+      "path": "project.license",
+      "reason": "no PEP 621 crosswalk upstream",
+      "comment": "An SPDX expression string since PEP 639. The legacy {text = ...} or {file = ...} table is the same key in an older shape."
+    },
+    {
+      "format": "pep621",
+      "term": "identifier",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has no DOI field"
+    },
+    {
+      "format": "pep621",
+      "term": "codeRepository",
+      "path": "project.urls.Source | project.urls.Repository | project.urls.Homepage",
+      "reason": "no PEP 621 crosswalk upstream"
+    },
+    {
+      "format": "pep621",
+      "term": "description",
+      "path": "project.description",
+      "reason": "no PEP 621 crosswalk upstream"
+    },
+    {
+      "format": "pep621",
+      "term": "keywords",
+      "path": "project.keywords",
+      "reason": "no PEP 621 crosswalk upstream"
+    },
+    {
+      "format": "cargo",
+      "term": "name",
+      "path": "package.name",
+      "reason": "the cell says package.authors; the crate name is package.name"
+    },
+    {
+      "format": "cargo",
+      "term": "author.givenName",
+      "path": "package.authors[]",
+      "reason": "no cell; Cargo keeps one 'Name <email>' string per author"
+    },
+    {
+      "format": "cargo",
+      "term": "author.familyName",
+      "path": "package.authors[]",
+      "reason": "no cell; Cargo keeps one 'Name <email>' string per author"
+    },
+    {
+      "format": "cargo",
+      "term": "author.@id",
+      "path": null,
+      "reason": "no cell; Cargo has no person identifier"
+    },
+    {
+      "format": "cargo",
+      "term": "identifier",
+      "path": null,
+      "reason": "no cell; Cargo has no DOI field"
+    },
+    {
+      "format": "cargo",
+      "term": "description",
+      "path": "package.description",
+      "reason": "no cell; Cargo has package.description"
+    },
+    {
+      "format": "cargo",
+      "term": "keywords",
+      "path": "package.keywords",
+      "reason": "the cell says package.keyword; Cargo's key is package.keywords"
+    },
+    {
+      "format": "npm",
+      "term": "author.givenName",
+      "path": "author.name",
+      "reason": "no cell; the crosswalk's person name row says author.name, one name string"
+    },
+    {
+      "format": "npm",
+      "term": "author.familyName",
+      "path": "author.name",
+      "reason": "no cell; the crosswalk's person name row says author.name, one name string"
+    },
+    {
+      "format": "npm",
+      "term": "author.@id",
+      "path": null,
+      "reason": "no cell; package.json has no person identifier"
+    },
+    {
+      "format": "npm",
+      "term": "identifier",
+      "path": null,
+      "reason": "the cell says name, the package name; package.json has no DOI field"
+    }
+  ]
+}
