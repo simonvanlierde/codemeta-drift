@@ -75,7 +75,7 @@ repos:
   # and shellcheck over every `run:` when shellcheck is on PATH. jactionlint is a
   # maintained fork of actionlint that adds release, cache and concurrency checks.
   - repo: https://github.com/jdx/jactionlint
-    rev: 1027f0a131ab98bc7e191d995bfa15dbed5bbf8f # frozen: v2.2.0
+    rev: a65ab044e916760429068fe5794b8306abdfcbb9 # frozen: v2.3.0
     hooks:
       - id: jactionlint
 
@@ -111,7 +111,7 @@ repos:
   # Misspelt words in code, comments and docs. It fixes the ones it is sure of and
   # fails, so you review the fix. List a word it must leave alone in _typos.toml.
   - repo: https://github.com/crate-ci/typos
-    rev: 7f9d0819ca1c008ade73f4b41fa9d258d48f605b # frozen: v1.51.1
+    rev: b859c0df7f391deba73030f79b957e62b4d81dc6 # frozen: varcon-core-v5.0.7
     hooks:
       - id: typos
         # Copier writes the template's commit id here, and a hex id can spell a word
