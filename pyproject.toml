@@ -97,8 +97,10 @@ branch = true
 show_missing = true
 exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]
 
-# `just mutation` grades tests/test_checks.py against checks.py, the file the codemeta repo would copy.
+# `just mutation` grades the whole test suite against checks.py and the export modules.
+# cli.py is left out: most of its mutants change help text.
 [tool.mutmut]
 source_paths = ["src/codemeta_drift"]
-only_mutate = ["src/codemeta_drift/checks.py"]
-pytest_add_cli_args_test_selection = ["tests/test_checks.py"]
+only_mutate = ["src/codemeta_drift/checks.py", "src/codemeta_drift/export.py", "src/codemeta_drift/conformance.py"]
+pytest_add_cli_args_test_selection = ["tests"]
+also_copy = ["examples"]

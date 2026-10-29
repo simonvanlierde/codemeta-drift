@@ -169,10 +169,10 @@ uv tool install prek   # once per machine
 prek install           # git hooks
 just check             # lint, types, tests and the dependency audit (needs network)
 just hooks             # the YAML, Markdown, workflow and citation checks CI also runs
-just mutation          # mutation-test checks.py (not in CI)
+just mutation          # mutation-test the checks and the export (not in CI)
 ```
 
-`just mutation` changes `checks.py` one small step at a time and fails if the tests
+`just mutation` changes `checks.py`, `export.py` and `conformance.py` one small step at a time and fails if the tests
 still pass on a change that `tests/mutation-baseline.txt` does not list. A change that
 cannot alter behaviour goes in that file with the reason. It also fails on a listed
 change the tests now catch, so the list stays true.

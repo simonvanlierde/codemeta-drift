@@ -20,7 +20,7 @@ check:
 hooks:
     prek run -a
 
-# Mutation-test checks.py with tests/test_checks.py. Fails on a survivor not in
+# Mutation-test the modules in pyproject's [tool.mutmut]. Fails on a survivor not in
 # tests/mutation-baseline.txt, and on a listed one that no longer survives, so the list stays true.
 mutation:
     #!/usr/bin/env bash

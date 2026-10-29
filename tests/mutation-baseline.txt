@@ -1,3 +1,11 @@
-# Mutants of checks.py that `just mutation` allows to survive, one per line, then the reason.
+# Mutants that `just mutation` allows to survive, one per line, then the reason.
 # Mutant numbers shift when their function changes: rerun and recheck each line then.
 codemeta_drift.checks.x_column_diff__mutmut_6  autojunk=None is falsy, so difflib treats it as False
+codemeta_drift.conformance.x_branches__mutmut_20  ref[2:] only drops the leading "/", which filter(None, ...) drops anyway
+codemeta_drift.conformance.x_branches__mutmut_26  a missing pointer part as None or {} both give a schema with no keys
+codemeta_drift.conformance.x_branches__mutmut_28  same as _26: get() without a default returns None
+codemeta_drift.export.x_curated_tags__mutmut_2  resources.files(None) is the calling module's package, the same one
+codemeta_drift.export.x_generator__mutmut_9  distribution names are case-insensitive
+codemeta_drift.export.x_read_curated__mutmut_4  encoding None is the locale's, UTF-8 on every host this runs on
+codemeta_drift.export.x_read_curated__mutmut_6  resources.files(None) is the calling module's package, the same one
+codemeta_drift.export.x_read_curated__mutmut_10  "UTF-8" and "utf-8" are the same codec
