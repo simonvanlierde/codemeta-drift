@@ -6,8 +6,8 @@ term sits in each metadata format. Tools that keep `CITATION.cff`, `codemeta.jso
 tables, whose cells are prose and sometimes wrong.
 
 The schema is [`src/codemeta_drift/mapping.schema.json`](../src/codemeta_drift/mapping.schema.json)
-(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) is a
-hand-written export for CodeMeta 3.1.
+(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) is the
+export for CodeMeta 3.1, written by `codemeta-drift export` (see the README).
 
 ## Where, not how
 
@@ -55,9 +55,13 @@ Each row:
   because a later `contributor.givenName` would sit somewhere else.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
-- `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path reads that
-  crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. `curated:<reason>` means
-  the row departs from the crosswalk or fills a cell it leaves empty, and says why.
+- `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
+  crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. Only two things are added
+  to the cell: `[]` when the format keeps authors in a list (`authors` becomes `authors[]`), and
+  the author path in place of CFF's `person.` (`person.given-names` becomes
+  `authors[].given-names`). `curated:<reason>` means the row departs from the crosswalk, picks
+  one path out of a prose cell, or fills a cell it leaves empty, and says why. An empty cell is
+  never read as `null`, because the crosswalks also leave cells empty that the format has.
 - `see_also` (optional) is the upstream issue or pull request about the cell the row departs from.
 - `comment` (optional) is a note for people. Never read it in code.
 

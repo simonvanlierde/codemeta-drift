@@ -128,8 +128,32 @@ nothing beyond Python itself, so the CodeMeta repository could copy it into its 
 A mapping export is a JSON file that says where each CodeMeta term sits in CFF, codemeta.json,
 .zenodo.json, pyproject.toml, Cargo.toml and package.json, with wrong crosswalk cells corrected.
 [docs/mapping-export.md](docs/mapping-export.md) describes the format, and
-[examples/mapping-3.1.json](examples/mapping-3.1.json) is one for CodeMeta 3.1, written by hand
-for now.
+[examples/mapping-3.1.json](examples/mapping-3.1.json) is the one for CodeMeta 3.1.
+
+```sh
+codemeta-drift export codemeta --tag 3.1 --ref 3.1 --out mapping-3.1.json
+```
+
+A row reads its crosswalk cell when the cell is a path, such as `package.version`. Every other
+row comes from [`curated-3.1.json`](src/codemeta_drift/curated-3.1.json), which gives the path and
+the reason: the cell is prose (`license / license-url`), empty, or wrong (`package.keyword`), or
+the format has no crosswalk (PEP 621). A cell that is none of these is refused, not guessed:
+
+```text
+CELL_PROSE crosswalks/Citation File Format 1.2.0.csv: license: prose cell 'license / license-url', and no curated row
+```
+
+It then exits 1 and writes nothing. Cells are matched to the property list by name, and a name
+listed twice (`identifier` under Thing and under Person) by its order among the rows with that
+name. Only tags with a curated file can be exported; for now that is 3.1. A checkout directory
+named `export` needs a `./` in front.
+
+`--schemas DIR` also checks every path against the format's own JSON Schema and reports
+`PATH_NOT_IN_SCHEMA` for a key the schema doesn't have. The schemas for CFF 1.2.0, pyproject.toml,
+package.json and Cargo.toml are in [`tests/fixtures/schemas/`](tests/fixtures/schemas/), with
+their sources. Zenodo has no current published schema for `.zenodo.json`, so its paths are not
+checked. On the raw 3.1 crosswalk the check finds Cargo's `package.keyword`. It can't find a
+path that exists but means something else, such as Cargo's `name` cell `package.authors`.
 
 ## Development
 
