@@ -123,6 +123,14 @@ problem, it's reported once.
 All the checks live in one file, [`checks.py`](src/codemeta_drift/checks.py). It needs
 nothing beyond Python itself, so the CodeMeta repository could copy it into its own CI.
 
+## Mapping export
+
+A mapping export is a JSON file that says where each CodeMeta term sits in CFF, codemeta.json,
+.zenodo.json, pyproject.toml, Cargo.toml and package.json, with wrong crosswalk cells corrected.
+[docs/mapping-export.md](docs/mapping-export.md) describes the format, and
+[examples/mapping-3.1.json](examples/mapping-3.1.json) is one for CodeMeta 3.1, written by hand
+for now.
+
 ## Development
 
 You need [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and

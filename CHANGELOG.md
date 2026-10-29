@@ -14,6 +14,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   has a stable code. A malformed input file exits 2, so CI doesn't mistake it for drift.
 - `--ref` reads any tag, branch or commit through one `git cat-file` call, about as fast as
   reading the working tree.
+- The mapping export format: a JSON Schema for `mapping-<codemeta-tag>.json`, which says where
+  each CodeMeta term sits in six metadata formats, and a hand-written export for CodeMeta 3.1.
 - Test fixtures: the files the checks read from CodeMeta 3.1 and 4.0, and the output for each.
 
 [Unreleased]: https://github.com/simonvanlierde/codemeta-drift/commits/HEAD
