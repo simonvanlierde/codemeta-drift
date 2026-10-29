@@ -8,7 +8,7 @@ from jsonschema import Draft202012Validator
 
 from codemeta_drift import export as export_module
 from codemeta_drift.cli import main, read_dir
-from codemeta_drift.export import build_rows, classify, crosswalk_cells, export, read_curated
+from codemeta_drift.export import build_rows, classify, crosswalk_cells, export, read_curated, shared_paths
 
 ROOT = Path(__file__).parent.parent
 FIXTURE = ROOT / "tests/fixtures/3.1"
@@ -57,6 +57,16 @@ def test_cells_join_by_name_and_type_not_position():
     assert crosswalk_cells({**files, CFF: "\n".join([header, *rows])}, CFF) == cells
 
 
+def test_third_repeat_and_one_column_rows():
+    files = read_dir(FIXTURE)
+    files["properties_description.csv"] += "schema:Foo,identifier,Text,x\n"
+    files[CFF] = files[CFF].replace("name,title\n", "name\n") + "identifier,third\n"
+    cells = crosswalk_cells(files, CFF)
+    assert cells[("schema:Person", "identifier")] == "person.orcid / identifiers / doi"
+    assert cells[("schema:Foo", "identifier")] == "third"
+    assert cells[("schema:Thing", "name")] == ""
+
+
 def test_property_counts_that_differ_get_no_cell():
     files = read_dir(FIXTURE)
     text = files[CFF].replace("identifier,person.orcid / identifiers / doi\n", "")
@@ -93,7 +103,9 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
 def test_curated_row_that_repeats_the_cell_is_refused():
     row = {"format": "npm", "term": "keywords", "path": "keywords", "cell": "keywords", "reason": "x"}
     _, findings = build_rows(read_dir(FIXTURE), "3.1", [*read_curated("3.1"), row])
-    assert [f.code for f in findings] == ["CURATED_REPEATS"]
+    assert [str(f) for f in findings] == [
+        "CURATED_REPEATS crosswalks/NodeJS.csv: keywords: curated row repeats the cell 'keywords'"
+    ]
 
 
 def test_curated_row_whose_cell_changed_is_stale():
@@ -127,10 +139,62 @@ def test_curated_path_outside_the_grammar_is_refused(path: str):
 
 def test_curated_row_without_a_reason_names_the_file():
     curated = [
-        {k: v for k, v in c.items() if k != "reason"} if i == 2 else c for i, c in enumerate(read_curated("3.1"))
+        {k: v for k, v in c.items() if k not in {"path", "reason"}} if i == 2 else c
+        for i, c in enumerate(read_curated("3.1"))
     ]
-    with pytest.raises(ValueError, match=r"curated-3\.1\.json: row 3 has no reason"):
+    with pytest.raises(ValueError, match=r"curated-3\.1\.json: row 3 has no path, reason$"):
         build_rows(read_dir(FIXTURE), "3.1", curated)
+
+
+def test_unknown_tag_names_it():
+    with pytest.raises(KeyError, match=r"9\.9"):
+        read_curated("9.9")
+
+
+def test_curated_row_keeps_see_also_and_comment():
+    row = {
+        "format": "pep621",
+        "term": "name",
+        "path": "project.name",
+        "reason": "x",
+        "see_also": "https://a",
+        "comment": "c",
+    }
+    rows, _ = build_rows(read_dir(FIXTURE), "3.1", [*without(("pep621", "name")), row])
+    assert next(r for r in rows if r["format"] == "pep621" and r["term"] == "name") == {
+        "format": "pep621",
+        "term": "name",
+        "path": "project.name",
+        "source": "curated:x",
+        "see_also": "https://a",
+        "comment": "c",
+    }
+
+
+def test_missing_crosswalk_or_curated_row_is_refused():
+    files = {p: t for p, t in read_dir(FIXTURE).items() if p != "crosswalks/Zenodo.csv"}
+    _, findings = build_rows(files, "3.1", without(("pep621", "name")))
+    assert "CELL_MISSING pep621: name: no crosswalk, and no curated row" in map(str, findings)
+    assert "CELL_MISSING crosswalks/Zenodo.csv: name: no cell joined to the property table, and no curated row" in map(
+        str, findings
+    )
+
+
+def test_shared_paths_checks_each_alternative_both_ways():
+    rows = [
+        {"term": "name", "path": "x | y"},
+        {"term": "version", "path": "z | w"},
+        {"term": "author", "path": "list[]"},
+        {"term": "license", "path": "p.q"},
+        {"term": "description", "path": "y"},
+        {"term": "identifier", "path": "list.id"},
+        {"term": "keywords", "path": "p"},
+    ]
+    assert [f.detail for f in shared_paths("f", rows)] == [
+        "'y' overlaps name's 'y'",
+        "'list.id' overlaps author's 'list[]'",
+        "'p' overlaps license's 'p.q'",
+    ]
 
 
 def test_wrong_path_shaped_cells_shared_by_two_terms_are_refused():
@@ -165,7 +229,7 @@ def test_cli_export_reads_the_tag_and_writes_the_example(repo: Path, tmp_path: P
 def test_cli_export_without_the_tag_exits_2(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     shutil.copytree(FIXTURE, tmp_path, dirs_exist_ok=True)
     assert main(["export", str(tmp_path), "--tag", "3.1"]) == 2
-    assert "fatal:" in capsys.readouterr().err
+    assert capsys.readouterr().err.startswith(f"codemeta-drift: cannot read {tmp_path} at tag 3.1: fatal:")
 
 
 def test_cli_export_lists_refused_cells(tagged: Callable, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
@@ -173,7 +237,7 @@ def test_cli_export_lists_refused_cells(tagged: Callable, tmp_path: Path, capsys
         p: t.replace("description,abstract", "description,abstract / summary") for p, t in read_dir(FIXTURE).items()
     }
     out = tmp_path / "out.json"
-    assert main(["export", str(tagged(files)), "--tag", "3.1", "--out", str(out)]) == 1
+    assert main(["export", str(tagged(files)), "--tag", "3.1", "--out", str(out), "--schemas", str(SCHEMAS)]) == 1
     assert (
         capsys.readouterr().out
         == f"CELL_PROSE {CFF}: description: prose cell 'abstract / summary', and no curated row\n"
@@ -208,7 +272,7 @@ def test_cli_export_unwritable_out_exits_2_and_names_the_file(
 ):
     out = tmp_path / "no-dir" / "out.json"
     assert main(["export", str(repo), "--tag", "3.1", "--out", str(out)]) == 2
-    assert str(out) in capsys.readouterr().err
+    assert capsys.readouterr().err.startswith(f"codemeta-drift: cannot read or write {out}: FileNotFoundError:")
 
 
 def test_cli_export_bad_curated_row_exits_2_and_names_the_file(
@@ -217,12 +281,22 @@ def test_cli_export_bad_curated_row_exits_2_and_names_the_file(
     rows = [{k: v for k, v in c.items() if k != "reason"} for c in read_curated("3.1")]
     monkeypatch.setattr(export_module, "read_curated", lambda _: rows)
     assert main(["export", str(repo), "--tag", "3.1"]) == 2
-    assert "curated-3.1.json: row 1 has no reason" in capsys.readouterr().err
+    assert "ValueError: curated-3.1.json: row 1 has no reason" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("args", [["--tag", "9.9"], ["--tag", "../3.1"]])
-def test_cli_export_exits_2(args: list[str], tmp_path: Path):
+def test_cli_export_exits_2(args: list[str], tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     assert main(["export", str(tmp_path), *args]) == 2
+    assert capsys.readouterr().err == f"codemeta-drift: no curated rows for {args[1]}; have 3.1\n"
+
+
+def test_cli_export_prints_from_the_current_directory(
+    repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    monkeypatch.chdir(repo)
+    monkeypatch.setattr("sys.argv", ["codemeta-drift", "export", "--tag", "3.1"])
+    assert main() == 0
+    assert capsys.readouterr().out == EXAMPLE_FILE.read_text()
 
 
 def test_plain_check_still_runs():

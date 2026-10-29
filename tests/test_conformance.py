@@ -70,3 +70,33 @@ def test_every_alternative_and_no_null_or_unchecked_format():
         {"format": "zenodo", "term": "name", "path": "nonsense"},
     ]
     assert [f.detail for f in conform(rows, SCHEMAS)] == ["project.homepage: no 'homepage'"]
+
+
+TOY = {
+    "$ref": "#/$defs/a",
+    "$defs": {
+        "a": {"$ref": "#/$defs/b"},
+        "b": {"$ref": "#/$defs/a", "properties": {"deep": {}}},
+        "s/l": {"properties": {"slash": {}}},
+        "t~l": {"properties": {"tilde": {}}},
+    },
+    "allOf": [{"properties": {"all": {}}}, {"$ref": "#"}, {"$ref": "#/allOf/0"}],
+    "oneOf": [{"properties": {"one": {}}}, {"$ref": "#/$defs/s~1l"}, {"$ref": "#/$defs/t~0l"}],
+    "patternProperties": {"^x-": {}},
+}
+
+
+@pytest.mark.parametrize(
+    ("path", "why"),
+    [
+        ("deep", None),  # through two $refs that cycle
+        ("all", None),
+        ("one", None),
+        ("slash", None),  # ~1 is / in a JSON pointer
+        ("tilde", None),  # ~0 is ~
+        ("x-any", None),
+        ("y-any", "no 'y-any'"),
+    ],
+)
+def test_resolve_follows_refs_and_combinators(path: str, why: str | None):
+    assert resolve(TOY, path) == why
