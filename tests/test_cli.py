@@ -1,6 +1,6 @@
 import json
 import shutil
-import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -8,22 +8,6 @@ import pytest
 from codemeta_drift.cli import is_input, main
 
 FIXTURES = Path(__file__).parent / "fixtures"
-
-
-def git(root: Path, *args: str) -> None:
-    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True)
-
-
-@pytest.fixture
-def repo(tmp_path: Path) -> Path:
-    """A git repository whose first commit is the 3.1 fixture and second the 4.0 fixture."""
-    git(tmp_path, "init", "-q")
-    for tag in ("3.1", "4.0"):
-        shutil.copytree(FIXTURES / tag, tmp_path, dirs_exist_ok=True)
-        git(tmp_path, "add", "-A")
-        git(tmp_path, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", tag)
-        git(tmp_path, "tag", tag)
-    return tmp_path
 
 
 def test_ref_reads_the_commit_not_the_working_tree(repo: Path, capsys: pytest.CaptureFixture[str]):
@@ -38,7 +22,9 @@ def test_working_tree_and_json_output(repo: Path, capsys: pytest.CaptureFixture[
     assert any(f["code"] == "AGGREGATE_FORMAT" and f["term"] == "GitLab" for f in findings)
 
 
-def test_ref_and_working_tree_read_the_same_files(repo: Path, capsys: pytest.CaptureFixture[str]):
+def test_ref_and_working_tree_read_the_same_files(
+    repo: Path, git: Callable[..., None], capsys: pytest.CaptureFixture[str]
+):
     """Includes a non-ASCII name, which git quotes unless asked not to, and a file no check reads."""
     shutil.copy(repo / "crosswalks/GitLab.csv", repo / "crosswalks/Gitläb.csv")
     (repo / "examples/notes.txt").write_text("not an input")

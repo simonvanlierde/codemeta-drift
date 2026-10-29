@@ -20,11 +20,13 @@ check:
 hooks:
     prek run -a
 
-# Mutation-test checks.py with tests/test_checks.py. Fails on a survivor not in
+# Mutation-test the modules in pyproject's [tool.mutmut]. Fails on a survivor not in
 # tests/mutation-baseline.txt, and on a listed one that no longer survives, so the list stays true.
 mutation:
     #!/usr/bin/env bash
     set -euo pipefail
+    # sort and comm must agree on the ǁ in class-method mutant names, so use byte order.
+    export LC_ALL=C
     # mutmut reuses results from mutants/ even after the tests change, so start clean.
     rm -rf mutants
     uv run mutmut run >/dev/null

@@ -123,6 +123,41 @@ problem, it's reported once.
 All the checks live in one file, [`checks.py`](src/codemeta_drift/checks.py). It needs
 nothing beyond Python itself, so the CodeMeta repository could copy it into its own CI.
 
+## Mapping export
+
+A mapping export is a JSON file that says where each CodeMeta term sits in CFF, codemeta.json,
+.zenodo.json, pyproject.toml, Cargo.toml and package.json, with wrong crosswalk cells corrected.
+[docs/mapping-export.md](docs/mapping-export.md) describes the format, and
+[examples/mapping-3.1.json](examples/mapping-3.1.json) is the one for CodeMeta 3.1.
+
+```sh
+codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
+```
+
+A row reads its crosswalk cell when the cell is a path, such as `package.version`. Every other
+row comes from [`curated-3.1.json`](src/codemeta_drift/curated-3.1.json), which gives the path and
+the reason: the cell is prose (`license / license-url`), empty, or wrong (`package.keyword`), or
+the format has no crosswalk (PEP 621). A cell that is none of these is refused, not guessed:
+
+```text
+CELL_PROSE crosswalks/Citation File Format 1.2.0.csv: license: prose cell 'license / license-url', and no curated row
+```
+
+It then exits 1 and writes nothing. The rows are read from the tag's commit, not the working
+tree, because each one says which tag it came from. A curated row records the cell it was written
+for, and is reported as `CURATED_STALE` when that cell changes. Two terms whose paths are equal or
+nested, such as Cargo's `name` cell `package.authors` beside `author`, are `PATH_SHARED`. Cells are matched to the property list by name, and a name
+listed twice (`identifier` under Thing and under Person) by its order among the rows with that
+name. Only tags with a curated file can be exported; for now that is 3.1. A checkout directory
+named `export` needs a `./` in front.
+
+`--schemas DIR` also checks every path against the format's own JSON Schema and reports
+`PATH_NOT_IN_SCHEMA` for a key the schema doesn't have. The schemas for CFF 1.2.0, pyproject.toml,
+package.json and Cargo.toml are in [`tests/fixtures/schemas/`](tests/fixtures/schemas/), with
+their sources. Zenodo has no current published schema for `.zenodo.json`, so its paths are not
+checked. On the raw 3.1 crosswalk the check finds Cargo's `package.keyword`. It can't find a
+path that exists but means something else, such as Zenodo's `identifier` cell `id`.
+
 ## Development
 
 You need [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and
@@ -134,10 +169,10 @@ uv tool install prek   # once per machine
 prek install           # git hooks
 just check             # lint, types, tests and the dependency audit (needs network)
 just hooks             # the YAML, Markdown, workflow and citation checks CI also runs
-just mutation          # mutation-test checks.py (not in CI)
+just mutation          # mutation-test the checks and the export (not in CI)
 ```
 
-`just mutation` changes `checks.py` one small step at a time and fails if the tests
+`just mutation` changes `checks.py`, `export.py` and `conformance.py` one small step at a time and fails if the tests
 still pass on a change that `tests/mutation-baseline.txt` does not list. A change that
 cannot alter behaviour goes in that file with the reason. It also fails on a listed
 change the tests now catch, so the list stays true.

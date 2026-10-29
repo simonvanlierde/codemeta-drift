@@ -1,0 +1,11 @@
+# Each file is an unmodified copy, fetched 2026-10-29. The schemastore.org URLs are not versioned,
+# so those three files are a snapshot of that day, and a fresh download may differ.
+# file            url                                                                                   sha256
+cff-1.2.0.json    https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json  0b8d22140da702d766df318dcff3a91af2f39521298dcf36d76315fd99cc169b
+pyproject.json    https://json.schemastore.org/pyproject.json                                            82f021a77e8145047c2ad502909734c0786e6ab41fbeaa2a1bcee63a9fd538db
+package.json      https://json.schemastore.org/package.json                                              76767b4e0b941f048f20d6de3eef2b8dd5f2b09816913a26b4bbf1afbd31fd79
+cargo.json        https://json.schemastore.org/cargo.json                                                87aa9556ae57ddec7ce9dc405a0e1b53eabd6d533a1fc385c5175028016d5afa
+#
+# Zenodo has no schema here. zenodo/zenodo has zenodo/modules/deposit/jsonschemas/deposits/records/legacyrecord.json
+# (last changed 2022-10-14), from the codebase Zenodo replaced with InvenioRDM in 2023. It lacks version, which
+# the deposit API documents and .zenodo.json uses, so it would fail correct paths. It is also GPL-2.0.

@@ -4,3 +4,13 @@ Copyright 2026 Simon van Lierde
 tests/fixtures/3.1/ and tests/fixtures/4.0/ are unmodified copies of files from
 the CodeMeta repository (https://github.com/codemeta/codemeta) at tags 3.1 and
 4.0, licensed under the Apache License 2.0 by the CodeMeta contributors.
+
+tests/fixtures/schemas/ holds unmodified copies of JSON Schemas; tests/fixtures/schemas/SOURCES
+gives each URL and checksum:
+
+- cff-1.2.0.json, from the Citation File Format project
+  (https://github.com/citation-file-format/citation-file-format, tag 1.2.0), licensed under
+  CC-BY-4.0 by the Citation File Format contributors.
+- pyproject.json, package.json and cargo.json, from SchemaStore
+  (https://github.com/SchemaStore/schemastore), licensed under the Apache License 2.0 by the
+  SchemaStore contributors.
