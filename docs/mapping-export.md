@@ -75,7 +75,8 @@ A (format, term) pair appears at most once. JSON Schema can't say that, so a con
 `zenodo`, `pep621`, `cargo`, `npm`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `license`, `identifier`,
 `codeRepository`, `description`, `keywords`. The same inputs give the same bytes, so a consumer
-can pin the file's sha256. A consumer must not depend on the row order.
+can pin the file's sha256. The header's `generator.version` is one of those inputs: a new
+codemeta-drift release changes the bytes even when no row changes. A consumer must not depend on the row order.
 
 ## Path grammar
 
@@ -116,7 +117,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
 
 ## What a consumer does
 
-1. Read `schema_version` first. A major it doesn't know is an error (citesync exits 2).
+1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 2).
 2. Validate the file against the schema it vendors beside it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for any of the eight terms is an error (citesync

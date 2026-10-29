@@ -7,8 +7,9 @@ without the context and the property table.
 ``codemeta-drift export [checkout] --tag TAG [--out FILE] [--schemas DIR]`` writes the
 mapping export from the commit of tag TAG, never the working tree, since every row says
 it was read from that tag. It exits 0 when written, 1 when a row can't be made (such as a
-crosswalk cell with no path and no curated row, or a path not in its format's schema), and
-2 as above, or when the checkout has no tag TAG or a file can't be read or written.
+crosswalk cell with no path and no curated row, or a path not in its format's schema), with
+the findings on standard error so standard output is never a partial file, and 2 as above,
+or when the checkout has no tag TAG or a file can't be read or written.
 """
 
 import argparse
@@ -17,11 +18,15 @@ import json
 import subprocess
 import sys
 from dataclasses import asdict
+from importlib import metadata
 from pathlib import Path
 
 from codemeta_drift.checks import CONTEXT, TABLE, check
 from codemeta_drift.conformance import SCHEMA_FILES, conform
 from codemeta_drift.export import curated_tags, export
+
+JSON_VERSION = 1
+"""The ``--json`` document's version: a minor release may add keys; removing or retyping one bumps it."""
 
 INPUTS = (
     "codemeta.jsonld",
@@ -103,7 +108,7 @@ def export_main(argv: list[str]) -> int:
                 schemas[fmt] = json.loads(target.read_text("utf-8"))
             findings += conform(mapping["rows"], schemas)
         if findings:
-            print("\n".join(map(str, findings)))
+            print("\n".join(map(str, findings)), file=sys.stderr)
             return 1
         text = json.dumps(mapping, indent=2, ensure_ascii=False) + "\n"
         if args.out:
@@ -130,9 +135,10 @@ def main(argv: list[str] | None = None) -> int:
         description="Report where CodeMeta's files disagree.",
         epilog="codemeta-drift export --help describes the mapping export.",
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {metadata.version('codemeta-drift')}")
     parser.add_argument("checkout", type=Path, help="root of a codemeta clone")
     parser.add_argument("--ref", help="read this commit, tag or branch instead of the working tree")
-    parser.add_argument("--json", action="store_true", help="print findings as a JSON array")
+    parser.add_argument("--json", action="store_true", help="print the findings as one JSON document")
     args = parser.parse_args(argv)
 
     try:
@@ -149,7 +155,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"codemeta-drift: cannot read {args.checkout}: {type(err).__name__}: {err}", file=sys.stderr)
         return 2
     if args.json:
-        print(json.dumps([asdict(f) for f in findings], indent=2))
+        tool = {"name": "codemeta-drift", "version": metadata.version("codemeta-drift")}
+        print(json.dumps({"version": JSON_VERSION, "tool": tool, "findings": [asdict(f) for f in findings]}, indent=2))
     else:
         print("\n".join(map(str, findings)))
     return 1 if any(f.code != "SKIPPED" for f in findings) else 0

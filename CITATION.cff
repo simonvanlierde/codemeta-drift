@@ -4,7 +4,7 @@
 cff-version: 1.2.0
 message: If you use this software, please cite it as below.
 title: "codemeta-drift"
-abstract: "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree"
+abstract: "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping"
 authors:
   - given-names: "Simon"
     family-names: "van Lierde"
