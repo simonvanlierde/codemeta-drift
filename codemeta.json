@@ -2,7 +2,7 @@
   "@context": "https://w3id.org/codemeta/3.0",
   "@type": "SoftwareSourceCode",
   "name": "codemeta-drift",
-  "description": "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree",
+  "description": "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping",
   "dateCreated": "2026-10-13",
   "developmentStatus": "https://www.repostatus.org/#active",
   "keywords": [

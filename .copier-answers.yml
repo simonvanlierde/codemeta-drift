@@ -15,7 +15,7 @@ license: Apache-2.0
 module_name: codemeta_drift
 openssf_badge: none
 project_description: Report where CodeMeta's context, definitions, property table,
-    examples and crosswalks disagree
+    examples and crosswalks disagree, and export the crosswalks as a JSON mapping
 project_name: codemeta-drift
 public: true
 publish_to_pypi: true

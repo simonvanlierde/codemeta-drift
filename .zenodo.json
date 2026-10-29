@@ -1,7 +1,7 @@
 {
   "upload_type": "software",
   "title": "codemeta-drift",
-  "description": "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree",
+  "description": "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping",
   "creators": [
     {
       "name": "van Lierde, Simon",

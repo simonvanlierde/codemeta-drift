@@ -81,4 +81,4 @@ repo-settings:
 
 # Set the GitHub About box from your answers: description and a topic per stack. Adds topics, never removes yours. Safe to rerun.
 repo-about:
-    gh repo edit --description 'Report where CodeMeta'\''s context, definitions, property table, examples and crosswalks disagree' --add-topic python
+    gh repo edit --description 'Report where CodeMeta'\''s context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping' --add-topic python
