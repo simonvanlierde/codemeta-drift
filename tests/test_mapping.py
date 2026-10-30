@@ -13,7 +13,7 @@ EXAMPLE = json.loads((ROOT / "examples/mapping-3.1.json").read_text())
 PATH = re.compile(SCHEMA["$defs"]["row"]["properties"]["path"]["pattern"])
 
 FORMATS = ("cff-1.2.0", "codemeta", "zenodo", "pep621", "cargo", "npm")
-TERMS = ("name", "version", "author", "license", "identifier", "codeRepository", "description", "keywords")
+TERMS = ("name", "version", "author", "license", "identifier", "swhid", "codeRepository", "description", "keywords")
 
 
 def test_schema_is_valid_2020_12():
@@ -84,7 +84,7 @@ def test_example_null_rows():
     nulls = {(row["format"], row["term"]) for row in EXAMPLE["rows"] if row["path"] is None}
     contributor = ("contributor", "contributor.givenName", "contributor.familyName", "contributor.@id")
     assert nulls == (
-        {(f, t) for f in ("pep621", "cargo", "npm") for t in ("author.@id", "identifier", "contributor.@id")}
+        {(f, t) for f in ("pep621", "cargo", "npm") for t in ("author.@id", "identifier", "swhid", "contributor.@id")}
         | {(f, t) for f in ("cff-1.2.0", "pep621", "cargo") for t in contributor}
         | {(f, "datePublished") for f in ("pep621", "cargo", "npm")}
     )

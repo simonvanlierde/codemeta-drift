@@ -22,7 +22,7 @@ object.
 
 ```json
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.1.0"},
   "rows": [
@@ -50,11 +50,15 @@ Each row:
 
 - `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo` or `npm`. A
   format whose versions differ puts the version in the id.
-- `term` is one of the ten terms `name`, `version`, `author`, `contributor`, `license`,
-  `identifier`, `codeRepository`, `description`, `keywords` and `datePublished`, or a person
+- `term` is one of the eleven terms `name`, `version`, `author`, `contributor`, `license`,
+  `identifier`, `swhid`, `codeRepository`, `description`, `keywords` and `datePublished`, or a person
   sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
   sub-term names the term it sits under, because `contributor.givenName` sits somewhere else
-  than `author.givenName`.
+  than `author.givenName`. `identifier` is the DOI. `swhid` is the
+  [Software Heritage identifier](https://www.swhid.org/), such as
+  `swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505`. CodeMeta has no term of its own for it:
+  codemeta.json holds it in `identifier`, beside the DOI, so both codemeta rows have the path
+  `identifier` and the consumer picks each value out by its spelling.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
@@ -75,7 +79,7 @@ A (format, term) pair appears at most once. JSON Schema can't say that, so a con
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
 `zenodo`, `pep621`, `cargo`, `npm`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
-`contributor.familyName`, `contributor.@id`, `license`, `identifier`, `codeRepository`,
+`contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`. The same inputs give the same bytes, so a consumer
 can pin the file's sha256. The header's `generator.version` is one of those inputs: a new
 codemeta-drift release changes the bytes even when no row changes. A consumer must not depend on the row order.
