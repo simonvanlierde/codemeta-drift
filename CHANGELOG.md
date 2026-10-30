@@ -7,6 +7,19 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-30
+
+### Added
+
+- The export maps `datePublished` and `contributor`, with the same person sub-terms as
+  `author`. CFF 1.2.0, Cargo.toml and pyproject.toml have no contributor list, so their rows are
+  `null`; Zenodo's need a curated row, because its crosswalk cells are empty.
+
+### Changed
+
+- The export's `schema_version` is 1.1, since it adds terms. A reader of 1.0 reads it unchanged.
+- A consumer now needs rows only for the terms it uses, not for every term in the export.
+
 ## [0.1.0] - 2026-10-29
 
 ### Added
@@ -29,5 +42,6 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/simonvanlierde/codemeta-drift/releases/tag/v0.1.0

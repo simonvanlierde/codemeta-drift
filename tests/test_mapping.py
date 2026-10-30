@@ -82,4 +82,9 @@ def test_example_generator_is_this_release():
 
 def test_example_null_rows():
     nulls = {(row["format"], row["term"]) for row in EXAMPLE["rows"] if row["path"] is None}
-    assert nulls == {(f, t) for f in ("pep621", "cargo", "npm") for t in ("author.@id", "identifier")}
+    contributor = ("contributor", "contributor.givenName", "contributor.familyName", "contributor.@id")
+    assert nulls == (
+        {(f, t) for f in ("pep621", "cargo", "npm") for t in ("author.@id", "identifier", "contributor.@id")}
+        | {(f, t) for f in ("cff-1.2.0", "pep621", "cargo") for t in contributor}
+        | {(f, "datePublished") for f in ("pep621", "cargo", "npm")}
+    )

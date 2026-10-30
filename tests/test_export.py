@@ -89,6 +89,18 @@ def test_cell_paths_get_list_and_person_prefix():
     assert path["cff-1.2.0", "author.givenName"] == "authors[].given-names"
     assert path["zenodo", "author.@id"] == "creators[].ORCID"
     assert path["npm", "author"] == "author"
+    assert path["codemeta", "contributor.@id"] == "contributor[].@id"
+    assert path["zenodo", "datePublished"] == "publication_date"
+
+
+def test_contributor_cells_derive_like_author_cells():
+    rows, findings = build_rows(
+        read_dir(FIXTURE), "3.1", without(("npm", "contributor"), ("cff-1.2.0", "contributor.givenName"))
+    )
+    path = {(r["format"], r["term"]): r["path"] for r in rows}
+    assert path["npm", "contributor"] == "contributors"
+    detail = "cell 'person.given-names' is relative to contributor, which has no row"
+    assert [str(f) for f in findings] == [f"CELL_NO_AUTHOR {CFF}: contributor.givenName: {detail}"]
 
 
 def test_prose_and_empty_cells_without_a_curated_row_are_refused():
@@ -97,7 +109,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == 64
+    assert len(rows) == 94
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():

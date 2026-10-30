@@ -202,6 +202,162 @@
       "path": null,
       "cell": "name",
       "reason": "the cell says name, the package name; package.json has no DOI field"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "no cell for contributors; CFF 1.2.0 has no contributor list, only authors"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "person.given-names",
+      "reason": "no cell for contributors; CFF 1.2.0 has no contributor list, only authors"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "person.family-names",
+      "reason": "no cell for contributors; CFF 1.2.0 has no contributor list, only authors"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "person.orcid / identifiers / doi",
+      "reason": "no cell for contributors; CFF 1.2.0 has no contributor list, only authors"
+    },
+    {
+      "format": "zenodo",
+      "term": "contributor",
+      "path": "contributors[]",
+      "cell": "",
+      "reason": "no cell; .zenodo.json lists contributors under contributors, each with a name, a type and an optional orcid"
+    },
+    {
+      "format": "zenodo",
+      "term": "contributor.givenName",
+      "path": "contributors[].name",
+      "cell": "",
+      "reason": "no cell; Zenodo keeps one name string per contributor, written 'Family, Given'"
+    },
+    {
+      "format": "zenodo",
+      "term": "contributor.familyName",
+      "path": "contributors[].name",
+      "cell": "",
+      "reason": "no cell; Zenodo keeps one name string per contributor, written 'Family, Given'"
+    },
+    {
+      "format": "zenodo",
+      "term": "contributor.@id",
+      "path": "contributors[].orcid",
+      "cell": "ORCID",
+      "reason": "the cell says ORCID; the .zenodo.json key is orcid"
+    },
+    {
+      "format": "pep621",
+      "term": "contributor",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has authors and maintainers, no contributors"
+    },
+    {
+      "format": "pep621",
+      "term": "contributor.givenName",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has no contributors"
+    },
+    {
+      "format": "pep621",
+      "term": "contributor.familyName",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has no contributors"
+    },
+    {
+      "format": "pep621",
+      "term": "contributor.@id",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has no contributors"
+    },
+    {
+      "format": "pep621",
+      "term": "datePublished",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has no release date"
+    },
+    {
+      "format": "cargo",
+      "term": "contributor",
+      "path": null,
+      "cell": "package.authors",
+      "reason": "the cell says package.authors, which holds the authors; Cargo has no contributor list"
+    },
+    {
+      "format": "cargo",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Cargo has no contributor list"
+    },
+    {
+      "format": "cargo",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Cargo has no contributor list"
+    },
+    {
+      "format": "cargo",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Cargo has no contributor list"
+    },
+    {
+      "format": "cargo",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Cargo.toml has no release date"
+    },
+    {
+      "format": "npm",
+      "term": "contributor",
+      "path": "contributors[]",
+      "cell": "contributors",
+      "reason": "the cell says contributors; package.json keeps a list of people there"
+    },
+    {
+      "format": "npm",
+      "term": "contributor.givenName",
+      "path": "contributors[].name",
+      "cell": "",
+      "reason": "no cell; package.json keeps one name string per person, as for author"
+    },
+    {
+      "format": "npm",
+      "term": "contributor.familyName",
+      "path": "contributors[].name",
+      "cell": "",
+      "reason": "no cell; package.json keeps one name string per person, as for author"
+    },
+    {
+      "format": "npm",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; package.json has no person identifier"
+    },
+    {
+      "format": "npm",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; package.json has no release date"
     }
   ]
 }
