@@ -93,6 +93,15 @@ def test_cell_paths_get_list_and_person_prefix():
     assert path["zenodo", "datePublished"] == "publication_date"
 
 
+def test_swhid_rows_sit_beside_the_doi():
+    rows, findings = build_rows(read_dir(FIXTURE), "3.1", read_curated("3.1"))
+    path = {(r["format"], r["term"]): r["path"] for r in rows}
+    assert findings == []
+    assert path["cff-1.2.0", "swhid"] == "identifiers[type=swh].value"
+    assert path["codemeta", "swhid"] == path["codemeta", "identifier"] == "identifier"
+    assert path["zenodo", "swhid"] == "related_identifiers[scheme=swh].identifier"
+
+
 def test_contributor_cells_derive_like_author_cells():
     rows, findings = build_rows(
         read_dir(FIXTURE), "3.1", without(("npm", "contributor"), ("cff-1.2.0", "contributor.givenName"))
@@ -109,7 +118,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == 94
+    assert len(rows) == 100
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():
@@ -196,16 +205,19 @@ def test_shared_paths_checks_each_alternative_both_ways():
     rows = [
         {"term": "name", "path": "x | y"},
         {"term": "version", "path": "z | w"},
+        {"term": "identifier", "path": "list.id"},
         {"term": "author", "path": "list[]"},
         {"term": "license", "path": "p.q"},
         {"term": "description", "path": "y"},
-        {"term": "identifier", "path": "list.id"},
         {"term": "keywords", "path": "p"},
+        {"term": "swhid", "path": "list.id"},
     ]
+    # swhid shares identifier's path on purpose: both are values of one property, told apart by their spelling.
     assert [f.detail for f in shared_paths("f", rows)] == [
+        "'list[]' overlaps identifier's 'list.id'",
         "'y' overlaps name's 'y'",
-        "'list.id' overlaps author's 'list[]'",
         "'p' overlaps license's 'p.q'",
+        "'list.id' overlaps author's 'list[]'",
     ]
 
 

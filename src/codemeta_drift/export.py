@@ -16,7 +16,7 @@ from typing import Any
 
 from codemeta_drift.checks import Finding, csv_rows, table_rows
 
-SCHEMA_VERSION = "1.1"
+SCHEMA_VERSION = "1.2"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -32,6 +32,8 @@ TERMS = {
     "contributor.@id": ("schema:Person", "identifier"),
     "license": ("schema:CreativeWork", "license"),
     "identifier": ("schema:Thing", "identifier"),
+    # The Software Heritage identifier: CodeMeta has no term for it and holds it in identifier, beside the DOI.
+    "swhid": ("schema:Thing", "identifier"),
     "codeRepository": ("schema:SoftwareSourceCode", "codeRepository"),
     "description": ("schema:Thing", "description"),
     "keywords": ("schema:CreativeWork", "keywords"),
@@ -167,7 +169,8 @@ def shared_paths(label: str, rows: list[dict[str, Any]]) -> list[Finding]:
     """A ``PATH_SHARED`` finding for each two terms whose paths are equal or one holds the other.
 
     A wrong cell that still looks like a path (npm's identifier cell ``name``) mostly names another
-    term's key. Person sub-terms are left out: they sit inside author's path on purpose.
+    term's key. Person sub-terms are left out: they sit inside author's path on purpose. So are two
+    terms of one property (identifier and swhid in codemeta): the consumer tells them apart by spelling.
     """
     paths = [
         (row["term"], alternative)
@@ -178,8 +181,10 @@ def shared_paths(label: str, rows: list[dict[str, Any]]) -> list[Finding]:
     findings = []
     for i, (term, path) in enumerate(paths):
         for other, other_path in paths[:i]:
+            if TERMS[term] == TERMS[other]:  # one term, or two of one property
+                continue
             a, b = path.replace("[]", ""), other_path.replace("[]", "")
-            if term != other and (a == b or a.startswith(f"{b}.") or b.startswith(f"{a}.")):
+            if a == b or a.startswith(f"{b}.") or b.startswith(f"{a}."):
                 findings.append(Finding("PATH_SHARED", label, term, f"{path!r} overlaps {other}'s {other_path!r}"))
     return findings
 

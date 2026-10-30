@@ -24,6 +24,19 @@
       "reason": "the cell lists identifiers / person.orcid / doi; the software DOI is doi, or the doi entry of identifiers"
     },
     {
+      "format": "cff-1.2.0",
+      "term": "swhid",
+      "path": "identifiers[type=swh].value",
+      "cell": "identifiers / person.orcid / doi",
+      "reason": "the cell lists identifiers / person.orcid / doi; a SWHID is the swh entry of identifiers"
+    },
+    {
+      "format": "codemeta",
+      "term": "swhid",
+      "path": "identifier",
+      "reason": "CodeMeta has no SWHID term; a SWHID sits in identifier, as a PropertyValue with propertyID swhid or a swh:1: string, beside the DOI"
+    },
+    {
       "format": "zenodo",
       "term": "author.givenName",
       "path": "creators[].name",
@@ -51,6 +64,13 @@
       "cell": "id",
       "reason": "the cell says id, the Zenodo record id; the DOI field is doi",
       "comment": "The GitHub integration mints the DOI and normally leaves doi unset in .zenodo.json."
+    },
+    {
+      "format": "zenodo",
+      "term": "swhid",
+      "path": "related_identifiers[scheme=swh].identifier",
+      "cell": "id",
+      "reason": "the cell says id, the Zenodo record id; a SWHID is the identifier of the related_identifiers entry with scheme swh"
     },
     {
       "format": "zenodo",
@@ -110,6 +130,12 @@
     },
     {
       "format": "pep621",
+      "term": "swhid",
+      "path": null,
+      "reason": "no PEP 621 crosswalk upstream; PEP 621 has no SWHID field"
+    },
+    {
+      "format": "pep621",
       "term": "codeRepository",
       "path": "project.urls.Source | project.urls.Repository | project.urls.Homepage",
       "reason": "no PEP 621 crosswalk upstream"
@@ -163,6 +189,13 @@
     },
     {
       "format": "cargo",
+      "term": "swhid",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Cargo has no SWHID field"
+    },
+    {
+      "format": "cargo",
       "term": "description",
       "path": "package.description",
       "cell": "",
@@ -202,6 +235,13 @@
       "path": null,
       "cell": "name",
       "reason": "the cell says name, the package name; package.json has no DOI field"
+    },
+    {
+      "format": "npm",
+      "term": "swhid",
+      "path": null,
+      "cell": "name",
+      "reason": "the cell says name, the package name; package.json has no SWHID field"
     },
     {
       "format": "cff-1.2.0",

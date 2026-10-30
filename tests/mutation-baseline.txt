@@ -9,3 +9,5 @@ codemeta_drift.export.x_generator__mutmut_9  distribution names are case-insensi
 codemeta_drift.export.x_read_curated__mutmut_4  encoding None is the locale's, UTF-8 on every host this runs on
 codemeta_drift.export.x_read_curated__mutmut_6  resources.files(None) is the calling module's package, the same one
 codemeta_drift.export.x_read_curated__mutmut_10  "UTF-8" and "utf-8" are the same codec
+codemeta_drift.export.x_derive__mutmut_3  a term has at most one dot (the schema's term pattern), so partition and rpartition agree
+codemeta_drift.export.x_make_row__mutmut_74  same as derive_3

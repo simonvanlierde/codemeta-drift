@@ -7,6 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The export maps `swhid`, the Software Heritage identifier: CFF `identifiers` of type `swh`,
+  Zenodo `related_identifiers` with scheme `swh`, and codemeta.json `identifier`, which holds
+  the DOI too. See [the term list](docs/mapping-export.md#the-file).
+
+### Changed
+
+- The export's `schema_version` is 1.2, since it adds a term. A reader of 1.0 or 1.1 reads it unchanged.
+
 ## [0.2.0] - 2026-10-30
 
 ### Added
