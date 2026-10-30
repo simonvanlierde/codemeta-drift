@@ -137,6 +137,7 @@ A mapping export is a JSON file that says where each CodeMeta term sits in CFF, 
 .zenodo.json, pyproject.toml, Cargo.toml and package.json, with wrong crosswalk cells corrected.
 [docs/mapping-export.md](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md) describes the format, and
 [examples/mapping-3.1.json](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-3.1.json) is the one for CodeMeta 3.1.
+[The crosswalk page](https://simonvanlierde.github.io/codemeta-drift/) shows that file as a searchable table, rebuilt on each release.
 
 ```sh
 codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
@@ -168,15 +169,16 @@ path that exists but means something else, such as Zenodo's `identifier` cell `i
 
 ## Development
 
-You need [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and
-[prek](https://github.com/j178/prek).
+You need [uv](https://docs.astral.sh/uv/), [just](https://just.systems),
+[prek](https://github.com/j178/prek) and [Node](https://nodejs.org) 20 or later for the crosswalk page's tests.
 
 ```sh
 uv sync
 uv tool install prek   # once per machine
 prek install           # git hooks
-just check             # lint, types, tests and the dependency audit (needs network)
+just check             # lint, types, tests, the page's tests and the dependency audit (needs network)
 just hooks             # the YAML, Markdown, workflow and citation checks CI also runs
+just site              # serve the crosswalk page in site/ at http://127.0.0.1:8000
 ```
 
 `just mutation`, which CI doesn't run, changes `checks.py`, `export.py` and `conformance.py` one small step at a time and fails if the tests

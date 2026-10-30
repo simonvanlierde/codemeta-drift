@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+    <title>CodeMeta crosswalk</title>
+    <meta name="description" content="Where each CodeMeta term sits in CITATION.cff, .zenodo.json, pyproject.toml, Cargo.toml and package.json, from codemeta-drift's mapping export.">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="main.mjs"></script>
+  </head>
+  <body>
+    <main class="wrap">
+      <p class="slug">
+        <b>codemeta-drift</b>
+        <span>CodeMeta <span id="tag">…</span></span>
+        <span>schema <span id="schema">…</span></span>
+        <span id="generator">…</span>
+        <a id="export">export</a>
+        <a href="https://github.com/simonvanlierde/codemeta-drift">source</a>
+      </p>
+      <h1>Where each CodeMeta term sits</h1>
+      <p class="hint">
+        One row per CodeMeta term, one column per file format, read from codemeta-drift's mapping
+        export. A cell gives the key path in that file; <span class="none">no field</span> means the
+        format has no place for the term, and the notes say why. Link to a term with
+        <code>#author.givenName</code>.
+      </p>
+      <p id="error" class="error" role="alert" hidden></p>
+      <div id="sheet" hidden>
+        <div class="bar">
+          <label for="q">Search terms and keys</label>
+          <input id="q" type="search" placeholder="given-names" autocomplete="off" spellcheck="false">
+          <p id="count" aria-live="polite"></p>
+        </div>
+        <div class="scroll" role="region" aria-labelledby="caption" tabindex="0">
+          <table>
+            <caption id="caption" class="vh">CodeMeta terms and their key in each format</caption>
+            <thead id="head"></thead>
+            <tbody id="body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+/* A data sheet on warm paper: near-black ink, hairline rules, mono for every key, one red for
+   errors. The palette is jsonvet's playground's. */
+:root {
+  --paper: #fbfaf5; --ink: #1a1916; --faint: #6b675e; --dim: #77736a; --pen: #c0251b;
+  --rule: #dcd8cc; --rule-strong: #b7b2a4; --tint: #f2efe5; --active: #f5e6d6;
+  --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, "Iowan Old Style", Georgia, serif;
+  --mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1b1915; --ink: #ebe5d6; --faint: #a8a191; --dim: #8b8475; --pen: #ff8a73;
+    --rule: #3a362d; --rule-strong: #575146; --tint: #26231d; --active: #3a2a22;
+    color-scheme: dark;
+  }
+}
+@media (forced-colors: active) {
+  :root { --pen: Highlight; --ink: CanvasText; --faint: CanvasText; --dim: GrayText; --rule: GrayText; --active: Canvas; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--serif); }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: .22em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+code { font: .8125rem/1.5 var(--mono); }
+[hidden] { display: none !important; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.wrap { max-width: 1240px; margin-inline: auto; padding: 0 clamp(16px, 4vw, 48px) 48px; }
+
+/* The slug: the sheet's job line, in small mono, parts set off by middle dots. */
+.slug { display: flex; flex-wrap: wrap; gap: 2px 0; margin: 0; padding-block: 20px 9px; border-bottom: 1px dashed var(--rule-strong); font: 12px/1.6 var(--mono); color: var(--faint); }
+.slug > * + *::before { content: "·"; content: "·" / ""; margin-inline: .7ch; color: var(--dim); text-decoration: none; display: inline-block; }
+.slug b, .slug #tag, .slug #schema { color: var(--ink); }
+h1 { margin: 22px 0 6px; font-size: 1.625rem; font-weight: 400; line-height: 1.25; }
+.hint { margin: 0; max-width: 46rem; color: var(--faint); font-size: .9375rem; font-style: italic; }
+.hint code { font-style: normal; }
+.error { margin: 18px 0 0; padding: 10px 12px; border-left: 3px solid var(--pen); background: var(--tint); color: var(--pen); }
+
+/* Search and count, one line above the sheet. */
+.bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin: 22px 0 10px; }
+.bar label { font-size: .9375rem; }
+#q { flex: 1 1 14rem; max-width: 24rem; padding: 5px 8px; font: 14px/1.4 var(--mono); color: var(--ink); background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 0; }
+#q:focus-visible { outline-offset: 0; border-color: var(--ink); }
+#count { margin: 0; font: 12px/1.6 var(--mono); color: var(--faint); font-variant-numeric: tabular-nums; }
+
+/* The sheet: hairline rules, mono keys, the term column held while the rest scrolls. */
+.scroll { overflow-x: auto; border-block: 1px solid var(--ink); }
+.scroll:focus-visible { outline-offset: 4px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 6px 12px 6px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+thead th { font: 600 12px/1.6 var(--mono); color: var(--faint); white-space: nowrap; border-bottom-color: var(--rule-strong); }
+tbody th { font-weight: 400; white-space: nowrap; }
+tbody th a { text-decoration: none; }
+tbody th a:hover code, tbody th a:focus-visible code { text-decoration: underline; }
+tbody code { display: block; }
+tbody th code { white-space: nowrap; }
+td code + code::before { content: "|\a0"; content: "|\a0" / "or "; color: var(--dim); }
+tbody tr:not(.sub) > * { border-bottom: 0; }
+tr:target, tr:target + .sub { background: var(--active); }
+tr:last-child > * { border-bottom: 0; }
+.none { font-style: italic; font-size: .875rem; color: var(--faint); white-space: nowrap; }
+.none::before { content: "∅ "; content: "∅ " / ""; font-style: normal; color: var(--dim); }
+.sub td { padding: 0 0 8px; font-size: .875rem; color: var(--faint); }
+.sub ul { margin: 0 0 4px; padding: 0; list-style: none; }
+.sub li + li { margin-top: 4px; }
+.fmt { font: 11.5px/1.5 var(--mono); color: var(--ink); }
+.sub summary { cursor: pointer; font: 11.5px/1.6 var(--mono); width: max-content; }
+.sub dl { display: grid; max-width: 60rem; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 4px 0 0; }
+.sub dt { font: 11.5px/1.5 var(--mono); color: var(--ink); }
+.sub dd { margin: 0; }
+.sub td > * { position: sticky; left: 0; max-width: min(60rem, calc(100vw - 32px)); }

@@ -16,10 +16,25 @@ default:
 # The stack checks CI runs. `just hooks` runs the git hooks, which CI also runs.
 check:
     @just py-check
+    @just site-test
 
 # Fix and format every stack here, as each stack's `fmt` recipe does.
 fmt:
     @just py-fmt
+
+# Test the crosswalk page's table and search logic.
+site-test:
+    node --test site/*.test.mjs
+
+# Serve the crosswalk page with the example export at http://127.0.0.1:8000 (Ctrl-C stops it).
+site port="8000":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dir=$(mktemp -d)
+    trap 'rm -rf "$dir"' EXIT
+    # Links, not copies, so an edit shows on reload.
+    ln -s "$PWD"/site/* "$PWD"/examples/mapping-3.1.json "$dir"/
+    python3 -m http.server --bind 127.0.0.1 --directory "$dir" {{ port }}
 
 # Run every git hook over the whole repo, not just staged files.
 hooks:
