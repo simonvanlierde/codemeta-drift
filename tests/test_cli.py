@@ -41,6 +41,15 @@ def test_ref_and_working_tree_read_the_same_files(
     assert "crosswalks/Gitläb.csv" in tree
 
 
+def test_a_directory_named_like_an_input_is_skipped(repo: Path, capsys: pytest.CaptureFixture[str]):
+    """As --ref skips it, since git lists only files."""
+    (repo / "examples/dir.json").mkdir()
+    code = main([str(repo)])
+    tree = capsys.readouterr().out
+    assert (main([str(repo), "--ref", "HEAD"]), capsys.readouterr().out) == (code, tree)
+    assert code != 2
+
+
 @pytest.mark.parametrize("args", [["--ref", "no-such-ref"], ["--ref=--output=x"]])
 def test_bad_ref_exits_2(repo: Path, args: list[str], capsys: pytest.CaptureFixture[str]):
     assert main([str(repo), *args]) == 2

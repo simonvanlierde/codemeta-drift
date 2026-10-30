@@ -11,6 +11,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - A `CELL_NO_AUTHOR` finding now says the author or contributor has no path, not no row, which was
   wrong when its curated row has a null path, as CFF's contributor row does.
+- `export` refuses a crosswalk cell that already reads as a list, such as `authors[]`, with a `CELL_PATH` finding, instead of
+  writing `authors[][]` and its sub-terms into the export.
+- A check of the working tree skips a directory whose name matches an input file, such as `examples/x.json`, as
+  `--ref` already did, instead of exiting 2.
 
 ## [0.3.0] - 2026-10-30
 
