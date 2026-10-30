@@ -17,6 +17,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The export's `schema_version` is 1.2, since it adds a term. A reader of 1.0 or 1.1 reads it unchanged.
 
+### Fixed
+
+- `PATH_SHARED` lets `swhid` share `identifier`'s path only in codemeta.json. A Zenodo or CFF
+  `swhid` row on the DOI's path is reported again. See [the README](README.md#mapping-export).
+
 ## [0.2.0] - 2026-10-30
 
 ### Added
