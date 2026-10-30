@@ -116,7 +116,7 @@ def test_contributor_cells_derive_like_author_cells():
     )
     path = {(r["format"], r["term"]): r["path"] for r in rows}
     assert path["npm", "contributor"] == "contributors"
-    detail = "cell 'person.given-names' is relative to contributor, which has no row"
+    detail = "cell 'person.given-names' is relative to contributor, which has no path"
     assert [str(f) for f in findings] == [f"CELL_NO_AUTHOR {CFF}: contributor.givenName: {detail}"]
 
 
@@ -244,8 +244,8 @@ def test_sub_term_without_an_author_row_says_so():
     _, findings = build_rows(files, "3.1", read_curated("3.1"))
     assert [str(f) for f in findings] == [
         f"CELL_MISSING {CFF}: author: no cell joined to the property table, and no curated row",
-        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, which has no row",
-        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, which has no row",
+        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, which has no path",
+        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, which has no path",
     ]
 
 

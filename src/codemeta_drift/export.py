@@ -219,7 +219,7 @@ def make_row(
     if derived is None:
         kind = classify(cell)
         if kind == "path":
-            detail = f"cell {cell.strip()!r} is relative to {term.partition('.')[0]}, which has no row"
+            detail = f"cell {cell.strip()!r} is relative to {term.partition('.')[0]}, which has no path"
             return None, Finding("CELL_NO_AUTHOR", label, term, detail)
         detail = (
             f"{kind} cell {cell.strip()!r}, and no curated row" if kind == "prose" else "empty cell, no curated row"

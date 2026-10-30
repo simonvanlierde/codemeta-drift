@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- A `CELL_NO_AUTHOR` finding now says the author or contributor has no path, not no row, which was
+  wrong when its curated row has a null path, as CFF's contributor row does.
+
 ## [0.3.0] - 2026-10-30
 
 ### Added
