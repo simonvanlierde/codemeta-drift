@@ -213,18 +213,8 @@ def make_row(
             return None, finding
         row = {"format": fmt, "term": term, "path": override["path"], "source": f"curated:{override['reason']}"}
         return row | {k: override[k] for k in ("see_also", "comment") if k in override}, None
-    if cell is None:
-        detail = "no cell joined to the property table" if spoke.crosswalk else "no crosswalk"
-        return None, Finding("CELL_MISSING", label, term, f"{detail}, and no curated row")
-    if derived is None:
-        kind = classify(cell)
-        if kind == "path":
-            detail = f"cell {cell.strip()!r} is relative to {term.partition('.')[0]}, which has no path"
-            return None, Finding("CELL_NO_AUTHOR", label, term, detail)
-        detail = (
-            f"{kind} cell {cell.strip()!r}, and no curated row" if kind == "prose" else "empty cell, no curated row"
-        )
-        return None, Finding(f"CELL_{kind.upper()}", label, term, detail)
+    if finding := cell_finding(spoke, label, term, cell, derived):
+        return None, finding
     row = {"format": fmt, "term": term, "path": derived, "source": f"crosswalk:{spoke.crosswalk}@{tag}"}
     if note := CROSSWALK_COMMENTS.get((fmt, term)):
         row["comment"] = note
@@ -239,6 +229,25 @@ CROSSWALK_COMMENTS = {
         " name-particle van, and a family name of van Leeuwenhoek."
     ),
 }
+
+
+def cell_finding(spoke: Spoke, label: str, term: str, cell: str | None, derived: str | None) -> Finding | None:
+    """Why a row with no curated row can't come from its cell: it has none, it isn't a path, or its path is wrong."""
+    if cell is None:
+        detail = "no cell joined to the property table" if spoke.crosswalk else "no crosswalk"
+        return Finding("CELL_MISSING", label, term, f"{detail}, and no curated row")
+    if derived is None:
+        kind = classify(cell)
+        if kind == "path":
+            detail = f"cell {cell.strip()!r} is relative to {term.partition('.')[0]}, which has no path"
+            return Finding("CELL_NO_AUTHOR", label, term, detail)
+        detail = (
+            f"{kind} cell {cell.strip()!r}, and no curated row" if kind == "prose" else "empty cell, no curated row"
+        )
+        return Finding(f"CELL_{kind.upper()}", label, term, detail)
+    if not PATH.fullmatch(derived):  # such as authors[][] from a cell that already reads as a list
+        return Finding("CELL_PATH", label, term, f"cell {cell.strip()!r} gives {derived!r}, which is not a path")
+    return None
 
 
 def curated_finding(

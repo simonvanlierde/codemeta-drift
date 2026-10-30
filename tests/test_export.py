@@ -249,6 +249,18 @@ def test_sub_term_without_an_author_row_says_so():
     ]
 
 
+def test_a_cell_that_already_reads_as_a_list_is_refused():
+    files = read_dir(FIXTURE)
+    files[CFF] = files[CFF].replace("author,authors\n", "author,authors[]\n")
+    rows, findings = build_rows(files, "3.1", read_curated("3.1"))
+    assert [str(f) for f in findings] == [
+        f"CELL_PATH {CFF}: author: cell 'authors[]' gives 'authors[][]', which is not a path",
+        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, which has no path",
+        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, which has no path",
+    ]
+    assert not [r for r in rows if r["path"] and "[][]" in r["path"]]
+
+
 def test_cli_export_reads_the_tag_and_writes_the_example(repo: Path, tmp_path: Path):
     """HEAD is 4.0 and the working tree has an edit: the rows must come from tag 3.1."""
     cargo = repo / "crosswalks/Cargo.csv"
