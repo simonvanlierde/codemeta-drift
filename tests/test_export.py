@@ -102,6 +102,14 @@ def test_swhid_rows_sit_beside_the_doi():
     assert path["zenodo", "swhid"] == "related_identifiers[scheme=swh].identifier"
 
 
+@pytest.mark.parametrize(("fmt", "label"), [("zenodo", "crosswalks/Zenodo.csv"), ("cff-1.2.0", CFF)])
+def test_swhid_on_the_doi_path_is_shared_outside_codemeta(fmt: str, label: str):
+    """Only codemeta.json holds the SWHID and the DOI in one key; elsewhere that path is a wrong row."""
+    curated = [c | {"path": "doi"} if (c["format"], c["term"]) == (fmt, "swhid") else c for c in read_curated("3.1")]
+    _, findings = build_rows(read_dir(FIXTURE), "3.1", curated)
+    assert [str(f) for f in findings] == [f"PATH_SHARED {label}: swhid: 'doi' overlaps identifier's 'doi'"]
+
+
 def test_contributor_cells_derive_like_author_cells():
     rows, findings = build_rows(
         read_dir(FIXTURE), "3.1", without(("npm", "contributor"), ("cff-1.2.0", "contributor.givenName"))
@@ -212,8 +220,8 @@ def test_shared_paths_checks_each_alternative_both_ways():
         {"term": "keywords", "path": "p"},
         {"term": "swhid", "path": "list.id"},
     ]
-    # swhid shares identifier's path on purpose: both are values of one property, told apart by their spelling.
-    assert [f.detail for f in shared_paths("f", rows)] == [
+    # In codemeta, swhid shares identifier's path on purpose: both are values of one property, told apart by spelling.
+    assert [f.detail for f in shared_paths("f", "codemeta", rows)] == [
         "'list[]' overlaps identifier's 'list.id'",
         "'y' overlaps name's 'y'",
         "'p' overlaps license's 'p.q'",

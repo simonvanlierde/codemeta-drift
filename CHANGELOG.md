@@ -14,10 +14,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The export maps `swhid`, the Software Heritage identifier: CFF `identifiers` of type `swh`,
   Zenodo `related_identifiers` with scheme `swh`, and codemeta.json `identifier`, which holds
   the DOI too. See [the term list](docs/mapping-export.md#the-file).
+- The Zenodo `swhid` row's comment says `scheme` is optional in `related_identifiers`, so a
+  consumer also reads an entry with no scheme whose identifier starts `swh:1:` as the SWHID.
 
 ### Changed
 
 - The export's `schema_version` is 1.2, since it adds a term. A reader of 1.0 or 1.1 reads it unchanged.
+
+### Fixed
+
+- `PATH_SHARED` lets `swhid` share `identifier`'s path only in codemeta.json. A Zenodo or CFF
+  `swhid` row on the DOI's path is reported again. See [the README](README.md#mapping-export).
 
 ## [0.2.0] - 2026-10-30
 
