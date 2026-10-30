@@ -24,7 +24,7 @@ object.
 {
   "schema_version": "1.2",
   "codemeta_tag": "3.1",
-  "generator": {"name": "codemeta-drift", "version": "0.1.0"},
+  "generator": {"name": "codemeta-drift", "version": "0.2.0"},
   "rows": [
     {
       "format": "cargo",
