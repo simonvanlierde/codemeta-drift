@@ -9,7 +9,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- [The crosswalk page](https://simonvanlierde.github.io/codemeta-drift/) shows the CodeMeta 3.1 mapping as a
+- [The crosswalk page](https://simonvanlierde.com/codemeta-drift/) shows the CodeMeta 3.1 mapping as a
   searchable table, with a link for each term and the reason a format has no field for it.
 
 ## [0.3.0] - 2026-10-30

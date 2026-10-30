@@ -16,13 +16,12 @@ default:
 # The stack checks CI runs. `just hooks` runs the git hooks, which CI also runs.
 check:
     @just py-check
-    @just site-test
 
 # Fix and format every stack here, as each stack's `fmt` recipe does.
 fmt:
     @just py-fmt
 
-# Test the crosswalk page's table and search logic.
+# Test the crosswalk page's table and search logic (needs Node 20 or later; pages.yml runs it on pull requests).
 site-test:
     node --test site/*.test.mjs
 
