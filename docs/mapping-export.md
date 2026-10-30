@@ -22,7 +22,7 @@ object.
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.1.0"},
   "rows": [
@@ -122,7 +122,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
 1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 2).
 2. Validate the file against the schema it vendors beside it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
-4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2). A row with `path: null` is not missing: the format has no place for that term.
+4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
+   A row with `path: null` is not missing: the format has no place for that term.
 5. Treat two rows for the same (format, term) as an error.
 
 ## Later: SSSOM

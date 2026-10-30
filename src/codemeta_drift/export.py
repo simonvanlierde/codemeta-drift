@@ -16,7 +16,7 @@ from typing import Any
 
 from codemeta_drift.checks import Finding, csv_rows, table_rows
 
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.1"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -37,9 +37,9 @@ TERMS = {
     "keywords": ("schema:CreativeWork", "keywords"),
     "datePublished": ("schema:CreativeWork", "datePublished"),
 }
+"""Each exported term and the property table row (parent type, property) its crosswalk cell sits on."""
 PEOPLE = ("author", "contributor")
 """The terms that hold people; each has the person sub-terms ``<term>.givenName``, ``.familyName`` and ``.@id``."""
-"""Each exported term and the property table row (parent type, property) its crosswalk cell sits on."""
 
 
 @dataclass(frozen=True)
