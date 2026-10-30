@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-30
+
 ### Added
 
 - The export maps `swhid`, the Software Heritage identifier: CFF `identifiers` of type `swh`,
@@ -52,6 +54,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/simonvanlierde/codemeta-drift/releases/tag/v0.1.0
