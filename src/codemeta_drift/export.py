@@ -161,16 +161,21 @@ def build_rows(
             if row:
                 made[term] = row["path"]
                 rows.append(row)
-        findings += shared_paths(spoke.crosswalk or fmt, [r for r in rows if r["format"] == fmt])
+        findings += shared_paths(spoke.crosswalk or fmt, fmt, [r for r in rows if r["format"] == fmt])
     return rows, findings
 
 
-def shared_paths(label: str, rows: list[dict[str, Any]]) -> list[Finding]:
-    """A ``PATH_SHARED`` finding for each two terms whose paths are equal or one holds the other.
+# (format, two terms) whose paths are equal by design: codemeta.json holds the SWHID in identifier, beside the DOI.
+SHARED_ON_PURPOSE = {("codemeta", frozenset({"identifier", "swhid"}))}
+
+
+def shared_paths(label: str, fmt: str, rows: list[dict[str, Any]]) -> list[Finding]:
+    """A ``PATH_SHARED`` finding for each two terms of ``fmt`` whose paths are equal or one holds the other.
 
     A wrong cell that still looks like a path (npm's identifier cell ``name``) mostly names another
-    term's key. Person sub-terms are left out: they sit inside author's path on purpose. So are two
-    terms of one property (identifier and swhid in codemeta): the consumer tells them apart by spelling.
+    term's key. Person sub-terms are left out: they sit inside author's path on purpose. So are the
+    pairs in ``SHARED_ON_PURPOSE``, such as codemeta's identifier and swhid, which the consumer tells
+    apart by spelling. In every other format those two have keys of their own.
     """
     paths = [
         (row["term"], alternative)
@@ -181,7 +186,7 @@ def shared_paths(label: str, rows: list[dict[str, Any]]) -> list[Finding]:
     findings = []
     for i, (term, path) in enumerate(paths):
         for other, other_path in paths[:i]:
-            if TERMS[term] == TERMS[other]:  # one term, or two of one property
+            if term == other or (fmt, frozenset({term, other})) in SHARED_ON_PURPOSE:
                 continue
             a, b = path.replace("[]", ""), other_path.replace("[]", "")
             if a == b or a.startswith(f"{b}.") or b.startswith(f"{a}."):
