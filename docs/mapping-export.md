@@ -50,16 +50,17 @@ Each row:
 
 - `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo` or `npm`. A
   format whose versions differ puts the version in the id.
-- `term` is one of the eight terms `name`, `version`, `author`, `license`, `identifier`,
-  `codeRepository`, `description` and `keywords`, or a person sub-term: `author.givenName`,
-  `author.familyName` and `author.@id` (the ORCID). A sub-term names the term it sits under,
-  because a later `contributor.givenName` would sit somewhere else.
+- `term` is one of the ten terms `name`, `version`, `author`, `contributor`, `license`,
+  `identifier`, `codeRepository`, `description`, `keywords` and `datePublished`, or a person
+  sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
+  sub-term names the term it sits under, because `contributor.givenName` sits somewhere else
+  than `author.givenName`.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
   crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. Only two things are added
   to the cell: `[]` when the format keeps authors in a list (`authors` becomes `authors[]`), and
-  the author path in place of CFF's `person.` (`person.given-names` becomes
+  the author or contributor path in place of CFF's `person.` (`person.given-names` becomes
   `authors[].given-names`). `curated:<reason>` means the row departs from the crosswalk, picks
   one path out of a prose cell, or fills a cell it leaves empty, and says why. An empty cell is
   never read as `null`, because the crosswalks also leave cells empty that the format has.
@@ -73,8 +74,9 @@ A (format, term) pair appears at most once. JSON Schema can't say that, so a con
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
 `zenodo`, `pep621`, `cargo`, `npm`, and within a format in the order `name`, `version`, `author`,
-`author.givenName`, `author.familyName`, `author.@id`, `license`, `identifier`,
-`codeRepository`, `description`, `keywords`. The same inputs give the same bytes, so a consumer
+`author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
+`contributor.familyName`, `contributor.@id`, `license`, `identifier`, `codeRepository`,
+`description`, `keywords`, `datePublished`. The same inputs give the same bytes, so a consumer
 can pin the file's sha256. The header's `generator.version` is one of those inputs: a new
 codemeta-drift release changes the bytes even when no row changes. A consumer must not depend on the row order.
 
@@ -120,8 +122,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
 1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 2).
 2. Validate the file against the schema it vendors beside it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
-4. For each format it reads, a missing row for any of the eight terms is an error (citesync
-   exits 2). A row with `path: null` is not missing: the format has no place for that term.
+4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2). A row with `path: null` is not missing: the format has no place for that term.
 5. Treat two rows for the same (format, term) as an error.
 
 ## Later: SSSOM

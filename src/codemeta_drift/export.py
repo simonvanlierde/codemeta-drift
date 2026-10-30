@@ -26,12 +26,19 @@ TERMS = {
     "author.givenName": ("schema:Person", "givenName"),
     "author.familyName": ("schema:Person", "familyName"),
     "author.@id": ("schema:Person", "identifier"),
+    "contributor": ("schema:CreativeWork", "contributor"),
+    "contributor.givenName": ("schema:Person", "givenName"),
+    "contributor.familyName": ("schema:Person", "familyName"),
+    "contributor.@id": ("schema:Person", "identifier"),
     "license": ("schema:CreativeWork", "license"),
     "identifier": ("schema:Thing", "identifier"),
     "codeRepository": ("schema:SoftwareSourceCode", "codeRepository"),
     "description": ("schema:Thing", "description"),
     "keywords": ("schema:CreativeWork", "keywords"),
+    "datePublished": ("schema:CreativeWork", "datePublished"),
 }
+PEOPLE = ("author", "contributor")
+"""The terms that hold people; each has the person sub-terms ``<term>.givenName``, ``.familyName`` and ``.@id``."""
 """Each exported term and the property table row (parent type, property) its crosswalk cell sits on."""
 
 
@@ -98,8 +105,9 @@ def crosswalk_cells(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str,
 
 
 def identity(term: str) -> str:
-    """codemeta.json's own path for a term: author is a list, its sub-terms sit in each element."""
-    return "author[]" if term == "author" else term.replace("author.", "author[].")
+    """codemeta.json's own path for a term: author and contributor are lists, their sub-terms sit in each element."""
+    parent, dot, rest = term.partition(".")
+    return f"{parent}[]{dot}{rest}" if parent in PEOPLE else term
 
 
 def curated_tags() -> list[str]:
@@ -201,7 +209,7 @@ def make_row(
     if derived is None:
         kind = classify(cell)
         if kind == "path":
-            detail = f"cell {cell.strip()!r} is relative to author, which has no row"
+            detail = f"cell {cell.strip()!r} is relative to {term.partition('.')[0]}, which has no row"
             return None, Finding("CELL_NO_AUTHOR", label, term, detail)
         detail = (
             f"{kind} cell {cell.strip()!r}, and no curated row" if kind == "prose" else "empty cell, no curated row"
@@ -226,12 +234,13 @@ def curated_finding(
 
 
 def derive(spoke: Spoke, term: str, cell: str, made: Mapping[str, str | None]) -> str | None:
-    """The path a cell means for a term, or None when it depends on an author path that is missing."""
-    if term == "author":
+    """The path a cell means for a term, or None when it depends on an author or contributor path that is missing."""
+    parent = term.partition(".")[0]
+    if term in PEOPLE:
         return f"{cell}[]" if spoke.person_list else cell
-    if term.startswith("author.") and spoke.person_prefix is not None and cell.startswith(spoke.person_prefix):
-        author = made.get("author")
-        return f"{author}.{cell.removeprefix(spoke.person_prefix)}" if author else None
+    if parent in PEOPLE and spoke.person_prefix is not None and cell.startswith(spoke.person_prefix):
+        people = made.get(parent)
+        return f"{people}.{cell.removeprefix(spoke.person_prefix)}" if people else None
     return cell
 
 

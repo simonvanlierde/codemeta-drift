@@ -7,6 +7,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The export maps `datePublished` and `contributor`, with the same person sub-terms as
+  `author`. CFF 1.2.0, Cargo.toml and pyproject.toml have no contributor list, so their rows are
+  `null`; Zenodo's need a curated row, because its crosswalk cells are empty.
+
 ## [0.1.0] - 2026-10-29
 
 ### Added
