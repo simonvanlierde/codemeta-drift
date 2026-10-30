@@ -225,7 +225,20 @@ def make_row(
             f"{kind} cell {cell.strip()!r}, and no curated row" if kind == "prose" else "empty cell, no curated row"
         )
         return None, Finding(f"CELL_{kind.upper()}", label, term, detail)
-    return {"format": fmt, "term": term, "path": derived, "source": f"crosswalk:{spoke.crosswalk}@{tag}"}, None
+    row = {"format": fmt, "term": term, "path": derived, "source": f"crosswalk:{spoke.crosswalk}@{tag}"}
+    if note := CROSSWALK_COMMENTS.get((fmt, term)):
+        row["comment"] = note
+    return row, None
+
+
+# Guidance for a row that reads its cell as it is, so it has no curated row to hold a comment.
+CROSSWALK_COMMENTS = {
+    ("cff-1.2.0", "author.familyName"): (
+        "CFF keeps a name particle and suffix apart: the family name is name-particle, family-names and"
+        " name-suffix joined by spaces, so Antonie van Leeuwenhoek has family-names Leeuwenhoek and"
+        " name-particle van, and a family name of van Leeuwenhoek."
+    ),
+}
 
 
 def curated_finding(

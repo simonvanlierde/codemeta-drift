@@ -71,6 +71,12 @@ Each row:
 - `see_also` (optional) is the upstream issue or pull request about the cell the row departs from.
 - `comment` (optional) is a note for people. Never read it in code.
 
+CFF stores a name particle and a name suffix apart from `family-names`, and CodeMeta has only
+`familyName`. A consumer reads the CodeMeta family name from the three joined by spaces:
+`name-particle`, `family-names`, `name-suffix`, each only when present. Antonie van Leeuwenhoek
+(`name-particle: van`, `family-names: Leeuwenhoek`) has the family name `van Leeuwenhoek`, and
+a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says so in its `comment`.
+
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
 

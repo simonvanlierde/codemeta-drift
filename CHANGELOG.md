@@ -9,6 +9,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- The CFF `author.familyName` row's comment says to join `name-particle`, `family-names` and `name-suffix` into the family name, so a consumer keeps "van" in Antonie van Leeuwenhoek. See [the export doc](docs/mapping-export.md#the-file).
 - The export maps `swhid`, the Software Heritage identifier: CFF `identifiers` of type `swh`,
   Zenodo `related_identifiers` with scheme `swh`, and codemeta.json `identifier`, which holds
   the DOI too. See [the term list](docs/mapping-export.md#the-file).
