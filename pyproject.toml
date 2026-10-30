@@ -1,6 +1,6 @@
 [project]
 name = "codemeta-drift"
-version = "0.2.0"
+version = "0.3.0"
 description = "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping"
 readme = "README.md"
 requires-python = ">=3.12"

@@ -7,23 +7,19 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-30
+
 ### Added
 
-- The CFF `author.familyName` row's comment says to join `name-particle`, `family-names` and `name-suffix` into the family name, so a consumer keeps "van" in Antonie van Leeuwenhoek. See [the export doc](docs/mapping-export.md#the-file).
 - The export maps `swhid`, the Software Heritage identifier: CFF `identifiers` of type `swh`,
-  Zenodo `related_identifiers` with scheme `swh`, and codemeta.json `identifier`, which holds
-  the DOI too. See [the term list](docs/mapping-export.md#the-file).
-- The Zenodo `swhid` row's comment says `scheme` is optional in `related_identifiers`, so a
-  consumer also reads an entry with no scheme whose identifier starts `swh:1:` as the SWHID.
+  Zenodo `related_identifiers` with scheme `swh` (or no scheme and a `swh:1:` value), and
+  codemeta.json `identifier`, which holds the DOI too. See [the term list](docs/mapping-export.md#the-file).
+- The CFF `author.familyName` row's comment says to join `name-particle`, `family-names` and
+  `name-suffix` into the family name, so a consumer keeps "van" in Antonie van Leeuwenhoek.
 
 ### Changed
 
 - The export's `schema_version` is 1.2, since it adds a term. A reader of 1.0 or 1.1 reads it unchanged.
-
-### Fixed
-
-- `PATH_SHARED` lets `swhid` share `identifier`'s path only in codemeta.json. A Zenodo or CFF
-  `swhid` row on the DOI's path is reported again. See [the README](README.md#mapping-export).
 
 ## [0.2.0] - 2026-10-30
 
@@ -60,6 +56,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/simonvanlierde/codemeta-drift/releases/tag/v0.1.0
