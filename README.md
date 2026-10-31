@@ -12,7 +12,7 @@ Export reviewed field mappings for citation tools such as
 
 [CodeMeta](https://codemeta.github.io) describes software metadata: authors, licences,
 versions and repository URLs. Its **crosswalks** map fields in other formats to CodeMeta
-terms. For example, CFF's `title` corresponds to CodeMeta's `name`.
+terms. For example, the Citation File Format (CFF) uses `title` where CodeMeta uses `name`.
 
 These files need to agree. In one checked snapshot, the property list replaced `position`
 with `maintainer`, while the crosswalks kept `position`. Joining the tables by row number
@@ -23,7 +23,7 @@ Use it to check the CodeMeta standard's own files. To keep a project's `CITATION
 
 ## Try it
 
-Run it with [uv](https://docs.astral.sh/uv/) against a CodeMeta checkout:
+You need Git and [uv](https://docs.astral.sh/uv/). Check a CodeMeta checkout:
 
 ```sh
 git clone https://github.com/codemeta/codemeta
@@ -34,7 +34,7 @@ uvx codemeta-drift codemeta --ref 4.0
 The first check reads the working tree. `--ref` reads a release, branch or commit.
 To install the command for repeated use, run `uv tool install codemeta-drift`.
 
-Each output line names the check, file, term and problem:
+Each output line names the check, file, term and problem. For example, the 4.0 check reports:
 
 ```text
 EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
@@ -53,8 +53,9 @@ Export the reviewed mappings for CodeMeta 3.1:
 uvx codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
 ```
 
-The export covers CFF, CodeMeta, Zenodo, Python, Cargo and npm metadata. It records where
-fields sit, with a reason for each curated correction. It does not convert field values.
+The export covers CFF, CodeMeta, Zenodo, Python (`pyproject.toml`), Cargo and npm metadata.
+It records the field path for each term, with a reason for each curated correction.
+It does not convert field values.
 The exporter reads the tag's commit and refuses rows it cannot resolve.
 
 Read the [export guide and contract](docs/mapping-export.md), or inspect the
@@ -69,6 +70,8 @@ exported; currently that is `3.1`.
 - [Set up development and run tests](docs/development.md).
 
 ## Development
+
+From a codemeta-drift checkout, with uv and [just](https://just.systems) installed:
 
 ```sh
 uv sync

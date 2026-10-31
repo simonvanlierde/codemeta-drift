@@ -1,8 +1,8 @@
 # Understand the findings
 
 codemeta-drift checks the files that define CodeMeta and its crosswalks. It compares
-terms by name, never by row number. A renamed term appears as one unexpected term and
-one missing term. When several crosswalks share a problem, the report groups them.
+terms by name and checks the row order. A renamed term appears as one unexpected term
+and one missing term. When several crosswalks share a problem, the report groups them.
 
 ## The files it compares
 
@@ -10,10 +10,13 @@ one missing term. When several crosswalks share a problem, the report groups the
 | --- | --- |
 | `codemeta.jsonld` | The vocabulary: every term and the web address that defines it |
 | `codemeta_all.jsonld` | The definitions of CodeMeta's own terms (since 4.0) |
-| `properties_description.csv` | The property list people read, one row per term |
-| `codemeta.json`, `examples/*.json` | Example metadata that should only use defined terms |
+| `properties_description.csv` | The property list, with each term under its parent type |
+| `codemeta.json`, `examples/codemeta.json`, `examples/codemeta-software.json` | Examples checked for undefined terms |
 | `crosswalks/*.csv` | One translation table per format, listing the same terms in the same order |
 | `crosswalk.csv` | All crosswalks combined into one table, which the website shows |
+
+Other example files use a different context or are intentionally invalid, so their terms
+are not checked. The vocabulary and property list are required; a missing file exits 2.
 
 ## Every check
 
@@ -26,9 +29,9 @@ one missing term. When several crosswalks share a problem, the report groups the
 | `DEFINITION_NO_TERM` | A definition for a term the vocabulary doesn't have |
 | `DEFINITION_IRI` | A term whose address differs between the definitions and the vocabulary |
 | `EXAMPLE_NO_TERM` | An example that uses an undefined term |
-| `CROSSWALK_ROWS` | A crosswalk whose terms don't match the property list |
+| `CROSSWALK_ROWS` | Missing, unexpected or reordered terms in a crosswalk |
 | `CROSSWALK_FORMAT` | Two crosswalks for the same format |
-| `AGGREGATE_ROWS` | The combined table's terms don't match the property list |
+| `AGGREGATE_ROWS` | Missing, unexpected or reordered terms in the combined table |
 | `AGGREGATE_FORMAT` | A crosswalk missing from the combined table, or a column with no crosswalk |
 | `SKIPPED` | A file this version doesn't have; the checks that need it don't run, and it doesn't count as a problem |
 
@@ -36,6 +39,12 @@ The checks live in [`checks.py`](../src/codemeta_drift/checks.py). That module u
 the Python standard library, so another repository can include it in its own CI.
 
 ## Read the output
+
+With the [command installed](../README.md#try-it), check the CodeMeta checkout:
+
+```sh
+codemeta-drift codemeta
+```
 
 Each line contains a finding code, file label, term and explanation:
 
@@ -45,7 +54,8 @@ EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codem
 ```
 
 A file label can name a group of files, as in the first line. A finding tells you where
-to investigate; the checker does not decide which vocabulary term should replace another.
+to investigate. Compare the named files before changing a term or mapping.
+These are consistency checks; they do not validate every JSON-LD rule or metadata value.
 
 | Exit code | Meaning |
 | --- | --- |
@@ -78,9 +88,9 @@ The output is one document with these keys:
 }
 ```
 
-`code` and `term` are stable identifiers. `file` is a label, which can describe a group;
-`detail` is text for a person. A minor release may add keys. Removing a key or changing
-its type bumps `version`.
+`code` identifies the check; `term` names the affected property or format. Use these fields
+for filtering. `file` is a label that can describe a group; `detail` is text for a person.
+A minor release may add keys. Removing a key or changing its type bumps `version`.
 
 The command line, exit codes, finding codes and mapping export form the public interface.
 Python modules may change in any 0.x release.

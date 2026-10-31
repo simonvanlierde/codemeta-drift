@@ -1,8 +1,8 @@
 # Findings in the checked CodeMeta snapshots
 
-This is a historical report, not a live status page. The main-branch column refers to
-CodeMeta commit `e62eb75`, checked on 2026-10-13. Run the checker against a current
-checkout to see what remains:
+This is a historical report, not a live status page. The last column refers to
+CodeMeta commit `e62eb75`, checked on 2026-10-13.
+With the [command installed](../README.md#try-it), check a current CodeMeta checkout to see what remains:
 
 ```sh
 codemeta-drift codemeta
@@ -18,15 +18,16 @@ codemeta-drift codemeta
   `embargoDate`, which the vocabulary doesn't have. The vocabulary only has `embargoEndDate`.
 - `funding` and `maintainer` point to different addresses in the definitions and the
   vocabulary.
-- Every crosswalk is missing the same 12 terms, and still has the old `position` row.
+- At `e62eb75`, every crosswalk is missing the same 12 terms and still has the old `position` row.
 - The combined table that the website shows has no column for the GitLab and code.json
   crosswalks.
 
 ## Counts by snapshot
 
-The main column is the dated commit above, not the current branch:
+Counts are finding entries, not affected files. A finding shared by several crosswalks
+counts once. The last column is the dated commit above:
 
-| Check | 3.1 | 4.0 | main |
+| Check | 3.1 | 4.0 | `e62eb75` |
 | --- | --- | --- | --- |
 | `TABLE_NO_TERM` | 0 | 4 | 3 |
 | `TERM_NO_ROW` | 0 | 3 | 3 |

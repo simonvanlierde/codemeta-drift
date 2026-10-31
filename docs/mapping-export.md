@@ -11,7 +11,9 @@ export for CodeMeta 3.1, written by `codemeta-drift export`.
 
 ## Export a mapping
 
-The checkout must contain the selected tag:
+Install the command with `uv tool install codemeta-drift`. The examples use a CodeMeta
+checkout at `codemeta`, as in the [quick start](../README.md#try-it). It must contain
+the selected tag:
 
 ```sh
 codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
@@ -24,12 +26,16 @@ curated file can be exported; currently that is `3.1`. To check a directory name
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
 Other rows use [`curated-3.1.json`](../src/codemeta_drift/curated-3.1.json), which records
 the replacement path and reason. The exporter refuses an unresolved cell, prints the
-findings on standard error and exits 1 without writing output.
+findings on standard error and exits 1 without writing output. A successful export exits 0;
+invalid arguments or unreadable inputs exit 2. Without `--out`, JSON goes to standard output.
 
 | Finding | What to check |
 | --- | --- |
 | `CELL_PROSE`, `CELL_EMPTY`, `CELL_MISSING` | The cell cannot supply a path and has no usable curated row |
+| `CELL_NO_AUTHOR` | A person sub-term has no author or contributor path to extend |
 | `CURATED_STALE` | The cell changed since its curated correction was written |
+| `CURATED_DUPLICATE`, `CURATED_UNUSED` | A curated row is repeated or matches no exported format/term pair |
+| `CURATED_PATH`, `CURATED_REPEATS` | A curated path is invalid or repeats a cell that already supplies it |
 | `PATH_SHARED` | Two terms use equal or nested paths unexpectedly |
 | `CELL_PATH` | Expanding the cell produces an invalid path, such as `authors[][]` |
 
@@ -40,8 +46,11 @@ them by their values.
 
 ## Check paths against JSON Schemas
 
+The bundled schema snapshots are in a codemeta-drift source checkout. From its root,
+use `../codemeta` for a CodeMeta checkout beside it:
+
 ```sh
-codemeta-drift export codemeta --tag 3.1 \
+uv run codemeta-drift export ../codemeta --tag 3.1 \
   --schemas tests/fixtures/schemas --out mapping-3.1.json
 ```
 
@@ -53,14 +62,13 @@ for Zenodo's `.zenodo.json` has not been verified, so those paths are not checke
 A schema can catch a missing key, such as Cargo's `package.keyword`. It cannot tell
 that an existing key means the wrong thing, such as Zenodo's `id` used for a DOI.
 
-## Where, not how
+## Field paths and value conversion
 
-A row says where a value sits: CFF `title` is CodeMeta `name`. It doesn't say how the value is
-spelled. An SPDX id or SPDX URL, an ORCID URL or bare iD, a DOI with or without `https://doi.org/`,
-a person written `"Family, Given"`, a repository URL with `git+` in front: all of that is the
-consumer's job, per (format, term). So is any shape a path can't express, such as Cargo's
-`.workspace = true` inheritance, or npm's `author` and `repository`, which may be a string or an
-object.
+A row identifies the field for a term: CFF `title` corresponds to CodeMeta `name`.
+The consumer handles differences such as SPDX IDs versus URLs, bare versus URL forms of
+ORCIDs and DOIs, person-name strings, and `git+` prefixes on repository URLs. It also
+handles shapes a path cannot express: Cargo workspace inheritance and npm's `author`
+and `repository`, which may be strings or objects.
 
 ## The file
 
@@ -74,9 +82,7 @@ object.
       "format": "cargo",
       "term": "keywords",
       "path": "package.keywords",
-      "source": "curated:the cell says package.keyword; Cargo's key is package.keywords",
-      "see_also": "https://github.com/codemeta/codemeta/issues/...",
-      "comment": "free text"
+      "source": "curated:the cell says package.keyword; Cargo's key is package.keywords"
     }
   ]
 }
@@ -102,14 +108,13 @@ Each row:
   [Software Heritage identifier](https://www.swhid.org/), such as
   `swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505`. CodeMeta has no term of its own for it:
   codemeta.json holds it in `identifier`, beside the DOI, so both codemeta rows have the path
-  `identifier` and the consumer picks each value out by its spelling.
+  `identifier` and the consumer distinguishes them by their identifier syntax.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
-  crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. Only two things are added
-  to the cell: `[]` when the format keeps authors in a list (`authors` becomes `authors[]`), and
-  the author or contributor path in place of CFF's `person.` (`person.given-names` becomes
-  `authors[].given-names`). `curated:<reason>` means the row departs from the crosswalk, picks
+  crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. The exporter expands
+  list and person paths: `authors` becomes `authors[]`, and CFF's `person.given-names`
+  becomes `authors[].given-names`. `curated:<reason>` means the row departs from the crosswalk, picks
   one path out of a prose cell, or fills a cell it leaves empty, and says why. An empty cell is
   never read as `null`, because the crosswalks also leave cells empty that the format has.
 - `see_also` (optional) is the upstream issue or pull request about the cell the row departs from.
@@ -124,7 +129,8 @@ a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says s
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
 
-A (format, term) pair appears at most once. JSON Schema can't say that, so a consumer checks it.
+A (format, term) pair appears at most once. The schema cannot enforce uniqueness by
+those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
 `zenodo`, `pep621`, `cargo`, `npm`, and within a format in the order `name`, `version`, `author`,
@@ -145,9 +151,9 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 | `key[k=v]` | each element of the list under `key` whose `k` equals `v` | `identifiers[type=doi].value` |
 | `a \| b` | `a` if it exists, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
 
-- A key is letters, digits, `_` and `-`, and may start with `@` (`author[].@id`). It can't
-  start with a digit.
-- A filter value is letters, digits, `_`, `.` and `-`.
+- A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
+  Later characters can be ASCII letters, digits, `_` or `-`.
+- A filter value contains ASCII letters, digits, `_`, `.` or `-`.
 - Alternatives are separated by exactly one space, `|`, one space.
 - There are no list indexes (`a[0]`) and no wildcards.
 
