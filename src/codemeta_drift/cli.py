@@ -47,7 +47,12 @@ def is_input(path: str) -> bool:
 
 def read_dir(root: Path) -> dict[str, str]:
     """The input files of a working tree, as path -> text."""
-    return {p.relative_to(root).as_posix(): p.read_text(encoding="utf-8") for g in INPUTS for p in root.glob(g)}
+    return {
+        p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
+        for g in INPUTS
+        for p in root.glob(g)
+        if p.is_file()  # as read_ref, which reads only blobs
+    }
 
 
 def read_ref(root: Path, ref: str) -> dict[str, str]:
