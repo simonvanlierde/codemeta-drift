@@ -12,6 +12,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Preview broken schema paths, new fields and a behind mapping pin with the
   [offline schema watcher](docs/schema-watcher.md). It prints deduplicated issue drafts.
 
+### Changed
+
+- The README now leads with checking and exporting. Finding codes, the dated findings report and contributor instructions have [dedicated guides](README.md#documentation).
+
 ### Fixed
 
 - Schema conformance checks recognize [array references and tuple item schemas](docs/schema-watcher.md).
