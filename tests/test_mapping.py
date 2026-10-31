@@ -88,3 +88,19 @@ def test_example_null_rows():
         | {(f, t) for f in ("cff-1.2.0", "pep621", "cargo") for t in contributor}
         | {(f, "datePublished") for f in ("pep621", "cargo", "npm")}
     )
+
+
+@pytest.mark.parametrize("cell", [False, 42, ["package.keyword"], {}])
+def test_crosswalk_cell_rejects_non_text_values(cell: object):
+    row = {**EXAMPLE["rows"][0], "crosswalk_cell": cell}
+    errors = list(Draft202012Validator(SCHEMA).iter_errors({**EXAMPLE, "rows": [row]}))
+    assert [e.json_path for e in errors] == ["$.rows[0].crosswalk_cell"]
+
+
+def test_original_cell_is_optional_for_older_exports():
+    older = {
+        **EXAMPLE,
+        "schema_version": "1.2",
+        "rows": [{k: v for k, v in row.items() if k != "crosswalk_cell"} for row in EXAMPLE["rows"]],
+    }
+    Draft202012Validator(SCHEMA).validate(older)

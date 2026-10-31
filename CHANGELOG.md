@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Mapping exports include each original crosswalk cell alongside the exported path, so readers can show corrections and empty cells.
+  See the [mapping export contract](docs/mapping-export.md).
+
 ### Changed
 
 - The README now leads with checking and exporting. Finding codes, the dated findings report and contributor instructions have [dedicated guides](README.md#documentation).

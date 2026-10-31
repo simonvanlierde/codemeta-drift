@@ -82,6 +82,33 @@ def test_export_3_1_equals_the_example_in_order():
     assert mapping == EXAMPLE
 
 
+@pytest.mark.parametrize(
+    ("fmt", "term", "expected"),
+    [
+        ("cargo", "name", "package.authors"),
+        ("cff-1.2.0", "author.givenName", "person.given-names"),
+        ("cff-1.2.0", "identifier", "identifiers / person.orcid / doi"),
+        ("cargo", "description", ""),
+        ("pep621", "name", None),
+        ("codemeta", "name", None),
+    ],
+)
+def test_export_keeps_original_crosswalk_cell(fmt: str, term: str, expected: str | None):
+    mapping, findings = export(read_dir(FIXTURE), "3.1")
+    assert findings == []
+    row = next(r for r in mapping["rows"] if (r["format"], r["term"]) == (fmt, term))
+    assert row["crosswalk_cell"] == expected
+
+
+def test_export_keeps_crosswalk_cell_whitespace():
+    files = read_dir(FIXTURE)
+    files[CFF] = files[CFF].replace("name,title\n", "name, title \n")
+    rows, _ = build_rows(files, "3.1", read_curated("3.1"))
+    row = next(r for r in rows if (r["format"], r["term"]) == ("cff-1.2.0", "name"))
+    assert row["crosswalk_cell"] == " title "
+    assert row["path"] == "title"
+
+
 def test_cell_paths_get_list_and_person_prefix():
     rows, _ = build_rows(read_dir(FIXTURE), "3.1", [])
     path = {(r["format"], r["term"]): r["path"] for r in rows}
@@ -195,6 +222,7 @@ def test_curated_row_keeps_see_also_and_comment():
         "term": "name",
         "path": "project.name",
         "source": "curated:x",
+        "crosswalk_cell": None,
         "see_also": "https://a",
         "comment": "c",
     }
