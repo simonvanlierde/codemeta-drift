@@ -22,9 +22,9 @@ request outside what the project sets out to do is closed with a link to this se
 
 ## Set up and check
 
-[Development](../README.md#development) in the README installs the tools, the dependencies
-and the git hooks. `just check` runs the checks CI runs, and `just fmt` fixes and
-formats.
+The [development guide](../docs/development.md) covers tools, dependencies and git hooks.
+`just check` runs lint, types, tests and the dependency audit. `just hooks` runs the
+remaining repository checks. `just fmt` formats the code and applies lint fixes.
 
 ## Write commits and pull requests
 
@@ -51,15 +51,16 @@ formats.
 Every commit in a pull request carries a `Signed-off-by:` line, which says you wrote the
 change or have the right to submit it under this project's license: the
 [Developer Certificate of Origin 1.1](https://developercertificate.org/). `git commit -s`
-adds the line. To add it to commits you already made, run
-`git rebase --signoff upstream/main` (the branch you started from) and force-push the branch.
+adds the line. For an unpushed branch based on `origin/main`,
+`git rebase --signoff origin/main` adds missing sign-offs to its commits.
 
-The `dco` workflow checks every pull request from a fork and fails on a commit without the line. Pull requests from a branch in this repository skip it: pushing that branch already needed write access.
+The `dco` workflow checks pull requests from forks and fails on a commit without a sign-off.
+Pull requests from this repository skip that check because pushing already required write
+access. Every commit still needs a sign-off.
 
 ## Who maintains this
 
-Simon van Lierde maintains codemeta-drift: reviews pull requests, merges them and
-makes releases. The repository belongs to [simonvanlierde](https://github.com/simonvanlierde)
-on GitHub. Only maintainers can merge to `main`. A new maintainer is added by an existing one, by name in this section.
-If no maintainer can continue, the repository is archived with a note in the README,
-and anyone may fork it under its license.
+Simon van Lierde reviews pull requests, merges them and makes releases. The repository
+belongs to [simonvanlierde](https://github.com/simonvanlierde) on GitHub. Only maintainers can merge to `main`. An existing maintainer adds a new
+maintainer by name in this section. If no maintainer can continue, the repository is
+archived with a note in the README. Anyone may fork it under its license.

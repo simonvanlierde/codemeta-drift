@@ -7,16 +7,68 @@ tables, whose cells are prose and sometimes wrong.
 
 The schema is [`src/codemeta_drift/mapping.schema.json`](../src/codemeta_drift/mapping.schema.json)
 (JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) is the
-export for CodeMeta 3.1, written by `codemeta-drift export` (see the README).
+export for CodeMeta 3.1, written by `codemeta-drift export`.
 
-## Where, not how
+## Export a mapping
 
-A row says where a value sits: CFF `title` is CodeMeta `name`. It doesn't say how the value is
-spelled. An SPDX id or SPDX URL, an ORCID URL or bare iD, a DOI with or without `https://doi.org/`,
-a person written `"Family, Given"`, a repository URL with `git+` in front: all of that is the
-consumer's job, per (format, term). So is any shape a path can't express, such as Cargo's
-`.workspace = true` inheritance, or npm's `author` and `repository`, which may be a string or an
-object.
+Install the command with `uv tool install codemeta-drift`. The examples use a CodeMeta
+checkout at `codemeta`, as in the [quick start](../README.md#try-it). It must contain
+the selected tag:
+
+```sh
+codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
+```
+
+The exporter reads the tag's commit, not the working tree. Only tags with a bundled
+curated file can be exported; currently that is `3.1`. To check a directory named
+`export`, write `./export` so the CLI does not treat it as the subcommand.
+
+A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
+Other rows use [`curated-3.1.json`](../src/codemeta_drift/curated-3.1.json), which records
+the replacement path and reason. The exporter refuses an unresolved cell, prints the
+findings on standard error and exits 1 without writing output. A successful export exits 0;
+invalid arguments or unreadable inputs exit 2. Without `--out`, JSON goes to standard output.
+
+| Finding | What to check |
+| --- | --- |
+| `CELL_PROSE`, `CELL_EMPTY`, `CELL_MISSING` | The cell cannot supply a path and has no usable curated row |
+| `CELL_NO_AUTHOR` | A person sub-term has no author or contributor path to extend |
+| `CURATED_STALE` | The cell changed since its curated correction was written |
+| `CURATED_DUPLICATE`, `CURATED_UNUSED` | A curated row is repeated or matches no exported format/term pair |
+| `CURATED_PATH`, `CURATED_REPEATS` | A curated path is invalid or repeats a cell that already supplies it |
+| `PATH_SHARED` | Two terms use equal or nested paths unexpectedly |
+| `CELL_PATH` | Expanding the cell produces an invalid path, such as `authors[][]` |
+
+Cells join to property-table rows by name. When a name occurs under several types,
+such as `identifier` under Thing and Person, the join uses its occurrence order.
+The DOI and SWHID deliberately share CodeMeta's `identifier` path; consumers distinguish
+them by their values.
+
+## Check paths against JSON Schemas
+
+The bundled schema snapshots are in a codemeta-drift source checkout. From its root,
+use `../codemeta` for a CodeMeta checkout beside it:
+
+```sh
+uv run codemeta-drift export ../codemeta --tag 3.1 \
+  --schemas tests/fixtures/schemas --out mapping-3.1.json
+```
+
+`--schemas DIR` adds `PATH_NOT_IN_SCHEMA` findings for paths absent from the format's
+schema. The bundled [schema snapshots and sources](../tests/fixtures/schemas/SOURCES)
+cover CFF 1.2.0, pyproject.toml, package.json and Cargo.toml. A suitable current schema
+for Zenodo's `.zenodo.json` has not been verified, so those paths are not checked.
+
+A schema can catch a missing key, such as Cargo's `package.keyword`. It cannot tell
+that an existing key means the wrong thing, such as Zenodo's `id` used for a DOI.
+
+## Field paths and value conversion
+
+A row identifies the field for a term: CFF `title` corresponds to CodeMeta `name`.
+The consumer handles differences such as SPDX IDs versus URLs, bare versus URL forms of
+ORCIDs and DOIs, person-name strings, and `git+` prefixes on repository URLs. It also
+handles shapes a path cannot express: Cargo workspace inheritance and npm's `author`
+and `repository`, which may be strings or objects.
 
 ## The file
 
@@ -31,9 +83,7 @@ object.
       "term": "keywords",
       "path": "package.keywords",
       "crosswalk_cell": "package.keyword",
-      "source": "curated:the cell says package.keyword; Cargo's key is package.keywords",
-      "see_also": "https://github.com/codemeta/codemeta/issues/...",
-      "comment": "free text"
+      "source": "curated:the cell says package.keyword; Cargo's key is package.keywords"
     }
   ]
 }
@@ -59,14 +109,13 @@ Each row:
   [Software Heritage identifier](https://www.swhid.org/), such as
   `swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505`. CodeMeta has no term of its own for it:
   codemeta.json holds it in `identifier`, beside the DOI, so both codemeta rows have the path
-  `identifier` and the consumer picks each value out by its spelling.
+  `identifier` and the consumer distinguishes them by their identifier syntax.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
-  crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. Only two things are added
-  to the cell: `[]` when the format keeps authors in a list (`authors` becomes `authors[]`), and
-  the author or contributor path in place of CFF's `person.` (`person.given-names` becomes
-  `authors[].given-names`). `curated:<reason>` means the row departs from the crosswalk, picks
+  crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. The exporter expands
+  list and person paths: `authors` becomes `authors[]`, and CFF's `person.given-names`
+  becomes `authors[].given-names`. `curated:<reason>` means the row departs from the crosswalk, picks
   one path out of a prose cell, or fills a cell it leaves empty, and says why. An empty cell is
   never read as `null`, because the crosswalks also leave cells empty that the format has.
 - `crosswalk_cell` (optional, added in schema 1.3) is the original crosswalk cell, before
@@ -86,7 +135,8 @@ a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says s
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
 
-A (format, term) pair appears at most once. JSON Schema can't say that, so a consumer checks it.
+A (format, term) pair appears at most once. The schema cannot enforce uniqueness by
+those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
 `zenodo`, `pep621`, `cargo`, `npm`, and within a format in the order `name`, `version`, `author`,
@@ -107,9 +157,9 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 | `key[k=v]` | each element of the list under `key` whose `k` equals `v` | `identifiers[type=doi].value` |
 | `a \| b` | `a` if it exists, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
 
-- A key is letters, digits, `_` and `-`, and may start with `@` (`author[].@id`). It can't
-  start with a digit.
-- A filter value is letters, digits, `_`, `.` and `-`.
+- A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
+  Later characters can be ASCII letters, digits, `_` or `-`.
+- A filter value contains ASCII letters, digits, `_`, `.` or `-`.
 - Alternatives are separated by exactly one space, `|`, one space.
 - There are no list indexes (`a[0]`) and no wildcards.
 
@@ -141,13 +191,3 @@ They come with a new codemeta tag or a new codemeta-drift release.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
    A row with `path: null` is not missing: the format has no place for that term.
 5. Treat two rows for the same (format, term) as an error.
-
-## Later: SSSOM
-
-The hub will move to [SSSOM](https://mapping-commons.github.io/sssom/) spokes. Each row field
-maps onto one SSSOM column, so the move needs no change to what a row holds: `term` becomes
-`subject_id` (`codemeta:<term>`), `format` and `path` become `object_source` and `object_id`,
-`source` becomes `mapping_justification` (`semapv:ManualMappingCuration`, since both kinds of row
-were checked by a person) with its reason in `comment`, and `see_also` keeps its name.
-`predicate_id` isn't stored yet. Most rows are `skos:exactMatch`; the name sub-terms that point
-at one name string (Zenodo, Cargo, npm, PEP 621) are not, and need their own predicate then.
