@@ -12,10 +12,10 @@ permissions:
 
 concurrency:
   # The event is in the group because a queued run replaces a pending one in its group
-  # whatever cancel-in-progress says, so a push to main must not wait beside the weekly run.
+  # whatever cancel-in-progress says, so a push to main and a manual run must not replace each other.
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   # Only a newer push to the same pull request cancels a run. A push to main must not cancel
-  # the weekly scheduled run, or that week's revision report is lost.
+  # the run already going for the commit before it.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
