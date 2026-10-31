@@ -7,6 +7,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The README now leads with checking and exporting. Finding codes, the dated findings report and contributor instructions have [dedicated guides](README.md#documentation).
+
 ### Fixed
 
 - A `CELL_NO_AUTHOR` finding now says the author or contributor has no path, not no row, which was

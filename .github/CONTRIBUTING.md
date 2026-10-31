@@ -22,8 +22,7 @@ request outside what the project sets out to do is closed with a link to this se
 
 ## Set up and check
 
-[Development](../README.md#development) in the README installs the tools, the dependencies
-and the git hooks. `just check` runs the checks CI runs, and `just fmt` fixes and
+The [development guide](../docs/development.md) covers tools, dependencies and git hooks. `just check` runs the checks CI runs, and `just fmt` fixes and
 formats.
 
 ## Write commits and pull requests

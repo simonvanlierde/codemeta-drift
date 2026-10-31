@@ -7,7 +7,51 @@ tables, whose cells are prose and sometimes wrong.
 
 The schema is [`src/codemeta_drift/mapping.schema.json`](../src/codemeta_drift/mapping.schema.json)
 (JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) is the
-export for CodeMeta 3.1, written by `codemeta-drift export` (see the README).
+export for CodeMeta 3.1, written by `codemeta-drift export`.
+
+## Export a mapping
+
+The checkout must contain the selected tag:
+
+```sh
+codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
+```
+
+The exporter reads the tag's commit, not the working tree. Only tags with a bundled
+curated file can be exported; currently that is `3.1`. To check a directory named
+`export`, write `./export` so the CLI does not treat it as the subcommand.
+
+A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
+Other rows use [`curated-3.1.json`](../src/codemeta_drift/curated-3.1.json), which records
+the replacement path and reason. The exporter refuses an unresolved cell, prints the
+findings on standard error and exits 1 without writing output.
+
+| Finding | What to check |
+| --- | --- |
+| `CELL_PROSE`, `CELL_EMPTY`, `CELL_MISSING` | The cell cannot supply a path and has no usable curated row |
+| `CURATED_STALE` | The cell changed since its curated correction was written |
+| `PATH_SHARED` | Two terms use equal or nested paths unexpectedly |
+| `CELL_PATH` | Expanding the cell produces an invalid path, such as `authors[][]` |
+
+Cells join to property-table rows by name. When a name occurs under several types,
+such as `identifier` under Thing and Person, the join uses its occurrence order.
+The DOI and SWHID deliberately share CodeMeta's `identifier` path; consumers distinguish
+them by their values.
+
+## Check paths against JSON Schemas
+
+```sh
+codemeta-drift export codemeta --tag 3.1 \
+  --schemas tests/fixtures/schemas --out mapping-3.1.json
+```
+
+`--schemas DIR` adds `PATH_NOT_IN_SCHEMA` findings for paths absent from the format's
+schema. The bundled [schema snapshots and sources](../tests/fixtures/schemas/SOURCES)
+cover CFF 1.2.0, pyproject.toml, package.json and Cargo.toml. A suitable current schema
+for Zenodo's `.zenodo.json` has not been verified, so those paths are not checked.
+
+A schema can catch a missing key, such as Cargo's `package.keyword`. It cannot tell
+that an existing key means the wrong thing, such as Zenodo's `id` used for a DOI.
 
 ## Where, not how
 
@@ -24,7 +68,7 @@ object.
 {
   "schema_version": "1.2",
   "codemeta_tag": "3.1",
-  "generator": {"name": "codemeta-drift", "version": "0.2.0"},
+  "generator": {"name": "codemeta-drift", "version": "0.3.0"},
   "rows": [
     {
       "format": "cargo",
@@ -135,13 +179,3 @@ They come with a new codemeta tag or a new codemeta-drift release.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
    A row with `path: null` is not missing: the format has no place for that term.
 5. Treat two rows for the same (format, term) as an error.
-
-## Later: SSSOM
-
-The hub will move to [SSSOM](https://mapping-commons.github.io/sssom/) spokes. Each row field
-maps onto one SSSOM column, so the move needs no change to what a row holds: `term` becomes
-`subject_id` (`codemeta:<term>`), `format` and `path` become `object_source` and `object_id`,
-`source` becomes `mapping_justification` (`semapv:ManualMappingCuration`, since both kinds of row
-were checked by a person) with its reason in `comment`, and `see_also` keeps its name.
-`predicate_id` isn't stored yet. Most rows are `skos:exactMatch`; the name sub-terms that point
-at one name string (Zenodo, Cargo, npm, PEP 621) are not, and need their own predicate then.
