@@ -136,12 +136,12 @@ They come with a new codemeta tag or a new codemeta-drift release.
    A row with `path: null` is not missing: the format has no place for that term.
 5. Treat two rows for the same (format, term) as an error.
 
-## Later: SSSOM
+## SSSOM spokes
 
-The hub will move to [SSSOM](https://mapping-commons.github.io/sssom/) spokes. Each row field
-maps onto one SSSOM column, so the move needs no change to what a row holds: `term` becomes
-`subject_id` (`codemeta:<term>`), `format` and `path` become `object_source` and `object_id`,
-`source` becomes `mapping_justification` (`semapv:ManualMappingCuration`, since both kinds of row
-were checked by a person) with its reason in `comment`, and `see_also` keeps its name.
-`predicate_id` isn't stored yet. Most rows are `skos:exactMatch`; the name sub-terms that point
-at one name string (Zenodo, Cargo, npm, PEP 621) are not, and need their own predicate then.
+The [crosswalk hub](crosswalk-hub.md) exports SSSOM 1.0 TSV spokes from this JSON file.
+The JSON contract stays unchanged. The spokes use `skos:relatedMatch`, because these
+paths identify corresponding fields without proving that their values or meanings match.
+
+The hub uses its own term namespace for person sub-terms and `swhid`. It does not invent
+CodeMeta vocabulary terms for them. Both crosswalk and curated rows retain
+`semapv:ManualMappingCuration` with their source reason in `comment`.

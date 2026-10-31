@@ -166,6 +166,11 @@ their sources. Zenodo has no current published schema for `.zenodo.json`, so its
 checked. On the raw 3.1 crosswalk the check finds Cargo's `package.keyword`. It can't find a
 path that exists but means something else, such as Zenodo's `identifier` cell `id`.
 
+## Crosswalk hub
+
+Derive field correspondences between two formats or write seven SSSOM spokes with
+[`codemeta-drift hub`](docs/crosswalk-hub.md). Values still need each format's parser and normalization.
+
 ## Development
 
 You need [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and

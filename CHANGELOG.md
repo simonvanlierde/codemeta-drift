@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Find corresponding fields in two formats and export seven SSSOM spokes with the
+  [crosswalk hub](docs/crosswalk-hub.md). The Go spoke relates a module path to the repository field.
+
 ### Fixed
 
 - A `CELL_NO_AUTHOR` finding now says the author or contributor has no path, not no row, which was
