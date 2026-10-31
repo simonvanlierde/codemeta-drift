@@ -11,6 +11,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Find corresponding fields in two formats and export seven SSSOM spokes with the
   [crosswalk hub](docs/crosswalk-hub.md). The Go spoke relates a module path to the repository field.
+- Preview broken schema paths, new fields and a behind mapping pin with the
+  [offline schema watcher](docs/schema-watcher.md). It prints deduplicated issue drafts.
+- Mapping exports include each original crosswalk cell alongside the exported path, so readers can show corrections and empty cells.
+  See the [mapping export contract](docs/mapping-export.md).
 
 ### Changed
 
@@ -18,6 +22,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Schema conformance checks recognize [array references and tuple item schemas](docs/schema-watcher.md).
 - A `CELL_NO_AUTHOR` finding now says the author or contributor has no path, not no row, which was
   wrong when its curated row has a null path, as CFF's contributor row does.
 - `export` refuses a crosswalk cell that already reads as a list, such as `authors[]`, with a `CELL_PATH` finding, instead of

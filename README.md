@@ -74,6 +74,12 @@ exported; currently that is `3.1`.
 Derive field correspondences between two formats or write seven SSSOM spokes with
 [`codemeta-drift hub`](docs/crosswalk-hub.md). Values still need each format's parser and normalization.
 
+## Schema watcher
+
+Compare downloaded schemas and prepare issue drafts with the
+[schema watcher](docs/schema-watcher.md). The weekly workflow polls public sources and
+also checks citesync's mapping pin. Publishing requires a configured token.
+
 ## Development
 
 From a codemeta-drift checkout, with uv and [just](https://just.systems) installed:
