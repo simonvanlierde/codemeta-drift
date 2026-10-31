@@ -22,6 +22,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- SSSOM exports use distinct field and format URI prefixes so reference readers can load them.
+  See the [validation and compatibility guide](docs/sssom-compatibility.md).
 - Schema conformance checks recognize [array references and tuple item schemas](docs/schema-watcher.md).
 - A `CELL_NO_AUTHOR` finding now says the author or contributor has no path, not no row, which was
   wrong when its curated row has a null path, as CFF's contributor row does.
