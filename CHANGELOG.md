@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Mapping exports include each original crosswalk cell alongside the exported path, so readers can show corrections and empty cells.
+  See the [mapping export contract](docs/mapping-export.md).
+
 ### Fixed
 
 - A `CELL_NO_AUTHOR` finding now says the author or contributor has no path, not no row, which was
