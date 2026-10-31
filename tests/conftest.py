@@ -9,11 +9,24 @@ import pytest
 FIXTURES = Path(__file__).parent / "fixtures"
 
 # The user's and the system's git config can add hooks or identity rules that reject the test commits.
-HERMETIC_GIT = {**os.environ, "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"}
+# A git hook exports GIT_DIR, GIT_INDEX_FILE and the like, which would point the test commands at the
+# outer repository, so drop every GIT_ variable.
+HERMETIC_GIT = {
+    **{k: v for k, v in os.environ.items() if not k.startswith("GIT_")},
+    "GIT_CONFIG_GLOBAL": os.devnull,
+    "GIT_CONFIG_NOSYSTEM": "1",
+}
 
 
 def git(root: Path, *args: str) -> None:
     subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True, env=HERMETIC_GIT)
+
+
+@pytest.fixture(autouse=True)
+def no_git_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Drop the GIT_ variables for the code under test too, which runs git itself."""
+    for key in [k for k in os.environ if k.startswith("GIT_")]:
+        monkeypatch.delenv(key)
 
 
 @pytest.fixture

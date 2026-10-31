@@ -270,10 +270,21 @@ def test_cli_export_reads_the_tag_and_writes_the_example(repo: Path, tmp_path: P
     assert out.read_bytes() == EXAMPLE_FILE.read_bytes()
 
 
-def test_cli_export_without_the_tag_exits_2(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+@pytest.mark.parametrize(
+    ("case", "why"), [("not-a-repo", "not a git repository"), ("repo-without-tag", "Needed a single revision")]
+)
+def test_cli_export_without_the_tag_exits_2(
+    case: str, why: str, tmp_path: Path, git: Callable[..., None], capsys: pytest.CaptureFixture[str]
+):
     shutil.copytree(FIXTURE, tmp_path, dirs_exist_ok=True)
+    if case == "repo-without-tag":
+        git(tmp_path, "init", "-q")
+        git(tmp_path, "add", "-A")
+        git(tmp_path, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "3.1")
     assert main(["export", str(tmp_path), "--tag", "3.1"]) == 2
-    assert capsys.readouterr().err.startswith(f"codemeta-drift: cannot read {tmp_path} at tag 3.1: fatal:")
+    err = capsys.readouterr().err
+    assert err.startswith(f"codemeta-drift: cannot read {tmp_path} at tag 3.1: fatal:")
+    assert why in err
 
 
 def test_cli_export_lists_refused_cells(tagged: Callable, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
