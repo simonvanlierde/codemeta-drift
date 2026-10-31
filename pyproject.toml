@@ -82,7 +82,8 @@ max-args = 10
 error-on-warning = false
 
 [tool.pytest.ini_options]
-addopts = ["-ra", "--strict-config", "--strict-markers", "--import-mode=importlib"]
+addopts = ["-ra", "--strict-config", "--strict-markers", "--import-mode=importlib", "-m", "not live"]
+markers = ["live: read-only contract checks against public schema sources"]
 testpaths = ["tests"]
 
 # Coverage is opt-in via `pytest --cov` (`just py-cov`), not addopts, because it

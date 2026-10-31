@@ -166,6 +166,12 @@ their sources. Zenodo has no current published schema for `.zenodo.json`, so its
 checked. On the raw 3.1 crosswalk the check finds Cargo's `package.keyword`. It can't find a
 path that exists but means something else, such as Zenodo's `identifier` cell `id`.
 
+## Schema watcher
+
+Compare downloaded schemas and prepare issue drafts with the
+[schema watcher](docs/schema-watcher.md). The weekly workflow polls public sources and
+also checks citesync's mapping pin. Publishing requires a configured token.
+
 ## Development
 
 You need [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and

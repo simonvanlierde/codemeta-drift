@@ -3,7 +3,7 @@
 A step resolves when the schema in reach has the key under ``properties``, a matching
 ``patternProperties`` entry, or an ``additionalProperties`` schema. Local ``$ref``s are followed,
 and a key found in any branch of ``allOf``, ``anyOf`` or ``oneOf`` counts. ``key[]`` and
-``key[k=v]`` need the value to be a list (``items``); a filter needs ``k`` in the item schema.
+``key[k=v]`` need item schemas (``items`` or ``prefixItems``); a filter needs ``k`` in an item schema.
 An external ``$ref`` is not followed, so a key only reachable through one does not resolve.
 """
 
@@ -34,10 +34,16 @@ def branches(root: Schema, node: object, seen: frozenset[int] = frozenset()) -> 
     seen |= {id(node)}
     yield node
     ref = node.get("$ref")
-    if isinstance(ref, str) and ref.startswith("#"):
+    if isinstance(ref, str) and (ref == "#" or ref.startswith("#/")):
         target: Any = root
-        for part in filter(None, ref[1:].split("/")):
-            target = target.get(part.replace("~1", "/").replace("~0", "~"), {}) if isinstance(target, dict) else {}
+        for token in ref[1:].split("/")[1:]:
+            part = token.replace("~1", "/").replace("~0", "~")
+            if isinstance(target, dict):
+                target = target.get(part, {})
+            elif isinstance(target, list) and re.fullmatch(r"0|[1-9][0-9]*", part) and int(part) < len(target):
+                target = target[int(part)]
+            else:
+                target = {}
         yield from branches(root, target, seen)
     for combinator in ("allOf", "anyOf", "oneOf"):
         for sub in node.get(combinator, ()):
@@ -55,6 +61,16 @@ def child(node: Schema, key: str) -> object:
     return extra if isinstance(extra, dict) else None
 
 
+def array_items(node: Schema) -> Iterator[Schema]:
+    """Item schemas for homogeneous arrays and both draft-07 and modern tuple arrays."""
+    for key in ("items", "prefixItems"):
+        value = node.get(key)
+        if isinstance(value, dict):
+            yield value
+        elif isinstance(value, list):
+            yield from (item for item in value if isinstance(item, dict))
+
+
 def resolve(root: Schema, path: str) -> str | None:
     """Why one path alternative (no `` | ``) is not in the schema, or None when every step resolves."""
     if " | " in path or not PATH.fullmatch(path):
@@ -62,11 +78,11 @@ def resolve(root: Schema, path: str) -> str | None:
     nodes: list[object] = [root]
     for match in STEP.finditer(path):
         key, selector = match["key"], match[0][len(match["key"]) :]
-        found = [c for n in nodes for b in branches(root, n) if (c := child(b, key)) is not None]
+        found: list[object] = [c for n in nodes for b in branches(root, n) if (c := child(b, key)) is not None]
         if not found:
             return f"no {key!r}"
         if selector:
-            found = [b["items"] for n in found for b in branches(root, n) if isinstance(b.get("items"), dict)]
+            found = [item for n in found for b in branches(root, n) for item in array_items(b)]
             if not found:
                 return f"{key!r} is not a list"
             if (k := match["filter"]) and not any(child(b, k) is not None for n in found for b in branches(root, n)):
