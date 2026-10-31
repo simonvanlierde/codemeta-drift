@@ -74,7 +74,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.3.0"},
   "rows": [
@@ -82,6 +82,7 @@ and `repository`, which may be strings or objects.
       "format": "cargo",
       "term": "keywords",
       "path": "package.keywords",
+      "crosswalk_cell": "package.keyword",
       "source": "curated:the cell says package.keyword; Cargo's key is package.keywords"
     }
   ]
@@ -117,6 +118,11 @@ Each row:
   becomes `authors[].given-names`. `curated:<reason>` means the row departs from the crosswalk, picks
   one path out of a prose cell, or fills a cell it leaves empty, and says why. An empty cell is
   never read as `null`, because the crosswalks also leave cells empty that the format has.
+- `crosswalk_cell` (optional, added in schema 1.3) is the original crosswalk cell, before
+  trimming whitespace or expanding a relative path. `""` means the joined cell was empty;
+  `null` means no cell could be joined, including formats without an upstream crosswalk.
+  New exports emit it on every row. An older export without this field does not supply the
+  original cell; a consumer must not infer it from `path` or `source`.
 - `see_also` (optional) is the upstream issue or pull request about the cell the row departs from.
 - `comment` (optional) is a note for people. Never read it in code.
 

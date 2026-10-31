@@ -11,6 +11,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Preview broken schema paths, new fields and a behind mapping pin with the
   [offline schema watcher](docs/schema-watcher.md). It prints deduplicated issue drafts.
+- Mapping exports include each original crosswalk cell alongside the exported path, so readers can show corrections and empty cells.
+  See the [mapping export contract](docs/mapping-export.md).
 
 ### Changed
 

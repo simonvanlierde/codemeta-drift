@@ -16,7 +16,7 @@ from typing import Any
 
 from codemeta_drift.checks import Finding, csv_rows, table_rows
 
-SCHEMA_VERSION = "1.2"
+SCHEMA_VERSION = "1.3"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -159,6 +159,7 @@ def build_rows(
             if finding:
                 findings.append(finding)
             if row:
+                row["crosswalk_cell"] = cells.get(key)
                 made[term] = row["path"]
                 rows.append(row)
         findings += shared_paths(spoke.crosswalk or fmt, fmt, [r for r in rows if r["format"] == fmt])
