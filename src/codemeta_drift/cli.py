@@ -130,15 +130,62 @@ def export_main(argv: list[str]) -> int:
     return 0
 
 
+def watch_main(argv: list[str]) -> int:
+    """Compare downloaded schemas and print issue drafts, without opening issues."""
+    from codemeta_drift.watcher import issue_plans, schema_changes  # noqa: PLC0415 - only watch needs this
+
+    parser = argparse.ArgumentParser(prog="codemeta-drift watch", description="Preview schema and pin issues offline.")
+    parser.add_argument("checkout", type=Path)
+    parser.add_argument("--tag", required=True, help="CodeMeta tag used for the curated export")
+    parser.add_argument("--before", required=True, type=Path, help="previous schema directory")
+    parser.add_argument("--after", required=True, type=Path, help="new schema directory")
+    parser.add_argument("--citesync-source", required=True, type=Path, help="citesync's MAPPING_SOURCE file")
+    parser.add_argument("--latest", required=True, help="latest stable codemeta-drift release tag")
+    parser.add_argument(
+        "--existing", required=True, type=Path, help="JSON list of all issue titles, including closed issues"
+    )
+    args = parser.parse_args(argv)
+    try:
+        mapping, findings = export(read_ref(args.checkout, f"refs/tags/{args.tag}"), args.tag)
+        if findings:
+            print("\n".join(map(str, findings)), file=sys.stderr)
+            return 1
+        snapshots = [
+            {fmt: json.loads((directory / name).read_text("utf-8")) for fmt, name in SCHEMA_FILES.items()}
+            for directory in (args.before, args.after)
+        ]
+        pins = [
+            line.split()[1] for line in args.citesync_source.read_text("utf-8").splitlines() if line.startswith("tag ")
+        ]
+        if len(pins) != 1:
+            msg = "MAPPING_SOURCE must contain exactly one tag line"
+            raise ValueError(msg)  # noqa: TRY301 - report malformed input with read errors
+        existing = json.loads(args.existing.read_text("utf-8"))
+        if not isinstance(existing, list) or any(not isinstance(title, str) for title in existing):
+            msg = "existing issues must be a JSON list of titles"
+            raise ValueError(msg)  # noqa: TRY301 - report malformed input with read errors
+        changes = schema_changes(mapping["rows"], *snapshots)
+        print(json.dumps(issue_plans(changes, pins[0], args.latest, set(existing)), indent=2))
+    except subprocess.CalledProcessError as err:
+        print(f"codemeta-drift: {err.stderr.decode().strip()}", file=sys.stderr)
+        return 2
+    except (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError) as err:
+        print(f"codemeta-drift: {type(err).__name__}: {err}", file=sys.stderr)
+        return 2
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     """Run every check on one snapshot and print the findings, or run a subcommand."""
     argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["watch"]:
+        return watch_main(argv[1:])
     if argv[:1] == ["export"]:
         return export_main(argv[1:])
     parser = argparse.ArgumentParser(
         prog="codemeta-drift",
         description="Report where CodeMeta's files disagree.",
-        epilog="codemeta-drift export --help describes the mapping export.",
+        epilog="codemeta-drift export --help for mapping JSON; codemeta-drift watch --help for schema comparison.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {metadata.version('codemeta-drift')}")
     parser.add_argument("checkout", type=Path, help="root of a codemeta clone")

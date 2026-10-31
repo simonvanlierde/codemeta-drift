@@ -100,3 +100,42 @@ TOY = {
 )
 def test_resolve_follows_refs_and_combinators(path: str, why: str | None):
     assert resolve(TOY, path) == why
+
+
+def test_local_ref_can_index_a_schema_array():
+    schema = {
+        "allOf": [{"properties": {"hidden": {"type": "string"}}}],
+        "properties": {"project": {"$ref": "#/allOf/0"}},
+    }
+    assert resolve(schema, "project.hidden") is None
+
+
+@pytest.mark.parametrize("ref", ["#/$defs/a~1b~0c", "#/$defs/"])
+def test_local_ref_preserves_escaped_and_empty_tokens(ref: str):
+    schema = {
+        "$defs": {"a/b~c": {"properties": {"name": {}}}, "": {"properties": {"name": {}}}},
+        "properties": {"project": {"$ref": ref}},
+    }
+    assert resolve(schema, "project.name") is None
+
+
+@pytest.mark.parametrize("index", ["01", "-1", "1", "8", "-"])
+def test_invalid_array_ref_does_not_resolve(index: str):
+    schema = {"allOf": [{"properties": {"name": {}}}], "properties": {"project": {"$ref": f"#/allOf/{index}"}}}
+    assert resolve(schema, "project.name") == "no 'name'"
+
+
+def test_unsupported_local_anchor_does_not_resolve_as_root():
+    schema = {"properties": {"name": {}, "project": {"$ref": "#not-a-pointer"}}}
+    assert resolve(schema, "project.name") == "no 'name'"
+
+
+@pytest.mark.parametrize("key", ["items", "prefixItems"])
+def test_tuple_array_schemas_resolve(key: str):
+    schema = {"properties": {"authors": {"type": "array", key: [{"properties": {"name": {}}}]}}}
+    assert resolve(schema, "authors[].name") is None
+
+
+def test_local_ref_can_point_to_root():
+    schema = {"properties": {"name": {}, "project": {"$ref": "#"}}}
+    assert resolve(schema, "project.name") is None
