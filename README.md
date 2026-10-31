@@ -69,6 +69,11 @@ exported; currently that is `3.1`.
 - [Export mappings and validate paths against schemas](docs/mapping-export.md).
 - [Set up development and run tests](docs/development.md).
 
+## Crosswalk hub
+
+Derive field correspondences between two formats or write seven SSSOM spokes with
+[`codemeta-drift hub`](docs/crosswalk-hub.md). Values still need each format's parser and normalization.
+
 ## Schema watcher
 
 Compare downloaded schemas and prepare issue drafts with the

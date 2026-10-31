@@ -191,3 +191,13 @@ They come with a new codemeta tag or a new codemeta-drift release.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
    A row with `path: null` is not missing: the format has no place for that term.
 5. Treat two rows for the same (format, term) as an error.
+
+## SSSOM spokes
+
+The [crosswalk hub](crosswalk-hub.md) exports SSSOM 1.0 TSV spokes from this JSON file.
+The JSON contract stays unchanged. The spokes use `skos:relatedMatch`, because these
+paths identify corresponding fields without proving that their values or meanings match.
+
+The hub uses its own term namespace for person sub-terms and `swhid`. It does not invent
+CodeMeta vocabulary terms for them. Both crosswalk and curated rows retain
+`semapv:ManualMappingCuration` with their source reason in `comment`.

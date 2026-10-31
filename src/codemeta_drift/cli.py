@@ -130,6 +130,41 @@ def export_main(argv: list[str]) -> int:
     return 0
 
 
+def hub_main(argv: list[str]) -> int:
+    """Write SSSOM spokes or field correspondences between two formats."""
+    from codemeta_drift.hub import crosswalk, pair_rows, sssom, table  # noqa: PLC0415 - only the hub command needs this
+
+    parser = argparse.ArgumentParser(prog="codemeta-drift hub", description="Join curated field correspondences.")
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name in ("pair", "sssom", "crosswalk"):
+        command = commands.add_parser(name)
+        command.add_argument("mapping", type=Path, help="a mapping JSON export")
+        command.add_argument("--out", type=Path, help="write here instead of standard output")
+        if name == "crosswalk":
+            command.add_argument("checkout", type=Path, help="checkout with the property table to preserve")
+            command.add_argument("--format", required=True, help="format id for the crosswalk column")
+        if name == "pair":
+            command.add_argument("--from", dest="source", required=True, help="source format id")
+            command.add_argument("--to", dest="target", required=True, help="target format id")
+    args = parser.parse_args(argv)
+    try:
+        mapping = json.loads(args.mapping.read_text("utf-8"))
+        if args.command == "crosswalk":
+            text = crosswalk(mapping, {TABLE: (args.checkout / TABLE).read_text("utf-8")}, args.format)
+        elif args.command == "sssom":
+            text = sssom(mapping)
+        else:
+            text = table(pair_rows(mapping, args.source, args.target), ["term", "source", "target"])
+        if args.out:
+            args.out.write_text(text, encoding="utf-8")
+        else:
+            print(text, end="")
+    except (OSError, ValueError) as err:
+        print(f"codemeta-drift: {err}", file=sys.stderr)
+        return 2
+    return 0
+
+
 def watch_main(argv: list[str]) -> int:
     """Compare downloaded schemas and print issue drafts, without opening issues."""
     from codemeta_drift.watcher import issue_plans, schema_changes  # noqa: PLC0415 - only watch needs this
@@ -178,14 +213,17 @@ def watch_main(argv: list[str]) -> int:
 def main(argv: list[str] | None = None) -> int:
     """Run every check on one snapshot and print the findings, or run a subcommand."""
     argv = sys.argv[1:] if argv is None else argv
-    if argv[:1] == ["watch"]:
-        return watch_main(argv[1:])
-    if argv[:1] == ["export"]:
-        return export_main(argv[1:])
+    commands = {"hub": hub_main, "watch": watch_main, "export": export_main}
+    if argv and argv[0] in commands:
+        return commands[argv[0]](argv[1:])
     parser = argparse.ArgumentParser(
         prog="codemeta-drift",
         description="Report where CodeMeta's files disagree.",
-        epilog="codemeta-drift export --help for mapping JSON; codemeta-drift watch --help for schema comparison.",
+        epilog=(
+            "codemeta-drift export --help for mapping JSON; "
+            "codemeta-drift hub --help for crosswalks and SSSOM; "
+            "codemeta-drift watch --help for schema comparison."
+        ),
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {metadata.version('codemeta-drift')}")
     parser.add_argument("checkout", type=Path, help="root of a codemeta clone")
