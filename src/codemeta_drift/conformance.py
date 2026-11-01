@@ -12,7 +12,7 @@ from collections.abc import Iterator, Mapping
 from typing import Any
 
 from codemeta_drift.checks import Finding
-from codemeta_drift.export import PATH
+from codemeta_drift.paths import parse
 
 SCHEMA_FILES = {
     "cff-1.2.0": "cff-1.2.0.json",
@@ -22,8 +22,6 @@ SCHEMA_FILES = {
     "zenodo": "zenodo.json",
 }
 """The schema file for each format that has one. Zenodo uses a verified structural subset; codemeta is not checked."""
-
-STEP = re.compile(r"(?P<key>@?[\w-][\w@-]*)(?:\[(?:(?P<filter>@?[\w-][\w@-]*)=[^\]]+)?\])?")
 
 type Schema = dict[str, Any]
 
@@ -74,19 +72,20 @@ def array_items(node: Schema) -> Iterator[Schema]:
 
 def resolve(root: Schema, path: str) -> str | None:
     """Why one path alternative (no `` | ``) is not in the schema, or None when every step resolves."""
-    if " | " in path or not PATH.fullmatch(path):
+    try:
+        (steps,) = parse(path)
+    except ValueError:  # not a path, or several alternatives
         return "not a path"
     nodes: list[object] = [root]
-    for match in STEP.finditer(path):
-        key, selector = match["key"], match[0][len(match["key"]) :]
+    for key, is_list, k, _ in steps:
         found: list[object] = [c for n in nodes for b in branches(root, n) if (c := child(b, key)) is not None]
         if not found:
             return f"no {key!r}"
-        if selector:
+        if is_list:
             found = [item for n in found for b in branches(root, n) for item in array_items(b)]
             if not found:
                 return f"{key!r} is not a list"
-            if (k := match["filter"]) and not any(child(b, k) is not None for n in found for b in branches(root, n)):
+            if k and not any(child(b, k) is not None for n in found for b in branches(root, n)):
                 return f"items of {key!r} have no {k!r}"
         nodes = found
     return None

@@ -5,8 +5,9 @@ from pathlib import Path
 import pytest
 
 from codemeta_drift.cli import read_dir
-from codemeta_drift.conformance import SCHEMA_FILES, STEP, conform, resolve
+from codemeta_drift.conformance import SCHEMA_FILES, conform, resolve
 from codemeta_drift.export import build_rows
+from codemeta_drift.paths import parse
 
 FIXTURES = Path(__file__).parent / "fixtures"
 SCHEMAS = {f: json.loads((FIXTURES / "schemas" / name).read_text()) for f, name in SCHEMA_FILES.items()}
@@ -153,4 +154,4 @@ def test_zenodo_path_coverage_includes_current_github_metadata():
 
 
 def test_a_key_may_contain_at_as_the_export_grammar_allows():
-    assert [m["key"] for m in STEP.finditer("Authors@R[role=aut].given")] == ["Authors@R", "given"]
+    assert [step.key for step in parse("Authors@R[role=aut].given")[0]] == ["Authors@R", "given"]

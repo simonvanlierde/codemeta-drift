@@ -22,6 +22,11 @@ def test_renamed_field_names_broken_and_new_paths(schemas: dict):
     ]
 
 
+def test_a_row_outside_the_grammar_is_reported_not_raised(schemas: dict):
+    changes = schema_changes([{"format": "pep621", "term": "name", "path": "project name"}], schemas, schemas)
+    assert changes == [{"format": "pep621", "kind": "broken", "path": "project name", "detail": "not a path"}]
+
+
 def test_unchanged_schema_does_not_report_existing_unmapped_fields(schemas: dict):
     assert schema_changes([], schemas, schemas) == []
 
