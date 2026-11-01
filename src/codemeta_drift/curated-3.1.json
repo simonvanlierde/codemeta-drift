@@ -405,21 +405,24 @@
       "term": "author",
       "path": "Author | Author-email",
       "cell": "Author",
-      "reason": "the cell says Author; packaging tools write an author who has an email to Author-email as 'Name <email>', and only a name-only author to Author"
+      "reason": "the cell says Author; packaging tools write an author who has an email to Author-email as 'Name <email>', and only a name-only author to Author",
+      "comment": "A project with authors of both kinds fills both fields: read Author and Author-email, not only the first that exists."
     },
     {
       "format": "pkg-info",
       "term": "author.givenName",
       "path": "Author | Author-email",
       "cell": "",
-      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
+      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email",
+      "comment": "A project with authors of both kinds fills both fields: read Author and Author-email, not only the first that exists."
     },
     {
       "format": "pkg-info",
       "term": "author.familyName",
       "path": "Author | Author-email",
       "cell": "",
-      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
+      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email",
+      "comment": "A project with authors of both kinds fills both fields: read Author and Author-email, not only the first that exists."
     },
     {
       "format": "pkg-info",
@@ -480,9 +483,10 @@
     {
       "format": "pkg-info",
       "term": "codeRepository",
-      "path": "Project-URL[label=Source] | Project-URL[label=Repository] | Home-page",
+      "path": "Project-URL[label=source] | Project-URL[label=repository] | Project-URL[label=sourcecode] | Project-URL[label=github] | Home-page",
       "cell": "",
-      "reason": "no cell; the repository is the Project-URL labelled Source or Repository, as in pyproject.toml's project.urls, else Home-page"
+      "reason": "no cell; the repository is the Project-URL whose label is source or one of its aliases, else the deprecated Home-page",
+      "comment": "Compare labels after normalising them as the well-known project URLs spec says: lower case, no punctuation or whitespace, so 'Source Code' matches sourcecode."
     },
     {
       "format": "pkg-info",
@@ -500,59 +504,74 @@
     },
     {
       "format": "r-description",
+      "term": "name",
+      "path": "Package",
+      "cell": "Title",
+      "reason": "the cell says Title, a short description of the package; the package's name is Package"
+    },
+    {
+      "format": "r-description",
       "term": "author",
       "path": "Authors@R[role=aut]",
       "cell": "[aut] in Author",
-      "reason": "the cell says [aut] in Author, prose about the free-text Author field; R builds that from Authors@R, whose person() entries with role aut are the authors"
+      "reason": "the cell says [aut] in Author, prose about the free-text Author field; R builds that from Authors@R, whose person() entries with role aut are the authors",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include aut. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
       "term": "author.givenName",
       "path": "Authors@R[role=aut].given",
       "cell": "givenName",
-      "reason": "the cell says givenName, a CodeMeta term; a person() entry keeps the given name in given"
+      "reason": "the cell says givenName, a CodeMeta term; a person() entry keeps the given name in given",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include aut. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
       "term": "author.familyName",
       "path": "Authors@R[role=aut].family",
       "cell": "familyName",
-      "reason": "the cell says familyName, a CodeMeta term; a person() entry keeps the family name in family"
+      "reason": "the cell says familyName, a CodeMeta term; a person() entry keeps the family name in family",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include aut. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
       "term": "author.@id",
       "path": "Authors@R[role=aut].comment.ORCID",
       "cell": "",
-      "reason": "no cell; a person() entry keeps an ORCID iD as comment = c(ORCID = ...)"
+      "reason": "no cell; a person() entry keeps an ORCID iD as comment = c(ORCID = ...)",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include aut. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
       "term": "contributor",
       "path": "Authors@R[role=ctb]",
       "cell": "[ctb] in Author",
-      "reason": "the cell says [ctb] in Author, prose about the free-text Author field; the person() entries in Authors@R with role ctb are the contributors"
+      "reason": "the cell says [ctb] in Author, prose about the free-text Author field; the person() entries in Authors@R with role ctb are the contributors",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include ctb. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
       "term": "contributor.givenName",
       "path": "Authors@R[role=ctb].given",
       "cell": "givenName",
-      "reason": "the cell says givenName, a CodeMeta term; a person() entry keeps the given name in given"
+      "reason": "the cell says givenName, a CodeMeta term; a person() entry keeps the given name in given",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include ctb. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
       "term": "contributor.familyName",
       "path": "Authors@R[role=ctb].family",
       "cell": "familyName",
-      "reason": "the cell says familyName, a CodeMeta term; a person() entry keeps the family name in family"
+      "reason": "the cell says familyName, a CodeMeta term; a person() entry keeps the family name in family",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include ctb. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
       "term": "contributor.@id",
       "path": "Authors@R[role=ctb].comment.ORCID",
       "cell": "",
-      "reason": "no cell; a person() entry keeps an ORCID iD as comment = c(ORCID = ...)"
+      "reason": "no cell; a person() entry keeps an ORCID iD as comment = c(ORCID = ...)",
+      "comment": "role is often a vector such as c(\"aut\", \"cre\"): match an entry whose roles include ctb. A package without Authors@R has only the free-text Author field."
     },
     {
       "format": "r-description",
@@ -594,14 +613,16 @@
       "term": "author.givenName",
       "path": "authors[].given-names",
       "cell": "",
-      "reason": "no cell; an author table uses CFF's keys, so the given name is given-names"
+      "reason": "no cell; an author table uses CFF's keys, so the given name is given-names",
+      "comment": "An author may also be a plain 'Name' or 'Name <email>' string; then both name sub-terms come from that string."
     },
     {
       "format": "julia",
       "term": "author.familyName",
       "path": "authors[].family-names",
       "cell": "",
-      "reason": "no cell; an author table uses CFF's keys, so the family name is family-names"
+      "reason": "no cell; an author table uses CFF's keys, so the family name is family-names",
+      "comment": "An author may also be a plain 'Name' or 'Name <email>' string; then both name sub-terms come from that string."
     },
     {
       "format": "julia",
@@ -699,14 +720,14 @@
       "term": "author.givenName",
       "path": "author",
       "cell": "",
-      "reason": "no cell; BibTeX keeps every author in one author string, each name written 'Family, Given' and joined by and"
+      "reason": "no cell; BibTeX keeps every author in one author string, names joined by and, each written 'Given Family' or 'Family, Given'"
     },
     {
       "format": "bibtex",
       "term": "author.familyName",
       "path": "author",
       "cell": "",
-      "reason": "no cell; BibTeX keeps every author in one author string, each name written 'Family, Given' and joined by and"
+      "reason": "no cell; BibTeX keeps every author in one author string, names joined by and, each written 'Given Family' or 'Family, Given'"
     },
     {
       "format": "bibtex",

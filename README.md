@@ -26,8 +26,8 @@ Use it to check the CodeMeta standard's own files. To keep a project's `CITATION
 
 At CodeMeta 3.1, the crosswalks for CFF, Zenodo, BibTeX, Python PKG-INFO, Cargo, npm,
 R DESCRIPTION and Julia's Project.toml have 136 cells for the 17 terms citation tools need.
-37 are for terms the format has no field for. Of the other 99, only 42 can be used as written:
-31 are wrong, ambiguous or prose (7 of them name a field the format doesn't have), and 26 are
+37 are for terms the format has no field for. Of the other 99, only 41 can be used as written:
+32 are wrong, ambiguous or prose (7 of them name a field the format doesn't have), and 26 are
 blank although the format has the field.
 CodeMeta has no crosswalk for `pyproject.toml` at all. The [coverage matrix](docs/coverage.md)
 shows every cell and the reason for each correction, and the

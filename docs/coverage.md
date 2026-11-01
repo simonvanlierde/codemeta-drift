@@ -21,7 +21,7 @@ How CodeMeta's 3.1 crosswalks map 17 CodeMeta terms in 9 formats, read from the 
 | cargo | `Cargo.csv` | 4 | 3 | 3 | 7 |
 | npm | `NodeJS.csv` | 7 | 3 | 4 | 3 |
 | pkg-info | `Python PKG-INFO.csv` | 3 | 3 | 3 | 8 |
-| r-description | `R Package Description.csv` | 6 | 8 | 2 | 1 |
+| r-description | `R Package Description.csv` | 5 | 9 | 2 | 1 |
 | julia | `Julia Project.csv` | 1 | 2 | 5 | 9 |
 | bibtex | `BibTeX.csv` | 5 | 3 | 4 | 5 |
 
@@ -29,7 +29,7 @@ How CodeMeta's 3.1 crosswalks map 17 CodeMeta terms in 9 formats, read from the 
 
 | Term | cff-1.2.0 | zenodo | pep621 | cargo | npm | pkg-info | r-description | julia | bibtex |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `name` | ✓ `title` | ✓ `title` | [+](#pep621) `project.name` | [✎](#cargo) `package.name` | ✓ `name` | ✓ `Name` | ✓ `Title` | ✓ `name` | ✓ `title` |
+| `name` | ✓ `title` | ✓ `title` | [+](#pep621) `project.name` | [✎](#cargo) `package.name` | ✓ `name` | ✓ `Name` | [✎](#r-description) `Package` | ✓ `name` | ✓ `title` |
 | `version` | ✓ `version` | ✓ `version` | [+](#pep621) `project.version` | ✓ `package.version` | ✓ `version` | ✓ `Version` | ✓ `Version` | [+](#julia) `version` | [+](#bibtex) `version` |
 | `author` | ✓ `authors[]` | ✓ `creators[]` | [+](#pep621) `project.authors[]` | ✓ `package.authors[]` | ✓ `author` | [✎](#pkg-info) `Author \| Author-email` | [✎](#r-description) `Authors@R[role=aut]` | [+](#julia) `authors[]` | ✓ `author` |
 | `author.givenName` | ✓ `authors[].given-names` | [+](#zenodo) `creators[].name` | [+](#pep621) `project.authors[].name` | [+](#cargo) `package.authors[]` | [+](#npm) `author.name` | [+](#pkg-info) `Author \| Author-email` | [✎](#r-description) `Authors@R[role=aut].given` | [+](#julia) `authors[].given-names` | [+](#bibtex) `author` |
@@ -42,7 +42,7 @@ How CodeMeta's 3.1 crosswalks map 17 CodeMeta terms in 9 formats, read from the 
 | `license` | [✎](#cff-120) `license` | ✓ `license` | [+](#pep621) `project.license` | ✓ `package.license` | ✓ `license` | [✎](#pkg-info) `License-Expression \| License` | ✓ `License` | [–](#julia) | ✓ `license` |
 | `identifier` | [✎](#cff-120) `doi \| identifiers[type=doi].value` | [✎](#zenodo) `doi` | [–](#pep621) | [–](#cargo) | [✎](#npm) | [–](#pkg-info) | [✎](#r-description) | [✎](#julia) | [✎](#bibtex) `doi` |
 | `swhid` | [✎](#cff-120) `identifiers[type=swh].value` | [✎](#zenodo) `related_identifiers[scheme=swh].identifier` | [–](#pep621) | [–](#cargo) | [✎](#npm) | [–](#pkg-info) | [✎](#r-description) | [✎](#julia) | [✎](#bibtex) `swhid` |
-| `codeRepository` | ✓ `repository-code` | [✎](#zenodo) `related_identifiers[relation=isSupplementTo].identifier` | [+](#pep621) `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` | ✓ `package.repository` | ✓ `repository` | [+](#pkg-info) `Project-URL[label=Source] \| Project-URL[label=Repository] \| Home-page` | ✓ `URL` | [–](#julia) | ✓ `repository` |
+| `codeRepository` | ✓ `repository-code` | [✎](#zenodo) `related_identifiers[relation=isSupplementTo].identifier` | [+](#pep621) `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` | ✓ `package.repository` | ✓ `repository` | [+](#pkg-info) `Project-URL[label=source] \| Project-URL[label=repository] \| Project-URL[label=sourcecode] \| Project-URL[label=github] \| Home-page` | ✓ `URL` | [–](#julia) | ✓ `repository` |
 | `description` | ✓ `abstract` | ✓ `description` | [+](#pep621) `project.description` | [+](#cargo) `package.description` | ✓ `description` | [✎](#pkg-info) `Summary` | ✓ `Description` | [–](#julia) | ✓ `abstract` |
 | `keywords` | ✓ `keywords` | ✓ `keywords` | [+](#pep621) `project.keywords` | [✎](#cargo) `package.keywords` | ✓ `keywords` | ✓ `Keywords` | [–](#r-description) | [–](#julia) | [+](#bibtex) `keywords` |
 | `datePublished` | ✓ `date-released` | ✓ `publication_date` | [–](#pep621) | [–](#cargo) | [–](#npm) | [–](#pkg-info) | ✓ `Date` | [–](#julia) | [✎](#bibtex) `date \| year` |
@@ -135,12 +135,13 @@ How CodeMeta's 3.1 crosswalks map 17 CodeMeta terms in 9 formats, read from the 
 - `license` (corrected): crosswalk cell `License` → `License-Expression | License`. The cell says License, which is free text; metadata 2.4 puts the SPDX expression in License-Expression.
 - `identifier` (no field): no crosswalk cell → no path. No cell; core metadata has no DOI field.
 - `swhid` (no field): no crosswalk cell → no path. No cell; core metadata has no SWHID field.
-- `codeRepository` (added): no crosswalk cell → `Project-URL[label=Source] | Project-URL[label=Repository] | Home-page`. No cell; the repository is the Project-URL labelled Source or Repository, as in pyproject.toml's project.urls, else Home-page.
+- `codeRepository` (added): no crosswalk cell → `Project-URL[label=source] | Project-URL[label=repository] | Project-URL[label=sourcecode] | Project-URL[label=github] | Home-page`. No cell; the repository is the Project-URL whose label is source or one of its aliases, else the deprecated Home-page.
 - `description` (corrected): crosswalk cell `Summary / Description` → `Summary`. The cell lists Summary / Description; Description is the long README text, Summary the one-line description.
 - `datePublished` (no field): no crosswalk cell → no path. No cell; core metadata has no release date.
 
 ### r-description
 
+- `name` (corrected): crosswalk cell `Title` → `Package`. The cell says Title, a short description of the package; the package's name is Package.
 - `author` (corrected): crosswalk cell `[aut] in Author` → `Authors@R[role=aut]`. The cell says [aut] in Author, prose about the free-text Author field; R builds that from Authors@R, whose person() entries with role aut are the authors.
 - `author.givenName` (corrected): crosswalk cell `givenName` → `Authors@R[role=aut].given`. The cell says givenName, a CodeMeta term; a person() entry keeps the given name in given.
 - `author.familyName` (corrected): crosswalk cell `familyName` → `Authors@R[role=aut].family`. The cell says familyName, a CodeMeta term; a person() entry keeps the family name in family.
@@ -175,8 +176,8 @@ How CodeMeta's 3.1 crosswalks map 17 CodeMeta terms in 9 formats, read from the 
 ### bibtex
 
 - `version` (added): no crosswalk cell → `version`. No cell; biblatex and biblatex-software keep the version in version.
-- `author.givenName` (added): no crosswalk cell → `author`. No cell; BibTeX keeps every author in one author string, each name written 'Family, Given' and joined by and.
-- `author.familyName` (added): no crosswalk cell → `author`. No cell; BibTeX keeps every author in one author string, each name written 'Family, Given' and joined by and.
+- `author.givenName` (added): no crosswalk cell → `author`. No cell; BibTeX keeps every author in one author string, names joined by and, each written 'Given Family' or 'Family, Given'.
+- `author.familyName` (added): no crosswalk cell → `author`. No cell; BibTeX keeps every author in one author string, names joined by and, each written 'Given Family' or 'Family, Given'.
 - `author.@id` (no field): no crosswalk cell → no path. No cell; BibTeX has no person identifier.
 - `contributor` (no field): no crosswalk cell → no path. No cell; a software entry has no contributor field.
 - `contributor.givenName` (no field): no crosswalk cell → no path. No cell; a software entry has no contributor field.
