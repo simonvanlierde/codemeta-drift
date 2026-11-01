@@ -109,7 +109,7 @@ def sssom(mapping: dict[str, Any]) -> str:
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
     metadata = (
         f"# mapping_set_id: {SITE}spokes-{tag}.sssom.tsv\n"
-        f"# mapping_set_version: {version}\n"
+        f"# mapping_set_version: '{version}'\n"
         f"# mapping_set_title: codemeta-drift crosswalk hub spokes for CodeMeta {tag}\n"
         "# mapping_set_description: Field correspondences between CodeMeta terms and seven metadata formats,"
         " from the reviewed mapping export. The paths correspond; their values may need conversion.\n"
