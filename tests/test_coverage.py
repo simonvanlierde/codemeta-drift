@@ -28,23 +28,23 @@ def test_docs_page_is_generated_from_the_example():
 def test_unreviewed_lists_every_other_crosswalk_by_shape():
     data = unreviewed(read_dir(TAG_FILES), mapping())
     names = [f["format"] for f in data["formats"]]
-    assert len(names) == 28  # the 44 crosswalks at 3.1, less the 16 the mapping reviews
+    assert len(names) == 16  # the 44 crosswalks at 3.1, less the 28 the mapping reviews
     assert "Zenodo" not in names
     assert "NodeJS" not in names
     found = {(c["format"], c["term"]): c["status"] for c in data["cells"]}
-    assert len(found) == 28 * 17
-    assert found["Leiningen", "name"] == "path"
-    assert found["DCAT-3", "name"] == "prose"
+    assert len(found) == 16 * 17
+    assert found["ASCL", "name"] == "path"
+    assert found["DCAT", "name"] == "prose"
     assert found["ASCL", "version"] == "empty"
     assert {f["label"] for f in data["formats"] if f["format"] == "DCAT"} == {"DCAT-2"}
 
 
 def test_unreviewed_marks_a_cell_it_cannot_join():
     files = read_dir(TAG_FILES)
-    leiningen = "crosswalks/Leiningen.csv"
-    files[leiningen] = files[leiningen].replace("\nversion,", "\nversion,\nversion,", 1)
+    ascl = "crosswalks/ASCL.csv"
+    files[ascl] = files[ascl].replace("\nversion,", "\nversion,\nversion,", 1)
     found = {(c["format"], c["term"]): c["status"] for c in unreviewed(files, mapping())["cells"]}
-    assert found["Leiningen", "version"] == "unmatched"
+    assert found["ASCL", "version"] == "unmatched"
 
 
 def test_a_format_the_mapping_lacks_counts_as_not_reviewed():
@@ -59,7 +59,7 @@ def test_a_format_the_mapping_lacks_counts_as_not_reviewed():
 def test_cli_lists_unreviewed_crosswalks_from_the_tag(repo: Path, capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(EXAMPLE), "--json", "--codemeta", str(repo)]) == 0
     data = json.loads(capsys.readouterr().out)
-    assert len(data["unreviewed"]["formats"]) == 28
+    assert len(data["unreviewed"]["formats"]) == 16
 
 
 def test_cli_coverage_without_the_tag_exits_2(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
@@ -83,14 +83,14 @@ def test_known_cells_get_their_status():
 
 def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if FORMATS[fmt].crosswalk]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 69, "corrected": 67, "added": 50, "no field": 86}
+    assert {s: found.count(s) for s in set(found)} == {"as-is": 110, "corrected": 125, "added": 90, "no field": 151}
 
 
 def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(EXAMPLE), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == "3.1"
-    assert len(data["cells"]) == 19 * 17
+    assert len(data["cells"]) == 31 * 17
     assert "unreviewed" not in data  # only with --codemeta
 
 
@@ -144,3 +144,10 @@ def test_upstream_says_missing_when_a_crosswalk_is_gone():
     del files["crosswalks/Cargo.csv"]
     states = {c["state"] for c in upstream(files, mapping()) if c["format"] == "cargo"}
     assert states == {"missing"}
+
+
+def test_a_url_in_a_reason_is_shown_as_code():
+    data = mapping()
+    row = next(r for r in data["rows"] if r["format"] == "cargo" and r["source"].startswith("curated:"))
+    row["source"] = "curated:a repository is written git+https://host/path.git; see it"
+    assert "written `git+https://host/path.git`; see it." in markdown(data)

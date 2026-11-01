@@ -194,6 +194,132 @@ def test_example_null_rows():
                 "datePublished",
             )
         }
+        | {
+            ("github", t)
+            for t in (
+                "version",
+                "author.givenName",
+                "author.familyName",
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("figshare", t)
+            for t in (
+                "version",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "swhid",
+                "codeRepository",
+            )
+        }
+        | {
+            ("bio-tools", t)
+            for t in (
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("leiningen", t)
+            for t in (
+                "author",
+                "author.givenName",
+                "author.familyName",
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "keywords",
+                "datePublished",
+            )
+        }
+        | {
+            ("octave", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "keywords",
+            )
+        }
+        | {
+            ("publiccode-0.8", t)
+            for t in (
+                "author",
+                "author.givenName",
+                "author.familyName",
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "keywords",
+            )
+        }
+        | {
+            ("swmath", t)
+            for t in (
+                "version",
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("spdx-2.3", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "keywords",
+            )
+        }
+        | {("dcat-3", t) for t in ("swhid",)}
+        | {
+            ("doap", t)
+            for t in (
+                "identifier",
+                "swhid",
+            )
+        }
+        | {
+            ("wikidata", t)
+            for t in (
+                "author.givenName",
+                "author.familyName",
+                "author.@id",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+            )
+        }
     )
 
 

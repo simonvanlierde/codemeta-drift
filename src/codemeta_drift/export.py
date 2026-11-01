@@ -82,6 +82,18 @@ FORMATS = {
     "cabal": Spoke("crosswalks/Cabal.csv"),
     "typst": Spoke(None),
     "quarto": Spoke(None),
+    "github": Spoke("crosswalks/GitHub.csv"),
+    "figshare": Spoke("crosswalks/Figshare.csv", person_list=True),
+    "bio-tools": Spoke("crosswalks/bio.tools.csv", person_list=True),
+    "leiningen": Spoke("crosswalks/Leiningen.csv"),
+    "octave": Spoke("crosswalks/Octave.csv"),
+    "publiccode-0.8": Spoke("crosswalks/publiccode.csv"),
+    "swmath": Spoke("crosswalks/swMATH.csv", person_list=True),
+    "spdx-2.3": Spoke("crosswalks/SPDX_2_3.csv"),
+    "codemeta-2": Spoke("crosswalks/codemeta-V2.csv", person_list=True, person_prefix=""),
+    "dcat-3": Spoke("crosswalks/DCAT-3.csv", person_list=True),
+    "doap": Spoke("crosswalks/DOAP.csv", person_list=True),
+    "wikidata": Spoke("crosswalks/Wikidata.csv", person_list=True),
 }
 
 PATH = re.compile(
@@ -181,7 +193,10 @@ def build_rows(
 
 
 # (format, two terms) whose paths are equal by design: codemeta.json holds the SWHID in identifier, beside the DOI.
-SHARED_ON_PURPOSE = {("codemeta", frozenset({"identifier", "swhid"}))}
+SHARED_ON_PURPOSE = {
+    ("codemeta", frozenset({"identifier", "swhid"})),
+    ("codemeta-2", frozenset({"identifier", "swhid"})),
+}
 
 
 def shared_paths(label: str, fmt: str, rows: list[dict[str, Any]]) -> list[Finding]:
@@ -189,8 +204,8 @@ def shared_paths(label: str, fmt: str, rows: list[dict[str, Any]]) -> list[Findi
 
     A wrong cell that still looks like a path (npm's identifier cell ``name``) mostly names another
     term's key. Person sub-terms are left out: they sit inside author's path on purpose. So are the
-    pairs in ``SHARED_ON_PURPOSE``, such as codemeta's identifier and swhid, which the consumer tells
-    apart by spelling. In every other format those two have keys of their own.
+    pairs in ``SHARED_ON_PURPOSE``, codemeta's and codemeta-2's identifier and swhid, which the
+    consumer tells apart by spelling. In every other format those two have keys of their own.
     """
     paths = [
         (row["term"], alternative)
@@ -266,6 +281,14 @@ CROSSWALK_COMMENTS = {
     ("cabal", "keywords"): (
         "category is free text for Hackage's catalogue ('Data, Text'), not a keyword list; the consumer"
         " splits it on commas."
+    ),
+    ("codemeta-2", "license"): (
+        "The 2.0 context types license as @id, and the example writes a URL (https://spdx.org/licenses/MIT),"
+        " not a bare SPDX id."
+    ),
+    ("codemeta-2", "swhid"): (
+        "CodeMeta has no SWHID term; a SWHID sits in identifier, beside the DOI, as a swh:1: string or a"
+        " PropertyValue (propertyID SWHID) whose value is one."
     ),
 }
 
