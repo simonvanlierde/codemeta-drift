@@ -255,7 +255,9 @@ They come with a new codemeta tag or a new codemeta-drift release.
 2. Validate the file against the schema it vendors beside it, and update the two together:
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
-   path pattern for `+` and prefixed keys, so a 1.6 file fails the 1.5 schema.
+   path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas. Update the
+   resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
+   that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
    A row with `path: null` is not missing: the format has no place for that term.

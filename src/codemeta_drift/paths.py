@@ -41,7 +41,7 @@ def parse(path: str) -> list[list[list[Step]]]:
     ]
 
 
-def matches(element: object, key: str, value: str) -> bool:
+def matches(element: object, key: str, value: str | None) -> bool:
     """Whether ``element[key]`` is ``value`` as text, or is a list that holds it."""
     if not isinstance(element, dict) or key not in element:
         return False
@@ -56,7 +56,7 @@ def chain(document: Any, steps: list[Step]) -> list[Any]:  # noqa: ANN401 - pars
         if step.is_list:
             nodes = [e for n in nodes if isinstance(n, list) for e in n]
         if step.filter_key:
-            nodes = [e for e in nodes if matches(e, step.filter_key, step.filter_value or "")]
+            nodes = [e for e in nodes if matches(e, step.filter_key, step.filter_value)]
     return nodes
 
 

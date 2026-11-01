@@ -9,7 +9,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade
 codemeta-drift with the file. A consumer that vendors the mapping schema vendors the 1.6 schema and
-`mapping-vectors.json` with it, and runs the vectors through its resolver: a 1.6 export fails the 1.5 schema.
+`mapping-vectors.json` with it, and runs the vectors through its resolver: a 1.6 export fails the 1.4 schema that 0.5.0 shipped.
 
 ### Added
 
