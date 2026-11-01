@@ -781,6 +781,13 @@
     },
     {
       "format": "bibtex",
+      "term": "codeRepository",
+      "path": "repository | url",
+      "cell": "repository",
+      "reason": "the cell says repository, which biblatex-software adds; plain BibTeX styles print only url, so the path falls back to it"
+    },
+    {
+      "format": "bibtex",
       "term": "keywords",
       "path": "keywords",
       "cell": "",

@@ -1190,8 +1190,8 @@
     {
       "format": "bibtex",
       "term": "codeRepository",
-      "path": "repository",
-      "source": "crosswalk:crosswalks/BibTeX.csv@3.1",
+      "path": "repository | url",
+      "source": "curated:the cell says repository, which biblatex-software adds; plain BibTeX styles print only url, so the path falls back to it",
       "crosswalk_cell": "repository"
     },
     {

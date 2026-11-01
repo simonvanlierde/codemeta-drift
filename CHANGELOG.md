@@ -21,6 +21,11 @@ use read it unchanged.
 - Ship `mapping-vectors.json` beside the mapping schema: test cases of path, document and the values the path
   resolves to, for a consumer to run through its own resolver. See the [mapping export](docs/mapping-export.md#path-grammar).
 
+### Changed
+
+- The BibTeX `codeRepository` row reads `repository | url`, since plain BibTeX styles print only `url`.
+  See the [coverage page](docs/coverage.md).
+
 ### Fixed
 
 - A person sub-term such as `author.@id` is read from the alternative its term resolved through, not by first
