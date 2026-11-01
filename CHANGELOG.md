@@ -7,8 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-01
+
+**Breaking:** Schema directories passed to `export --schemas` now also need `zenodo.json`.
+Copy the [verified structural subset](tests/fixtures/schemas/zenodo.json) into your schema directory.
+The new watcher uses the same five-file layout; see [Zenodo coverage and limits](docs/zenodo-schema.md).
+
 ### Added
 
+- Run an [offline schema recovery example](docs/schema-recovery.md) with an explicit synthetic approval and reproducible mapping hashes.
+- Check Zenodo mapping paths against a [verified structural subset](docs/zenodo-schema.md); importer source changes produce review drafts. This does not validate complete deposits.
 - Find corresponding fields in two formats and export seven SSSOM spokes with the
   [crosswalk hub](docs/crosswalk-hub.md). The Go spoke relates a module path to the repository field.
 - Preview broken schema paths, new fields and a behind mapping pin with the
@@ -22,6 +30,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Hub commands reject malformed original crosswalk cells, keeping [mapping validation](docs/mapping-export.md) consistent with the export contract.
 - SSSOM exports use distinct field and format URI prefixes so reference readers can load them.
   See the [validation and compatibility guide](docs/sssom-compatibility.md).
 - Schema conformance checks recognize [array references and tuple item schemas](docs/schema-watcher.md).
@@ -81,7 +90,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/simonvanlierde/codemeta-drift/releases/tag/v0.1.0

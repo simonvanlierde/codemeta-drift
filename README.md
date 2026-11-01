@@ -64,6 +64,8 @@ exported; currently that is `3.1`.
 
 ## Documentation
 
+- [Offline schema recovery](docs/schema-recovery.md): preview a synthetic rename and apply an explicit approval.
+- [Zenodo path coverage](docs/zenodo-schema.md): verified paths, upstream source checks and validation limits.
 - [Understand findings and use the JSON interface](docs/checks.md).
 - [Inspect the dated CodeMeta findings report](docs/findings.md).
 - [Export mappings and validate paths against schemas](docs/mapping-export.md).

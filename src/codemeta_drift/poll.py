@@ -41,6 +41,7 @@ def poll(
         "https://raw.githubusercontent.com/citation-file-format/citation-file-format/"
         f"{quote(cff_tag, safe='')}/schema.json"
     )
+    after["zenodo"] = before["zenodo"]
     latest = fetch(API + "simonvanlierde/codemeta-drift/releases/latest")["tag_name"]
     pin = fetch(API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE")
     # The contents endpoint returns base64 so every source still uses the same JSON fetch contract.
@@ -52,6 +53,20 @@ def poll(
         msg = "citesync MAPPING_SOURCE must have exactly one tag"
         raise ValueError(msg)
     plans = issue_plans(schema_changes(mapping["rows"], before, after), pin_tags[0], latest, set())
+    # Zenodo has no current public JSON Schema: source changes need a fresh manual path review.
+    source = before["zenodo"]["x-source"]
+    for path, digest in sorted(source["files"].items()):
+        current = fetch(API + source["repo"] + "/contents/" + path)
+        if current["sha"] != digest:
+            plans.append(
+                {
+                    "repo": "simonvanlierde/codemeta-drift",
+                    "title": f"Review Zenodo importer {path} {current['sha']}",
+                    "body": f"`{path}` changed from blob `{digest}` to `{current['sha']}`. "
+                    "Review the Zenodo structural subset before refreshing its source hashes. "
+                    "A source change does not automatically change the mapping.",
+                }
+            )
     tags = [tag["name"] for tag in fetch(API + "codemeta/codemeta/tags?per_page=100")]
     stable = [tag for tag in tags if re.fullmatch(r"v?[0-9]+(?:\.[0-9]+){1,2}", tag)]
     if stable:

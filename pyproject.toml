@@ -1,7 +1,7 @@
 [project]
 name = "codemeta-drift"
-version = "0.3.0"
-description = "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping"
+version = "0.4.0"
+description = "Check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [{ name = "Simon van Lierde", email = "code@duinlab.nl" }]

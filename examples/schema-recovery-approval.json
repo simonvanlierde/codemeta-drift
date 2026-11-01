@@ -1,0 +1,7 @@
+{
+  "format": "pep621",
+  "term": "name",
+  "from": "project.name",
+  "to": "project.display_name",
+  "reason": "Synthetic rename used only by the offline recovery example."
+}

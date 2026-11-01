@@ -118,3 +118,11 @@ def test_crosswalk_preserves_table_order_and_duplicate_properties(tmp_path: Path
         "Property,cff-1.2.0\nidentifier,authors[].orcid\n"
         "identifier,doi | identifiers[type=doi].value\nname,title\nunknown,\ncontributor,\n"
     )
+
+
+@pytest.mark.parametrize("cell", [[], {}, 7, True])
+def test_hub_rejects_malformed_original_cells(cell: object):
+    data = mapping()
+    data["rows"][0]["crosswalk_cell"] = cell
+    with pytest.raises(ValueError, match="mapping row"):
+        validate_mapping(data)

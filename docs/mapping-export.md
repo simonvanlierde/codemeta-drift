@@ -56,8 +56,8 @@ uv run codemeta-drift export ../codemeta --tag 3.1 \
 
 `--schemas DIR` adds `PATH_NOT_IN_SCHEMA` findings for paths absent from the format's
 schema. The bundled [schema snapshots and sources](../tests/fixtures/schemas/SOURCES)
-cover CFF 1.2.0, pyproject.toml, package.json and Cargo.toml. A suitable current schema
-for Zenodo's `.zenodo.json` has not been verified, so those paths are not checked.
+cover CFF 1.2.0, pyproject.toml, package.json and Cargo.toml. Zenodo uses a
+[verified structural subset](zenodo-schema.md), not a complete deposit validator.
 
 A schema can catch a missing key, such as Cargo's `package.keyword`. It cannot tell
 that an existing key means the wrong thing, such as Zenodo's `id` used for a DOI.

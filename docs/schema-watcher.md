@@ -10,9 +10,9 @@ codemeta-drift watch ../codemeta --tag 3.1 \
   --latest v0.3.0 --existing issue-titles.json
 ```
 
-Each directory needs the four files named in
+Each directory needs the five files named in
 [`SCHEMA_FILES`](../src/codemeta_drift/conformance.py): CFF, pyproject, package.json and
-Cargo. Both snapshots must come from the same sources. The command reads the curated
+Cargo, plus the [verified Zenodo structural subset](../tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the curated
 mapping from the selected CodeMeta tag, then checks its paths against the new schemas.
 It lists broken mapped paths and new declared properties that have no row. Local refs (including numeric array indices),
 combined schemas and array item properties are followed; recursive schemas stop at the
@@ -47,11 +47,12 @@ one second apart. The workflow's concurrency group serializes runs. A local
 `--publish` run uses `gh` credentials and must not run beside another publisher.
 
 Only the latest numeric CodeMeta tag gets a missing-export draft; older unsupported tags
-do not each open an issue. The four bundled schema files remain the baseline until they
+do not each open an issue. The five bundled schema files remain the baseline until they
 are deliberately refreshed. Draft fingerprints suppress repeat reports against that baseline.
 
-Zenodo remains unchecked: [the official documentation](https://developers.zenodo.org/#github)
-still links to the legacy schema recorded in
-[`SOURCES`](../tests/fixtures/schemas/SOURCES) predates the current service and lacks fields
-used by `.zenodo.json`. A suitable current public schema still needs verification. This
-workflow does not add mappings or accept proposals.
+Zenodo uses [verified structural path coverage](zenodo-schema.md), not a complete
+public JSON Schema. Changes to the importer source produce review drafts; they do
+not automatically modify that subset or the mapping.
+
+Run the [offline change-and-recovery example](schema-recovery.md) to induce a rename,
+deduplicate its review and apply an explicit synthetic approval without changing a real pin.

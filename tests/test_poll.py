@@ -1,4 +1,5 @@
 import base64
+import json
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,7 @@ from codemeta_drift.poll import API, SCHEMA_URLS, fetch_json, poll, publish
 def test_poll_uses_current_schemas_and_only_latest_codemeta_tag():
     schema = {"properties": {"title": {"type": "string"}}}
     before = {fmt: {"properties": {"name": {}}} for fmt in (*SCHEMA_URLS, "cff-1.2.0")}
+    before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
     responses = {
         API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": "1.2.0"},
         API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
@@ -23,11 +25,29 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag():
         **dict.fromkeys(SCHEMA_URLS.values(), schema),
         "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": schema,
     }
+    source = before["zenodo"]["x-source"]
+    responses.update(
+        {API + source["repo"] + "/contents/" + path: {"sha": digest} for path, digest in source["files"].items()}
+    )
     plans = poll({"rows": [{"format": "pep621", "term": "name", "path": "name"}]}, before, responses.__getitem__)
     assert len(plans) == 3
     assert "name" in plans[0]["body"]
     assert plans[1]["title"] == "Update mapping pin to v0.4.0"
     assert plans[2]["title"] == "Review CodeMeta tag 4.0"
+    changed = next(iter(source["files"]))
+    responses[API + source["repo"] + "/contents/" + changed] = {"sha": "b" * 40}
+    plans = poll({"rows": []}, before, responses.__getitem__)
+    assert sum(plan["title"].startswith("Review Zenodo importer") for plan in plans) == 1
+    created = []
+    titles = {plan["repo"]: set() for plan in plans}
+
+    def create(plan: dict[str, str]) -> None:
+        created.append(plan)
+        titles[plan["repo"]].add(plan["title"])
+
+    publish(plans, titles.__getitem__, create)
+    publish(plans, titles.__getitem__, create)
+    assert created == plans
 
 
 def test_publisher_fetches_closed_titles_and_publishes_once():
@@ -78,3 +98,17 @@ def test_failed_poll_never_publishes(tmp_path: Path, monkeypatch: pytest.MonkeyP
     with pytest.raises(OSError, match="schema fetch failed"):
         runner.main()
     assert not out.exists()
+
+
+@pytest.mark.parametrize("live", [False, pytest.param(True, marks=pytest.mark.live)])
+def test_zenodo_importer_source_contract(*, live: bool):
+    source = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())["x-source"]
+    for path in source["files"]:
+        try:
+            result = fetch_json(API + source["repo"] + "/contents/" + path) if live else {"sha": "a" * 40}
+        except HTTPError as err:
+            if err.code == 429:
+                pytest.skip("Zenodo source contract check was rate limited")
+            raise
+        assert isinstance(result["sha"], str)
+        assert len(result["sha"]) == 40
