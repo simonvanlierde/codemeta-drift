@@ -71,6 +71,8 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates():
     assert header["mapping_set_title"].endswith("CodeMeta 3.1")
     assert "may need conversion" in header["mapping_set_description"]
     assert header["mapping_provider"] == "https://github.com/simonvanlierde/codemeta-drift/"
+    assert header["license"] == "https://spdx.org/licenses/Apache-2.0.html"
+    assert header["sssom_version"] == "'1.0'"
     assert "# creator_id:\n#   - orcid:0009-0006-6953-909X\n" in text
     assert (
         "# see_also:\n#   - https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/crosswalk-hub.md\n" in text

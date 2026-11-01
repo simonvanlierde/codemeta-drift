@@ -32,8 +32,9 @@ the format itself; its URI prefix differs from `field:` so SSSOM readers can exp
 All three resolve on the [coverage page](https://simonvanlierde.com/codemeta-drift/), which
 opens the matching cell: `field:cargo/package.name` is
 <https://simonvanlierde.com/codemeta-drift/#field/cargo/package.name>. The page has no
-codemeta.json column, so `field:codemeta/...` opens the term's row instead, and the Go
-spoke's `field:gomod/module` has no cell. They are not registered w3id identifiers.
+codemeta.json column, so `field:codemeta/...` opens the term's row instead (`swhid` shares
+`identifier`'s, since codemeta.json holds both there). `format:codemeta` and the Go spoke's
+`field:gomod/module` and `format:gomod` have no cell. They are not registered w3id identifiers.
 
 The header names the set (`mapping_set_id`, title, description and version), its curator by
 ORCID (`creator_id`) and this repository as `mapping_provider`.
