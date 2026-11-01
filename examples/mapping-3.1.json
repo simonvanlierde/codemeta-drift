@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4",
+  "schema_version": "1.5",
   "codemeta_tag": "3.1",
   "generator": {
     "name": "codemeta-drift",
@@ -1214,6 +1214,1264 @@
       "path": "date | year",
       "source": "curated:the cell lists date / (year) / (month); biblatex writes the release date in date, and classic BibTeX gives only year and month",
       "crosswalk_cell": "date / (year) / (month)"
+    },
+    {
+      "format": "datacite",
+      "term": "name",
+      "path": "titles[].title",
+      "source": "curated:the cell says title, the XML element; in the REST JSON titles is a list of objects with a title key",
+      "comment": "A title with a titleType (AlternativeTitle, Subtitle, TranslatedTitle, Other) is not the main title; the main title has no titleType. bolognese takes the first title.",
+      "crosswalk_cell": "title "
+    },
+    {
+      "format": "datacite",
+      "term": "version",
+      "path": "version",
+      "source": "crosswalk:crosswalks/DataCite.csv@3.1",
+      "crosswalk_cell": "version"
+    },
+    {
+      "format": "datacite",
+      "term": "author",
+      "path": "creators[]",
+      "source": "crosswalk:crosswalks/DataCite.csv@3.1",
+      "crosswalk_cell": "creators"
+    },
+    {
+      "format": "datacite",
+      "term": "author.givenName",
+      "path": "creators[].givenName",
+      "source": "crosswalk:crosswalks/DataCite.csv@3.1",
+      "comment": "DataCite's givenName and familyName are optional. Without them, name holds the whole name, written 'Family, Given' for a Personal nameType, and the consumer splits it.",
+      "crosswalk_cell": "givenName"
+    },
+    {
+      "format": "datacite",
+      "term": "author.familyName",
+      "path": "creators[].familyName",
+      "source": "crosswalk:crosswalks/DataCite.csv@3.1",
+      "comment": "DataCite's givenName and familyName are optional. Without them, name holds the whole name, written 'Family, Given' for a Personal nameType, and the consumer splits it.",
+      "crosswalk_cell": "familyName"
+    },
+    {
+      "format": "datacite",
+      "term": "author.@id",
+      "path": "creators[].nameIdentifiers[nameIdentifierScheme=ORCID].nameIdentifier",
+      "source": "curated:the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme, and the ORCID is the one whose scheme is ORCID",
+      "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
+      "crosswalk_cell": "nameIdentifier"
+    },
+    {
+      "format": "datacite",
+      "term": "contributor",
+      "path": "contributors[]",
+      "source": "curated:the cell says contributor, the XML element; the REST JSON key is contributors, a list of objects that each carry a contributorType",
+      "comment": "Every contributor has a contributorType (Editor, Researcher, Other and so on); a consumer that wants only some roles filters on it.",
+      "crosswalk_cell": "contributor"
+    },
+    {
+      "format": "datacite",
+      "term": "contributor.givenName",
+      "path": "contributors[].givenName",
+      "source": "crosswalk:crosswalks/DataCite.csv@3.1",
+      "comment": "DataCite's givenName and familyName are optional. Without them, name holds the whole name, written 'Family, Given' for a Personal nameType, and the consumer splits it.",
+      "crosswalk_cell": "givenName"
+    },
+    {
+      "format": "datacite",
+      "term": "contributor.familyName",
+      "path": "contributors[].familyName",
+      "source": "crosswalk:crosswalks/DataCite.csv@3.1",
+      "comment": "DataCite's givenName and familyName are optional. Without them, name holds the whole name, written 'Family, Given' for a Personal nameType, and the consumer splits it.",
+      "crosswalk_cell": "familyName"
+    },
+    {
+      "format": "datacite",
+      "term": "contributor.@id",
+      "path": "contributors[].nameIdentifiers[nameIdentifierScheme=ORCID].nameIdentifier",
+      "source": "curated:the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme, and the ORCID is the one whose scheme is ORCID",
+      "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
+      "crosswalk_cell": "nameIdentifier"
+    },
+    {
+      "format": "datacite",
+      "term": "license",
+      "path": "rightsList[].rightsUri",
+      "source": "curated:the cell says rights, the free-text statement; bolognese's CodeMeta writer and commonmeta take the licence from rightsUri",
+      "comment": "Zenodo adds a second entry for access rights (rights 'Open Access', rightsUri info:eu-repo/semantics/openAccess), which is not a licence: skip URIs that are not http(s). When rightsIdentifierScheme is SPDX, rightsIdentifier holds the SPDX id, in Zenodo's lower case (gpl-3.0+).",
+      "crosswalk_cell": "rights"
+    },
+    {
+      "format": "datacite",
+      "term": "identifier",
+      "path": "doi",
+      "source": "curated:the cell says identifier, the XML element; the REST JSON holds the DOI in doi (bare, such as 10.5281/zenodo.7635478), and identifiers is the list of alternate identifiers",
+      "comment": "doi is a bare DOI, without https://doi.org/.",
+      "crosswalk_cell": "identifier"
+    },
+    {
+      "format": "datacite",
+      "term": "swhid",
+      "path": "relatedIdentifiers[relatedIdentifierType=SWHID].relatedIdentifier",
+      "source": "curated:the cell says identifier, the element that holds the DOI; DataCite 4.7 added SWHID as a relatedIdentifierType, so a SWHID is a related identifier",
+      "comment": "Only schema 4.7 and later have this type, and the schema does not say which relationType goes with it, so read the first related identifier of that type whatever its relationType. Older records have none.",
+      "crosswalk_cell": "identifier"
+    },
+    {
+      "format": "datacite",
+      "term": "codeRepository",
+      "path": "relatedIdentifiers[relationType=IsSupplementTo].relatedIdentifier | url",
+      "source": "curated:no cell; DataCite has no repository property. Zenodo records the repository as a related identifier with relationType IsSupplementTo; bolognese's CodeMeta writer uses url, which holds the repository for DOIs registered from codemeta.json",
+      "comment": "IsSupplementTo is Zenodo's convention: keep the one whose relatedIdentifierType is URL on a forge host (often a tag URL, …/tree/v1.0). url is the DOI's landing page: on Zenodo and most repositories it is the record page, not the code, so use it only when it is on a forge host.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "datacite",
+      "term": "description",
+      "path": "descriptions[descriptionType=Abstract].description",
+      "source": "curated:the cell says description, the XML element; in the REST JSON descriptions is a list, and the summary is the one with descriptionType Abstract. bolognese's CodeMeta writer takes the first description, which is the Abstract in most records",
+      "comment": "Other descriptionType values (Methods, TechnicalInfo, Other and so on) are not the description.",
+      "crosswalk_cell": "description"
+    },
+    {
+      "format": "datacite",
+      "term": "keywords",
+      "path": "subjects[].subject",
+      "source": "curated:the cell says subject, the XML element; in the REST JSON subjects is a list of objects with a subject key",
+      "comment": "A subject may carry a subjectScheme (a controlled vocabulary such as FAST or MeSH); those are not free keywords.",
+      "crosswalk_cell": "subject"
+    },
+    {
+      "format": "datacite",
+      "term": "datePublished",
+      "path": "dates[dateType=Issued].date | publicationYear",
+      "source": "curated:the cell says publicationYear, a bare year; bolognese's writers give datePublished as the Issued date and use publicationYear only when there is none",
+      "comment": "publicationYear is a number (2023), dates[].date can be a full date or a range.",
+      "crosswalk_cell": "publicationYear"
+    },
+    {
+      "format": "setup-py",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/Python Distutils (PyPI).csv@3.1",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "setup-py",
+      "term": "version",
+      "path": "version",
+      "source": "curated:the cell says Version, capitalised as in PKG-INFO; the setup() keyword is version",
+      "comment": "setup() keyword names are lower case, unlike PKG-INFO field names.",
+      "crosswalk_cell": "Version"
+    },
+    {
+      "format": "setup-py",
+      "term": "author",
+      "path": "author",
+      "source": "crosswalk:crosswalks/Python Distutils (PyPI).csv@3.1",
+      "crosswalk_cell": "author"
+    },
+    {
+      "format": "setup-py",
+      "term": "author.givenName",
+      "path": "author",
+      "source": "curated:no cell; setup() keeps one name string in author (the email is a separate author_email keyword)",
+      "comment": "The consumer splits the name. The string may list several people, separated by commas.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "author.familyName",
+      "path": "author",
+      "source": "curated:no cell; setup() keeps one name string in author (the email is a separate author_email keyword)",
+      "comment": "The consumer splits the name. The string may list several people, separated by commas.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no cell; setup() has no person identifier",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no cell; setup() has maintainer, which is not a contributor, and no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no cell; setup() has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no cell; setup() has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no cell; setup() has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "license",
+      "path": "license_expression | license",
+      "source": "curated:the cell says license, which is free text; setup() also takes license_expression, the SPDX expression setuptools writes to License-Expression in place of License",
+      "comment": "license_expression is the PEP 639 SPDX expression; license is free text.",
+      "crosswalk_cell": "license"
+    },
+    {
+      "format": "setup-py",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no cell; setup() has no DOI keyword",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no cell; setup() has no SWHID keyword",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "codeRepository",
+      "path": "project_urls.source | project_urls.repository | project_urls.sourcecode | project_urls.github | url",
+      "source": "curated:no cell; the repository is the project_urls entry whose label is source or one of its aliases, else url, the package homepage; setuptools writes project_urls to Project-URL and url to Home-page, so this matches the pkg-info row",
+      "comment": "project_urls is a map of label to URL. Compare labels after normalising them as the well-known project URLs spec says: lower case, no punctuation or whitespace, so 'Source Code' matches sourcecode.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "setup-py",
+      "term": "description",
+      "path": "description",
+      "source": "curated:the cell lists description, long_description; description is the one-line summary, long_description the README text (the pkg-info row picks Summary, not Description, for the same reason)",
+      "crosswalk_cell": "description, long_description"
+    },
+    {
+      "format": "setup-py",
+      "term": "keywords",
+      "path": "keywords",
+      "source": "crosswalk:crosswalks/Python Distutils (PyPI).csv@3.1",
+      "crosswalk_cell": "keywords"
+    },
+    {
+      "format": "setup-py",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no cell; setup() has no release date",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/Ruby Gem.csv@3.1",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "version",
+      "path": "version",
+      "source": "crosswalk:crosswalks/Ruby Gem.csv@3.1",
+      "crosswalk_cell": "version"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "author",
+      "path": "authors[]",
+      "source": "curated:the cell says author/authors, two alternatives; in a loaded Gem::Specification the singular author= writes into authors, which is the list that holds every author",
+      "comment": "spec.author = 'X' and spec.authors = ['X'] both give authors == ['X'], so read authors.",
+      "crosswalk_cell": "author/authors"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "author.givenName",
+      "path": "authors[]",
+      "source": "curated:no cell; an entry of authors is one name string",
+      "comment": "The consumer splits the name. The parallel email attribute holds addresses, not names.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "author.familyName",
+      "path": "authors[]",
+      "source": "curated:no cell; an entry of authors is one name string",
+      "comment": "The consumer splits the name. The parallel email attribute holds addresses, not names.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has no person identifier",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has authors and an email contact, no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "license",
+      "path": "licenses[]",
+      "source": "curated:the cell says license/licenses, two alternatives; in a loaded Gem::Specification license= writes into licenses, so licenses holds every entry",
+      "comment": "Each entry is one SPDX identifier. RubyGems has no compound expression: a dual-licensed gem lists two entries, and the list does not say whether they combine with OR or AND.",
+      "crosswalk_cell": "license/licenses"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has no DOI attribute",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has no SWHID attribute",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "codeRepository",
+      "path": "homepage",
+      "source": "crosswalk:crosswalks/Ruby Gem.csv@3.1",
+      "crosswalk_cell": "homepage"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "description",
+      "path": "summary",
+      "source": "curated:the cell lists summary, description; summary is the short text RubyGems requires, description the longer optional one (the pkg-info row picks the one-line Summary for the same reason)",
+      "crosswalk_cell": "summary, description"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "keywords",
+      "path": null,
+      "source": "curated:no cell; Gem::Specification has no keywords attribute",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "ruby-gem",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no cell; the date attribute is not a release date: the spec says not to set it, and it is SOURCE_DATE_EPOCH or a fixed 1980-01-02 for reproducible builds",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/Java (Maven).csv@3.1",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "maven",
+      "term": "version",
+      "path": "version | parent.version",
+      "source": "curated:the cell says version; a pom may leave version out and inherit it from its parent, so parent.version is the fallback; swh-indexer and codemetapy read only version",
+      "crosswalk_cell": "version"
+    },
+    {
+      "format": "maven",
+      "term": "author",
+      "path": "developers.developer[]",
+      "source": "curated:the cell lists developers; the list is the developer elements inside it, as codemetapy reads them",
+      "comment": "A developer is the project's committer. Roles such as lead are in roles.role[]; the consumer decides whether all developers are authors.",
+      "crosswalk_cell": "developers"
+    },
+    {
+      "format": "maven",
+      "term": "author.givenName",
+      "path": "developers.developer[].name",
+      "source": "curated:no cell; a developer has one name string, with no given and family name apart",
+      "comment": "The consumer splits the name into given and family name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "author.familyName",
+      "path": "developers.developer[].name",
+      "source": "curated:no cell; a developer has one name string, with no given and family name apart",
+      "comment": "The consumer splits the name into given and family name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no cell; a developer has id, name, email, url, organization and roles, and no ORCID (id is a project-local login)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "contributor",
+      "path": "contributors.contributor[]",
+      "source": "curated:the cell lists contributors; the list is the contributor elements inside it",
+      "comment": "The POM schema describes a contributor as someone who has contributed but does not have commit privileges.",
+      "crosswalk_cell": "contributors"
+    },
+    {
+      "format": "maven",
+      "term": "contributor.givenName",
+      "path": "contributors.contributor[].name",
+      "source": "curated:no cell; a contributor has one name string, with no given and family name apart",
+      "comment": "The consumer splits the name into given and family name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "contributor.familyName",
+      "path": "contributors.contributor[].name",
+      "source": "curated:no cell; a contributor has one name string, with no given and family name apart",
+      "comment": "The consumer splits the name into given and family name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no cell; a contributor has name, email, url, organization and roles, and no ORCID",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "license",
+      "path": "licenses.license[].url",
+      "source": "curated:the cell lists licenses / license / url; one license element per licence, and url is its link",
+      "comment": "url is a link, not an SPDX id. name is free text; codemetapy tries to turn name into an SPDX id first and falls back to url, swh-indexer reads url only.",
+      "crosswalk_cell": "licenses / license / url"
+    },
+    {
+      "format": "maven",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:the cell lists groupId / artifactId, which are the Maven coordinates, not a DOI; a pom has no DOI element",
+      "comment": "codemetapy writes groupId.artifactId to CodeMeta identifier. That is a coordinate and not the software DOI.",
+      "crosswalk_cell": "groupId / artifactId"
+    },
+    {
+      "format": "maven",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:the cell lists groupId / artifactId, the Maven coordinates; a pom has no place for a Software Heritage id",
+      "crosswalk_cell": "groupId / artifactId"
+    },
+    {
+      "format": "maven",
+      "term": "codeRepository",
+      "path": "scm.url",
+      "source": "curated:the cell lists scm / url; the repository link is the url inside scm, as codemetapy reads it (swh-indexer instead builds a Maven artifact repository URL from groupId and artifactId, which is not the source)",
+      "comment": "scm.connection and scm.developerConnection hold scm:git:... strings, not browsable URLs. Skip a value that still contains ${...}, as codemetapy does.",
+      "crosswalk_cell": "scm / url"
+    },
+    {
+      "format": "maven",
+      "term": "description",
+      "path": "description",
+      "source": "crosswalk:crosswalks/Java (Maven).csv@3.1",
+      "crosswalk_cell": "description"
+    },
+    {
+      "format": "maven",
+      "term": "keywords",
+      "path": null,
+      "source": "curated:no cell; the pom schema has no keyword or tag element",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "maven",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no cell; a pom records no release date (inceptionYear is the start of the project)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/Perl Module Description (CPAN::Meta).csv@3.1",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "version",
+      "path": "version",
+      "source": "curated:no cell; META.json keeps the distribution version in version, a required key",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "author",
+      "path": "author[]",
+      "source": "curated:no cell; META.json lists the contact people in author, a required list of strings",
+      "comment": "author is a list of strings, 'Name <email>' by convention; the consumer splits the name, and a bare name has no email. The spec calls these contacts for the distribution; it is usually the original author but may be a maintainer or a mailing list.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "author.givenName",
+      "path": "author[]",
+      "source": "curated:no cell; the author strings hold the whole name, so both name sub-terms point at author",
+      "comment": "author is a list of strings, 'Name <email>' by convention; the consumer splits the name, and a bare name has no email.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "author.familyName",
+      "path": "author[]",
+      "source": "curated:no cell; the author strings hold the whole name, so both name sub-terms point at author",
+      "comment": "author is a list of strings, 'Name <email>' by convention; the consumer splits the name, and a bare name has no email.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no cell; an author string holds a name and an email, and the spec has no ORCID field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "contributor",
+      "path": "x_contributors[]",
+      "source": "curated:no cell; the spec has no contributor list, but Dist::Zilla's Git::Contributors plugin writes one under the custom key x_contributors, and MetaCPAN reads it there",
+      "comment": "Not part of the spec: the spec reserves keys that start with x_ for custom use. Only distributions built with that plugin (or a similar one) have it. Entries are 'Name <email>' strings; a single string is a list of one, as MetaCPAN reads it.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "contributor.givenName",
+      "path": "x_contributors[]",
+      "source": "curated:no cell; the x_contributors strings hold the whole name, so both name sub-terms point at it",
+      "comment": "Entries are 'Name <email>' strings; the consumer splits the name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "contributor.familyName",
+      "path": "x_contributors[]",
+      "source": "curated:no cell; the x_contributors strings hold the whole name, so both name sub-terms point at it",
+      "comment": "Entries are 'Name <email>' strings; the consumer splits the name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no cell; an x_contributors string holds a name and an email, with no ORCID",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "license",
+      "path": "license",
+      "source": "crosswalk:crosswalks/Perl Module Description (CPAN::Meta).csv@3.1",
+      "comment": "license is a list of CPAN::Meta licence strings (perl_5, mit, apache_2_0), not SPDX ids; the consumer maps them with the spec's table. A single string is a list of one.",
+      "crosswalk_cell": "license"
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no cell; META.json has no DOI field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no cell; META.json has no SWHID field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "codeRepository",
+      "path": "resources.repository.web | resources.repository.url",
+      "source": "curated:the cell says resources.repository, which is a map; the web key holds the browsable URL and url the repository itself (often git://)",
+      "comment": "In a spec 1.x META.yml, resources.repository is a plain URL string; CPAN::Meta::Converter turns it into {url: ...}, so read META.json or convert first.",
+      "crosswalk_cell": "resources.repository"
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "description",
+      "path": "abstract",
+      "source": "curated:the cell lists abstract, description; abstract is the required one-line summary and description the optional longer text",
+      "comment": "description (spec 2, optional) is the longer text; use it only where a long description is wanted.",
+      "crosswalk_cell": "abstract, description"
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "keywords",
+      "path": "keywords",
+      "source": "crosswalk:crosswalks/Perl Module Description (CPAN::Meta).csv@3.1",
+      "crosswalk_cell": "keywords"
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no cell; META.json has no release date",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "name",
+      "path": "id",
+      "source": "curated:the cell says name; a nuspec has no name element, the package name is id (title is an optional display name that nuget.org does not show)",
+      "comment": "swh-indexer maps name but its nuspec test yields no name, so it never reads id either.",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "nuget",
+      "term": "version",
+      "path": "version",
+      "source": "crosswalk:crosswalks/NuGet.csv@3.1",
+      "crosswalk_cell": "version"
+    },
+    {
+      "format": "nuget",
+      "term": "author",
+      "path": "authors",
+      "source": "crosswalk:crosswalks/NuGet.csv@3.1",
+      "comment": "authors is one string; the consumer splits it on commas and trims each name, as swh-indexer does.",
+      "crosswalk_cell": "authors"
+    },
+    {
+      "format": "nuget",
+      "term": "author.givenName",
+      "path": "authors",
+      "source": "curated:no cell; authors keeps names in one comma-separated string",
+      "comment": "The consumer splits the string on commas, then splits each name into given and family name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "author.familyName",
+      "path": "authors",
+      "source": "curated:no cell; authors keeps names in one comma-separated string",
+      "comment": "The consumer splits the string on commas, then splits each name into given and family name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:the cell says id, which is the package id, not a person's id; a nuspec has no ORCID",
+      "crosswalk_cell": "id"
+    },
+    {
+      "format": "nuget",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no cell; the nuspec has authors and the deprecated owners, and no contributors (owners are the publishers on the feed)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no cell; the nuspec has no contributors",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no cell; the nuspec has no contributors",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:the cell says id, which is the package id, not a person's id; the nuspec has no contributors",
+      "crosswalk_cell": "id"
+    },
+    {
+      "format": "nuget",
+      "term": "license",
+      "path": "license | licenseUrl",
+      "source": "curated:the cell lists license/licenseUrl; license holds an SPDX expression, and licenseUrl (deprecated) is the fallback link",
+      "comment": "license has a type attribute: expression holds an SPDX expression (read license.@type to tell); file holds a path inside the package. swh-indexer reads both elements and keeps only simple OR expressions.",
+      "crosswalk_cell": "license/licenseUrl"
+    },
+    {
+      "format": "nuget",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no cell; a nuspec has no DOI (id is the package id)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no cell; a nuspec has no place for a Software Heritage id",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "nuget",
+      "term": "codeRepository",
+      "path": "repository.@url",
+      "source": "curated:the cell says repository.url, but url is an attribute of repository, not a child element; the xmltodict-style key is @url",
+      "comment": "Also has @type, @branch, @commit. url is a VCS URL, not a web page; projectUrl is the home page.",
+      "crosswalk_cell": "repository.url"
+    },
+    {
+      "format": "nuget",
+      "term": "description",
+      "path": "description",
+      "source": "curated:the cell lists description/summary; description is the full text and summary is deprecated",
+      "comment": "swh-indexer also adds summary as a second description.",
+      "crosswalk_cell": "description/summary"
+    },
+    {
+      "format": "nuget",
+      "term": "keywords",
+      "path": "tags",
+      "source": "crosswalk:crosswalks/NuGet.csv@3.1",
+      "crosswalk_cell": "tags"
+    },
+    {
+      "format": "nuget",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no cell; a nuspec has no publication date (the feed has one)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/Pubspec.csv@3.1",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "pubspec",
+      "term": "version",
+      "path": "version",
+      "source": "crosswalk:crosswalks/Pubspec.csv@3.1",
+      "crosswalk_cell": "version"
+    },
+    {
+      "format": "pubspec",
+      "term": "author",
+      "path": "authors[] | author",
+      "source": "curated:the cell lists author/authors, two deprecated keys; pubspec_parse and the Software Heritage indexer read both, authors as a list of strings and author as one string",
+      "comment": "Pub deprecated both keys (pub issue 2234), so a current pubspec has neither. When both are present pubspec_parse joins them; the path reads authors first. Each entry is 'Name' or 'Name <email>': the consumer drops the email and splits the name.",
+      "crosswalk_cell": "author/authors"
+    },
+    {
+      "format": "pubspec",
+      "term": "author.givenName",
+      "path": "authors[] | author",
+      "source": "curated:no cell; an author entry is one name string, so both name sub-terms point at it (as for Cargo)",
+      "comment": "Pub deprecated both keys (pub issue 2234), so a current pubspec has neither. When both are present pubspec_parse joins them; the path reads authors first. Each entry is 'Name' or 'Name <email>': the consumer drops the email and splits the name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "author.familyName",
+      "path": "authors[] | author",
+      "source": "curated:no cell; an author entry is one name string, so both name sub-terms point at it (as for Cargo)",
+      "comment": "Pub deprecated both keys (pub issue 2234), so a current pubspec has neither. When both are present pubspec_parse joins them; the path reads authors first. Each entry is 'Name' or 'Name <email>': the consumer drops the email and splits the name.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no person identifier",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no contributor list",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "license",
+      "path": null,
+      "source": "curated:the cell says license; pub has no such key and ignores unknown fields, so the licence is the package's LICENSE file. The Software Heritage indexer reads license, but its pubspec table is a copy of this crosswalk column",
+      "comment": "The Software Heritage indexer reads a license key as an SPDX id, but pub's known keys (pubspec_typo.dart) and pubspec_parse have none, and dart.dev only asks for a LICENSE file. A consumer that wants the licence reads that file.",
+      "crosswalk_cell": "license"
+    },
+    {
+      "format": "pubspec",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no DOI field (funding holds URLs where people can sponsor the package)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no SWHID field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "pubspec",
+      "term": "codeRepository",
+      "path": "repository",
+      "source": "crosswalk:crosswalks/Pubspec.csv@3.1",
+      "crosswalk_cell": "repository"
+    },
+    {
+      "format": "pubspec",
+      "term": "description",
+      "path": "description",
+      "source": "crosswalk:crosswalks/Pubspec.csv@3.1",
+      "crosswalk_cell": "description"
+    },
+    {
+      "format": "pubspec",
+      "term": "keywords",
+      "path": "topics",
+      "source": "curated:the cell says keywords; pub's key is topics (at most 5 tags), and pubspec_parse and pub's key list have no keywords",
+      "comment": "topics is a list of strings. The Software Heritage indexer reads keywords from its pubspec table, which is the crosswalk's own cell, not a key pub knows.",
+      "crosswalk_cell": "keywords"
+    },
+    {
+      "format": "pubspec",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no cell; a pubspec has no release date (pub.dev records it when a version is uploaded)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/Cabal.csv@3.1",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "cabal",
+      "term": "version",
+      "path": "version",
+      "source": "crosswalk:crosswalks/Cabal.csv@3.1",
+      "crosswalk_cell": "version"
+    },
+    {
+      "format": "cabal",
+      "term": "author",
+      "path": "author",
+      "source": "crosswalk:crosswalks/Cabal.csv@3.1",
+      "comment": "author is free text: often one name, 'Name <email>', or several names joined by commas. The consumer splits it.",
+      "crosswalk_cell": "author"
+    },
+    {
+      "format": "cabal",
+      "term": "author.givenName",
+      "path": "author",
+      "source": "curated:no cell; author is one free-text string, so both name sub-terms point at it and the consumer splits it",
+      "comment": "Several authors may share the string, separated by commas. Drop any '<email>' part before splitting.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "author.familyName",
+      "path": "author",
+      "source": "curated:no cell; author is one free-text string, so both name sub-terms point at it and the consumer splits it",
+      "comment": "Several authors may share the string, separated by commas. Drop any '<email>' part before splitting.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no person identifier",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no contributor field (maintainer names who looks after the package now, not who contributed)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no contributor field (maintainer names who looks after the package now, not who contributed)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no contributor field (maintainer names who looks after the package now, not who contributed)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no contributor field (maintainer names who looks after the package now, not who contributed)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "license",
+      "path": "license",
+      "source": "curated:the cell lists license, license-file and license-files; license holds the licence itself (an SPDX expression), the other two name files that hold its text",
+      "comment": "Since cabal-version 2.2 license is a case-sensitive SPDX expression, such as Apache-2.0 AND (MIT OR GPL-2.0-or-later). Older files use Cabal's own names (BSD3, OtherLicense, AllRightsReserved), and the default is NONE.",
+      "crosswalk_cell": "license / license-file / license-files"
+    },
+    {
+      "format": "cabal",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no DOI field (package-url is where a source bundle sits)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no SWHID field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "codeRepository",
+      "path": "source-repository[kind=head].location | source-repository[kind=this].location",
+      "source": "curated:no cell; the repository is the location of a source-repository section, of kind head (the development branch) or else this (the release's tag, kept in a separate tag field)",
+      "comment": "The value is a URL for most git repositories, but its form depends on the repository type (a CVS location is not a URL).",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "cabal",
+      "term": "description",
+      "path": "synopsis",
+      "source": "curated:the cell lists synopsis / description, two fields; synopsis is the one-line summary, description is several paragraphs in Haddock markup",
+      "comment": "cabal2nix, which turns a .cabal file into package metadata, takes the short description from synopsis. A consumer wanting the long text reads description.",
+      "crosswalk_cell": "synopsis / description"
+    },
+    {
+      "format": "cabal",
+      "term": "keywords",
+      "path": "category",
+      "source": "crosswalk:crosswalks/Cabal.csv@3.1",
+      "comment": "category is free text for Hackage's catalogue ('Data, Text'), not a keyword list; the consumer splits it on commas.",
+      "crosswalk_cell": "category"
+    },
+    {
+      "format": "cabal",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no cell; a .cabal file has no release date (Hackage records the upload time)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "typst",
+      "term": "name",
+      "path": "package.name",
+      "source": "curated:no typst.toml crosswalk upstream; the package name is package.name (its identifier in the namespace, kebab-case)",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "version",
+      "path": "package.version",
+      "source": "curated:no typst.toml crosswalk upstream; package.version is a full major.minor.patch triple",
+      "comment": "Typst takes only major.minor.patch: no pre-release or build tag.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "author",
+      "path": "package.authors[]",
+      "source": "curated:no typst.toml crosswalk upstream; package.authors is a list of strings",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "author.givenName",
+      "path": "package.authors[]",
+      "source": "curated:no typst.toml crosswalk upstream; an author is one string, 'Name <email|url|@github-handle>'",
+      "comment": "The consumer drops the angle-bracket part and splits the name.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "author.familyName",
+      "path": "package.authors[]",
+      "source": "curated:no typst.toml crosswalk upstream; an author is one string, 'Name <email|url|@github-handle>'",
+      "comment": "The consumer drops the angle-bracket part and splits the name.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; an author string takes an email, URL or GitHub handle in angle brackets, no ORCID",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; the manifest has authors only, no contributor list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; the manifest has no contributor list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; the manifest has no contributor list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; the manifest has no contributor list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "license",
+      "path": "package.license",
+      "source": "curated:no typst.toml crosswalk upstream; package.license is an SPDX 2 expression string",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; the manifest has no DOI field",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; the manifest has no SWHID field",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "codeRepository",
+      "path": "package.repository",
+      "source": "curated:no typst.toml crosswalk upstream; package.repository links the repository where the package is developed; package.homepage is the web page, a separate key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "description",
+      "path": "package.description",
+      "source": "curated:no typst.toml crosswalk upstream; package.description is a short description",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "keywords",
+      "path": "package.keywords",
+      "source": "curated:no typst.toml crosswalk upstream; package.keywords is an array of search keywords; package.categories and package.disciplines are separate Typst Universe lists",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "typst",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no typst.toml crosswalk upstream; the manifest has no release date",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "name",
+      "path": "title",
+      "source": "curated:no _extension.yml crosswalk upstream; title is the extension's name, and its id is the _extensions/<name>/ directory, not a key (citesync reads npm's name key here, which the file does not have, so it finds no name)",
+      "comment": "A display name, not the id.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "version",
+      "path": "version",
+      "source": "curated:no _extension.yml crosswalk upstream; version is a SemVer string, and quarto-cli rejects the file when it is not one (1.2 fails)",
+      "comment": "Pre-release and build tags are allowed, as in SemVer.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "author",
+      "path": "author",
+      "source": "curated:no _extension.yml crosswalk upstream; author is one string, not a list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "author.givenName",
+      "path": "author",
+      "source": "curated:no _extension.yml crosswalk upstream; author is one free-text string",
+      "comment": "The consumer splits the name.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "author.familyName",
+      "path": "author",
+      "source": "curated:no _extension.yml crosswalk upstream; author is one free-text string",
+      "comment": "The consumer splits the name.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; there is one author string, no ORCID",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; there is one author string, no contributor key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no contributor key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no contributor key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no contributor key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "license",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no license key among the documented fields (title, author, version, quarto-required, contributes)",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no DOI key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no SWHID key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "codeRepository",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no repository key; the install command takes a GitHub URL, which the file does not record",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "description",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no description key; title is the name only",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "keywords",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no keywords key",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "quarto",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:no _extension.yml crosswalk upstream; no release date key",
+      "crosswalk_cell": null
     }
   ]
 }

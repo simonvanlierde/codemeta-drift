@@ -181,7 +181,8 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
         for cell in data["cells"]:
             if cell["format"] != fmt or not cell["reason"]:
                 continue
-            was = f"crosswalk cell `{cell['cell']}`" if (cell["cell"] or "").strip() else "no crosswalk cell"
+            # Stripped: DataCite's name cell is "title ", and a code span can't end in a space.
+            was = f"crosswalk cell `{cell['cell'].strip()}`" if (cell["cell"] or "").strip() else "no crosswalk cell"
             now = f"`{cell['path']}`" if cell["path"] else "no path"
             reason = cell["reason"][0].upper() + cell["reason"][1:].rstrip(".")
             lines.append(f"- `{cell['term']}` ({cell['status']}): {was} → {now}. {reason}.")

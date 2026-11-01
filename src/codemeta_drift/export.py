@@ -16,7 +16,7 @@ from typing import Any
 
 from codemeta_drift.checks import Finding, csv_rows, table_rows
 
-SCHEMA_VERSION = "1.4"
+SCHEMA_VERSION = "1.5"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -72,6 +72,16 @@ FORMATS = {
     "r-description": Spoke("crosswalks/R Package Description.csv"),
     "julia": Spoke("crosswalks/Julia Project.csv", person_list=True),
     "bibtex": Spoke("crosswalks/BibTeX.csv"),
+    "datacite": Spoke("crosswalks/DataCite.csv", person_list=True, person_prefix=""),
+    "setup-py": Spoke("crosswalks/Python Distutils (PyPI).csv"),
+    "ruby-gem": Spoke("crosswalks/Ruby Gem.csv", person_list=True),
+    "maven": Spoke("crosswalks/Java (Maven).csv", person_list=True),
+    "cpan-meta-2": Spoke("crosswalks/Perl Module Description (CPAN::Meta).csv", person_list=True),
+    "nuget": Spoke("crosswalks/NuGet.csv"),
+    "pubspec": Spoke("crosswalks/Pubspec.csv", person_list=True),
+    "cabal": Spoke("crosswalks/Cabal.csv"),
+    "typst": Spoke(None),
+    "quarto": Spoke(None),
 }
 
 PATH = re.compile(
@@ -226,12 +236,36 @@ def make_row(
     return row, None
 
 
+DATACITE_NAME = (
+    "DataCite's givenName and familyName are optional. Without them, name holds the whole name,"
+    " written 'Family, Given' for a Personal nameType, and the consumer splits it."
+)
+
 # Guidance for a row that reads its cell as it is, so it has no curated row to hold a comment.
 CROSSWALK_COMMENTS = {
     ("cff-1.2.0", "author.familyName"): (
         "CFF keeps a name particle and suffix apart: the family name is name-particle, family-names and"
         " name-suffix joined by spaces, so Antonie van Leeuwenhoek has family-names Leeuwenhoek and"
         " name-particle van, and a family name of van Leeuwenhoek."
+    ),
+    ("datacite", "author.givenName"): DATACITE_NAME,
+    ("datacite", "author.familyName"): DATACITE_NAME,
+    ("datacite", "contributor.givenName"): DATACITE_NAME,
+    ("datacite", "contributor.familyName"): DATACITE_NAME,
+    ("cpan-meta-2", "license"): (
+        "license is a list of CPAN::Meta licence strings (perl_5, mit, apache_2_0), not SPDX ids; the"
+        " consumer maps them with the spec's table. A single string is a list of one."
+    ),
+    ("nuget", "author"): (
+        "authors is one string; the consumer splits it on commas and trims each name, as swh-indexer does."
+    ),
+    ("cabal", "author"): (
+        "author is free text: often one name, 'Name <email>', or several names joined by commas. The"
+        " consumer splits it."
+    ),
+    ("cabal", "keywords"): (
+        "category is free text for Hackage's catalogue ('Data, Text'), not a keyword list; the consumer"
+        " splits it on commas."
     ),
 }
 
