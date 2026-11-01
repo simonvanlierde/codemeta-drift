@@ -34,7 +34,8 @@ def test_unreviewed_lists_every_other_crosswalk_by_shape():
     found = {(c["format"], c["term"]): c["status"] for c in data["cells"]}
     assert len(found) == 16 * 17
     assert found["ASCL", "name"] == "path"
-    assert found["DCAT", "name"] == "prose"
+    assert found["DCAT", "name"] == "path"  # dcterms:title, a prefixed key since schema 1.6
+    assert found["MODS", "name"] == "prose"
     assert found["ASCL", "version"] == "empty"
     assert {f["label"] for f in data["formats"] if f["format"] == "DCAT"} == {"DCAT-2"}
 
@@ -83,7 +84,7 @@ def test_known_cells_get_their_status():
 
 def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if FORMATS[fmt].crosswalk]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 108, "corrected": 127, "added": 90, "no field": 151}
+    assert {s: found.count(s) for s in set(found)} == {"as-is": 111, "corrected": 124, "added": 90, "no field": 151}
 
 
 def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):

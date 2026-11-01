@@ -74,7 +74,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.5",
+  "schema_version": "1.6",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.5.0"},
   "rows": [
@@ -150,12 +150,9 @@ them into one first. These cases need more than the grammar below says:
   elements with `label` and `url`, the label normalised as the
   [well-known project URLs spec](https://packaging.python.org/en/latest/specifications/well-known-project-urls/)
   says: lower case, no punctuation or whitespace, so `Source Code` matches `sourcecode`.
-  `Author | Author-email` is the one path whose alternatives are all read: a project with
-  authors of both kinds fills both fields.
 - R DESCRIPTION: `Authors@R` becomes a list of person entries with `given`, `family`, `role`
-  and `comment`, where `comment` is a mapping (`c(ORCID = "...")`). `role` is a list, and
-  `[role=aut]` matches an entry whose roles include `aut`, so `c("aut", "cre")` matches. A
-  package without `Authors@R` has only the free-text `Author` field, which no path reads.
+  and `comment`, where `comment` is a mapping (`c(ORCID = "...")`). `role` is a list, so
+  `[role=aut]` matches `c("aut", "cre")`. A package without `Authors@R` has only the free-text `Author` field, which no path reads.
 - Julia: an `authors` element may be a plain `Name` or `Name <email>` string. Both name
   sub-terms then come from that string, and the consumer splits it, as for Zenodo.
 - DataCite: paths start inside `data.attributes` of the REST API's JSON, so the DOI is `doi`.
@@ -183,10 +180,10 @@ them into one first. These cases need more than the grammar below says:
   which are not JSON keys. In a document with several packages, the consumer reads the one that
   SPDXRef-DOCUMENT's `DESCRIBES` relationship names.
 - DCAT 3 and DOAP are RDF. A consumer reads the record (RDF/XML from Zenodo's OAI-PMH or a
-  project's `.doap` file) as JSON-LD rooted at the `dcat:Dataset` or `doap:Project` node, compacted
-  so each property has its bare local name. No published context does that, so the consumer
-  supplies one that maps each name to its DCAT, Dublin Core, OWL, DOAP or FOAF IRI. A property may hold one value or a list, a link is an
-  object with `@id`, and a typed date may be an object with `@value`.
+  project's `.doap` file) as JSON-LD rooted at the `dcat:Dataset` or `doap:Project` node,
+  compacted with a context that defines only the prefixes `dcat`, `dcterms`, `owl`, `foaf` and
+  `doap`, so each key is a prefixed name such as `dcterms:title`. A property may hold one value or
+  a list, a link is an object with `@id`, and a typed date may be an object with `@value`.
 - Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
   element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object
   with `id` for an item, or an object with `time` for a date. A deprecated statement is skipped.
@@ -213,13 +210,17 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 | --- | --- | --- |
 | `key` | the value under `key` | `package.name` |
 | `key[]` | each element of the list under `key` | `authors[]` |
-| `key[k=v]` | each element of the list under `key` whose `k` equals `v` | `identifiers[type=doi].value` |
-| `a \| b` | `a` if it exists, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
+| `key[k=v]` | each element of the list under `key` whose `k` equals `v`, or is a list that holds `v` | `identifiers[type=doi].value` |
+| `a + b` | the values of `a`, then those of `b` | `Author + Author-email` |
+| `a \| b` | `a` if it has any value, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
 
 - A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
   Later characters can be ASCII letters, digits, `_`, `-` or `@` (R's `Authors@R`, since schema 1.4).
+  A key may carry one prefix, `prefix:local`, for RDF formats (`dcterms:title`, since schema 1.6).
 - A filter value contains ASCII letters, digits, `_`, `.` or `-`.
-- Alternatives are separated by exactly one space, `|`, one space.
+- Alternatives are separated by exactly one space, `|`, one space, and parts by one space, `+`,
+  one space. `+` binds tighter, so `a + b | c` reads `c` only when `a` and `b` both have no value.
+- A filter matches only an element that has the key.
 - There are no list indexes (`a[0]`) and no wildcards.
 
 A person sub-term's path is absolute and starts with the path of its term. CFF `author` is
@@ -258,7 +259,10 @@ They come with a new codemeta tag or a new codemeta-drift release.
 1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 2).
 2. Validate the file against the schema it vendors beside it, and update the two together:
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
-   Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema.
+   Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
+   path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas. Update the
+   resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
+   that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
    A row with `path: null` is not missing: the format has no place for that term.

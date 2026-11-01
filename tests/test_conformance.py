@@ -154,4 +154,4 @@ def test_zenodo_path_coverage_includes_current_github_metadata():
 
 
 def test_a_key_may_contain_at_as_the_export_grammar_allows():
-    assert [step.key for step in parse("Authors@R[role=aut].given")[0]] == ["Authors@R", "given"]
+    assert [step.key for step in parse("Authors@R[role=aut].given")[0][0]] == ["Authors@R", "given"]

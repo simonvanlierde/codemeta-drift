@@ -8,16 +8,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade
-codemeta-drift with the file. A 1.5 export still passes the 1.4 schema, and readers that skip formats they don't
-use read it unchanged.
+codemeta-drift with the file. A consumer that vendors the mapping schema vendors the 1.6 schema and
+`mapping-vectors.json` with it, and runs the vectors through its resolver: a 1.6 export fails the 1.4 schema that 0.5.0 shipped.
 
 ### Added
 
 - The mapping export covers 22 more formats: DataCite, setup.py, Ruby gemspecs, Maven's pom.xml, CPAN's
   META.json, NuGet's .nuspec, Dart's pubspec.yaml, Cabal, `typst.toml`, Quarto's `_extension.yml`, the GitHub
   API, Figshare, bio.tools, Leiningen's project.clj, Octave's DESCRIPTION, publiccode.yml 0.8, swMATH, SPDX 2.3,
-  CodeMeta 2.0, DCAT 3, DOAP and Wikidata. Each row was checked against the format's own tools and spec, and its
-  `schema_version` is 1.5. See the [mapping export](docs/mapping-export.md).
+  CodeMeta 2.0, DCAT 3, DOAP and Wikidata. Each row was checked against the format's own tools and spec. See the [mapping export](docs/mapping-export.md).
 - Ship `mapping-vectors.json` beside the mapping schema: test cases of path, document and the values the path
   resolves to, for a consumer to run through its own resolver. See the [mapping export](docs/mapping-export.md#path-grammar).
 
@@ -25,6 +24,10 @@ use read it unchanged.
 
 - The BibTeX `codeRepository` row reads `repository | url`, since plain BibTeX styles print only `url`.
   See the [coverage page](docs/coverage.md).
+- Schema 1.6 extends the path grammar: `a + b` reads both parts, `[k=v]` also matches a list that holds `v`, and
+  a key may carry a prefix. The PKG-INFO author rows use `+`, the Project-URL rows end in `.url`, and the DCAT 3
+  and DOAP rows use prefixed names such as `dcterms:title`. See the
+  [path grammar](docs/mapping-export.md#path-grammar).
 
 ### Fixed
 
