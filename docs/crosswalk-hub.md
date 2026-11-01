@@ -27,10 +27,13 @@ in one string, SPDX identifiers stored as URLs, and Go module paths.
 The `term:` namespace identifies the hub's terms from the JSON export, including compound
 person paths and `swhid`. It does not add terms to CodeMeta's vocabulary. The `field:`
 namespace identifies a format and its complete path, percent-encoded. `format:` identifies
-the format itself; its URI prefix differs from `field:` so SSSOM readers can expand both. All three resolve on the [coverage page](https://simonvanlierde.com/codemeta-drift/),
-which opens the matching cell: `field:cargo/package.name` is
-<https://simonvanlierde.com/codemeta-drift/#field/cargo/package.name>. They are not registered
-w3id identifiers.
+the format itself; its URI prefix differs from `field:` so SSSOM readers can expand both.
+
+All three resolve on the [coverage page](https://simonvanlierde.com/codemeta-drift/), which
+opens the matching cell: `field:cargo/package.name` is
+<https://simonvanlierde.com/codemeta-drift/#field/cargo/package.name>. The page has no
+codemeta.json column, so `field:codemeta/...` opens the term's row instead, and the Go
+spoke's `field:gomod/module` has no cell. They are not registered w3id identifiers.
 
 The header names the set (`mapping_set_id`, title, description and version), its curator by
 ORCID (`creator_id`) and this repository as `mapping_provider`.

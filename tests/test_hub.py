@@ -62,9 +62,28 @@ def test_mapping_rejects_invalid_input(change: str):
 
 def test_sssom_uses_curie_identifiers_and_conservative_predicates():
     text = sssom(mapping())
-    assert text.startswith("# mapping_set_id: https://simonvanlierde.com/codemeta-drift/spokes-3.1.sssom.tsv\n")
+    header = dict(
+        line.removeprefix("# ").split(": ", 1) for line in text.splitlines() if line.startswith("# ") and ": " in line
+    )
+    site = "https://simonvanlierde.com/codemeta-drift/"
+    assert header["mapping_set_id"] == f"{site}spokes-3.1.sssom.tsv"
+    assert header["mapping_set_version"] == mapping()["generator"]["version"]
+    assert header["mapping_set_title"].endswith("CodeMeta 3.1")
+    assert "may need conversion" in header["mapping_set_description"]
+    assert header["mapping_provider"] == "https://github.com/simonvanlierde/codemeta-drift/"
     assert "# creator_id:\n#   - orcid:0009-0006-6953-909X\n" in text
-    assert "#   orcid: https://orcid.org/\n" in text
+    assert (
+        "# see_also:\n#   - https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/crosswalk-hub.md\n" in text
+    )
+    prefixes = dict(
+        line.removeprefix("#   ").split(": ", 1)
+        for line in text.split("# curie_map:\n", 1)[1].splitlines()
+        if line.startswith("#   ")
+    )
+    assert prefixes["term"] == f"{site}#term/"
+    assert prefixes["field"] == f"{site}#field/"
+    assert prefixes["format"] == f"{site}#format/"
+    assert prefixes["orcid"] == "https://orcid.org/"
     rows = list(
         csv.DictReader(
             io.StringIO("\n".join(line for line in text.splitlines() if not line.startswith("#"))), delimiter="\t"
