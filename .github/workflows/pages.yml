@@ -32,6 +32,8 @@ jobs:
           version: "0.13.1"
           python-version: "3.14"
       - run: uv sync --locked
+      # The runner's own Node: the test imports a plain module and needs no packages.
+      - run: node --test site/fragment.test.mjs
       # Read only through git, never run: the build reads CodeMeta's files as data, at main and at the
       # export's tag, so the clone is full (about 11 MB).
       - run: git clone --no-checkout https://github.com/codemeta/codemeta.git "${RUNNER_TEMP}/codemeta"
