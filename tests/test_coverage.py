@@ -4,10 +4,11 @@ from pathlib import Path
 import pytest
 
 from codemeta_drift.cli import main, read_dir
-from codemeta_drift.coverage import coverage, markdown, upstream
+from codemeta_drift.coverage import coverage, markdown, unreviewed, upstream
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/mapping-3.1.json"
+TAG_FILES = ROOT / "tests/fixtures/3.1"  # CodeMeta at 3.1, pinned by tests/fixtures/3.1.sha256
 
 
 def mapping():
@@ -19,8 +20,41 @@ def statuses():
 
 
 def test_docs_page_is_generated_from_the_example():
-    # Regenerate with: uv run codemeta-drift hub coverage examples/mapping-3.1.json --out docs/coverage.md
-    assert (ROOT / "docs/coverage.md").read_text("utf-8") == markdown(mapping())
+    # Regenerate as docs/development.md says, with a CodeMeta clone that has the tag.
+    assert (ROOT / "docs/coverage.md").read_text("utf-8") == markdown(mapping(), read_dir(TAG_FILES))
+
+
+def test_unreviewed_lists_every_other_crosswalk_by_shape():
+    data = unreviewed(read_dir(TAG_FILES), mapping())
+    names = [f["format"] for f in data["formats"]]
+    assert len(names) == 36  # the 44 crosswalks at 3.1, less the eight the mapping reviews
+    assert "Zenodo" not in names
+    assert "NodeJS" not in names
+    found = {(c["format"], c["term"]): c["status"] for c in data["cells"]}
+    assert len(found) == 36 * 17
+    assert found["DataCite", "name"] == "path"
+    assert found["DCAT-3", "name"] == "prose"
+    assert found["ASCL", "version"] == "empty"
+    assert {f["label"] for f in data["formats"] if f["format"] == "DCAT"} == {"DCAT-2"}
+
+
+def test_unreviewed_marks_a_cell_it_cannot_join():
+    files = read_dir(TAG_FILES)
+    datacite = "crosswalks/DataCite.csv"
+    files[datacite] = files[datacite].replace("\nversion,", "\nversion,\nversion,", 1)
+    found = {(c["format"], c["term"]): c["status"] for c in unreviewed(files, mapping())["cells"]}
+    assert found["DataCite", "version"] == "unmatched"
+
+
+def test_cli_lists_unreviewed_crosswalks_from_the_tag(repo: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(["hub", "coverage", str(EXAMPLE), "--json", "--codemeta", str(repo)]) == 0
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["unreviewed"]["formats"]) == 36
+
+
+def test_cli_coverage_without_the_tag_exits_2(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(["hub", "coverage", str(EXAMPLE), "--codemeta", str(tmp_path)]) == 2
+    assert capsys.readouterr().err.startswith(f"codemeta-drift: cannot read {tmp_path}: fatal:")
 
 
 def test_known_cells_get_their_status():
@@ -37,16 +71,17 @@ def test_known_cells_get_their_status():
     assert not any(fmt == "codemeta" for fmt, _ in found)
 
 
-def test_counts_for_the_four_crosswalks():
+def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if fmt != "pep621"]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 27, "corrected": 15, "added": 12, "no field": 14}
+    assert {s: found.count(s) for s in set(found)} == {"as-is": 41, "corrected": 32, "added": 26, "no field": 37}
 
 
 def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(EXAMPLE), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == "3.1"
-    assert len(data["cells"]) == 5 * 17
+    assert len(data["cells"]) == 9 * 17
+    assert "unreviewed" not in data  # only with --codemeta
 
 
 def test_upstream_reports_unmatched_changed_and_fixed_cells():

@@ -53,6 +53,9 @@ def test_path_grammar_accepts_example_paths(path: str):
         "a  | b",
         "a b",
         "1a",
+        "@@a",
+        "a[@@x=1]",
+        "a.@",
     ],
 )
 def test_path_grammar_rejects_malformed_paths(path: str):
@@ -87,6 +90,11 @@ def test_example_null_rows():
         {(f, t) for f in ("pep621", "cargo", "npm") for t in ("author.@id", "identifier", "swhid", "contributor.@id")}
         | {(f, t) for f in ("cff-1.2.0", "pep621", "cargo") for t in contributor}
         | {(f, "datePublished") for f in ("pep621", "cargo", "npm")}
+        | {("pkg-info", t) for t in ("author.@id", "identifier", "swhid", "datePublished", *contributor)}
+        | {("r-description", t) for t in ("identifier", "swhid", "keywords")}
+        | {("julia", t) for t in ("license", "identifier", "swhid", "codeRepository", "description", "keywords")}
+        | {("julia", t) for t in ("datePublished", *contributor)}
+        | {("bibtex", t) for t in ("author.@id", *contributor)}
     )
 
 

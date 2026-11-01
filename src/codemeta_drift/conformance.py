@@ -23,7 +23,7 @@ SCHEMA_FILES = {
 }
 """The schema file for each format that has one. Zenodo uses a verified structural subset; codemeta is not checked."""
 
-STEP = re.compile(r"(?P<key>@?[\w-]+)(?:\[(?:(?P<filter>@?[\w-]+)=[^\]]+)?\])?")
+STEP = re.compile(r"(?P<key>@?[\w-][\w@-]*)(?:\[(?:(?P<filter>@?[\w-][\w@-]*)=[^\]]+)?\])?")
 
 type Schema = dict[str, Any]
 

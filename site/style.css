@@ -46,7 +46,6 @@ body {
 code,
 .mono,
 .slug,
-.path,
 select {
   font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Liberation Mono", monospace;
 }
@@ -95,6 +94,18 @@ a:hover {
 .skip:focus {
   top: 8px;
 }
+/* Every cell is a tab stop, so a keyboard user can jump past the matrix. */
+.skip-matrix:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.skip-matrix:focus {
+  display: inline-block;
+  margin-bottom: 8px;
+}
 .slug {
   display: flex;
   flex-wrap: wrap;
@@ -117,6 +128,55 @@ h1 {
   letter-spacing: -0.01em;
   margin: 28px 0 8px;
   max-width: 28ch;
+}
+/* The intro and the headline figure share the first screen on a wide window; the figure drops below on a narrow one. */
+.hero {
+  display: grid;
+  gap: 8px 48px;
+  align-items: end;
+}
+@media (min-width: 1000px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+  }
+}
+.score {
+  margin: 16px 0 0;
+  padding-top: 10px;
+  border-top: 2px solid var(--ink);
+}
+.score .big {
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.score .big span {
+  font-size: 1.25rem;
+  color: var(--faint);
+}
+.score figcaption {
+  font-size: 0.9375rem;
+}
+/* as-is in ink, corrected and added in the two ochre washes, as in the matrix cells. */
+.bar {
+  display: flex;
+  height: 10px;
+  margin: 12px 0 10px;
+  gap: 2px;
+}
+.bar span {
+  flex-basis: 0;
+}
+.bar .s-as-is {
+  background: var(--ink);
+}
+.bar .s-corrected {
+  background: var(--ochre);
+}
+.bar .s-added {
+  background: var(--ochre-wash);
+  box-shadow: inset 0 0 0 1px var(--ochre);
 }
 /* The views: a row of tabs on one hairline, the chosen one tinted with a 2px ink bar at its foot. */
 .tabs {
@@ -201,9 +261,9 @@ select {
   display: grid;
   gap: 24px;
 }
-@media (min-width: 1000px) {
+@media (min-width: 1280px) {
   .board {
-    grid-template-columns: minmax(0, 1fr) 16rem;
+    grid-template-columns: minmax(0, 1fr) 15rem;
     align-items: start;
   }
   .detail {
@@ -213,6 +273,8 @@ select {
 }
 .scroll {
   overflow-x: auto;
+  /* Room for the sticky format column on the left; on the right, Chrome otherwise stops with a focused cell half out. */
+  scroll-padding: 0 3rem 0 9.5rem;
   border: 1px solid var(--rule);
 }
 table {
@@ -232,36 +294,50 @@ table {
   padding: 8px 10px;
   white-space: nowrap;
 }
+/* A fixed width the scroll padding can match; a long crosswalk name wraps. */
 #matrix tbody th {
   font-weight: 400;
-  padding: 10px;
+  padding: 8px 12px;
+  width: 9.5rem;
+  min-width: 9.5rem;
+  vertical-align: middle;
+}
+/* Term names run up the column, so seventeen columns fit beside the detail panel. */
+#matrix thead th.rot {
+  vertical-align: bottom;
+  text-align: center;
+  padding: 10px 0 8px;
+}
+#matrix th.rot span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
   white-space: nowrap;
+}
+#matrix thead th.rot code {
+  font-size: 12px;
+  color: var(--ink);
+}
+#matrix .tally {
+  padding: 8px 12px;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 0.875rem;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
 }
 #matrix td + td,
 #matrix th + td {
   border-left: 1px solid var(--rule);
 }
 .cell {
-  display: flex;
-  gap: 6px;
-  align-items: baseline;
+  display: grid;
+  place-items: center;
   width: 100%;
-  min-width: 7.5rem;
-  max-width: 12rem;
+  min-width: 2.25rem;
   border: 0;
-  text-align: left;
-  padding: 10px;
-  font-size: 12.5px;
-  line-height: 1.35;
-}
-.cell .path {
-  overflow-wrap: normal;
-}
-.cell .mark {
+  padding: 0;
   font-family: Charter, Georgia, serif;
-  font-size: 1rem;
-  flex: none;
-  width: 1ch;
+  font-size: 1.0625rem;
 }
 .cell:hover,
 .cell[aria-pressed="true"] {
@@ -271,7 +347,7 @@ table {
 .s-added {
   color: var(--ochre);
 }
-/* The tint fills the whole table cell, not just the button, so a tall row reads as one block. */
+/* The tint fills the whole table cell, edge to edge, not just the button inside it. */
 #matrix td:has(.s-corrected) {
   background: var(--ochre-wash);
 }
@@ -280,6 +356,40 @@ table {
 }
 .s-no-field {
   color: var(--faint);
+}
+/* A crosswalk nobody reviewed gets no wash: its marks say only the cell's shape. Prose and unjoinable cells are ochre. */
+.s-path,
+.s-empty {
+  color: var(--faint);
+}
+.s-prose,
+.s-unmatched {
+  color: var(--ochre);
+}
+/* tr.group outranks the sticky first-column rule: the label row spans the table and stays put. */
+#matrix tr.group th {
+  position: static;
+  box-shadow: none;
+  padding: 18px 12px 6px;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--faint);
+  white-space: normal;
+}
+#matrix tbody:first-of-type tr.group th {
+  padding-top: 8px;
+}
+/* The label spans the whole table; capped to the screen so it wraps where the reader can see it. */
+#matrix tr.group > th > span {
+  display: inline-block;
+  position: sticky;
+  left: 12px;
+  max-width: min(44rem, calc(100vw - 4rem));
+}
+#matrix tr.group .mark {
+  position: static;
+  font-style: normal;
+  color: var(--ink);
 }
 table[data-only="as-is"] td:has(.cell:not(.s-as-is)),
 table[data-only="corrected"] td:has(.cell:not(.s-corrected)),
@@ -405,7 +515,7 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
   font-size: 12px;
   color: var(--faint);
 }
-@media (max-width: 999px) and (min-height: 480px) {
+@media (max-width: 1279px) and (min-height: 480px) {
   /* A chosen cell's detail stays in view at the foot of the screen until it is closed. */
   html:has(.detail dl) {
     /* Tabbing scrolls a focused cell clear of the panel, not under it. */
@@ -448,6 +558,13 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
   .tabs [role="tab"][aria-selected="true"] {
     border-bottom: 2px solid Highlight;
   }
+  /* Forced colours drop backgrounds, which are all the headline bar has. */
+  .bar span {
+    border: 1px solid CanvasText;
+  }
+  .bar .s-as-is {
+    background: CanvasText;
+  }
   /* Forced colours drop box-shadow, which marks the chosen cell and filter otherwise. */
   .cell[aria-pressed="true"],
   #filters [aria-pressed="true"] {
@@ -463,13 +580,11 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
     border-top-color: CanvasText;
   }
 }
-/* The term column stays put while the formats scroll sideways. On a phone it would cover a focused cell instead. */
-@media (min-width: 561px) {
-  #matrix th:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 1;
-    background: var(--paper);
-    box-shadow: inset -1px 0 0 var(--rule);
-  }
+/* The format column stays put while the terms scroll sideways; the scroll padding keeps a focused cell clear of it. */
+#matrix th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--paper);
+  box-shadow: inset -1px 0 0 var(--rule);
 }

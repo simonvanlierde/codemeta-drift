@@ -24,12 +24,14 @@ Use it to check the CodeMeta standard's own files. To keep a project's `CITATION
 
 ## How the crosswalks hold up
 
-At CodeMeta 3.1, the CFF, Zenodo, Cargo and npm crosswalks have 68 cells for the 17 terms
-citation tools need. 14 are for terms the format has no field for. Of the other 54,
-only 27 can be used as written: 15 are wrong, ambiguous or prose (3 of them name a field the
-format doesn't have), and 12 are blank although the format has the field.
+At CodeMeta 3.1, the crosswalks for CFF, Zenodo, BibTeX, Python PKG-INFO, Cargo, npm,
+R DESCRIPTION and Julia's Project.toml have 136 cells for the 17 terms citation tools need.
+37 are for terms the format has no field for. Of the other 99, only 41 can be used as written:
+32 are wrong, ambiguous or prose (7 of them name a field the format doesn't have), and 26 are
+blank although the format has the field.
 CodeMeta has no crosswalk for `pyproject.toml` at all. The [coverage matrix](docs/coverage.md)
-shows every cell and the reason for each correction, and the
+shows every cell and the reason for each correction, lists the other 36 crosswalks by the shape
+of their cells, and the
 [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.
 
 ## Try it
@@ -64,7 +66,7 @@ Export the reviewed mappings for CodeMeta 3.1:
 uvx codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
 ```
 
-The export covers CFF, CodeMeta, Zenodo, Python (`pyproject.toml`), Cargo and npm metadata.
+The export covers CFF, CodeMeta, Zenodo, BibTeX, Python (`pyproject.toml` and PKG-INFO), Cargo, npm, R (DESCRIPTION) and Julia (`Project.toml`) metadata.
 It records the field path for each term, with a reason for each curated correction.
 It does not convert field values.
 The exporter reads the tag's commit and refuses rows it cannot resolve.
@@ -85,7 +87,7 @@ exported; currently that is `3.1`.
 
 ## Crosswalk hub
 
-Derive field correspondences between two formats or write seven SSSOM spokes with
+Derive field correspondences between two formats or write SSSOM spokes for every format with
 [`codemeta-drift hub`](docs/crosswalk-hub.md). Values still need each format's parser and normalization.
 
 ## Schema watcher
