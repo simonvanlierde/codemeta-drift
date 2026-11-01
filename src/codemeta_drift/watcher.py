@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 from codemeta_drift.conformance import array_items, branches, resolve
-from codemeta_drift.paths import parse
+from codemeta_drift.paths import PIECES, parse
 
 
 def schema_paths(root: dict[str, Any]) -> set[str]:
@@ -48,7 +48,7 @@ def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: di
             path
             for row in rows
             if row["format"] == fmt and row["path"] is not None
-            for path in row["path"].split(" | ")
+            for path in PIECES.split(row["path"])
         }
         changes.extend(
             {"format": fmt, "kind": "broken", "path": path, "detail": reason}
@@ -58,7 +58,7 @@ def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: di
         covered = set()
         for path in paths:
             try:
-                (steps,) = parse(path)
+                [[steps]] = parse(path)
             except ValueError:  # already reported above as broken: not a path
                 continue
             prefix = ""

@@ -12,7 +12,7 @@ from collections.abc import Iterator, Mapping
 from typing import Any
 
 from codemeta_drift.checks import Finding
-from codemeta_drift.paths import parse
+from codemeta_drift.paths import PIECES, parse
 
 SCHEMA_FILES = {
     "cff-1.2.0": "cff-1.2.0.json",
@@ -71,9 +71,9 @@ def array_items(node: Schema) -> Iterator[Schema]:
 
 
 def resolve(root: Schema, path: str) -> str | None:
-    """Why one path alternative (no `` | ``) is not in the schema, or None when every step resolves."""
+    """Why one path piece (no `` | `` or `` + ``) is not in the schema, or None when every step resolves."""
     try:
-        (steps,) = parse(path)
+        [[steps]] = parse(path)
     except ValueError:  # not a path, or several alternatives
         return "not a path"
     nodes: list[object] = [root]
@@ -100,6 +100,6 @@ def conform(rows: list[dict[str, Any]], schemas: Mapping[str, Schema]) -> list[F
         Finding("PATH_NOT_IN_SCHEMA", row["format"], row["term"], f"{alternative}: {why}")
         for row in rows
         if (schema := schemas.get(row["format"])) is not None
-        for alternative in (row["path"] or "").split(" | ")
+        for alternative in PIECES.split(row["path"] or "")
         if alternative and (why := resolve(schema, alternative))
     ]

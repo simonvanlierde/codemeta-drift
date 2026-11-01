@@ -28,5 +28,5 @@ def test_vector_resolves(case: dict) -> None:
 
 def test_vectors_cover_each_form() -> None:
     paths = " ".join(c["path"] for c in CASES)
-    for form in (" | ", "[]", "[type=", "@url", "Authors@R"):
+    for form in (" | ", " + ", "[]", "[type=", "@url", "Authors@R", "dcterms:", ".url"):
         assert form in paths

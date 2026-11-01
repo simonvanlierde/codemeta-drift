@@ -16,7 +16,7 @@ from typing import Any
 
 from codemeta_drift.checks import Finding, csv_rows, table_rows
 
-SCHEMA_VERSION = "1.5"
+SCHEMA_VERSION = "1.6"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -101,6 +101,9 @@ PATH = re.compile(
         "properties"
     ]["path"]["pattern"]
 )
+
+# Splits a path into its single-chain pieces, at both `` | `` and `` + ``.
+PIECES = re.compile(r" [|+] ")
 
 
 def classify(cell: str) -> str:
@@ -211,7 +214,7 @@ def shared_paths(label: str, fmt: str, rows: list[dict[str, Any]]) -> list[Findi
         (row["term"], alternative)
         for row in rows
         if "." not in row["term"] and row["path"]
-        for alternative in row["path"].split(" | ")
+        for alternative in PIECES.split(row["path"])
     ]
     findings = []
     for i, (term, path) in enumerate(paths):
@@ -289,6 +292,24 @@ CROSSWALK_COMMENTS = {
     ("codemeta-2", "swhid"): (
         "CodeMeta has no SWHID term; a SWHID sits in identifier, beside the DOI, as a swh:1: string or a"
         " PropertyValue (propertyID SWHID) whose value is one."
+    ),
+    ("dcat-3", "author"): (
+        "The spec recommends a foaf:Agent as the value, so an element is an object or an IRI. A creator"
+        " with only an IRI has no name sub-fields."
+    ),
+    ("dcat-3", "contributor"): (
+        "DCAT lists dcterms:contributor, dcterms:creator and dcterms:publisher as the standard properties"
+        " for basic agent associations (section 13.1); prov:qualifiedAttribution with dcat:hadRole is for"
+        " other roles, which a path cannot express."
+    ),
+    ("dcat-3", "identifier"): (
+        "dcterms:identifier is repeatable and untyped; a DOI is told from a SWHID by its spelling."
+    ),
+    ("dcat-3", "keywords"): "Repeatable: a single keyword may be a string rather than an array.",
+    ("dcat-3", "datePublished"): (
+        "A date typed xsd:gYear, xsd:gYearMonth, xsd:date or xsd:dateTime; a record may give several"
+        " (Zenodo gives a year and a date), so take the most precise. A typed literal may arrive as"
+        ' {"@value", "@type"}.'
     ),
 }
 

@@ -403,26 +403,23 @@
     {
       "format": "pkg-info",
       "term": "author",
-      "path": "Author | Author-email",
+      "path": "Author + Author-email",
       "cell": "Author",
-      "reason": "the cell says Author; packaging tools write an author who has an email to Author-email as 'Name <email>', and only a name-only author to Author",
-      "comment": "A project with authors of both kinds fills both fields: read Author and Author-email, not only the first that exists."
+      "reason": "the cell says Author; packaging tools write an author who has an email to Author-email as 'Name <email>', and only a name-only author to Author"
     },
     {
       "format": "pkg-info",
       "term": "author.givenName",
-      "path": "Author | Author-email",
+      "path": "Author + Author-email",
       "cell": "",
-      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email",
-      "comment": "A project with authors of both kinds fills both fields: read Author and Author-email, not only the first that exists."
+      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
     },
     {
       "format": "pkg-info",
       "term": "author.familyName",
-      "path": "Author | Author-email",
+      "path": "Author + Author-email",
       "cell": "",
-      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email",
-      "comment": "A project with authors of both kinds fills both fields: read Author and Author-email, not only the first that exists."
+      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
     },
     {
       "format": "pkg-info",
@@ -483,7 +480,7 @@
     {
       "format": "pkg-info",
       "term": "codeRepository",
-      "path": "Project-URL[label=source] | Project-URL[label=repository] | Project-URL[label=sourcecode] | Project-URL[label=github] | Home-page",
+      "path": "Project-URL[label=source].url | Project-URL[label=repository].url | Project-URL[label=sourcecode].url | Project-URL[label=github].url | Home-page",
       "cell": "",
       "reason": "no cell; the repository is the Project-URL whose label is source or one of its aliases, else the deprecated Home-page",
       "comment": "Compare labels after normalising them as the well-known project URLs spec says: lower case, no punctuation or whitespace, so 'Source Code' matches sourcecode."
@@ -2680,94 +2677,63 @@
     },
     {
       "format": "dcat-3",
-      "term": "name",
-      "path": "title",
-      "cell": "dcterms:title",
-      "reason": "the cell says dcterms:title; the path uses its bare local name because the grammar has no ':'"
-    },
-    {
-      "format": "dcat-3",
       "term": "version",
-      "path": "version | versionInfo",
+      "path": "dcat:version | owl:versionInfo",
       "cell": "dcat:version",
-      "reason": "the cell says dcat:version, which DCAT 3 added for the version name or identifier of a resource; the path is its local name, with owl:versionInfo after it, which Zenodo's DCAT export writes"
-    },
-    {
-      "format": "dcat-3",
-      "term": "author",
-      "path": "creator[]",
-      "cell": "dcterms:creator",
-      "reason": "the cell says dcterms:creator; a dataset can have several creators, so the path is a list of its local name creator",
-      "comment": "The spec recommends a foaf:Agent as the value, so an element is an object or an IRI. A creator with only an IRI has no name sub-fields."
+      "reason": "the cell says dcat:version, which DCAT 3 added for the version name or identifier of a resource; owl:versionInfo comes after it, which Zenodo's DCAT export writes"
     },
     {
       "format": "dcat-3",
       "term": "author.givenName",
-      "path": "creator[].givenName",
+      "path": "dcterms:creator[].foaf:givenName",
       "cell": "",
       "reason": "no cell; the spec types a creator as foaf:Agent, whose person form carries foaf:givenName",
-      "comment": "An agent that has only foaf:name has no given or family name here; the consumer then splits creator[].name."
+      "comment": "An agent that has only foaf:name has no given or family name here; the consumer then splits dcterms:creator[].foaf:name."
     },
     {
       "format": "dcat-3",
       "term": "author.familyName",
-      "path": "creator[].familyName",
+      "path": "dcterms:creator[].foaf:familyName",
       "cell": "",
       "reason": "no cell; the spec types a creator as foaf:Agent, whose person form carries foaf:familyName",
-      "comment": "An agent that has only foaf:name has no given or family name here; the consumer then splits creator[].name."
+      "comment": "An agent that has only foaf:name has no given or family name here; the consumer then splits dcterms:creator[].foaf:name."
     },
     {
       "format": "dcat-3",
       "term": "author.@id",
-      "path": "creator[].@id",
+      "path": "dcterms:creator[].@id",
       "cell": "dcterms:identifier",
       "reason": "the cell says dcterms:identifier, which names the identifier of a resource and not of an agent; an ORCID is the agent's own IRI, so the @id of the creator node",
       "comment": "The spec also allows adms:identifier on the agent for an ORCID given as a string; a consumer may read that when @id is absent."
     },
     {
       "format": "dcat-3",
-      "term": "contributor",
-      "path": "contributor[]",
-      "cell": "dcterms:contributor",
-      "reason": "the cell says dcterms:contributor; a list of its local name, as for creator",
-      "comment": "DCAT lists dcterms:contributor, dcterms:creator and dcterms:publisher as the standard properties for basic agent associations (section 13.1); prov:qualifiedAttribution with dcat:hadRole is for other roles, which a path cannot express."
-    },
-    {
-      "format": "dcat-3",
       "term": "contributor.givenName",
-      "path": "contributor[].givenName",
+      "path": "dcterms:contributor[].foaf:givenName",
       "cell": "",
       "reason": "same reasoning as author.givenName, under contributor"
     },
     {
       "format": "dcat-3",
       "term": "contributor.familyName",
-      "path": "contributor[].familyName",
+      "path": "dcterms:contributor[].foaf:familyName",
       "cell": "",
       "reason": "same reasoning as author.familyName, under contributor"
     },
     {
       "format": "dcat-3",
       "term": "contributor.@id",
-      "path": "contributor[].@id",
+      "path": "dcterms:contributor[].@id",
       "cell": "dcterms:identifier",
       "reason": "same reasoning as author.@id, under contributor"
     },
     {
       "format": "dcat-3",
       "term": "license",
-      "path": "license | distribution[].license",
+      "path": "dcterms:license | dcat:distribution[].dcterms:license",
       "cell": "dcterms:license",
       "reason": "the cell says dcterms:license, which DCAT allows on the dataset and on each distribution; the path reads the dataset's, else a distribution's",
       "comment": "The value is a dcterms:LicenseDocument, usually an IRI; the consumer converts between IRI and SPDX id. Zenodo's software records give the licence only on the distribution, as dct:rights with an SPDX adms:identifier, which this path does not read."
-    },
-    {
-      "format": "dcat-3",
-      "term": "identifier",
-      "path": "identifier",
-      "cell": "dcterms:identifier",
-      "reason": "the cell says dcterms:identifier; the path is its local name. The software DOI is one of its values",
-      "comment": "dcterms:identifier is repeatable and untyped; a DOI is told from a SWHID by its spelling."
     },
     {
       "format": "dcat-3",
@@ -2785,32 +2751,9 @@
       "reason": "the cell says dcat:accessURL, a property of dcat:Distribution that usually points at a landing page or a download, not a repository"
     },
     {
-      "format": "dcat-3",
-      "term": "description",
-      "path": "description",
-      "cell": "dcterms:description",
-      "reason": "the cell says dcterms:description; the path is its local name"
-    },
-    {
-      "format": "dcat-3",
-      "term": "keywords",
-      "path": "keyword",
-      "cell": "dcat:keyword",
-      "reason": "the cell says dcat:keyword; the path is its local name",
-      "comment": "Repeatable: a single keyword may be a string rather than an array."
-    },
-    {
-      "format": "dcat-3",
-      "term": "datePublished",
-      "path": "issued",
-      "cell": "dcterms:issued",
-      "reason": "the cell says dcterms:issued, the date of formal issuance; the path is its local name",
-      "comment": "A date typed xsd:gYear, xsd:gYearMonth, xsd:date or xsd:dateTime; a record may give several (Zenodo gives a year and a date), so take the most precise. A typed literal may arrive as {\"@value\", \"@type\"}."
-    },
-    {
       "format": "doap",
       "term": "version",
-      "path": "release[].revision",
+      "path": "doap:release[].doap:revision",
       "cell": "revision",
       "reason": "the cell says revision, which belongs to doap:Version, not to the project; a project reaches a Version through doap:release, so the path is release[].revision",
       "comment": "A project lists many releases; the consumer picks the newest, by doap:created or by revision order."
@@ -2818,14 +2761,14 @@
     {
       "format": "doap",
       "term": "author",
-      "path": "developer[] | maintainer[]",
+      "path": "doap:developer[] | doap:maintainer[]",
       "cell": "developer",
       "reason": "the cell says developer, but most DOAP files (Apache's, GNOME's) list only maintainer, so the path falls back to it"
     },
     {
       "format": "doap",
       "term": "author.givenName",
-      "path": "developer[].name | maintainer[].name",
+      "path": "doap:developer[].foaf:name | doap:maintainer[].foaf:name",
       "cell": "",
       "reason": "no cell; DOAP people are foaf:Person nodes and the name most DOAP files give is foaf:name, one string",
       "comment": "The consumer splits the name into given and family name; a node that has foaf:givenName and foaf:familyName can be read directly."
@@ -2833,7 +2776,7 @@
     {
       "format": "doap",
       "term": "author.familyName",
-      "path": "developer[].name | maintainer[].name",
+      "path": "doap:developer[].foaf:name | doap:maintainer[].foaf:name",
       "cell": "",
       "reason": "no cell; DOAP people are foaf:Person nodes and the name most DOAP files give is foaf:name, one string",
       "comment": "The consumer splits the name into given and family name; a node that has foaf:givenName and foaf:familyName can be read directly."
@@ -2841,7 +2784,7 @@
     {
       "format": "doap",
       "term": "author.@id",
-      "path": "developer[].@id | maintainer[].@id",
+      "path": "doap:developer[].@id | doap:maintainer[].@id",
       "cell": "",
       "reason": "no cell; DOAP has no ORCID property, but a foaf:Person node can be named by its ORCID IRI, which JSON-LD keeps as @id",
       "comment": "Most DOAP files name people with a blank node, so this is often absent."
@@ -2849,7 +2792,7 @@
     {
       "format": "doap",
       "term": "contributor",
-      "path": "helper[]",
+      "path": "doap:helper[]",
       "cell": "developer",
       "reason": "the cell says developer, which is also author's path; doap:helper is DOAP's term for a project contributor, so contributors read from helper",
       "comment": "documenter, translator and tester are further contributor roles; the consumer may read them too."
@@ -2857,7 +2800,7 @@
     {
       "format": "doap",
       "term": "contributor.givenName",
-      "path": "helper[].name",
+      "path": "doap:helper[].foaf:name",
       "cell": "",
       "reason": "no cell; DOAP people are foaf:Person nodes and the name most DOAP files give is foaf:name, one string",
       "comment": "The consumer splits the name into given and family name; a node that has foaf:givenName and foaf:familyName can be read directly."
@@ -2865,7 +2808,7 @@
     {
       "format": "doap",
       "term": "contributor.familyName",
-      "path": "helper[].name",
+      "path": "doap:helper[].foaf:name",
       "cell": "",
       "reason": "no cell; DOAP people are foaf:Person nodes and the name most DOAP files give is foaf:name, one string",
       "comment": "The consumer splits the name into given and family name; a node that has foaf:givenName and foaf:familyName can be read directly."
@@ -2873,7 +2816,7 @@
     {
       "format": "doap",
       "term": "contributor.@id",
-      "path": "helper[].@id",
+      "path": "doap:helper[].@id",
       "cell": "",
       "reason": "no cell; DOAP has no ORCID property, but a foaf:Person node can be named by its ORCID IRI, which JSON-LD keeps as @id",
       "comment": "Most DOAP files name people with a blank node, so this is often absent."
@@ -2895,7 +2838,7 @@
     {
       "format": "doap",
       "term": "codeRepository",
-      "path": "repository[].location",
+      "path": "doap:repository[].doap:location",
       "cell": "repository/location",
       "reason": "the cell says repository/location in XPath form; in the compacted JSON-LD tree the repository node's location is repository[].location (the node's type, GitRepository or SVNRepository, is @type)",
       "comment": "location may be an IRI string or an object with @id."
@@ -2903,7 +2846,7 @@
     {
       "format": "doap",
       "term": "datePublished",
-      "path": "release[].created",
+      "path": "doap:release[].doap:created",
       "cell": "",
       "reason": "the cell is empty; a release's date is doap:created on its doap:Version node, so the path is release[].created",
       "comment": "Same release as version: the consumer pairs release[].revision with release[].created of the same element."
@@ -3041,6 +2984,34 @@
       "cell": "P577",
       "reason": "the cell says P577, which is not a key of the entity JSON; the date is the time field of a time value",
       "comment": "The value looks like +2020-05-01T00:00:00Z; precision (11 = day, 9 = year) says how much of it is real."
+    },
+    {
+      "format": "doap",
+      "term": "name",
+      "path": "doap:name",
+      "cell": "name",
+      "reason": "the cell says name, DOAP's doap:name; the path names it with its prefix"
+    },
+    {
+      "format": "doap",
+      "term": "license",
+      "path": "doap:license",
+      "cell": "license",
+      "reason": "the cell says license, DOAP's doap:license; the path names it with its prefix"
+    },
+    {
+      "format": "doap",
+      "term": "description",
+      "path": "doap:description",
+      "cell": "description",
+      "reason": "the cell says description, DOAP's doap:description; the path names it with its prefix"
+    },
+    {
+      "format": "doap",
+      "term": "keywords",
+      "path": "doap:category",
+      "cell": "category",
+      "reason": "the cell says category, DOAP's doap:category; the path names it with its prefix"
     }
   ]
 }
