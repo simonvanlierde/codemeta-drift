@@ -36,6 +36,7 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert sorted(p.name for p in out.iterdir()) == [
         "data.json",
         "favicon.svg",
+        "fragment.mjs",
         "index.html",
         "main.mjs",
         "spokes-3.1.sssom.tsv",

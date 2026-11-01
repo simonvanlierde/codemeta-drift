@@ -18,6 +18,10 @@ use read it unchanged.
   was checked against the format's own tools and spec, and its `schema_version` is 1.5. See the
   [mapping export](docs/mapping-export.md).
 
+### Fixed
+
+- The [schema watcher](docs/schema-watcher.md) now also opens a citesync issue when a hash in `MAPPING_SOURCE` differs from the file published at the pinned tag, and its run prints a notice when it skips publishing for lack of a token. The docs name the token permissions it needs.
+
 ## [0.5.0] - 2026-11-01
 
 **Breaking:** SSSOM `term:`, `field:` and `format:` identifiers and the `mapping_set_id` have new URIs.

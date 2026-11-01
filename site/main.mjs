@@ -1,6 +1,8 @@
 // Draws the coverage matrix, the route between two formats and the upstream check from data.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
+import { parseFragment } from "./fragment.mjs";
+
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
   "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", pep621: "pyproject.toml",
@@ -244,29 +246,21 @@ function tabs() {
   });
 }
 
-// The SSSOM export's identifiers resolve here: #term/<term>, #field/<format>/<path> and #format/<format>,
-// each percent-encoded as the export writes it. The first matching cell is chosen and scrolled to.
+// Opens what the fragment names (see parseFragment). The first matching cell is chosen and scrolled to.
 function follow() {
-  const [kind, ...rest] = location.hash.slice(1).split("/");
-  if (kind === "route" || (kind === "upstream" && !document.getElementById("tab-upstream").hidden)) {
-    showTab(kind);
+  const target = parseFragment(location.hash);
+  if (!target) return;
+  if (target.tab) {
+    if (target.tab === "route" || !document.getElementById("tab-upstream").hidden) showTab(target.tab);
     return;
   }
-  let parts;
-  try {
-    parts = rest.map(decodeURIComponent);
-  } catch {
-    return; // a malformed fragment selects nothing
-  }
   const match = {
-    term: (b) => b.dataset.term === parts[0],
-    format: (b) => b.dataset.format === parts[0],
-    field: (b) => b.dataset.format === parts[0] && b.dataset.path === parts.slice(1).join("/"),
-  }[kind];
-  if (!match) return;
+    term: (b) => b.dataset.term === target.term,
+    format: (b) => b.dataset.format === target.format,
+    field: (b) => b.dataset.format === target.format && b.dataset.path === target.path,
+  }[target.kind];
   const cells = [...document.querySelectorAll("#matrix .cell")];
-  // codemeta.json is the hub and has no row: its field ids open the term's first cell instead.
-  const hub = kind === "field" && parts[0] === "codemeta" && ((b) => b.dataset.term === parts.slice(1).join("/").replaceAll("[]", ""));
+  const hub = target.hubTerm !== undefined && ((b) => b.dataset.term === target.hubTerm);
   const button = cells.find(match) ?? (hub ? cells.find(hub) : undefined);
   if (!button) return;
   showTab("matrix");
