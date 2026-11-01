@@ -37,3 +37,6 @@ target/
 
 # mutmut working copy
 mutants/
+
+# The built coverage page (site/build.py)
+_site/
