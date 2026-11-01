@@ -14,8 +14,12 @@ the source of truth for values.
 - **Tabs.** Three views under the headline: Matrix (the default), Follow a field, and Upstream (CodeMeta's main branch)
   with the count of changed cells. One hairline row; the chosen tab is tinted with a 2px ink bar at its
   foot, like the chosen filter. `#route` and `#upstream` open their views; the SSSOM fragments open Matrix.
-- **Matrix.** Terms down, formats across. Paths wrap only after `.`, `]`, `=` or `|`, or before `[`.
-  The detail panel sits beside the table from 1000px, below it on smaller screens.
+- **Headline.** Beside the intro from 1000px: the count of crosswalk cells usable as written, a bar of
+  as-is, corrected and added in the cells' own colours, and one caption. It stacks below on smaller screens.
+- **Matrix.** Formats down, citation files first, then package manifests; terms across, their names
+  running up the column. A cell holds only its mark; its path is in the detail panel. The last column
+  counts the format's usable cells. The detail panel sits beside the table from 1280px, below it on
+  smaller screens.
 - **Route.** Three columns: the source path, the CodeMeta term in a box, the target path, joined by short
   rules. A missing end is italic ochre with a dashed rule. On a phone the three stack.
 - **Copy.** Plain and specific. Upstream state names the commit and date it was read from.
@@ -23,6 +27,6 @@ the source of truth for values.
 Don't add inline script or style, another host, or a mark whose meaning lives only in colour.
 
 The SSSOM export's identifiers resolve on this page: `#term/<term>`, `#field/<format>/<path>` and
-`#format/<format>` choose the first matching cell and scroll to it. codemeta.json has no column, so
-its field ids open the term's row; the Go spoke's one id has no cell. Below 1000px the detail panel
-sticks to the foot of the screen, and below 561px the term column scrolls with the rest.
+`#format/<format>` choose the first matching cell and scroll to it. codemeta.json has no row, so
+its field ids open the term's first cell; the Go spoke's one id has no cell. Below 1280px the detail panel
+sticks to the foot of the screen. The format column stays put at every width.

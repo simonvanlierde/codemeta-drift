@@ -1,8 +1,14 @@
 // Draws the coverage matrix, the route between two formats and the upstream check from data.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-const LABELS = { "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", pep621: "pyproject.toml", cargo: "Cargo", npm: "npm" };
+// Citation files first, then package manifests; the matrix rows follow this order.
+const LABELS = {
+  "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", bibtex: "BibTeX", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
+  cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
+};
 const label = (fmt) => LABELS[fmt] ?? fmt;
+const ORDER = Object.keys(LABELS);
+const rank = (fmt) => (ORDER.includes(fmt) ? ORDER.indexOf(fmt) : ORDER.length);
 
 // What each upstream state says about a cell on CodeMeta's main branch.
 const STATES = {
@@ -24,23 +30,19 @@ function el(tag, attrs = {}, ...children) {
 
 const code = (text) => el("code", {}, text);
 
-// A path may wrap only after a dot, a bracket or an alternative's bar, never inside a key.
-function breakable(path) {
-  const span = el("span", { class: "path" });
-  for (const part of path.split(/(?<=[.\]|=])|(?=\[)/)) span.append(part, el("wbr"));
-  return span;
-}
-
+// One row per format, one column per term: each cell is a status mark, and its path is in the detail.
 function matrix(data, onPick) {
   const table = document.getElementById("matrix");
-  const head = el("tr", {}, el("th", { scope: "col" }, "Term"));
-  for (const fmt of data.formats) head.append(el("th", { scope: "col" }, label(fmt)));
+  const head = el("tr", {}, el("th", { scope: "col" }, "Format"));
+  for (const term of data.terms) head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, code(term))));
+  head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, "as written")));
   table.append(el("thead", {}, head));
   const body = el("tbody");
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
-  for (const term of data.terms) {
-    const row = el("tr", {}, el("th", { scope: "row" }, code(term)));
-    for (const fmt of data.formats) {
+  for (const fmt of [...data.formats].sort((a, b) => rank(a) - rank(b))) {
+    const row = el("tr", {}, el("th", { scope: "row" }, label(fmt)));
+    const own = data.cells.filter((c) => c.format === fmt);
+    for (const term of data.terms) {
       const cell = byKey.get(`${fmt} ${term}`);
       const td = el("td");
       if (cell) {
@@ -51,13 +53,16 @@ function matrix(data, onPick) {
             "data-format": fmt, "data-term": term, "data-path": cell.path ?? "",
             "aria-label": `${label(fmt)}, ${term}: ${cell.status}${cell.path ? `, ${cell.path}` : ""}` },
           el("span", { class: "mark", "aria-hidden": "true" }, mark),
-          cell.path ? breakable(cell.path) : null,
         );
         button.addEventListener("click", () => onPick(cell, button));
         td.append(button);
       }
       row.append(td);
     }
+    // How many cells of the format's crosswalk that name a field can be used unchanged.
+    const needed = own.filter((c) => c.status !== "no field");
+    const usable = own[0]?.crosswalk ? `${needed.filter((c) => c.status === "as-is").length} of ${needed.length}` : "no crosswalk";
+    row.append(el("td", { class: "tally" }, usable));
     body.append(row);
   }
   table.append(body);
@@ -112,7 +117,7 @@ function filters(data) {
       if (name === "all") delete table.dataset.only;
       else table.dataset.only = name.replace(" ", "-");
       // Dimmed cells leave the tab order and the accessibility tree, not just the eye.
-      for (const td of table.querySelectorAll("tbody td")) {
+      for (const td of table.querySelectorAll("tbody td:not(.tally)")) {
         const cell = td.querySelector(".cell");
         td.inert = name !== "all" && cell?.dataset.status !== name;
       }
@@ -126,7 +131,8 @@ function route(data) {
   const from = document.getElementById("from");
   const to = document.getElementById("to");
   const list = document.getElementById("route");
-  for (const select of [from, to]) for (const fmt of data.formats) select.append(el("option", { value: fmt }, label(fmt)));
+  const formats = [...data.formats].sort((a, b) => rank(a) - rank(b));
+  for (const select of [from, to]) for (const fmt of formats) select.append(el("option", { value: fmt }, label(fmt)));
   from.value = "pep621";
   to.value = "cargo";
   const paths = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c.path]));
@@ -227,7 +233,7 @@ function follow() {
   }[kind];
   if (!match) return;
   const cells = [...document.querySelectorAll("#matrix .cell")];
-  // codemeta.json is the hub and has no column: its field ids open the term's row instead.
+  // codemeta.json is the hub and has no row: its field ids open the term's first cell instead.
   const hub = kind === "field" && parts[0] === "codemeta" && ((b) => b.dataset.term === parts.slice(1).join("/").replaceAll("[]", ""));
   const button = cells.find(match) ?? (hub ? cells.find(hub) : undefined);
   if (!button) return;
@@ -239,16 +245,33 @@ function follow() {
   button.focus({ preventScroll: true });
 }
 
+// The headline: of the crosswalk cells for a field the format has, how many work as written, as a figure and a bar.
+function score(data) {
+  const crosswalk = data.cells.filter((c) => c.crosswalk);
+  const needed = crosswalk.filter((c) => c.status !== "no field");
+  const count = (status) => needed.filter((c) => c.status === status).length;
+  const formats = new Set(crosswalk.map((c) => c.format)).size;
+  const bar = el("div", { class: "bar", "aria-hidden": "true" });
+  for (const status of ["as-is", "corrected", "added"]) {
+    const part = el("span", { class: `s-${status}` });
+    part.style.flexGrow = String(count(status));
+    bar.append(part);
+  }
+  document.getElementById("score").append(
+    el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${needed.length}`)),
+    bar,
+    el("figcaption", {}, `cells in these ${formats} CodeMeta crosswalks can be used as written. `
+      + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank although the format has the field. `
+      + `The other ${crosswalk.length - needed.length} are for terms the format has no field for.`),
+  );
+}
+
 async function start() {
   const response = await fetch("data.json", { cache: "no-cache" });
   const { coverage, upstream } = await response.json();
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
-  const crosswalk = coverage.cells.filter((c) => c.crosswalk);
-  const needed = crosswalk.filter((c) => c.status !== "no field");
-  const asIs = needed.filter((c) => c.status === "as-is").length;
-  document.getElementById("lede").append(" ", el("strong", {},
-    `Of the ${crosswalk.length} cells in CodeMeta's own crosswalks, ${crosswalk.length - needed.length} are for terms the format has no field for; only ${asIs} of the other ${needed.length} can be used as written.`));
+  score(coverage);
   matrix(coverage, detail(coverage, upstream));
   filters(coverage);
   route(coverage);
