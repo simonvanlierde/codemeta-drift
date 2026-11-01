@@ -149,14 +149,16 @@ function route(data) {
 
 function upstreamSection(upstream, tag) {
   if (!upstream) return;
-  document.getElementById("upstream").hidden = false;
+  const tab = document.getElementById("tab-upstream");
+  tab.hidden = false;
+  document.getElementById("upstream-count").textContent = String(upstream.cells.length);
   const date = upstream.date.slice(0, 10);
   document.getElementById("checked").textContent = `upstream main checked ${date} at ${upstream.commit.slice(0, 7)}`;
   const intro = document.getElementById("upstream-intro");
-  intro.append(`Commit `, el("a", { href: `https://github.com/codemeta/codemeta/commit/${upstream.commit}` },
-    upstream.commit.slice(0, 7)), ` from ${date}. `,
-    upstream.cells.length ? `${upstream.cells.length} of the cells above read differently there than at ${tag}:`
-      : `Every cell above reads the same there as at ${tag}.`);
+  intro.append(`CodeMeta's main branch at commit `, el("a", { href: `https://github.com/codemeta/codemeta/commit/${upstream.commit}` },
+    upstream.commit.slice(0, 7)), `, ${date}. `,
+    upstream.cells.length ? `${upstream.cells.length} of the matrix's cells read differently there than at ${tag}:`
+      : `Every cell in the matrix reads the same there as at ${tag}.`);
   const list = document.getElementById("upstream-cells");
   for (const c of upstream.cells) {
     list.append(el("li", {}, code(c.term), ` in ${label(c.format)} ${STATES[c.state]}`,
@@ -171,10 +173,47 @@ function upstreamSection(upstream, tag) {
   table.append(body);
 }
 
+// Three views as tabs. Arrow keys, Home and End move between them and show the one reached; each
+// view except the matrix has a fragment (#route, #upstream) so it can be linked to.
+const TABS = ["matrix", "route", "upstream"];
+
+function showTab(name, focus = false) {
+  for (const other of TABS) {
+    const tab = document.getElementById(`tab-${other}`);
+    const on = other === name;
+    tab.setAttribute("aria-selected", String(on));
+    tab.tabIndex = on ? 0 : -1;
+    document.getElementById(`panel-${other}`).hidden = !on;
+    if (on && focus) tab.focus();
+  }
+}
+
+function tabs() {
+  const list = document.getElementById("tabs");
+  const visible = () => TABS.filter((name) => !document.getElementById(`tab-${name}`).hidden);
+  const choose = (name, focus) => {
+    showTab(name, focus);
+    history.replaceState(null, "", name === "matrix" ? location.pathname : `#${name}`);
+  };
+  for (const name of TABS) document.getElementById(`tab-${name}`).addEventListener("click", () => choose(name, false));
+  list.addEventListener("keydown", (event) => {
+    const names = visible();
+    const at = names.indexOf(document.activeElement.id.replace("tab-", ""));
+    const next = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: names.length - 1 }[event.key];
+    if (at < 0 || next === undefined) return;
+    event.preventDefault();
+    choose(names[(next + names.length) % names.length], true);
+  });
+}
+
 // The SSSOM export's identifiers resolve here: #term/<term>, #field/<format>/<path> and #format/<format>,
 // each percent-encoded as the export writes it. The first matching cell is chosen and scrolled to.
 function follow() {
   const [kind, ...rest] = location.hash.slice(1).split("/");
+  if (kind === "route" || (kind === "upstream" && !document.getElementById("tab-upstream").hidden)) {
+    showTab(kind);
+    return;
+  }
   let parts;
   try {
     parts = rest.map(decodeURIComponent);
@@ -192,6 +231,7 @@ function follow() {
   const hub = kind === "field" && parts[0] === "codemeta" && ((b) => b.dataset.term === parts.slice(1).join("/").replaceAll("[]", ""));
   const button = cells.find(match) ?? (hub ? cells.find(hub) : undefined);
   if (!button) return;
+  showTab("matrix");
   // A filtered-out cell can't take focus: show every cell first.
   if (button.closest("[inert]")) document.querySelector("#filters button").click();
   button.click();
@@ -213,6 +253,7 @@ async function start() {
   filters(coverage);
   route(coverage);
   upstreamSection(upstream, coverage.codemeta_tag);
+  tabs();
   follow();
   window.addEventListener("hashchange", follow);
 }

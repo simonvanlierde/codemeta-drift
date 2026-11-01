@@ -11,6 +11,9 @@ the source of truth for values.
   the CSP allows nothing but the page's own files.
 - **Flat.** Hairlines and one dashed rule under the slug. No shadows, rounded corners or boxes beyond the
   table's own border. The selected cell gets a 2px ink inset.
+- **Tabs.** Three views under the headline: Matrix (the default), Follow a field, and Upstream (CodeMeta's main branch)
+  with the count of changed cells. One hairline row; the chosen tab is tinted with a 2px ink bar at its
+  foot, like the chosen filter. `#route` and `#upstream` open their views; the SSSOM fragments open Matrix.
 - **Matrix.** Terms down, formats across. Paths wrap only after `.`, `]`, `=` or `|`, or before `[`.
   The detail panel sits beside the table from 1000px, below it on smaller screens.
 - **Route.** Three columns: the source path, the CodeMeta term in a box, the target path, joined by short
