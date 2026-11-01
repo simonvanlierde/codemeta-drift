@@ -1,7 +1,7 @@
 {
   "upload_type": "software",
   "title": "codemeta-drift",
-  "description": "Check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review",
+  "description": "Show where CodeMeta's crosswalks are wrong or missing, check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review",
   "creators": [
     {
       "name": "van Lierde, Simon",
@@ -14,6 +14,7 @@
     "CodeMeta",
     "software metadata",
     "crosswalk",
+    "crosswalk coverage",
     "JSON-LD",
     "SSSOM",
     "schema drift"

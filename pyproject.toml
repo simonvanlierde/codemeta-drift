@@ -1,7 +1,7 @@
 [project]
 name = "codemeta-drift"
-version = "0.4.0"
-description = "Check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
+version = "0.5.0"
+description = "Show where CodeMeta's crosswalks are wrong or missing, check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [{ name = "Simon van Lierde", email = "code@duinlab.nl" }]
@@ -104,4 +104,4 @@ exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]
 source_paths = ["src/codemeta_drift"]
 only_mutate = ["src/codemeta_drift/checks.py", "src/codemeta_drift/export.py", "src/codemeta_drift/conformance.py"]
 pytest_add_cli_args_test_selection = ["tests"]
-also_copy = ["examples"]
+also_copy = ["docs", "examples", "site"]

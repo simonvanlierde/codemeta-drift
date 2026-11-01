@@ -202,7 +202,7 @@ h1 {
 [role="tabpanel"] > .hint:first-child {
   margin-top: 0;
 }
-h3 {
+h2 {
   font-size: 1.0625rem;
   font-weight: 400;
   margin: 0 0 10px;
@@ -272,6 +272,8 @@ select {
   }
 }
 .scroll {
+  /* Clips the absolutely placed visually-hidden tally text, which otherwise widens the page on a phone. */
+  position: relative;
   overflow-x: auto;
   /* Room for the sticky format column on the left; on the right, Chrome otherwise stops with a focused cell half out. */
   scroll-padding: 0 3rem 0 9.5rem;
@@ -340,7 +342,7 @@ table {
   font-size: 1.0625rem;
 }
 .cell:hover,
-.cell[aria-pressed="true"] {
+.cell[aria-current="true"] {
   box-shadow: inset 0 0 0 2px var(--ink);
 }
 .s-corrected,
@@ -566,7 +568,7 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
     background: CanvasText;
   }
   /* Forced colours drop box-shadow, which marks the chosen cell and filter otherwise. */
-  .cell[aria-pressed="true"],
+  .cell[aria-current="true"],
   #filters [aria-pressed="true"] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
