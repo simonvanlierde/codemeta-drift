@@ -1,4 +1,4 @@
-"""Build the coverage web page into a directory: the static files plus data.json.
+"""Build the coverage web page into a directory: the static files, data.json and the SSSOM spokes.
 
     uv run site/build.py --out _site [--codemeta CHECKOUT]
 
@@ -19,6 +19,7 @@ from typing import Any
 from codemeta_drift.checks import check
 from codemeta_drift.cli import read_ref
 from codemeta_drift.coverage import coverage, upstream
+from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
 STATIC = ("index.html", "style.css", "main.mjs", "favicon.svg")
@@ -59,6 +60,8 @@ def main() -> None:
     args.out.mkdir(parents=True)
     for name in STATIC:
         shutil.copy(ROOT / "site" / name, args.out / name)
+    # The SSSOM export's mapping_set_id points here.
+    (args.out / f"spokes-{mapping['codemeta_tag']}.sssom.tsv").write_text(sssom(mapping), encoding="utf-8")
     (args.out / "data.json").write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 

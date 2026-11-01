@@ -24,7 +24,14 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     # The repo fixture's HEAD is the 4.0 snapshot, whose crosswalks no longer line up with its table.
     assert data["upstream"]["drift"]
     assert {c["state"] for c in data["upstream"]["cells"]} <= {"unmatched", "changed", "fixed"}
-    assert sorted(p.name for p in out.iterdir()) == ["data.json", "favicon.svg", "index.html", "main.mjs", "style.css"]
+    assert sorted(p.name for p in out.iterdir()) == [
+        "data.json",
+        "favicon.svg",
+        "index.html",
+        "main.mjs",
+        "spokes-3.1.sssom.tsv",
+        "style.css",
+    ]
 
 
 def test_page_keeps_its_csp_and_no_inline_code():
