@@ -4,6 +4,14 @@
 const LABELS = { "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", pep621: "pyproject.toml", cargo: "Cargo", npm: "npm" };
 const label = (fmt) => LABELS[fmt] ?? fmt;
 
+// What each upstream state says about a cell on CodeMeta's main branch.
+const STATES = {
+  missing: "has no crosswalk file on main",
+  unmatched: "can't be joined: the crosswalk and the property table list this property a different number of times",
+  fixed: "now says what the reviewed mapping says, so the correction can go",
+  changed: "has new text",
+};
+
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(attrs)) {
@@ -57,6 +65,7 @@ function matrix(data, onPick) {
 
 function detail(data, upstream) {
   const box = document.getElementById("detail");
+  const hint = box.firstElementChild;
   const changes = new Map((upstream?.cells ?? []).map((c) => [`${c.format} ${c.term}`, c]));
   let picked = null;
   return (cell, button) => {
@@ -72,13 +81,18 @@ function detail(data, upstream) {
     if (cell.reason) rows.push(["Why", cell.reason]);
     const now = changes.get(`${cell.format} ${cell.term}`);
     if (now) {
-      const text = { unmatched: "can't be joined: its crosswalk and property table list this property a different number of times",
-        fixed: "now holds the reviewed path, so the correction can go", changed: "has new text" }[now.state];
-      rows.push(["On main", el("span", {}, `The cell ${text}`, now.now ? el("span", {}, ": ", code(now.now)) : null, ".")]);
+      rows.push(["On main", el("span", {}, `The cell ${STATES[now.state]}`, now.now ? el("span", {}, ": ", code(now.now)) : null, ".")]);
     }
     const list = el("dl");
     for (const [key, value] of rows) list.append(el("dt", {}, key), el("dd", {}, value));
-    box.replaceChildren(el("h3", {}, code(cell.term), ` in ${label(cell.format)}`), list);
+    const close = el("button", { type: "button" }, "Close");
+    close.addEventListener("click", () => {
+      button.removeAttribute("aria-pressed");
+      picked = null;
+      box.replaceChildren(hint);
+      button.focus();
+    });
+    box.replaceChildren(el("div", { class: "detail-head" }, el("h3", {}, code(cell.term), ` in ${label(cell.format)}`), close), list);
   };
 }
 
@@ -95,6 +109,11 @@ function filters(data) {
       for (const b of buttons) b.setAttribute("aria-pressed", String(b === button));
       if (name === "all") delete table.dataset.only;
       else table.dataset.only = name.replace(" ", "-");
+      // Dimmed cells leave the tab order and the accessibility tree, not just the eye.
+      for (const td of table.querySelectorAll("tbody td")) {
+        const cell = td.querySelector(".cell");
+        td.inert = name !== "all" && cell?.dataset.status !== name;
+      }
     });
     buttons.push(button);
     box.append(button);
@@ -138,9 +157,7 @@ function upstreamSection(upstream, tag) {
       : `Every cell above reads the same there as at ${tag}.`);
   const list = document.getElementById("upstream-cells");
   for (const c of upstream.cells) {
-    const what = c.state === "unmatched" ? "can't be joined to the property table"
-      : c.state === "fixed" ? "now holds the reviewed path" : "changed";
-    list.append(el("li", {}, code(c.term), ` in ${label(c.format)} ${what}`,
+    list.append(el("li", {}, code(c.term), ` in ${label(c.format)} ${STATES[c.state]}`,
       c.now !== null ? el("span", {}, ": ", code(c.now)) : null));
   }
   const counts = new Map();
@@ -156,14 +173,22 @@ function upstreamSection(upstream, tag) {
 // each percent-encoded as the export writes it. The first matching cell is chosen and scrolled to.
 function follow() {
   const [kind, ...rest] = location.hash.slice(1).split("/");
-  const parts = rest.map(decodeURIComponent);
+  let parts;
+  try {
+    parts = rest.map(decodeURIComponent);
+  } catch {
+    return; // a malformed fragment selects nothing
+  }
   const match = {
     term: (b) => b.dataset.term === parts[0],
     format: (b) => b.dataset.format === parts[0],
     field: (b) => b.dataset.format === parts[0] && b.dataset.path === parts.slice(1).join("/"),
   }[kind];
   if (!match) return;
-  const button = [...document.querySelectorAll("#matrix .cell")].find(match);
+  const cells = [...document.querySelectorAll("#matrix .cell")];
+  // codemeta.json is the hub and has no column: its field ids open the term's row instead.
+  const hub = kind === "field" && parts[0] === "codemeta" && ((b) => b.dataset.term === parts.slice(1).join("/").replaceAll("[]", ""));
+  const button = cells.find(match) ?? (hub ? cells.find(hub) : undefined);
   if (!button) return;
   button.click();
   button.scrollIntoView({ block: "center" });
@@ -175,10 +200,11 @@ async function start() {
   const { coverage, upstream } = await response.json();
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
-  const crosswalked = coverage.cells.filter((c) => c.crosswalk && c.status !== "no field");
-  const asIs = crosswalked.filter((c) => c.status === "as-is").length;
+  const crosswalk = coverage.cells.filter((c) => c.crosswalk);
+  const needed = crosswalk.filter((c) => c.status !== "no field");
+  const asIs = needed.filter((c) => c.status === "as-is").length;
   document.getElementById("lede").append(" ", el("strong", {},
-    `${asIs} of ${crosswalked.length} crosswalk cells for real fields can be used as written.`));
+    `Of the ${crosswalk.length} cells in CodeMeta's own crosswalks, ${crosswalk.length - needed.length} are rightly empty; only ${asIs} of the other ${needed.length} can be used as written.`));
   matrix(coverage, detail(coverage, upstream));
   filters(coverage);
   route(coverage);

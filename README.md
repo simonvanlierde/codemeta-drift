@@ -24,9 +24,10 @@ Use it to check the CodeMeta standard's own files. To keep a project's `CITATION
 
 ## How the crosswalks hold up
 
-At CodeMeta 3.1, the CFF, Zenodo, Cargo and npm crosswalks have 54 cells for fields those formats
-actually have, across the 17 terms citation tools need. Only 27 of them can be used as written:
-15 name the wrong field, list several at once or describe it in prose, and 12 are blank.
+At CodeMeta 3.1, the CFF, Zenodo, Cargo and npm crosswalks have 68 cells for the 17 terms
+citation tools need. 14 are rightly empty, because the format has no such field. Of the other 54,
+only 27 can be used as written: 15 are wrong, ambiguous or prose (3 of them name a field the
+format doesn't have), and 12 are blank although the format has the field.
 CodeMeta has no crosswalk for `pyproject.toml` at all. The [coverage matrix](docs/coverage.md)
 shows every cell and the reason for each correction, and the
 [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.

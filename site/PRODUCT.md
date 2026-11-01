@@ -26,5 +26,5 @@ that converts, and the copy says so.
 ## Accessibility
 
 Each cell is a labelled button whose name carries its status, so the mark and colour are never the only
-signal. Keyboard focus is visible, targets are 44 px, the term column stays visible on a phone, and
+signal. Keyboard focus is visible, targets are 44 px, the term column stays visible on a tablet, filtered-out cells leave the tab order, and
 light, dark and forced colours are covered.

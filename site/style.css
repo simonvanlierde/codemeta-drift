@@ -53,6 +53,13 @@ select {
 code {
   font-size: 0.875em;
 }
+::selection {
+  background: var(--ochre-wash);
+  color: var(--ink);
+}
+html {
+  scrollbar-color: var(--rule) var(--paper);
+}
 a {
   color: inherit;
   text-decoration-color: var(--rule);
@@ -261,11 +268,22 @@ table[data-only="as-is"] td:has(.cell:not(.s-as-is)),
 table[data-only="corrected"] td:has(.cell:not(.s-corrected)),
 table[data-only="added"] td:has(.cell:not(.s-added)),
 table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
-  opacity: 0.2;
+  opacity: 0.4;
 }
 .detail {
   border-top: 2px solid var(--ink);
   padding-top: 10px;
+}
+.detail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.detail-head button {
+  flex: none;
+  padding: 0 12px;
+  font-size: 0.875rem;
 }
 .detail dl {
   margin: 0;
@@ -369,6 +387,18 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
   font-size: 12px;
   color: var(--faint);
 }
+@media (max-width: 999px) {
+  /* A chosen cell's detail stays in view at the foot of the screen until it is closed. */
+  .detail:has(dl) {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    max-height: 30vh;
+    overflow: auto;
+    background: var(--paper);
+    padding-bottom: 12px;
+  }
+}
 @media (max-width: 560px) {
   .route li {
     grid-template-columns: minmax(0, 1fr);
@@ -390,6 +420,12 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
   }
 }
 @media (forced-colors: active) {
+  /* Forced colours drop box-shadow, which marks the chosen cell and filter otherwise. */
+  .cell[aria-pressed="true"],
+  #filters [aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
   .s-corrected,
   .s-added {
     color: Highlight;
@@ -399,11 +435,13 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
     border-top-color: CanvasText;
   }
 }
-/* The term column stays put while the formats scroll sideways on a narrow screen. */
-#matrix th:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background: var(--paper);
-  box-shadow: inset -1px 0 0 var(--rule);
+/* The term column stays put while the formats scroll sideways. On a phone it would cover a focused cell instead. */
+@media (min-width: 561px) {
+  #matrix th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--paper);
+    box-shadow: inset -1px 0 0 var(--rule);
+  }
 }

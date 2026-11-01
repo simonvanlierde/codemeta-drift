@@ -21,9 +21,12 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert build(out, "--codemeta", str(repo)).returncode == 0
     data = json.loads((out / "data.json").read_text("utf-8"))
     assert data["coverage"]["codemeta_tag"] == "3.1"
-    # The repo fixture's HEAD is the 4.0 snapshot, whose crosswalks no longer line up with its table.
-    assert data["upstream"]["drift"]
-    assert {c["state"] for c in data["upstream"]["cells"]} <= {"unmatched", "changed", "fixed"}
+    # The repo fixture's HEAD is the 4.0 snapshot: its exported cells read as at 3.1, but its files drift.
+    codes = [f["code"] for f in data["upstream"]["drift"]]
+    assert codes.count("CROSSWALK_ROWS") == 10
+    assert "SKIPPED" not in codes
+    assert data["upstream"]["cells"] == []
+    assert len(data["upstream"]["commit"]) == 40
     assert sorted(p.name for p in out.iterdir()) == [
         "data.json",
         "favicon.svg",

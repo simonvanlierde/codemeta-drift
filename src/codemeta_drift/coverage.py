@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from codemeta_drift.checks import TABLE
-from codemeta_drift.export import FORMATS, TERMS, crosswalk_cells
+from codemeta_drift.export import FORMATS, PEOPLE, TERMS, classify, crosswalk_cells, derive
 from codemeta_drift.hub import validate_mapping
 
 STATUSES = {
@@ -133,25 +133,43 @@ def markdown(mapping: dict[str, Any]) -> str:
 def upstream(files: Mapping[str, str], mapping: dict[str, Any]) -> list[dict[str, Any]]:
     """The cells whose crosswalk text in ``files`` (a newer CodeMeta commit) differs from the export's tag.
 
-    ``state`` is ``unmatched`` when the new commit's crosswalk and property table list a property
-    a different number of times, so its cell can't be joined; ``fixed`` when the new text is the
-    curated path, so the curated row could go; else ``changed``.
+    ``state`` is ``missing`` when the new commit has no such crosswalk file; ``unmatched`` when its
+    crosswalk and property table list a property a different number of times, so its cell can't be
+    joined; ``fixed`` when a corrected or added cell now gives the reviewed path (or, for a format
+    with no field, is now empty), so the curated row could go; else ``changed``.
     """
+    paths = {(row["format"], row["term"]): row["path"] for row in mapping["rows"]}
     cells: dict[str, dict[tuple[str, str], str]] = {}
     changed = []
     for c in coverage(mapping)["cells"]:
         crosswalk = c["crosswalk"]
         if crosswalk is None:
             continue
+        if crosswalk not in files or TABLE not in files:
+            changed.append({**c, "now": None, "state": "missing"})
+            continue
         if crosswalk not in cells:
-            cells[crosswalk] = crosswalk_cells(files, crosswalk) if crosswalk in files and TABLE in files else {}
+            cells[crosswalk] = crosswalk_cells(files, crosswalk)
         now = cells[crosswalk].get(TERMS[c["term"]])
-        if (now or "").strip() != (c["cell"] or "").strip():
-            if now is None:
-                state = "unmatched"
-            elif c["status"] != "as-is" and now.strip() == (c["path"] or ""):
-                state = "fixed"
-            else:
-                state = "changed"
-            changed.append({**c, "now": now, "state": state})
+        if (now or "").strip() == (c["cell"] or "").strip():
+            continue
+        if now is None:
+            state = "unmatched"
+        elif c["status"] != "as-is" and fixes(c, now.strip(), paths):
+            state = "fixed"
+        else:
+            state = "changed"
+        changed.append({**c, "now": now, "state": state})
     return changed
+
+
+def fixes(cell: dict[str, Any], now: str, paths: Mapping[tuple[str, str], str | None]) -> bool:
+    """Whether new crosswalk text means what the curated row says: the same path once derived, or nothing."""
+    if cell["path"] is None:
+        return not now
+    if not now or classify(now) != "path":
+        return False
+    fmt = cell["format"]
+    made = {term: paths.get((fmt, term)) for term in PEOPLE}
+    # The curated path is in derived form: a list's [] added, CFF's person. replaced by the author path.
+    return derive(FORMATS[fmt], cell["term"], now, made) == cell["path"]

@@ -32,6 +32,8 @@ def test_known_cells_get_their_status():
     assert found["cargo", "datePublished"] == "no field"
     # The contributor person rows reuse the Person cells, but CFF has no contributor list to hold them.
     assert found["cff-1.2.0", "contributor.givenName"] == "no field"
+    assert found["cff-1.2.0", "author.givenName"] == "as-is"  # the same Person row, with an author list
+    assert found["pep621", "contributor.@id"] == "no field"
     assert not any(fmt == "codemeta" for fmt, _ in found)
 
 
@@ -55,9 +57,35 @@ def test_upstream_reports_unmatched_changed_and_fixed_cells():
     files[cargo] = files[cargo].replace("version,package.version", "version,package.ver")
     zenodo = "crosswalks/Zenodo.csv"
     files[zenodo] = files[zenodo].replace("\nversion,", "\nversion,\nversion,", 1)
+    cff = "crosswalks/Citation File Format 1.2.0.csv"
+    files[cff] = files[cff].replace("\nname,title", "\nname,name", 1)
     found = {(c["format"], c["term"]): c["state"] for c in upstream(files, mapping())}
     assert found == {
         ("cargo", "keywords"): "fixed",
         ("cargo", "version"): "changed",
         ("zenodo", "version"): "unmatched",
+        ("cff-1.2.0", "name"): "changed",  # an as-is cell that changes is never "fixed"
     }
+
+
+@pytest.mark.parametrize(
+    ("cell", "term"),
+    [
+        ("identifier,ORCID", "author.@id"),  # Zenodo: orcid derives to creators[].orcid
+        ("identifier,ORCID", "contributor.@id"),
+    ],
+)
+def test_upstream_derives_the_new_cell_before_calling_it_fixed(cell: str, term: str):
+    files = read_dir(ROOT / "tests/fixtures/3.1")
+    zenodo = "crosswalks/Zenodo.csv"
+    assert cell in files[zenodo]
+    files[zenodo] = files[zenodo].replace(cell, "identifier,orcid")
+    found = {(c["format"], c["term"]): c["state"] for c in upstream(files, mapping())}
+    assert found["zenodo", term] == "fixed"
+
+
+def test_upstream_says_missing_when_a_crosswalk_is_gone():
+    files = read_dir(ROOT / "tests/fixtures/3.1")
+    del files["crosswalks/Cargo.csv"]
+    states = {c["state"] for c in upstream(files, mapping()) if c["format"] == "cargo"}
+    assert states == {"missing"}

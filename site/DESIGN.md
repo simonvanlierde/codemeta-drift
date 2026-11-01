@@ -20,4 +20,6 @@ the source of truth for values.
 Don't add inline script or style, another host, or a mark whose meaning lives only in colour.
 
 The SSSOM export's identifiers resolve on this page: `#term/<term>`, `#field/<format>/<path>` and
-`#format/<format>` choose the first matching cell and scroll to it.
+`#format/<format>` choose the first matching cell and scroll to it. codemeta.json has no column, so
+its field ids open the term's row; the Go spoke's one id has no cell. Below 1000px the detail panel
+sticks to the foot of the screen, and below 561px the term column scrolls with the rest.
