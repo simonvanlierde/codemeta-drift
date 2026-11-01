@@ -14,7 +14,7 @@
 <script type="module" src="main.mjs"></script>
 </head>
 <body>
-<a class="skip" href="#matrix">Skip to the matrix</a>
+<a class="skip" href="#tabs">Skip to the views</a>
 <header class="wrap slug">
   <p><b>codemeta-drift</b> · crosswalk coverage at CodeMeta <span id="tag">3.1</span></p>
   <p id="checked">upstream not checked in this build</p>
@@ -26,8 +26,14 @@
   <noscript><p class="note">This page needs JavaScript to draw the matrix. The same matrix is in
     <a href="https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md">docs/coverage.md</a>.</p></noscript>
 
-  <section aria-labelledby="matrix-title">
-    <h2 id="matrix-title">The matrix</h2>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-matrix" aria-controls="panel-matrix" aria-selected="true">Matrix</button>
+    <button type="button" role="tab" id="tab-route" aria-controls="panel-route" aria-selected="false" tabindex="-1">Follow a field</button>
+    <button type="button" role="tab" id="tab-upstream" aria-controls="panel-upstream" aria-selected="false" tabindex="-1" hidden>Upstream <span class="n" id="upstream-count"></span></button>
+  </div>
+
+  <section role="tabpanel" id="panel-matrix" aria-labelledby="tab-matrix">
+    <p class="hint">Each cell is one CodeMeta term in one format. Choose a cell to see why it has that status.</p>
     <div class="legend" role="group" aria-label="Show one status">
       <span class="legend-label">Show</span>
       <div id="filters"></div>
@@ -43,8 +49,7 @@
     </div>
   </section>
 
-  <section aria-labelledby="route-title">
-    <h2 id="route-title">Follow a field from one format to another</h2>
+  <section role="tabpanel" id="panel-route" aria-labelledby="tab-route" hidden>
     <p class="hint">Every route runs through a CodeMeta term. A broken end means one format has no field for it.
       The paths correspond; their values may still need converting.</p>
     <div class="pickers">
@@ -54,8 +59,7 @@
     <ol id="route" class="route"></ol>
   </section>
 
-  <section aria-labelledby="upstream-title" id="upstream" hidden>
-    <h2 id="upstream-title">CodeMeta's main branch now</h2>
+  <section role="tabpanel" id="panel-upstream" aria-labelledby="tab-upstream" hidden>
     <p class="hint" id="upstream-intro"></p>
     <ul id="upstream-cells" class="changes"></ul>
     <table id="drift" class="counts"><caption class="vh">Drift findings by check</caption></table>

@@ -118,12 +118,29 @@ h1 {
   margin: 28px 0 8px;
   max-width: 28ch;
 }
-h2 {
-  font-size: 1.25rem;
-  font-weight: 400;
-  margin: 40px 0 8px;
-  padding-top: 18px;
-  border-top: 1px solid var(--rule);
+/* The views: a row of tabs on one hairline, the chosen one tinted with a 2px ink bar at its foot. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 28px 0 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.tabs [role="tab"] {
+  border: 0;
+  padding: 8px 16px;
+  color: var(--faint);
+  font-size: 1.0625rem;
+}
+.tabs [role="tab"]:hover {
+  color: var(--ink);
+}
+.tabs [role="tab"][aria-selected="true"] {
+  color: var(--ink);
+  background: var(--tint);
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+[role="tabpanel"] > .hint:first-child {
+  margin-top: 0;
 }
 h3 {
   font-size: 1.0625rem;
@@ -365,6 +382,7 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
 }
 .changes {
   padding-left: 1.2em;
+  max-width: 68ch;
 }
 .counts {
   width: auto;
@@ -404,6 +422,9 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
   }
 }
 @media (max-width: 560px) {
+  .tabs [role="tab"] {
+    padding-inline: 12px;
+  }
   .route li {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
@@ -424,6 +445,9 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
   }
 }
 @media (forced-colors: active) {
+  .tabs [role="tab"][aria-selected="true"] {
+    border-bottom: 2px solid Highlight;
+  }
   /* Forced colours drop box-shadow, which marks the chosen cell and filter otherwise. */
   .cell[aria-pressed="true"],
   #filters [aria-pressed="true"] {
