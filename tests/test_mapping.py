@@ -95,6 +95,105 @@ def test_example_null_rows():
         | {("julia", t) for t in ("license", "identifier", "swhid", "codeRepository", "description", "keywords")}
         | {("julia", t) for t in ("datePublished", *contributor)}
         | {("bibtex", t) for t in ("author.@id", *contributor)}
+        | {
+            ("setup-py", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("ruby-gem", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "keywords",
+                "datePublished",
+            )
+        }
+        | {("maven", t) for t in ("author.@id", "contributor.@id", "identifier", "swhid", "keywords", "datePublished")}
+        | {("cpan-meta-2", t) for t in ("author.@id", "contributor.@id", "identifier", "swhid", "datePublished")}
+        | {
+            ("nuget", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("pubspec", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "license",
+                "identifier",
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("cabal", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("typst", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "identifier",
+                "swhid",
+                "datePublished",
+            )
+        }
+        | {
+            ("quarto", t)
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "license",
+                "identifier",
+                "swhid",
+                "codeRepository",
+                "description",
+                "keywords",
+                "datePublished",
+            )
+        }
     )
 
 

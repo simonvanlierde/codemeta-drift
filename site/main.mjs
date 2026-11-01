@@ -3,8 +3,10 @@
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
-  "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", bibtex: "BibTeX", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
-  cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
+  "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", pep621: "pyproject.toml",
+  "pkg-info": "Python PKG-INFO", "setup-py": "setup.py", cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION",
+  julia: "Julia Project.toml", "ruby-gem": "Ruby gemspec", maven: "Maven pom.xml", "cpan-meta-2": "CPAN META.json",
+  nuget: "NuGet .nuspec", pubspec: "Dart pubspec", cabal: "Haskell Cabal", typst: "typst.toml", quarto: "Quarto extension",
 };
 const label = (fmt) => LABELS[fmt] ?? fmt;
 const ORDER = Object.keys(LABELS);

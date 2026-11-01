@@ -74,7 +74,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.4",
+  "schema_version": "1.5",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.5.0"},
   "rows": [
@@ -101,8 +101,12 @@ Each row:
 
 - `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo`, `npm`,
   `pkg-info` (Python core metadata), `r-description` (R's DESCRIPTION), `julia` (Julia's
-  Project.toml) or `bibtex` (a biblatex-software entry). A format whose versions differ puts the
-  version in the id. The last four were added in schema 1.4.
+  Project.toml), `bibtex` (a biblatex-software entry), `datacite` (the DataCite REST API's
+  JSON), `setup-py` (setup.py's `setup()` arguments), `ruby-gem` (a Gem::Specification), `maven`
+  (pom.xml), `cpan-meta-2` (META.json), `nuget` (.nuspec), `pubspec` (pubspec.yaml), `cabal`
+  (a .cabal file), `typst` (typst.toml) or `quarto` (a Quarto extension's _extension.yml). A
+  format whose versions differ puts the version in the id. `pkg-info` to `bibtex` were added in
+  schema 1.4, and `datacite` to `quarto` in 1.5.
 - `term` is one of the eleven terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords` and `datePublished`, or a person
   sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
@@ -134,8 +138,8 @@ CFF stores a name particle and a name suffix apart from `family-names`, and Code
 (`name-particle: van`, `family-names: Leeuwenhoek`) has the family name `van Leeuwenhoek`, and
 a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says so in its `comment`.
 
-PKG-INFO and R's DESCRIPTION are not trees, so a consumer reads them into one first. Three kinds
-of row there, and one Julia case, need more than the grammar below says:
+PKG-INFO, R's DESCRIPTION and several of the newer formats are not trees, so a consumer reads
+them into one first. These cases need more than the grammar below says:
 
 - PKG-INFO: each field is a key, and a field that repeats is a list. `Project-URL` becomes
   elements with `label` and `url`, the label normalised as the
@@ -149,6 +153,19 @@ of row there, and one Julia case, need more than the grammar below says:
   package without `Authors@R` has only the free-text `Author` field, which no path reads.
 - Julia: an `authors` element may be a plain `Name` or `Name <email>` string. Both name
   sub-terms then come from that string, and the consumer splits it, as for Zenodo.
+- DataCite: paths start inside `data.attributes` of the REST API's JSON, so the DOI is `doi`.
+  The XML form is not addressed.
+- setup.py and Ruby gemspecs are code, not data. A consumer reads the literal arguments of
+  `setup()` with a Python parser, or loads a gemspec with `Gem::Specification.load`, in a
+  throwaway environment and never on the host. A gem's `version` is read as a string.
+- pom.xml and .nuspec are XML. The tree starts at `project` (Maven) or `package.metadata`
+  (NuGet), with the namespace ignored. An element the schema lets repeat (a `developer`, a
+  `license`) is a list even when it occurs once, under its wrapper (`developers.developer[]`).
+  An attribute is an `@` key (`repository.@url`), and an element with attributes reads its text
+  at its own path. A Maven value with `${...}` may need resolving first.
+- A .cabal file: field names are lower case, and each top-level field is a key holding its text.
+  A section is an element of a list named after it, with its first argument as `kind`, so
+  `source-repository head` is read at `source-repository[kind=head].location`.
 
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
@@ -157,7 +174,7 @@ A (format, term) pair appears at most once. The schema cannot enforce uniqueness
 those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, and within a format in the order `name`, `version`, `author`,
+`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
 `contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`. The same inputs give the same bytes, so a consumer
@@ -207,6 +224,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
 1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 2).
 2. Validate the file against the schema it vendors beside it, and update the two together:
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
+   Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
    A row with `path: null` is not missing: the format has no place for that term.
