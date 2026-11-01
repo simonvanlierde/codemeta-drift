@@ -16,15 +16,18 @@ This is not an official Zenodo JSON Schema or a complete deposit validator.
 It does not validate required deposit fields, ORCID checksums, licences, contributor
 vocabularies or every field the service accepts. Fields outside this subset need
 source review before adding mappings. The related-identifier `scheme` field is
-a consumer-side selector; the importer infers the scheme from the identifier value. The importer source is inspected, never executed
-or copied into this package.
+a consumer-side selector; the importer infers the scheme from the identifier value.
+The importer source is inspected, never executed or copied into this package.
 
 Path checks now detect the old crosswalk's uppercase `creators[].ORCID`, bare `id`
 and `related_identifiers.isSupplementTo` paths. The curated mapping already uses
 `creators[].orcid`, `doi` and filtered related-identifier lists.
 
 The poller checks the three upstream blob hashes. A changed file produces a
-review draft. Existing titles, including closed ones, suppress repeats. The baseline is not refreshed automatically: inspect the changed
+review draft. A missing file (HTTP 404) also produces a review draft, so a renamed
+importer does not stop unrelated schema and pin checks. Other HTTP failures still
+stop the poll before publication. Existing titles, including closed ones, suppress repeats.
+The baseline is not refreshed automatically: inspect the changed
 source, update the structural subset if needed, and record the reviewed hashes.
 A file change is a review signal, not proof that a mapped field changed.
 

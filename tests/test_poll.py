@@ -1,6 +1,7 @@
 import base64
 import json
 from collections.abc import Callable
+from email.message import Message
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
@@ -11,7 +12,8 @@ from codemeta_drift import poll as runner
 from codemeta_drift.poll import API, SCHEMA_URLS, fetch_json, poll, publish
 
 
-def test_poll_uses_current_schemas_and_only_latest_codemeta_tag():
+@pytest.mark.parametrize("upstream", ["changed", "deleted", "rate-limited"])
+def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
     schema = {"properties": {"title": {"type": "string"}}}
     before = {fmt: {"properties": {"name": {}}} for fmt in (*SCHEMA_URLS, "cff-1.2.0")}
     before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
@@ -35,9 +37,27 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag():
     assert plans[1]["title"] == "Update mapping pin to v0.4.0"
     assert plans[2]["title"] == "Review CodeMeta tag 4.0"
     changed = next(iter(source["files"]))
-    responses[API + source["repo"] + "/contents/" + changed] = {"sha": "b" * 40}
-    plans = poll({"rows": []}, before, responses.__getitem__)
-    assert sum(plan["title"].startswith("Review Zenodo importer") for plan in plans) == 1
+    changed_url = API + source["repo"] + "/contents/" + changed
+
+    def fetch(url: str) -> dict[str, Any] | list[dict[str, str]]:
+        if url == changed_url:
+            if upstream == "rate-limited":
+                raise HTTPError(url, 429, "Too Many Requests", Message(), None)
+            if upstream == "deleted":
+                raise HTTPError(url, 404, "Not Found", Message(), None)
+            return {"sha": "b" * 40}
+        return responses[url]
+
+    if upstream == "rate-limited":
+        with pytest.raises(HTTPError) as caught:
+            poll({"rows": []}, before, fetch)
+        assert caught.value.code == 429
+        return
+    plans = poll({"rows": []}, before, fetch)
+    importer = [plan for plan in plans if plan["title"].startswith("Review Zenodo importer")]
+    assert len(importer) == 1
+    assert importer[0]["title"].endswith("missing" if upstream == "deleted" else "b" * 40)
+    assert any(plan["title"] == "Update mapping pin to v0.4.0" for plan in plans)
     created = []
     titles = {plan["repo"]: set() for plan in plans}
 

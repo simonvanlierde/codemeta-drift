@@ -36,6 +36,7 @@ Each output directory contains:
 - `pin.json`: the mapping and contract SHA-256 hashes, CodeMeta tag and generator version.
 
 The example refuses to overwrite an output directory. Use a fresh path for another run.
+A missing or malformed approval file produces a CLI error without creating output.
 The test runs both modes and checks hashes, deduplication, validation and preservation
 of the original mapping. It also rejects an approval for a different change.
 

@@ -30,6 +30,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
 
 ### Fixed
 
+- Missing Zenodo importer files produce review drafts instead of aborting unrelated schema and pin checks. See [Zenodo coverage](docs/zenodo-schema.md).
+- The [recovery example](docs/schema-recovery.md) reports unreadable approvals and existing output directories as CLI errors without modifying existing files.
 - Hub commands reject malformed original crosswalk cells, keeping [mapping validation](docs/mapping-export.md) consistent with the export contract.
 - SSSOM exports use distinct field and format URI prefixes so reference readers can load them.
   See the [validation and compatibility guide](docs/sssom-compatibility.md).

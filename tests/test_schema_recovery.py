@@ -55,3 +55,26 @@ def test_recovery_rejects_an_unrelated_approval(tmp_path: Path):
     assert result.returncode == 2
     assert "approval does not describe" in result.stderr
     assert not out.exists()
+
+
+@pytest.mark.parametrize("invalid", ["malformed-approval", "missing-approval", "existing-output"])
+def test_recovery_input_errors_leave_existing_files_alone(invalid: str, tmp_path: Path):
+    approval = tmp_path / "approval.json"
+    out = tmp_path / "result"
+    args = [sys.executable, str(ROOT / "examples/schema-recovery.py"), str(out)]
+    if invalid == "existing-output":
+        out.mkdir()
+        (out / "keep.txt").write_text("existing output")
+    else:
+        if invalid == "malformed-approval":
+            approval.write_text("{broken")
+        args += ["--approval", str(approval)]
+    result = subprocess.run(args, capture_output=True, text=True, check=False)
+    assert result.returncode == 2
+    assert "error:" in result.stderr
+    assert "Traceback" not in result.stderr
+    if invalid == "existing-output":
+        assert list(out.iterdir()) == [out / "keep.txt"]
+        assert (out / "keep.txt").read_text() == "existing output"
+    else:
+        assert not out.exists()

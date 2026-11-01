@@ -8,6 +8,7 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import urlopen
 
@@ -56,13 +57,18 @@ def poll(
     # Zenodo has no current public JSON Schema: source changes need a fresh manual path review.
     source = before["zenodo"]["x-source"]
     for path, digest in sorted(source["files"].items()):
-        current = fetch(API + source["repo"] + "/contents/" + path)
-        if current["sha"] != digest:
+        try:
+            current_sha = fetch(API + source["repo"] + "/contents/" + path)["sha"]
+        except HTTPError as err:
+            if err.code != 404:
+                raise
+            current_sha = "missing"
+        if current_sha != digest:
             plans.append(
                 {
                     "repo": "simonvanlierde/codemeta-drift",
-                    "title": f"Review Zenodo importer {path} {current['sha']}",
-                    "body": f"`{path}` changed from blob `{digest}` to `{current['sha']}`. "
+                    "title": f"Review Zenodo importer {path} {current_sha}",
+                    "body": f"`{path}` changed from blob `{digest}` to `{current_sha}`. "
                     "Review the Zenodo structural subset before refreshing its source hashes. "
                     "A source change does not automatically change the mapping.",
                 }

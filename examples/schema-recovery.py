@@ -44,7 +44,10 @@ def main() -> None:
         parser.error("the synthetic rename did not produce one deduplicated review")
     repaired = copy.deepcopy(mapping)
     if args.approval:
-        approval = json.loads(args.approval.read_text("utf-8"))
+        try:
+            approval = json.loads(args.approval.read_text("utf-8"))
+        except (OSError, ValueError) as err:
+            parser.error(f"cannot read approval: {err}")
         expected = {"format": "pep621", "term": "name", "from": "project.name", "to": "project.display_name"}
         if (
             not isinstance(approval, dict)
@@ -69,7 +72,10 @@ def main() -> None:
         "example_only": True,
     }
     # A demonstration never edits the installed mapping or a consumer's real pin.
-    args.out.mkdir(parents=True)
+    try:
+        args.out.mkdir(parents=True)
+    except OSError as err:
+        parser.error(f"cannot create output directory: {err}")
     (args.out / "mapping.json").write_bytes(result)
     (args.out / "pin.json").write_text(json.dumps(pin, indent=2) + "\n", encoding="utf-8")
     (args.out / "drafts.json").write_text(json.dumps(drafts, indent=2) + "\n", encoding="utf-8")
