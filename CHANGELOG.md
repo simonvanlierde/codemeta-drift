@@ -22,6 +22,8 @@ codemeta-drift with the file. A consumer that vendors the mapping schema vendors
 
 ### Changed
 
+- The BibTeX `codeRepository` row reads `repository | url`, since plain BibTeX styles print only `url`.
+  See the [coverage page](docs/coverage.md).
 - Schema 1.6 extends the path grammar: `a + b` reads both parts, `[k=v]` also matches a list that holds `v`, and
   a key may carry a prefix. The PKG-INFO author rows use `+`, the Project-URL rows end in `.url`, and the DCAT 3
   and DOAP rows use prefixed names such as `dcterms:title`. See the
@@ -29,6 +31,8 @@ codemeta-drift with the file. A consumer that vendors the mapping schema vendors
 
 ### Fixed
 
+- A person sub-term such as `author.@id` is read from the alternative its term resolved through, not by first
+  match, so one person's ORCID never lands on another. See the [mapping export](docs/mapping-export.md#path-grammar).
 - The [schema watcher](docs/schema-watcher.md) now also opens a citesync issue when a hash in `MAPPING_SOURCE` differs from the file published at the pinned tag, and its run prints a notice when it skips publishing for lack of a token. The docs name the token permissions it needs.
 
 ## [0.5.0] - 2026-11-01

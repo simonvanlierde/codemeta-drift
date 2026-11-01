@@ -35,13 +35,27 @@ def fetch_json(url: str) -> Any:  # noqa: ANN401
 
 
 def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list[dict[str, str]]:
-    """Draft one citesync issue per `sha256 <hex> <local> <path>` line that differs from the file at the tag."""
+    """Draft one citesync issue per `sha256 <hex> <local> <path>` line that differs from, or is missing at, the tag."""
     plans = []
     for line in source.splitlines():
         if not line.startswith("sha256 "):
             continue
         _, digest, local, path = line.split()
-        published = fetch(API + f"simonvanlierde/codemeta-drift/contents/{path}?ref={quote(tag, safe='')}")
+        try:
+            published = fetch(API + f"simonvanlierde/codemeta-drift/contents/{path}?ref={quote(tag, safe='')}")
+        except HTTPError as err:
+            if err.code != 404:
+                raise
+            # citesync can pin a file from main before a release ships it.
+            plans.append(
+                {
+                    "repo": "simonvanlierde/citesync",
+                    "title": f"Pinned {local} is not in codemeta-drift {tag}",
+                    "body": f"MAPPING_SOURCE pins `{local}` from `{path}`, but codemeta-drift {tag} has no such "
+                    "file. Pin a release that ships it.",
+                }
+            )
+            continue
         current = hashlib.sha256(base64.b64decode(published["content"])).hexdigest()
         if current != digest:
             plans.append(

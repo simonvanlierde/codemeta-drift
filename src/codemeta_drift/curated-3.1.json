@@ -778,6 +778,13 @@
     },
     {
       "format": "bibtex",
+      "term": "codeRepository",
+      "path": "repository | url",
+      "cell": "repository",
+      "reason": "the cell says repository, which biblatex-software adds; plain BibTeX styles print only url, so the path falls back to it"
+    },
+    {
+      "format": "bibtex",
       "term": "keywords",
       "path": "keywords",
       "cell": "",
@@ -1923,9 +1930,9 @@
     {
       "format": "figshare",
       "term": "author",
-      "path": "authors[].full_name",
+      "path": "authors[]",
       "cell": "",
-      "reason": "the cell is empty; authors is a list of objects and full_name holds the whole name"
+      "reason": "the cell is empty; authors is a list of objects with full_name, first_name, last_name and orcid_id"
     },
     {
       "format": "figshare",
@@ -2025,7 +2032,7 @@
     {
       "format": "bio-tools",
       "term": "author",
-      "path": "credit[typeRole=Developer].name",
+      "path": "credit[typeRole=Developer]",
       "cell": "",
       "reason": "the cell is empty; credit is a list of people and organisations with a typeRole list, and Developer is the role closest to an author; toolmeta-harvester folds Contributor into author too, but contributor keeps them apart",
       "comment": "typeRole is a list, so [typeRole=Developer] matches an entry whose roles include it, as in the R note. biotoolsSchema has no author role; a credit with typeEntity other than Person is an organisation."
@@ -2057,7 +2064,7 @@
     {
       "format": "bio-tools",
       "term": "contributor",
-      "path": "credit[typeRole=Contributor].name",
+      "path": "credit[typeRole=Contributor]",
       "cell": "",
       "reason": "the cell is empty; credit entries with the Contributor role"
     },

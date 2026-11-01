@@ -105,6 +105,29 @@ def test_poll_flags_stale_pinned_hash_at_the_right_tag():
     assert "mapping.schema.json" not in plans[0]["body"]
 
 
+def test_a_pinned_file_missing_at_the_tag_is_an_issue_not_a_crash():
+    """A citesync pin can name a file from main that the pinned release does not have yet."""
+    schema = b"{}\n"
+    source = f"sha256 {hashlib.sha256(b'v').hexdigest()} mapping-vectors.json src/codemeta_drift/mapping-vectors.json\n"
+    source += (
+        f"sha256 {hashlib.sha256(b'old').hexdigest()} mapping.schema.json src/codemeta_drift/mapping.schema.json\n"
+    )
+    url = API + "simonvanlierde/codemeta-drift/contents/src/codemeta_drift/{}?ref=v0.5.0"
+
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        if target == url.format("mapping-vectors.json"):
+            raise HTTPError(target, 404, "Not Found", Message(), None)
+        assert target == url.format("mapping.schema.json")
+        return {"content": base64.b64encode(schema).decode()}
+
+    plans = runner.stale_pin_hashes(source, "v0.5.0", fetch)
+    assert [plan["title"] for plan in plans] == [
+        "Pinned mapping-vectors.json is not in codemeta-drift v0.5.0",
+        "Update mapping pin hash for mapping.schema.json at v0.5.0",
+    ]
+    assert "src/codemeta_drift/mapping-vectors.json" in plans[0]["body"]
+
+
 def test_publisher_fetches_closed_titles_and_publishes_once():
     existing = {"simonvanlierde/codemeta-drift": {"closed"}}
     created = []

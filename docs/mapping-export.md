@@ -228,6 +228,11 @@ A person sub-term's path is absolute and starts with the path of its term. CFF `
 name in one string, both name sub-terms point at it (Zenodo `creators[].name`), and the
 consumer splits it.
 
+When a term has alternatives, each of its sub-terms has the same alternatives in the same order,
+each starting with its term's. A consumer reads a sub-term from the alternative its term resolved
+through, not by first match: a DOAP file with a developer and a maintainer reads `author.@id` from
+`developer[].@id` even when only the maintainer has one, so one person's ORCID never lands on another.
+
 The schema's `path` pattern accepts exactly this grammar.
 
 `mapping-vectors.json`, in the package beside `mapping.schema.json`, lists cases of `path`, `document`
