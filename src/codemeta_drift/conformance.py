@@ -19,8 +19,9 @@ SCHEMA_FILES = {
     "pep621": "pyproject.json",
     "npm": "package.json",
     "cargo": "cargo.json",
+    "zenodo": "zenodo.json",
 }
-"""The schema file for each format that has one. Zenodo and codemeta are not checked."""
+"""The schema file for each format that has one. Zenodo uses a verified structural subset; codemeta is not checked."""
 
 STEP = re.compile(r"(?P<key>@?[\w-]+)(?:\[(?:(?P<filter>@?[\w-]+)=[^\]]+)?\])?")
 

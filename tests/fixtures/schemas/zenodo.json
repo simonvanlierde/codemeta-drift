@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verified Zenodo GitHub metadata paths (structural subset)",
+  "$comment": "Locally authored path coverage checked against upstream importer declarations and hooks. Not an official Zenodo schema or full deposit validator. No upstream source code is included.",
+  "x-source": {
+    "repo": "zenodo/zenodo-rdm",
+    "revision": "93fe9f413d7fffc00d8207911c57dad2df9a2392",
+    "checked": "2026-11-01",
+    "files": {
+      "site/zenodo_rdm/github/release.py": "7ec14a472b76a462e3ea41aa67bd3a4782dda9d5",
+      "site/zenodo_rdm/legacy/deserializers/schemas.py": "4287d280b0b7d65106bbff599b15c1cf88299e94",
+      "site/zenodo_rdm/legacy/deserializers/metadata.py": "acf29e7e57abeb110f3d3fbf633e99049a52ed29"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "license": {
+      "type": "string"
+    },
+    "doi": {
+      "type": "string"
+    },
+    "publication_date": {
+      "type": "string"
+    },
+    "upload_type": {
+      "type": "string"
+    },
+    "access_right": {
+      "type": "string"
+    },
+    "creators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "affiliation": {
+            "type": "string"
+          },
+          "gnd": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "contributors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "affiliation": {
+            "type": "string"
+          },
+          "gnd": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_identifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "resource_type": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

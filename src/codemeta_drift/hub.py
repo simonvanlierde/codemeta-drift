@@ -44,6 +44,7 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
             or not isinstance(row["source"], str)
             or not re.fullmatch(r"(crosswalk:crosswalks/[^@]+\.csv@[^@\s]+|curated:\S.*)", row["source"])
             or (row["path"] is not None and (not isinstance(row["path"], str) or not PATH.fullmatch(row["path"])))
+            or (row.get("crosswalk_cell") is not None and not isinstance(row["crosswalk_cell"], str))
             or any(key in row and not isinstance(row[key], str) for key in ("comment", "see_also"))
             or ("see_also" in row and not row["see_also"].startswith("https://"))
         ):

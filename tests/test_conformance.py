@@ -38,6 +38,10 @@ def test_raw_crosswalk_paths_fail():
     """The 3.1 crosswalk cells that parse as paths, with no curated rows."""
     rows, _ = build_rows(read_dir(FIXTURES / "3.1"), "3.1", [])
     assert [str(f) for f in conform(rows, SCHEMAS)] == [
+        "PATH_NOT_IN_SCHEMA zenodo: author.@id: creators[].ORCID: no 'ORCID'",
+        "PATH_NOT_IN_SCHEMA zenodo: identifier: id: no 'id'",
+        "PATH_NOT_IN_SCHEMA zenodo: swhid: id: no 'id'",
+        "PATH_NOT_IN_SCHEMA zenodo: codeRepository: related_identifiers.isSupplementTo: no 'isSupplementTo'",
         "PATH_NOT_IN_SCHEMA cargo: keywords: package.keyword: no 'keyword'",
     ]
 
@@ -67,7 +71,7 @@ def test_every_alternative_and_no_null_or_unchecked_format():
     rows = [
         {"format": "pep621", "term": "codeRepository", "path": "project.urls.Source | project.homepage"},
         {"format": "pep621", "term": "identifier", "path": None},
-        {"format": "zenodo", "term": "name", "path": "nonsense"},
+        {"format": "codemeta", "term": "name", "path": "nonsense"},
     ]
     assert [f.detail for f in conform(rows, SCHEMAS)] == ["project.homepage: no 'homepage'"]
 
@@ -139,3 +143,10 @@ def test_tuple_array_schemas_resolve(key: str):
 def test_local_ref_can_point_to_root():
     schema = {"properties": {"name": {}, "project": {"$ref": "#"}}}
     assert resolve(schema, "project.name") is None
+
+
+def test_zenodo_path_coverage_includes_current_github_metadata():
+    assert "zenodo" in SCHEMAS
+    for path in ("version", "creators[].orcid", "contributors[].type", "related_identifiers[scheme=swh].identifier"):
+        assert resolve(SCHEMAS["zenodo"], path) is None
+    assert conform([{"format": "zenodo", "term": "name", "path": "not_a_zenodo_field"}], SCHEMAS)
