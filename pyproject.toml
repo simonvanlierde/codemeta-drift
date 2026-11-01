@@ -1,6 +1,6 @@
 [project]
 name = "codemeta-drift"
-version = "0.5.0"
+version = "0.6.0"
 description = "Show where CodeMeta's crosswalks are wrong or missing, check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
 readme = "README.md"
 requires-python = ">=3.12"

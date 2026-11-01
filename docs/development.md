@@ -42,7 +42,7 @@ The `pages` workflow builds it on every pull request and deploys from main and e
 
 ## Mutation tests
 
-`just mutation` tests modified copies of `checks.py`, `export.py` and `conformance.py`.
+`just mutation` tests modified copies of `checks.py`, `export.py`, `conformance.py` and `paths.py`.
 It leaves the source files unchanged and fails when the tests miss a changed behaviour.
 A mutation that cannot alter behaviour belongs in [`tests/mutation-baseline.txt`](../tests/mutation-baseline.txt), with its reason.
 The command also fails when tests catch a listed mutation, so the baseline stays current.

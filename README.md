@@ -26,8 +26,8 @@ Use it to check the CodeMeta standard's own files. To keep a project's `CITATION
 
 At CodeMeta 3.1, the 28 crosswalks reviewed here, from CFF, Zenodo and DataCite to Maven, SPDX
 and Wikidata, have 476 cells for the 17 terms citation tools need. 151 are for terms the format has
-no field for. Of the other 325, only 110 can be used as written: 125 are wrong, ambiguous or prose
-(22 of them fill a term the format has no field for), and 90 are blank although the format has the field.
+no field for. Of the other 325, only 111 can be used as written: 124 are wrong, ambiguous or prose
+(23 of them fill a term the format has no field for), and 90 are blank although the format has the field.
 CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml` or Quarto extensions at all. The [coverage matrix](docs/coverage.md)
 shows every cell and the reason for each correction, lists the other 16 crosswalks by the shape
 of their cells, and the
@@ -65,7 +65,8 @@ Export the reviewed mappings for CodeMeta 3.1:
 uvx codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
 ```
 
-The export covers CFF, CodeMeta, Zenodo, BibTeX, Python (`pyproject.toml` and PKG-INFO), Cargo, npm, R (DESCRIPTION) and Julia (`Project.toml`) metadata.
+The export covers 32 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3 and Wikidata; the
+[mapping export](docs/mapping-export.md) lists them.
 It records the field path for each term, with a reason for each curated correction.
 It does not convert field values.
 The exporter reads the tag's commit and refuses rows it cannot resolve.

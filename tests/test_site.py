@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from codemeta_drift.export import FORMATS
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -57,3 +59,12 @@ def test_build_refuses_a_directory_it_did_not_make(tmp_path: Path):
     result = build(tmp_path)
     assert result.returncode == 2
     assert (tmp_path / "notes.txt").read_text() == "keep me"
+
+
+def test_every_format_has_a_label():
+    """The page shows a raw format id, sorted last, for a format LABELS lacks."""
+    source = (ROOT / "site/main.mjs").read_text("utf-8")
+    block = re.search(r"const LABELS = \{(.*?)\};", source, re.DOTALL)
+    assert block
+    labels = set(re.findall(r'"?([a-z0-9.-]+)"?: "', block[1]))
+    assert labels == set(FORMATS) - {"codemeta"}  # codemeta is the hub, not a spoke

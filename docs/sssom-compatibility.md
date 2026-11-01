@@ -17,7 +17,7 @@ in a separate tool environment. It checks the JSON schema, prefix-map completene
 CURIE syntax. It does not require a runtime dependency in codemeta-drift.
 
 Checked on 2026-11-01 with the bundled mapping for CodeMeta 3.1: validation passed,
-and the reference parser retained all 119 rows across eleven formats and the set's title,
+and the reference parser retained all 343 rows across 33 formats and the set's title,
 version and curator ORCID. The parser rejects
 an export whose `field:` and `format:` prefixes have the same URI base. The hub uses
 separate `#field/` and `#format/` bases, with a regression test for that requirement.
