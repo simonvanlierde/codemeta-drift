@@ -62,7 +62,9 @@ def test_mapping_rejects_invalid_input(change: str):
 
 def test_sssom_uses_curie_identifiers_and_conservative_predicates():
     text = sssom(mapping())
-    assert text.startswith("# mapping_set_id: https://github.com/simonvanlierde/codemeta-drift/")
+    assert text.startswith("# mapping_set_id: https://simonvanlierde.com/codemeta-drift/spokes-3.1.sssom.tsv\n")
+    assert "# creator_id:\n#   - orcid:0009-0006-6953-909X\n" in text
+    assert "#   orcid: https://orcid.org/\n" in text
     rows = list(
         csv.DictReader(
             io.StringIO("\n".join(line for line in text.splitlines() if not line.startswith("#"))), delimiter="\t"
@@ -87,7 +89,8 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates():
 
 def test_sssom_prefixes_have_distinct_uri_namespaces():
     prefixes = {}
-    for line in sssom(mapping()).splitlines():
+    curie_map = sssom(mapping()).split("# curie_map:\n", 1)[1]
+    for line in curie_map.splitlines():
         if line.startswith("#   "):
             prefix, uri = line.removeprefix("#   ").split(": ", 1)
             prefixes[prefix] = uri

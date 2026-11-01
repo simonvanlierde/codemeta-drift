@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- SSSOM exports carry mapping-set metadata (title, description, version, curator ORCID and provider), and their
+  term, field and format identifiers point at the coverage page. See the [crosswalk hub](docs/crosswalk-hub.md).
+
 ## [0.4.0] - 2026-11-01
 
 **Breaking:** Schema directories passed to `export --schemas` now also need `zenodo.json`.

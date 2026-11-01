@@ -11,6 +11,10 @@ from codemeta_drift.checks import table_rows
 from codemeta_drift.export import FORMATS, PATH, TERMS
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
+SITE = "https://simonvanlierde.com/codemeta-drift/"
+"""The coverage page, which resolves the hub's term, field and format identifiers to matrix cells."""
+CREATOR = "orcid:0009-0006-6953-909X"
+"""The curator of the mapping set, as in CITATION.cff."""
 
 
 def validate_mapping(data: Any) -> None:  # noqa: ANN401
@@ -102,14 +106,25 @@ def sssom(mapping: dict[str, Any]) -> str:
     namespace. It does not invent CodeMeta vocabulary terms for these compound correspondences.
     """
     rows = spokes(mapping)
+    tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
     metadata = (
-        f"# mapping_set_id: {REPO}blob/main/docs/crosswalk-hub.md\n"
+        f"# mapping_set_id: {SITE}spokes-{tag}.sssom.tsv\n"
+        f"# mapping_set_version: {version}\n"
+        f"# mapping_set_title: codemeta-drift crosswalk hub spokes for CodeMeta {tag}\n"
+        "# mapping_set_description: Field correspondences between CodeMeta terms and seven metadata formats,"
+        " from the reviewed mapping export. The paths correspond; their values may need conversion.\n"
+        f"# mapping_provider: {REPO}\n"
+        "# creator_id:\n"
+        f"#   - {CREATOR}\n"
+        "# see_also:\n"
+        f"#   - {REPO}blob/main/docs/crosswalk-hub.md\n"
         "# license: https://spdx.org/licenses/Apache-2.0.html\n"
         "# sssom_version: '1.0'\n"
         "# curie_map:\n"
-        f"#   term: {REPO}blob/main/docs/mapping-export.md#\n"
-        f"#   field: {REPO}blob/main/docs/crosswalk-hub.md#field/\n"
-        f"#   format: {REPO}blob/main/docs/crosswalk-hub.md#format/\n"
+        f"#   term: {SITE}#term/\n"
+        f"#   field: {SITE}#field/\n"
+        f"#   format: {SITE}#format/\n"
+        "#   orcid: https://orcid.org/\n"
         "#   skos: http://www.w3.org/2004/02/skos/core#\n"
         "#   semapv: https://w3id.org/semapv/vocab/\n"
     )
