@@ -188,6 +188,11 @@ consumer splits it.
 
 The schema's `path` pattern accepts exactly this grammar.
 
+`mapping-vectors.json`, in the package beside `mapping.schema.json`, lists cases of `path`, `document`
+and `expected`. `expected` is the list of values the path resolves to in `document`, in document order,
+from the first alternative that yields any value. A consumer vendors the file with the schema and runs
+every case through its own resolver, so the copies of the grammar stay in step.
+
 ## Compatibility
 
 A **minor** version (1.0 to 1.1) only adds: an optional field, a new format id, a new term or
