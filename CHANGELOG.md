@@ -21,6 +21,8 @@ the new export, since R paths contain `@`.
 - The mapping export covers BibTeX, Python PKG-INFO, R DESCRIPTION and Julia `Project.toml`, each cell reviewed
   against CodeMeta's crosswalk. Its `schema_version` is 1.4, and a path key may now contain `@`, as in R's
   `Authors@R`. See the [mapping export](docs/mapping-export.md).
+- The coverage matrix also lists the CodeMeta crosswalks nobody has reviewed, each cell marked as a path, prose,
+  empty or unmatched. `codemeta-drift hub coverage --codemeta <checkout>` adds them to the Markdown or JSON.
 
 ### Changed
 

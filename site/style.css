@@ -262,7 +262,7 @@ select {
 .scroll {
   overflow-x: auto;
   /* Room for the sticky format column on the left; on the right, Chrome otherwise stops with a focused cell half out. */
-  scroll-padding: 0 3rem 0 10rem;
+  scroll-padding: 0 3rem 0 9.5rem;
   border: 1px solid var(--rule);
 }
 table {
@@ -282,10 +282,12 @@ table {
   padding: 8px 10px;
   white-space: nowrap;
 }
+/* A fixed width the scroll padding can match; a long crosswalk name wraps. */
 #matrix tbody th {
   font-weight: 400;
   padding: 8px 12px;
-  white-space: nowrap;
+  width: 9.5rem;
+  min-width: 9.5rem;
   vertical-align: middle;
 }
 /* Term names run up the column, so seventeen columns fit beside the detail panel. */
@@ -342,6 +344,39 @@ table {
 }
 .s-no-field {
   color: var(--faint);
+}
+/* A crosswalk nobody reviewed gets no wash: its marks say only the cell's shape. Prose and unjoinable cells are ochre. */
+.u-path,
+.u-empty {
+  color: var(--faint);
+}
+.u-prose,
+.u-unmatched {
+  color: var(--ochre);
+}
+#matrix .group th {
+  position: static;
+  box-shadow: none;
+  padding: 18px 12px 6px;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--faint);
+  white-space: normal;
+}
+#matrix tbody:first-of-type .group th {
+  padding-top: 8px;
+}
+/* The label spans the whole table; capped to the screen so it wraps where the reader can see it. */
+#matrix .group > th > span {
+  display: inline-block;
+  position: sticky;
+  left: 12px;
+  max-width: min(44rem, calc(100vw - 4rem));
+}
+#matrix .group .mark {
+  position: static;
+  font-style: normal;
+  color: var(--ink);
 }
 table[data-only="as-is"] td:has(.cell:not(.s-as-is)),
 table[data-only="corrected"] td:has(.cell:not(.s-corrected)),

@@ -30,7 +30,8 @@ R DESCRIPTION and Julia's Project.toml have 136 cells for the 17 terms citation 
 32 are wrong, ambiguous or prose (7 of them name a field the format doesn't have), and 26 are
 blank although the format has the field.
 CodeMeta has no crosswalk for `pyproject.toml` at all. The [coverage matrix](docs/coverage.md)
-shows every cell and the reason for each correction, and the
+shows every cell and the reason for each correction, lists the other 36 crosswalks by the shape
+of their cells, and the
 [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.
 
 ## Try it

@@ -3,7 +3,8 @@
     uv run site/build.py --out _site [--codemeta CHECKOUT]
 
 With ``--codemeta``, data.json also holds that checkout's HEAD: its drift findings and the
-crosswalk cells that read differently there than at the export's tag.
+crosswalk cells that read differently there than at the export's tag. It also holds the
+crosswalks nobody has reviewed, read at the export's tag, so the clone needs that tag.
 """
 
 # ruff: noqa: INP001
@@ -18,7 +19,7 @@ from typing import Any
 
 from codemeta_drift.checks import check
 from codemeta_drift.cli import read_ref
-from codemeta_drift.coverage import coverage, upstream
+from codemeta_drift.coverage import coverage, unreviewed, upstream
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -51,6 +52,7 @@ def main() -> None:
     mapping = json.loads((ROOT / "examples/mapping-3.1.json").read_text("utf-8"))
     data = {
         "coverage": coverage(mapping),
+        "unreviewed": unreviewed(read_ref(args.codemeta, mapping["codemeta_tag"]), mapping) if args.codemeta else None,
         "upstream": upstream_data(args.codemeta, mapping) if args.codemeta else None,
     }
     # Only a directory this script made, or an empty one, is replaced.

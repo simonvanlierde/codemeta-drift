@@ -20,6 +20,9 @@ the source of truth for values.
   running up the column. A cell holds only its mark; its path is in the detail panel. The last column
   counts the format's usable cells. The detail panel sits beside the table from 1280px, below it on
   smaller screens.
+- **Not reviewed.** The other crosswalks follow the reviewed rows under an italic group label that
+  carries their legend: • path, ¶ prose, ○ empty, ? unmatched. No wash: a mark says only the cell's
+  shape, so prose and unmatched are ochre text and the rest faint. Their last column counts path cells.
 - **Route.** Three columns: the source path, the CodeMeta term in a box, the target path, joined by short
   rules. A missing end is italic ochre with a dashed rule. On a phone the three stack.
 - **Copy.** Plain and specific. Upstream state names the commit and date it was read from.

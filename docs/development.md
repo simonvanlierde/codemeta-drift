@@ -22,11 +22,12 @@ just hooks             # the YAML, Markdown, workflow and citation checks CI als
 
 ## Coverage matrix and page
 
-`docs/coverage.md` is generated from the example export, and a test fails while it is stale.
-After changing the curated rows or the export, regenerate it:
+`docs/coverage.md` is generated from the example export and, for the crosswalks nobody has
+reviewed, from CodeMeta's files at the export's tag. A test fails while it is stale. After
+changing the curated rows or the export, regenerate it with a CodeMeta clone that has the tag:
 
 ```sh
-uv run codemeta-drift hub coverage examples/mapping-3.1.json --out docs/coverage.md
+uv run codemeta-drift hub coverage examples/mapping-3.1.json --codemeta ../codemeta --out docs/coverage.md
 ```
 
 To preview the page, build it with a CodeMeta clone and serve the output:

@@ -8,6 +8,8 @@ const LABELS = {
 };
 const label = (fmt) => LABELS[fmt] ?? fmt;
 const ORDER = Object.keys(LABELS);
+// Shorter names for the crosswalks nobody reviewed, where the crosswalk's own header runs long.
+const SHORT = { "ISO_19115-1": "ISO 19115-1", "Perl Module Description (CPAN::Meta)": "Perl (CPAN::Meta)" };
 const rank = (fmt) => (ORDER.includes(fmt) ? ORDER.indexOf(fmt) : ORDER.length);
 
 // What each upstream state says about a cell on CodeMeta's main branch.
@@ -31,13 +33,17 @@ function el(tag, attrs = {}, ...children) {
 const code = (text) => el("code", {}, text);
 
 // One row per format, one column per term: each cell is a status mark, and its path is in the detail.
-function matrix(data, onPick) {
+function matrix(data, unreviewed, onPick) {
   const table = document.getElementById("matrix");
   const head = el("tr", {}, el("th", { scope: "col" }, "Format"));
   for (const term of data.terms) head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, code(term))));
   head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, "as written")));
   table.append(el("thead", {}, head));
   const body = el("tbody");
+  if (unreviewed) {
+    body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(data.terms.length + 2) },
+      el("span", {}, "Reviewed. Every cell is checked, and each change has a reason."))));
+  }
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
   for (const fmt of [...data.formats].sort((a, b) => rank(a) - rank(b))) {
     const row = el("tr", {}, el("th", { scope: "row" }, label(fmt)));
@@ -61,14 +67,42 @@ function matrix(data, onPick) {
     }
     // How many cells of the format's crosswalk that name a field can be used unchanged.
     const needed = own.filter((c) => c.status !== "no field");
-    const usable = own[0]?.crosswalk ? `${needed.filter((c) => c.status === "as-is").length} of ${needed.length}` : "no crosswalk";
-    row.append(el("td", { class: "tally" }, usable));
+    const usable = own[0]?.crosswalk ? `${needed.filter((c) => c.status === "as-is").length} of ${needed.length}` : "–";
+    row.append(el("td", { class: "tally", "aria-label": own[0]?.crosswalk ? `${usable} usable as written` : "no CodeMeta crosswalk" }, usable));
     body.append(row);
   }
   table.append(body);
+  if (unreviewed) table.append(others(data.terms, unreviewed, onPick));
 }
 
-function detail(data, upstream) {
+// The crosswalks with no reviewed mapping, below the reviewed ones: each mark says only the cell's shape.
+function others(terms, data, onPick) {
+  const body = el("tbody", { class: "others" });
+  const legend = el("span", {}, "Not reviewed. The mark says only what CodeMeta's cell looks like: ");
+  for (const [name, { mark }] of Object.entries(data.statuses)) legend.append(el("span", { class: "mark" }, mark), ` ${name} `);
+  body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
+  const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
+  const name = (f) => SHORT[f.format] ?? f.label;
+  for (const fmt of [...data.formats].sort((a, b) => name(a).localeCompare(name(b), "en", { sensitivity: "base" }))) {
+    const row = el("tr", {}, el("th", { scope: "row" }, name(fmt)));
+    let paths = 0;
+    for (const term of terms) {
+      const cell = { ...byKey.get(`${fmt.format} ${term}`), label: name(fmt), crosswalk: fmt.crosswalk, reviewed: false };
+      if (cell.status === "path") paths += 1;
+      const button = el("button", { type: "button", class: `cell u-${cell.status}`, "data-status": cell.status,
+        "data-format": fmt.format, "data-term": term, "aria-label": `${name(fmt)}, ${term}: ${cell.status}, not reviewed` },
+        el("span", { class: "mark", "aria-hidden": "true" }, data.statuses[cell.status].mark));
+      button.addEventListener("click", () => onPick(cell, button));
+      row.append(el("td", {}, button));
+    }
+    // Not reviewed, so nothing is known to be usable: count the cells that at least read as a path.
+    row.append(el("td", { class: "tally", "aria-label": `${paths} cells read as a path` }, `${paths} ${data.statuses.path.mark}`));
+    body.append(row);
+  }
+  return body;
+}
+
+function detail(data, unreviewed, upstream) {
   const box = document.getElementById("detail");
   const hint = box.firstElementChild;
   const changes = new Map((upstream?.cells ?? []).map((c) => [`${c.format} ${c.term}`, c]));
@@ -78,10 +112,12 @@ function detail(data, upstream) {
     button.setAttribute("aria-pressed", "true");
     picked = button;
     const was = (cell.cell ?? "").trim();
+    const { mark, meaning } = cell.reviewed === false ? unreviewed.statuses[cell.status] : data.statuses[cell.status];
+    const name = cell.label ?? label(cell.format);
     const rows = [
-      ["Status", `${data.statuses[cell.status].mark} ${cell.status}: ${data.statuses[cell.status].meaning}`],
-      ["CodeMeta's cell", cell.crosswalk ? (was ? code(was) : "empty") : "no CodeMeta crosswalk for this format"],
-      ["Path used", cell.path ? code(cell.path) : "none"],
+      ["Status", `${mark} ${cell.status}: ${meaning}`],
+      ["CodeMeta's cell", cell.crosswalk ? (was ? code(was) : cell.cell === null ? "can't be joined" : "empty") : "no CodeMeta crosswalk for this format"],
+      ["Path used", cell.reviewed === false ? "none yet: nobody has reviewed this crosswalk" : cell.path ? code(cell.path) : "none"],
     ];
     if (cell.reason) rows.push(["Why", cell.reason]);
     const now = changes.get(`${cell.format} ${cell.term}`);
@@ -98,8 +134,8 @@ function detail(data, upstream) {
       // A filter may have made the cell inert; focus the filter that hid it instead.
       (button.closest("[inert]") ? document.querySelector('#filters [aria-pressed="true"]') : button).focus();
     });
-    document.getElementById("picked").textContent = `${cell.term} in ${label(cell.format)}: ${cell.status}`;
-    box.replaceChildren(el("div", { class: "detail-head" }, el("h3", {}, code(cell.term), ` in ${label(cell.format)}`), close), list);
+    document.getElementById("picked").textContent = `${cell.term} in ${name}: ${cell.status}`;
+    box.replaceChildren(el("div", { class: "detail-head" }, el("h3", {}, code(cell.term), ` in ${name}`), close), list);
   };
 }
 
@@ -268,11 +304,11 @@ function score(data) {
 
 async function start() {
   const response = await fetch("data.json", { cache: "no-cache" });
-  const { coverage, upstream } = await response.json();
+  const { coverage, unreviewed, upstream } = await response.json();
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
   score(coverage);
-  matrix(coverage, detail(coverage, upstream));
+  matrix(coverage, unreviewed, detail(coverage, unreviewed, upstream));
   filters(coverage);
   route(coverage);
   upstreamSection(upstream, coverage.codemeta_tag);

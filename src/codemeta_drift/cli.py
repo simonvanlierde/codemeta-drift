@@ -130,9 +130,23 @@ def export_main(argv: list[str]) -> int:
     return 0
 
 
+def coverage_text(mapping: dict, checkout: Path | None, *, as_json: bool) -> str:
+    """``hub coverage`` output; a CodeMeta checkout adds the crosswalks nobody reviewed, read at the export's tag."""
+    from codemeta_drift.coverage import coverage, markdown, unreviewed  # noqa: PLC0415 - only the hub command needs this
+
+    try:
+        files = read_ref(checkout, str(mapping.get("codemeta_tag"))) if checkout else None
+    except subprocess.CalledProcessError as err:
+        msg = f"cannot read {checkout}: {err.stderr.decode().strip()}"
+        raise ValueError(msg) from err
+    if not as_json:
+        return markdown(mapping, files)
+    data = coverage(mapping) | ({"unreviewed": unreviewed(files, mapping)} if files is not None else {})
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+
+
 def hub_main(argv: list[str]) -> int:
     """Write SSSOM spokes or field correspondences between two formats."""
-    from codemeta_drift.coverage import coverage, markdown  # noqa: PLC0415 - only the hub command needs this
     from codemeta_drift.hub import crosswalk, pair_rows, sssom, table  # noqa: PLC0415 - only the hub command needs this
 
     parser = argparse.ArgumentParser(prog="codemeta-drift hub", description="Join curated field correspondences.")
@@ -146,6 +160,9 @@ def hub_main(argv: list[str]) -> int:
             command.add_argument("--format", required=True, help="format id for the crosswalk column")
         if name == "coverage":
             command.add_argument("--json", action="store_true", help="write the cells as JSON instead of Markdown")
+            command.add_argument(
+                "--codemeta", type=Path, help="CodeMeta checkout: also list the crosswalks nobody has reviewed"
+            )
         if name == "pair":
             command.add_argument("--from", dest="source", required=True, help="source format id")
             command.add_argument("--to", dest="target", required=True, help="target format id")
@@ -155,9 +172,7 @@ def hub_main(argv: list[str]) -> int:
         if args.command == "crosswalk":
             text = crosswalk(mapping, {TABLE: (args.checkout / TABLE).read_text("utf-8")}, args.format)
         elif args.command == "coverage":
-            text = (
-                json.dumps(coverage(mapping), indent=2, ensure_ascii=False) + "\n" if args.json else markdown(mapping)
-            )
+            text = coverage_text(mapping, args.codemeta, as_json=args.json)
         elif args.command == "sssom":
             text = sssom(mapping)
         else:
