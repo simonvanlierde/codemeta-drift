@@ -102,6 +102,6 @@ exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]
 # cli.py is left out: most of its mutants change help text.
 [tool.mutmut]
 source_paths = ["src/codemeta_drift"]
-only_mutate = ["src/codemeta_drift/checks.py", "src/codemeta_drift/export.py", "src/codemeta_drift/conformance.py"]
+only_mutate = ["src/codemeta_drift/checks.py", "src/codemeta_drift/export.py", "src/codemeta_drift/conformance.py", "src/codemeta_drift/paths.py"]
 pytest_add_cli_args_test_selection = ["tests"]
 also_copy = ["docs", "examples", "site"]

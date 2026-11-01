@@ -5,7 +5,8 @@ import json
 import re
 from typing import Any
 
-from codemeta_drift.conformance import STEP, array_items, branches, resolve
+from codemeta_drift.conformance import array_items, branches, resolve
+from codemeta_drift.paths import parse
 
 
 def schema_paths(root: dict[str, Any]) -> set[str]:
@@ -57,12 +58,12 @@ def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: di
         covered = set()
         for path in paths:
             prefix = ""
-            for step in STEP.finditer(path):
-                field = f"{prefix}.{step['key']}" if prefix else step["key"]
+            for key, is_list, filter_key, _ in parse(path)[0]:
+                field = f"{prefix}.{key}" if prefix else key
                 covered.add(field)
-                if step["filter"]:
-                    covered.add(f"{field}[].{step['filter']}")
-                prefix = field + ("[]" if len(step[0]) > len(step["key"]) else "")
+                if filter_key:
+                    covered.add(f"{field}[].{filter_key}")
+                prefix = field + ("[]" if is_list else "")
         changes.extend(
             {"format": fmt, "kind": "unmapped", "path": path, "detail": "new field has no mapping row"}
             for path in sorted(schema_paths(schema) - schema_paths(before[fmt]) - covered)
