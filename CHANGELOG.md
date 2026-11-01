@@ -13,10 +13,11 @@ use read it unchanged.
 
 ### Added
 
-- The mapping export covers ten more formats: DataCite, setup.py, Ruby gemspecs, Maven's pom.xml, CPAN's
-  META.json, NuGet's .nuspec, Dart's pubspec.yaml, Cabal, `typst.toml` and Quarto's `_extension.yml`. Each row
-  was checked against the format's own tools and spec, and its `schema_version` is 1.5. See the
-  [mapping export](docs/mapping-export.md).
+- The mapping export covers 22 more formats: DataCite, setup.py, Ruby gemspecs, Maven's pom.xml, CPAN's
+  META.json, NuGet's .nuspec, Dart's pubspec.yaml, Cabal, `typst.toml`, Quarto's `_extension.yml`, the GitHub
+  API, Figshare, bio.tools, Leiningen's project.clj, Octave's DESCRIPTION, publiccode.yml 0.8, swMATH, SPDX 2.3,
+  CodeMeta 2.0, DCAT 3, DOAP and Wikidata. Each row was checked against the format's own tools and spec, and its
+  `schema_version` is 1.5. See the [mapping export](docs/mapping-export.md).
 - Ship `mapping-vectors.json` beside the mapping schema: test cases of path, document and the values the path
   resolves to, for a consumer to run through its own resolver. See the [mapping export](docs/mapping-export.md#path-grammar).
 

@@ -185,6 +185,9 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
             was = f"crosswalk cell `{cell['cell'].strip()}`" if (cell["cell"] or "").strip() else "no crosswalk cell"
             now = f"`{cell['path']}`" if cell["path"] else "no path"
             reason = cell["reason"][0].upper() + cell["reason"][1:].rstrip(".")
+            # A bare URL in a reason (SPDX's git+https://host/path.git) is shown as code, not a link.
+            # It starts after a space or "(" and never ends in a full stop; <autolinks> and `code` are left alone.
+            reason = re.sub(r"(?<![^\s(])[^\s`<(]*https?://[^\s;,)`>]*[^\s;,)`>.]", lambda m: f"`{m[0]}`", reason)
             lines.append(f"- `{cell['term']}` ({cell['status']}): {was} → {now}. {reason}.")
         lines.append("")
     if files is not None:

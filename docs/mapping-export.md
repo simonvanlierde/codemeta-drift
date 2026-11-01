@@ -104,9 +104,14 @@ Each row:
   Project.toml), `bibtex` (a biblatex-software entry), `datacite` (the DataCite REST API's
   JSON), `setup-py` (setup.py's `setup()` arguments), `ruby-gem` (a Gem::Specification), `maven`
   (pom.xml), `cpan-meta-2` (META.json), `nuget` (.nuspec), `pubspec` (pubspec.yaml), `cabal`
-  (a .cabal file), `typst` (typst.toml) or `quarto` (a Quarto extension's _extension.yml). A
-  format whose versions differ puts the version in the id. `pkg-info` to `bibtex` were added in
-  schema 1.4, and `datacite` to `quarto` in 1.5.
+  (a .cabal file), `typst` (typst.toml), `quarto` (a Quarto extension's _extension.yml),
+  `github` (the GitHub REST API's repository JSON), `figshare` (a Figshare article's JSON),
+  `bio-tools` (a bio.tools entry), `leiningen` (project.clj), `octave` (an Octave package's
+  DESCRIPTION), `publiccode-0.8` (publiccode.yml), `swmath` (a zbMATH Open software record),
+  `spdx-2.3` (an SPDX 2.3 package in JSON), `codemeta-2` (a codemeta.json written to the 2.0
+  context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project) or `wikidata` (a Wikidata
+  item). A format whose versions differ puts the version in the id. `pkg-info` to `bibtex` were
+  added in schema 1.4, and `datacite` to `wikidata` in 1.5.
 - `term` is one of the eleven terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords` and `datePublished`, or a person
   sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
@@ -114,8 +119,8 @@ Each row:
   than `author.givenName`. `identifier` is the DOI. `swhid` is the
   [Software Heritage identifier](https://www.swhid.org/), such as
   `swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505`. CodeMeta has no term of its own for it:
-  codemeta.json holds it in `identifier`, beside the DOI, so both codemeta rows have the path
-  `identifier` and the consumer distinguishes them by their identifier syntax.
+  codemeta.json holds it in `identifier`, beside the DOI, so both rows of `codemeta` and of
+  `codemeta-2` have the path `identifier` and the consumer distinguishes them by their identifier syntax.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
@@ -166,6 +171,25 @@ them into one first. These cases need more than the grammar below says:
 - A .cabal file: field names are lower case, and each top-level field is a key holding its text.
   A section is an element of a list named after it, with its first argument as `kind`, so
   `source-repository head` is read at `source-repository[kind=head].location`.
+- project.clj is Clojure code: never run `lein` or `load-file` on it. A consumer reads it with a
+  Clojure reader with `*read-eval*` off and takes the first `(defproject NAME VERSION :key value ...)`
+  form as a map: `name` and `group` from the NAME symbol, `version` from the second element, and
+  each `:key` without its colon. A value written as an unquote (`~`) is skipped, not evaluated.
+- Octave's DESCRIPTION has `Name: value` lines, a line starting with a space continues the value
+  before it, and `#` starts a comment. Field names are lower-cased, as Octave's `pkg` does, so
+  `License` is read at `license`, and only the first of a repeated field counts.
+- SPDX: the paths address the JSON form, where a package is an element of `packages` with lower
+  camel case keys (`versionInfo`). The crosswalk cells use the tag-value names (`PackageName`),
+  which are not JSON keys. In a document with several packages, the consumer reads the one that
+  SPDXRef-DOCUMENT's `DESCRIBES` relationship names.
+- DCAT 3 and DOAP are RDF. A consumer reads the record (RDF/XML from Zenodo's OAI-PMH or a
+  project's `.doap` file) as JSON-LD rooted at the `dcat:Dataset` or `doap:Project` node, compacted
+  so each property has its bare local name. No published context does that, so the consumer
+  supplies one that maps each name to its DCAT, Dublin Core, OWL, DOAP or FOAF IRI. A property may hold one value or a list, a link is an
+  object with `@id`, and a typed date may be an object with `@value`.
+- Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
+  element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object
+  with `id` for an item, or an object with `time` for a date. A deprecated statement is skipped.
 
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
@@ -174,7 +198,7 @@ A (format, term) pair appears at most once. The schema cannot enforce uniqueness
 those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, and within a format in the order `name`, `version`, `author`,
+`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
 `contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`. The same inputs give the same bytes, so a consumer
