@@ -7,23 +7,25 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-01
+
 **Breaking:** SSSOM `term:`, `field:` and `format:` identifiers and the `mapping_set_id` have new URIs.
 Regenerate stored SSSOM files with `codemeta-drift hub sssom` rather than joining them with 0.4.0 output.
 
 Upgrade step: a consumer that validates the mapping export against a vendored schema vendors the 1.4 schema
 with the new export, since R paths contain `@`. Readers that skip formats they don't use read it unchanged.
+The `hub` commands of 0.4.0 and older refuse a 1.4 export, so upgrade codemeta-drift with the file.
 
 ### Added
 
 - See every crosswalk cell for nine citation and package formats, and why a reviewed mapping changed it, in the
   [coverage matrix](docs/coverage.md) and on the [coverage page](https://simonvanlierde.com/codemeta-drift/).
-  `codemeta-drift hub coverage` writes the matrix as Markdown or JSON.
+  `codemeta-drift hub coverage` writes the matrix as Markdown or JSON. It also lists the CodeMeta crosswalks
+  nobody has reviewed, each cell marked as a path, prose, empty or unmatched; `--codemeta <checkout>` adds them.
 - The coverage page checks CodeMeta's main branch every Monday and lists the cells that changed since the pinned tag.
 - The mapping export covers BibTeX, Python PKG-INFO, R DESCRIPTION and Julia `Project.toml`, each cell reviewed
   against CodeMeta's crosswalk. Its `schema_version` is 1.4, and a path key may now contain `@`, as in R's
   `Authors@R`. See the [mapping export](docs/mapping-export.md).
-- The coverage matrix also lists the CodeMeta crosswalks nobody has reviewed, each cell marked as a path, prose,
-  empty or unmatched. `codemeta-drift hub coverage --codemeta <checkout>` adds them to the Markdown or JSON.
 
 ### Changed
 
@@ -115,7 +117,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.1.0...v0.2.0

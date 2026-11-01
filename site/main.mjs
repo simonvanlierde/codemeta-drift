@@ -79,7 +79,7 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
   return body;
 }
 
-// The crosswalk cells for a term the format has a field for; the tally and the headline count these.
+// The crosswalk cells a person had to judge: every cell except a 'no field' one. The tally and the headline count these.
 const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no field");
 
 const usableTally = (cells) => {
@@ -101,8 +101,8 @@ function detail(statuses, labels, reviewed, upstream) {
   const changes = new Map((upstream?.cells ?? []).map((c) => [`${c.format} ${c.term}`, c]));
   let picked = null;
   return (cell, button) => {
-    picked?.removeAttribute("aria-pressed");
-    button.setAttribute("aria-pressed", "true");
+    picked?.removeAttribute("aria-current");
+    button.setAttribute("aria-current", "true");
     picked = button;
     const was = (cell.cell ?? "").trim();
     const { mark, meaning } = statuses[cell.status];
@@ -121,14 +121,14 @@ function detail(statuses, labels, reviewed, upstream) {
     for (const [key, value] of rows) list.append(el("dt", {}, key), el("dd", {}, value));
     const close = el("button", { type: "button" }, "Close");
     close.addEventListener("click", () => {
-      button.removeAttribute("aria-pressed");
+      button.removeAttribute("aria-current");
       picked = null;
       box.replaceChildren(hint);
       // A filter may have made the cell inert; focus the filter that hid it instead.
       (button.closest("[inert]") ? document.querySelector('#filters [aria-pressed="true"]') : button).focus();
     });
-    document.getElementById("picked").textContent = `${cell.term} in ${name}: ${cell.status}`;
-    box.replaceChildren(el("div", { class: "detail-head" }, el("h3", {}, code(cell.term), ` in ${name}`), close), list);
+    document.getElementById("picked").textContent = `${cell.term} in ${name}: ${cell.status}${cell.path ? `, path ${cell.path}` : ""}`;
+    box.replaceChildren(el("div", { class: "detail-head" }, el("h2", {}, code(cell.term), ` in ${name}`), close), list);
   };
 }
 

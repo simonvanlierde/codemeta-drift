@@ -4,7 +4,7 @@
 cff-version: 1.2.0
 message: If you use this software, please cite it as below.
 title: "codemeta-drift"
-abstract: "Check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
+abstract: "Show where CodeMeta's crosswalks are wrong or missing, check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
 authors:
   - given-names: "Simon"
     family-names: "van Lierde"
@@ -16,6 +16,7 @@ keywords:
   - CodeMeta
   - software metadata
   - crosswalk
+  - crosswalk coverage
   - JSON-LD
   - SSSOM
   - schema drift

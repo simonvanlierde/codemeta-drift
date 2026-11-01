@@ -46,6 +46,15 @@ def test_unreviewed_marks_a_cell_it_cannot_join():
     assert found["DataCite", "version"] == "unmatched"
 
 
+def test_a_format_the_mapping_lacks_counts_as_not_reviewed():
+    partial = mapping()
+    partial["rows"] = [row for row in partial["rows"] if row["format"] != "bibtex"]
+    assert "bibtex" not in coverage(partial)["formats"]
+    files = read_dir(TAG_FILES)
+    assert "BibTeX" in [f["format"] for f in unreviewed(files, partial)["formats"]]
+    assert "| bibtex |" not in markdown(partial, files)
+
+
 def test_cli_lists_unreviewed_crosswalks_from_the_tag(repo: Path, capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(EXAMPLE), "--json", "--codemeta", str(repo)]) == 0
     data = json.loads(capsys.readouterr().out)

@@ -76,7 +76,7 @@ and `repository`, which may be strings or objects.
 {
   "schema_version": "1.4",
   "codemeta_tag": "3.1",
-  "generator": {"name": "codemeta-drift", "version": "0.3.0"},
+  "generator": {"name": "codemeta-drift", "version": "0.5.0"},
   "rows": [
     {
       "format": "cargo",
@@ -133,6 +133,22 @@ CFF stores a name particle and a name suffix apart from `family-names`, and Code
 `name-particle`, `family-names`, `name-suffix`, each only when present. Antonie van Leeuwenhoek
 (`name-particle: van`, `family-names: Leeuwenhoek`) has the family name `van Leeuwenhoek`, and
 a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says so in its `comment`.
+
+PKG-INFO and R's DESCRIPTION are not trees, so a consumer reads them into one first. Three kinds
+of row there, and one Julia case, need more than the grammar below says:
+
+- PKG-INFO: each field is a key, and a field that repeats is a list. `Project-URL` becomes
+  elements with `label` and `url`, the label normalised as the
+  [well-known project URLs spec](https://packaging.python.org/en/latest/specifications/well-known-project-urls/)
+  says: lower case, no punctuation or whitespace, so `Source Code` matches `sourcecode`.
+  `Author | Author-email` is the one path whose alternatives are all read: a project with
+  authors of both kinds fills both fields.
+- R DESCRIPTION: `Authors@R` becomes a list of person entries with `given`, `family`, `role`
+  and `comment`, where `comment` is a mapping (`c(ORCID = "...")`). `role` is a list, and
+  `[role=aut]` matches an entry whose roles include `aut`, so `c("aut", "cre")` matches. A
+  package without `Authors@R` has only the free-text `Author` field, which no path reads.
+- Julia: an `authors` element may be a plain `Name` or `Name <email>` string. Both name
+  sub-terms then come from that string, and the consumer splits it, as for Zenodo.
 
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
