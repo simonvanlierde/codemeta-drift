@@ -31,6 +31,10 @@ issue when that stable release tag is older than `--latest`. Equal and newer pin
 no issue. Release tags must use `vMAJOR.MINOR.PATCH` or `MAJOR.MINOR.PATCH`; arbitrary refs
 and prereleases are errors because this preview cannot infer their release order.
 
+The poll also compares each `sha256` line of `MAPPING_SOURCE` with the hash of that file as
+published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issue titled
+"Update mapping pin hash for <file> at <tag>" that names the file.
+
 The weekly [schema watcher workflow](../.github/workflows/schema-watch.yml) polls the
 existing public schema sources, CFF's latest release, CodeMeta's tags, the latest stable
 codemeta-drift release and citesync's pin. It uploads the draft JSON as an artifact. To
@@ -41,7 +45,10 @@ uv run python -m codemeta_drift.poll --out schema-watch.json
 ```
 
 Publishing is opt-in. The workflow publishes only when the `MAPPING_WATCH_TOKEN` repository
-secret is configured with issue access to both codemeta-drift and citesync. It reads all
+secret is configured. Without it the run prints a notice that publishing was skipped. Use a
+fine-grained token limited to simonvanlierde/codemeta-drift and simonvanlierde/citesync with
+only Issues: read and write. Both repositories are public, so reading the schema sources and
+citesync's `MAPPING_SOURCE` needs no Contents permission. It reads all
 issue pages, including closed issues, before creating any missing drafts. Calls are spaced
 one second apart. The workflow's concurrency group serializes runs. A local
 `--publish` run uses `gh` credentials and must not run beside another publisher.

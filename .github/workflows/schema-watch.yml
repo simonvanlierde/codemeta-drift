@@ -34,4 +34,6 @@ jobs:
         run: |-
           if [ -n "$GH_TOKEN" ]; then
             uv run python -m codemeta_drift.poll --out schema-watch.json --publish
+          else
+            echo "::notice::Publishing skipped: the MAPPING_WATCH_TOKEN secret is not set, so drafts are only in the artifact."
           fi
