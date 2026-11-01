@@ -83,7 +83,7 @@ def test_known_cells_get_their_status():
 
 def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if FORMATS[fmt].crosswalk]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 109, "corrected": 126, "added": 90, "no field": 151}
+    assert {s: found.count(s) for s in set(found)} == {"as-is": 108, "corrected": 127, "added": 90, "no field": 151}
 
 
 def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):

@@ -21,6 +21,11 @@ use read it unchanged.
 - Ship `mapping-vectors.json` beside the mapping schema: test cases of path, document and the values the path
   resolves to, for a consumer to run through its own resolver. See the [mapping export](docs/mapping-export.md#path-grammar).
 
+### Changed
+
+- The BibTeX `codeRepository` row reads `repository | url`, since plain BibTeX styles print only `url`.
+  See the [coverage page](docs/coverage.md).
+
 ### Fixed
 
 - The [schema watcher](docs/schema-watcher.md) now also opens a citesync issue when a hash in `MAPPING_SOURCE` differs from the file published at the pinned tag, and its run prints a notice when it skips publishing for lack of a token. The docs name the token permissions it needs.
