@@ -2738,7 +2738,7 @@
       "format": "bio-tools",
       "term": "author",
       "path": "credit[typeRole=Developer].name",
-      "source": "curated:the cell is empty; credit is a list of people and organisations with a typeRole list, and Developer is the role closest to an author",
+      "source": "curated:the cell is empty; credit is a list of people and organisations with a typeRole list, and Developer is the role closest to an author; toolmeta-harvester folds Contributor into author too, but contributor keeps them apart",
       "comment": "typeRole is a list, so [typeRole=Developer] matches an entry whose roles include it, as in the R note. biotoolsSchema has no author role; a credit with typeEntity other than Person is an organisation.",
       "crosswalk_cell": ""
     },
@@ -3602,8 +3602,8 @@
     {
       "format": "dcat-3",
       "term": "version",
-      "path": "version",
-      "source": "curated:the cell says dcat:version, which DCAT 3 added for the version name or identifier of a resource; the path is its local name",
+      "path": "version | versionInfo",
+      "source": "curated:the cell says dcat:version, which DCAT 3 added for the version name or identifier of a resource; the path is its local name, with owl:versionInfo after it, which Zenodo's DCAT export writes",
       "crosswalk_cell": "dcat:version"
     },
     {
@@ -3694,9 +3694,8 @@
     {
       "format": "dcat-3",
       "term": "codeRepository",
-      "path": "distribution[].accessURL",
-      "source": "curated:the cell says dcat:accessURL, a property of dcat:Distribution; a dataset reaches it through distribution, so the path goes through distribution[]",
-      "comment": "accessURL of a distribution that points at the repository; other distributions may be downloads (downloadURL) or APIs.",
+      "path": null,
+      "source": "curated:the cell says dcat:accessURL, a property of dcat:Distribution that usually points at a landing page or a download, not a repository",
       "crosswalk_cell": "dcat:accessURL"
     },
     {
@@ -3740,14 +3739,14 @@
     {
       "format": "doap",
       "term": "author",
-      "path": "developer[]",
-      "source": "crosswalk:crosswalks/DOAP.csv@3.1",
+      "path": "developer[] | maintainer[]",
+      "source": "curated:the cell says developer, but most DOAP files (Apache's, GNOME's) list only maintainer, so the path falls back to it",
       "crosswalk_cell": "developer"
     },
     {
       "format": "doap",
       "term": "author.givenName",
-      "path": "developer[].name",
+      "path": "developer[].name | maintainer[].name",
       "source": "curated:no cell; DOAP people are foaf:Person nodes and the name most DOAP files give is foaf:name, one string",
       "comment": "The consumer splits the name into given and family name; a node that has foaf:givenName and foaf:familyName can be read directly.",
       "crosswalk_cell": ""
@@ -3755,7 +3754,7 @@
     {
       "format": "doap",
       "term": "author.familyName",
-      "path": "developer[].name",
+      "path": "developer[].name | maintainer[].name",
       "source": "curated:no cell; DOAP people are foaf:Person nodes and the name most DOAP files give is foaf:name, one string",
       "comment": "The consumer splits the name into given and family name; a node that has foaf:givenName and foaf:familyName can be read directly.",
       "crosswalk_cell": ""
@@ -3763,7 +3762,7 @@
     {
       "format": "doap",
       "term": "author.@id",
-      "path": "developer[].@id",
+      "path": "developer[].@id | maintainer[].@id",
       "source": "curated:no cell; DOAP has no ORCID property, but a foaf:Person node can be named by its ORCID IRI, which JSON-LD keeps as @id",
       "comment": "Most DOAP files name people with a blank node, so this is often absent.",
       "crosswalk_cell": ""

@@ -184,7 +184,8 @@ them into one first. These cases need more than the grammar below says:
   SPDXRef-DOCUMENT's `DESCRIBES` relationship names.
 - DCAT 3 and DOAP are RDF. A consumer reads the record (RDF/XML from Zenodo's OAI-PMH or a
   project's `.doap` file) as JSON-LD rooted at the `dcat:Dataset` or `doap:Project` node, compacted
-  so each property has its bare local name. A property may hold one value or a list, a link is an
+  so each property has its bare local name. No published context does that, so the consumer
+  supplies one that maps each name to its DCAT, Dublin Core, OWL, DOAP or FOAF IRI. A property may hold one value or a list, a link is an
   object with `@id`, and a typed date may be an object with `@value`.
 - Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
   element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object

@@ -301,7 +301,7 @@ def test_example_null_rows():
                 "keywords",
             )
         }
-        | {("dcat-3", t) for t in ("swhid",)}
+        | {("dcat-3", t) for t in ("swhid", "codeRepository")}
         | {
             ("doap", t)
             for t in (
