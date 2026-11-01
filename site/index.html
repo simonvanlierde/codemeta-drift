@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<title>codemeta-drift: where CodeMeta's crosswalks are wrong or missing</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="description" content="Every CodeMeta crosswalk cell for CFF, Zenodo, Cargo, npm and pyproject.toml: which ones work as written, which are wrong, and which are missing. CodeMeta's main branch is checked each week.">
+<link rel="canonical" href="https://simonvanlierde.com/codemeta-drift/">
+<meta name="theme-color" content="#fbfaf6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#181a17" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="main.mjs"></script>
+</head>
+<body>
+<a class="skip" href="#matrix">Skip to the matrix</a>
+<header class="wrap slug">
+  <p><b>codemeta-drift</b> · crosswalk coverage at CodeMeta <span id="tag">3.1</span></p>
+  <p id="checked">upstream not checked in this build</p>
+</header>
+<main class="wrap">
+  <h1>Where CodeMeta's crosswalks are wrong or missing</h1>
+  <p class="lede" id="lede">CodeMeta's crosswalks say which field of another format holds each CodeMeta term.
+    This page shows every cell for the formats citation tools read, and what a reviewed mapping had to change.</p>
+  <noscript><p class="note">This page needs JavaScript to draw the matrix. The same matrix is in
+    <a href="https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md">docs/coverage.md</a>.</p></noscript>
+
+  <section aria-labelledby="matrix-title">
+    <h2 id="matrix-title">The matrix</h2>
+    <div class="legend" role="group" aria-label="Show one status">
+      <span class="legend-label">Show</span>
+      <div id="filters"></div>
+    </div>
+    <div class="board">
+      <div class="scroll" role="region" tabindex="0" aria-label="Coverage matrix, scrolls sideways">
+        <table id="matrix"><caption class="vh">CodeMeta terms by format. Each cell gives its status and path; choose one to read why.</caption></table>
+      </div>
+      <p id="picked" class="vh" role="status"></p>
+      <aside id="detail" class="detail" aria-label="Chosen cell">
+        <p class="hint">Choose a cell to see CodeMeta's text, the path the reviewed mapping uses, and why.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="route-title">
+    <h2 id="route-title">Follow a field from one format to another</h2>
+    <p class="hint">Every route runs through a CodeMeta term. A broken end means one format has no field for it.
+      The paths correspond; their values may still need converting.</p>
+    <div class="pickers">
+      <label>From <select id="from"></select></label>
+      <label>To <select id="to"></select></label>
+    </div>
+    <ol id="route" class="route"></ol>
+  </section>
+
+  <section aria-labelledby="upstream-title" id="upstream" hidden>
+    <h2 id="upstream-title">CodeMeta's main branch now</h2>
+    <p class="hint" id="upstream-intro"></p>
+    <ul id="upstream-cells" class="changes"></ul>
+    <table id="drift" class="counts"><caption class="vh">Drift findings by check</caption></table>
+  </section>
+</main>
+<footer class="wrap colophon">
+  <p>Built from the reviewed <a href="https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md">mapping export</a>.
+    A mark is never the only signal: each cell's status is also in its name.</p>
+  <p class="mono"><span id="version">codemeta-drift</span> · Apache-2.0 ·
+    <a href="https://github.com/simonvanlierde/codemeta-drift">source</a> ·
+    <a href="https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md">matrix as Markdown</a></p>
+</footer>
+</body>
+</html>
