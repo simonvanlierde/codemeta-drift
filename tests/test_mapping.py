@@ -83,6 +83,18 @@ def test_example_generator_is_this_release():
     assert EXAMPLE["generator"] == generator()
 
 
+def test_person_sub_terms_line_up_with_their_term():
+    """Each alternative of a sub-term starts with the matching alternative of its term."""
+    paths = {(row["format"], row["term"]): row["path"] for row in EXAMPLE["rows"]}
+    for (fmt, term), path in paths.items():
+        parent = paths.get((fmt, term.split(".")[0])) if "." in term else None
+        if path is None or parent is None:
+            continue
+        subs, terms = path.split(" | "), parent.split(" | ")
+        assert len(subs) == len(terms), (fmt, term)
+        assert all(sub.startswith(alt) for sub, alt in zip(subs, terms, strict=True)), (fmt, term)
+
+
 def test_example_null_rows():
     nulls = {(row["format"], row["term"]) for row in EXAMPLE["rows"] if row["path"] is None}
     contributor = ("contributor", "contributor.givenName", "contributor.familyName", "contributor.@id")

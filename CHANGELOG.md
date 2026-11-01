@@ -23,6 +23,8 @@ use read it unchanged.
 
 ### Fixed
 
+- A person sub-term such as `author.@id` is read from the alternative its term resolved through, not by first
+  match, so one person's ORCID never lands on another. See the [mapping export](docs/mapping-export.md#path-grammar).
 - The [schema watcher](docs/schema-watcher.md) now also opens a citesync issue when a hash in `MAPPING_SOURCE` differs from the file published at the pinned tag, and its run prints a notice when it skips publishing for lack of a token. The docs name the token permissions it needs.
 
 ## [0.5.0] - 2026-11-01
