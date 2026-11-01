@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-01
+
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade
 codemeta-drift with the file. A consumer that vendors the mapping schema vendors the 1.6 schema and
 `mapping-vectors.json` with it, and runs the vectors through its resolver: a 1.6 export fails the 1.4 schema that 0.5.0 shipped.
@@ -16,7 +18,8 @@ codemeta-drift with the file. A consumer that vendors the mapping schema vendors
 - The mapping export covers 22 more formats: DataCite, setup.py, Ruby gemspecs, Maven's pom.xml, CPAN's
   META.json, NuGet's .nuspec, Dart's pubspec.yaml, Cabal, `typst.toml`, Quarto's `_extension.yml`, the GitHub
   API, Figshare, bio.tools, Leiningen's project.clj, Octave's DESCRIPTION, publiccode.yml 0.8, swMATH, SPDX 2.3,
-  CodeMeta 2.0, DCAT 3, DOAP and Wikidata. Each row was checked against the format's own tools and spec. See the [mapping export](docs/mapping-export.md).
+  CodeMeta 2.0, DCAT 3, DOAP and Wikidata, and the coverage page and SSSOM spokes cover them too. Each row was
+  checked against the format's own tools and spec. See the [mapping export](docs/mapping-export.md).
 - Ship `mapping-vectors.json` beside the mapping schema: test cases of path, document and the values the path
   resolves to, for a consumer to run through its own resolver. See the [mapping export](docs/mapping-export.md#path-grammar).
 
@@ -145,7 +148,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.2.0...v0.3.0
