@@ -399,6 +399,377 @@
       "path": null,
       "cell": "",
       "reason": "no cell; package.json has no release date"
+    },
+    {
+      "format": "pkg-info",
+      "term": "author",
+      "path": "Author | Author-email",
+      "cell": "Author",
+      "reason": "the cell says Author; packaging tools write an author who has an email to Author-email as 'Name <email>', and only a name-only author to Author"
+    },
+    {
+      "format": "pkg-info",
+      "term": "author.givenName",
+      "path": "Author | Author-email",
+      "cell": "",
+      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
+    },
+    {
+      "format": "pkg-info",
+      "term": "author.familyName",
+      "path": "Author | Author-email",
+      "cell": "",
+      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
+    },
+    {
+      "format": "pkg-info",
+      "term": "author.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata has no person identifier"
+    },
+    {
+      "format": "pkg-info",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata lists maintainers, who are not contributors"
+    },
+    {
+      "format": "pkg-info",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata has no contributor list"
+    },
+    {
+      "format": "pkg-info",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata has no contributor list"
+    },
+    {
+      "format": "pkg-info",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata has no contributor list"
+    },
+    {
+      "format": "pkg-info",
+      "term": "license",
+      "path": "License-Expression | License",
+      "cell": "License",
+      "reason": "the cell says License, which is free text; metadata 2.4 puts the SPDX expression in License-Expression"
+    },
+    {
+      "format": "pkg-info",
+      "term": "identifier",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata has no DOI field"
+    },
+    {
+      "format": "pkg-info",
+      "term": "swhid",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata has no SWHID field"
+    },
+    {
+      "format": "pkg-info",
+      "term": "codeRepository",
+      "path": "Project-URL[label=Source] | Project-URL[label=Repository] | Home-page",
+      "cell": "",
+      "reason": "no cell; the repository is the Project-URL labelled Source or Repository, as in pyproject.toml's project.urls, else Home-page"
+    },
+    {
+      "format": "pkg-info",
+      "term": "description",
+      "path": "Summary",
+      "cell": "Summary / Description",
+      "reason": "the cell lists Summary / Description; Description is the long README text, Summary the one-line description"
+    },
+    {
+      "format": "pkg-info",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; core metadata has no release date"
+    },
+    {
+      "format": "r-description",
+      "term": "author",
+      "path": "Authors@R[role=aut]",
+      "cell": "[aut] in Author",
+      "reason": "the cell says [aut] in Author, prose about the free-text Author field; R builds that from Authors@R, whose person() entries with role aut are the authors"
+    },
+    {
+      "format": "r-description",
+      "term": "author.givenName",
+      "path": "Authors@R[role=aut].given",
+      "cell": "givenName",
+      "reason": "the cell says givenName, a CodeMeta term; a person() entry keeps the given name in given"
+    },
+    {
+      "format": "r-description",
+      "term": "author.familyName",
+      "path": "Authors@R[role=aut].family",
+      "cell": "familyName",
+      "reason": "the cell says familyName, a CodeMeta term; a person() entry keeps the family name in family"
+    },
+    {
+      "format": "r-description",
+      "term": "author.@id",
+      "path": "Authors@R[role=aut].comment.ORCID",
+      "cell": "",
+      "reason": "no cell; a person() entry keeps an ORCID iD as comment = c(ORCID = ...)"
+    },
+    {
+      "format": "r-description",
+      "term": "contributor",
+      "path": "Authors@R[role=ctb]",
+      "cell": "[ctb] in Author",
+      "reason": "the cell says [ctb] in Author, prose about the free-text Author field; the person() entries in Authors@R with role ctb are the contributors"
+    },
+    {
+      "format": "r-description",
+      "term": "contributor.givenName",
+      "path": "Authors@R[role=ctb].given",
+      "cell": "givenName",
+      "reason": "the cell says givenName, a CodeMeta term; a person() entry keeps the given name in given"
+    },
+    {
+      "format": "r-description",
+      "term": "contributor.familyName",
+      "path": "Authors@R[role=ctb].family",
+      "cell": "familyName",
+      "reason": "the cell says familyName, a CodeMeta term; a person() entry keeps the family name in family"
+    },
+    {
+      "format": "r-description",
+      "term": "contributor.@id",
+      "path": "Authors@R[role=ctb].comment.ORCID",
+      "cell": "",
+      "reason": "no cell; a person() entry keeps an ORCID iD as comment = c(ORCID = ...)"
+    },
+    {
+      "format": "r-description",
+      "term": "identifier",
+      "path": null,
+      "cell": "Package",
+      "reason": "the cell says Package, the package name; DESCRIPTION has no DOI field"
+    },
+    {
+      "format": "r-description",
+      "term": "swhid",
+      "path": null,
+      "cell": "Package",
+      "reason": "the cell says Package, the package name; DESCRIPTION has no SWHID field"
+    },
+    {
+      "format": "r-description",
+      "term": "keywords",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; DESCRIPTION has no keywords field"
+    },
+    {
+      "format": "julia",
+      "term": "version",
+      "path": "version",
+      "cell": "",
+      "reason": "no cell; Project.toml keeps the package version in version"
+    },
+    {
+      "format": "julia",
+      "term": "author",
+      "path": "authors[]",
+      "cell": "",
+      "reason": "no cell; Project.toml lists authors in authors"
+    },
+    {
+      "format": "julia",
+      "term": "author.givenName",
+      "path": "authors[].given-names",
+      "cell": "",
+      "reason": "no cell; an author table uses CFF's keys, so the given name is given-names"
+    },
+    {
+      "format": "julia",
+      "term": "author.familyName",
+      "path": "authors[].family-names",
+      "cell": "",
+      "reason": "no cell; an author table uses CFF's keys, so the family name is family-names"
+    },
+    {
+      "format": "julia",
+      "term": "author.@id",
+      "path": "authors[].orcid",
+      "cell": "",
+      "reason": "no cell; an author table uses CFF's keys, so an ORCID iD is orcid"
+    },
+    {
+      "format": "julia",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Project.toml has no contributor list"
+    },
+    {
+      "format": "julia",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Project.toml has no contributor list"
+    },
+    {
+      "format": "julia",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Project.toml has no contributor list"
+    },
+    {
+      "format": "julia",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Project.toml has no contributor list"
+    },
+    {
+      "format": "julia",
+      "term": "license",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Pkg's Project.toml specification has no licence field"
+    },
+    {
+      "format": "julia",
+      "term": "identifier",
+      "path": null,
+      "cell": "uuid",
+      "reason": "the cell says uuid, which identifies the package to Pkg; it is not a DOI"
+    },
+    {
+      "format": "julia",
+      "term": "swhid",
+      "path": null,
+      "cell": "uuid",
+      "reason": "the cell says uuid, which identifies the package to Pkg; it is not a SWHID"
+    },
+    {
+      "format": "julia",
+      "term": "codeRepository",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Pkg's Project.toml specification has no repository field"
+    },
+    {
+      "format": "julia",
+      "term": "description",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Pkg's Project.toml specification has no description field"
+    },
+    {
+      "format": "julia",
+      "term": "keywords",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Project.toml has no keywords field"
+    },
+    {
+      "format": "julia",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Project.toml has no release date"
+    },
+    {
+      "format": "bibtex",
+      "term": "version",
+      "path": "version",
+      "cell": "",
+      "reason": "no cell; biblatex and biblatex-software keep the version in version"
+    },
+    {
+      "format": "bibtex",
+      "term": "author.givenName",
+      "path": "author",
+      "cell": "",
+      "reason": "no cell; BibTeX keeps every author in one author string, each name written 'Family, Given' and joined by and"
+    },
+    {
+      "format": "bibtex",
+      "term": "author.familyName",
+      "path": "author",
+      "cell": "",
+      "reason": "no cell; BibTeX keeps every author in one author string, each name written 'Family, Given' and joined by and"
+    },
+    {
+      "format": "bibtex",
+      "term": "author.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; BibTeX has no person identifier"
+    },
+    {
+      "format": "bibtex",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; a software entry has no contributor field"
+    },
+    {
+      "format": "bibtex",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; a software entry has no contributor field"
+    },
+    {
+      "format": "bibtex",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; a software entry has no contributor field"
+    },
+    {
+      "format": "bibtex",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; a software entry has no contributor field"
+    },
+    {
+      "format": "bibtex",
+      "term": "identifier",
+      "path": "doi",
+      "cell": "doi / hal_id",
+      "reason": "the cell lists doi / hal_id; hal_id is a HAL archive id, the DOI is doi"
+    },
+    {
+      "format": "bibtex",
+      "term": "swhid",
+      "path": "swhid",
+      "cell": "doi / hal_id",
+      "reason": "the cell lists doi / hal_id for every identifier; biblatex-software keeps the SWHID in swhid"
+    },
+    {
+      "format": "bibtex",
+      "term": "keywords",
+      "path": "keywords",
+      "cell": "",
+      "reason": "no cell; biblatex keeps keywords in keywords, separated by commas"
+    },
+    {
+      "format": "bibtex",
+      "term": "datePublished",
+      "path": "date | year",
+      "cell": "date / (year) / (month)",
+      "reason": "the cell lists date / (year) / (month); biblatex writes the release date in date, and classic BibTeX gives only year and month"
     }
   ]
 }

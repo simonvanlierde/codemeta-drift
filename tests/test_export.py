@@ -153,7 +153,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == 100
+    assert len(rows) == 168
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():
@@ -316,9 +316,8 @@ def test_cli_export_without_the_tag_exits_2(
 
 
 def test_cli_export_lists_refused_cells(tagged: Callable, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
-    files = {
-        p: t.replace("description,abstract", "description,abstract / summary") for p, t in read_dir(FIXTURE).items()
-    }
+    files = read_dir(FIXTURE)
+    files[CFF] = files[CFF].replace("description,abstract", "description,abstract / summary")
     out = tmp_path / "out.json"
     assert main(["export", str(tagged(files)), "--tag", "3.1", "--out", str(out), "--schemas", str(SCHEMAS)]) == 1
     out_text, err = capsys.readouterr()

@@ -21,7 +21,7 @@ alternatives retain their order and selectors. These are field correspondences, 
 instructions to copy a value unchanged.
 
 `sssom` writes [SSSOM 1.0 TSV](https://mapping-commons.github.io/sssom/1.0/spec-formats-tsv/)
-with an embedded metadata block and explicit CURIE prefixes. It covers the six formats
+with an embedded metadata block and explicit CURIE prefixes. It covers the ten formats
 in the JSON export and `gomod`. The Go spoke has only `codeRepository`, corresponding
 to the `module` directive; other terms have no Go mapping. The JSON export stays unchanged.
 
@@ -46,7 +46,7 @@ ORCID (`creator_id`) and this repository as `mapping_provider`.
 
 The hub rejects unsupported schema versions, malformed headers and rows, duplicate
 (format, term) rows, and unknown terms or formats before writing output. It supports the
-six formats and terms in the bundled mapping contract; it does not silently interpret new
+ten formats and terms in the bundled mapping contract; it does not silently interpret new
 terms added by a later producer. Optional fields it does not use are ignored.
 
 `crosswalk` writes CodeMeta's two-column CSV layout, `Property,<format>`. It reads the

@@ -37,16 +37,16 @@ def test_known_cells_get_their_status():
     assert not any(fmt == "codemeta" for fmt, _ in found)
 
 
-def test_counts_for_the_four_crosswalks():
+def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if fmt != "pep621"]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 27, "corrected": 15, "added": 12, "no field": 14}
+    assert {s: found.count(s) for s in set(found)} == {"as-is": 42, "corrected": 31, "added": 26, "no field": 37}
 
 
 def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(EXAMPLE), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == "3.1"
-    assert len(data["cells"]) == 5 * 17
+    assert len(data["cells"]) == 9 * 17
 
 
 def test_upstream_reports_unmatched_changed_and_fixed_cells():

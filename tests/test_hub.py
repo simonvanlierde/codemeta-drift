@@ -109,6 +109,10 @@ def test_sssom_rows_use_curie_identifiers_and_conservative_predicates():
         "format:pep621",
         "format:cargo",
         "format:npm",
+        "format:pkg-info",
+        "format:r-description",
+        "format:julia",
+        "format:bibtex",
         "format:gomod",
     }
     for row in rows:

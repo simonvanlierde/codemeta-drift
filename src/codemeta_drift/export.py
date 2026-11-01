@@ -16,7 +16,7 @@ from typing import Any
 
 from codemeta_drift.checks import Finding, csv_rows, table_rows
 
-SCHEMA_VERSION = "1.3"
+SCHEMA_VERSION = "1.4"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -68,6 +68,10 @@ FORMATS = {
     "pep621": Spoke(None),
     "cargo": Spoke("crosswalks/Cargo.csv", person_list=True),
     "npm": Spoke("crosswalks/NodeJS.csv"),
+    "pkg-info": Spoke("crosswalks/Python PKG-INFO.csv"),
+    "r-description": Spoke("crosswalks/R Package Description.csv"),
+    "julia": Spoke("crosswalks/Julia Project.csv", person_list=True),
+    "bibtex": Spoke("crosswalks/BibTeX.csv"),
 }
 
 PATH = re.compile(

@@ -74,7 +74,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.3.0"},
   "rows": [
@@ -99,8 +99,10 @@ The header:
 
 Each row:
 
-- `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo` or `npm`. A
-  format whose versions differ puts the version in the id.
+- `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo`, `npm`,
+  `pkg-info` (Python core metadata), `r-description` (R's DESCRIPTION), `julia` (Julia's
+  Project.toml) or `bibtex` (a biblatex-software entry). A format whose versions differ puts the
+  version in the id. The last four were added in schema 1.4.
 - `term` is one of the eleven terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords` and `datePublished`, or a person
   sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
@@ -139,7 +141,7 @@ A (format, term) pair appears at most once. The schema cannot enforce uniqueness
 those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, and within a format in the order `name`, `version`, `author`,
+`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
 `contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`. The same inputs give the same bytes, so a consumer
@@ -158,7 +160,7 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 | `a \| b` | `a` if it exists, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
 
 - A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
-  Later characters can be ASCII letters, digits, `_` or `-`.
+  Later characters can be ASCII letters, digits, `_`, `-` or `@` (R's `Authors@R`, since schema 1.4).
 - A filter value contains ASCII letters, digits, `_`, `.` or `-`.
 - Alternatives are separated by exactly one space, `|`, one space.
 - There are no list indexes (`a[0]`) and no wildcards.
@@ -186,7 +188,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
 ## What a consumer does
 
 1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 2).
-2. Validate the file against the schema it vendors beside it.
+2. Validate the file against the schema it vendors beside it, and update the two together:
+   a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
    A row with `path: null` is not missing: the format has no place for that term.
