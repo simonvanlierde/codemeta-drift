@@ -57,8 +57,12 @@ def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: di
         )
         covered = set()
         for path in paths:
+            try:
+                (steps,) = parse(path)
+            except ValueError:  # already reported above as broken: not a path
+                continue
             prefix = ""
-            for key, is_list, filter_key, _ in parse(path)[0]:
+            for key, is_list, filter_key, _ in steps:
                 field = f"{prefix}.{key}" if prefix else key
                 covered.add(field)
                 if filter_key:
