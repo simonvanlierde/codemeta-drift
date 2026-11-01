@@ -81,6 +81,7 @@ def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == "3.1"
     assert len(data["cells"]) == 9 * 17
+    assert "unreviewed" not in data  # only with --codemeta
 
 
 def test_upstream_reports_unmatched_changed_and_fixed_cells():

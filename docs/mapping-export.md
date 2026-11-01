@@ -176,8 +176,9 @@ The schema's `path` pattern accepts exactly this grammar.
 
 A **minor** version (1.0 to 1.1) only adds: an optional field, a new format id, a new term or
 sub-term, or a relaxed pattern. A consumer that knows 1.0 reads a 1.1 file correctly. The schema
-allows fields it doesn't define, in the header, `generator` and each row, so a 1.1 file also
-passes the 1.0 schema a consumer vendors.
+allows fields it doesn't define, in the header, `generator` and each row, so a file that only
+adds those also passes the older schema a consumer vendors. A relaxed pattern does not: 1.4's
+`Authors@R` paths fail the 1.3 schema, so the consumer vendors the new schema with the file.
 
 A **major** version (1.x to 2.0) is anything else: a renamed or removed field, a new required
 field, a changed meaning, or a change to the path grammar that an old reader would misread.

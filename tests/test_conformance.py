@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from codemeta_drift.cli import read_dir
-from codemeta_drift.conformance import SCHEMA_FILES, conform, resolve
+from codemeta_drift.conformance import SCHEMA_FILES, STEP, conform, resolve
 from codemeta_drift.export import build_rows
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -150,3 +150,7 @@ def test_zenodo_path_coverage_includes_current_github_metadata():
     for path in ("version", "creators[].orcid", "contributors[].type", "related_identifiers[scheme=swh].identifier"):
         assert resolve(SCHEMAS["zenodo"], path) is None
     assert conform([{"format": "zenodo", "term": "name", "path": "not_a_zenodo_field"}], SCHEMAS)
+
+
+def test_a_key_may_contain_at_as_the_export_grammar_allows():
+    assert [m["key"] for m in STEP.finditer("Authors@R[role=aut].given")] == ["Authors@R", "given"]

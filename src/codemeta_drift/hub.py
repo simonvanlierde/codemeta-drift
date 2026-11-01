@@ -62,7 +62,7 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
 
 
 def spokes(mapping: dict[str, Any]) -> list[dict[str, Any]]:
-    """Validate the six-format export and add Go's module directive as a repository correspondence."""
+    """Validate the export and add Go's module directive as a repository correspondence."""
     validate_mapping(mapping)
     return [
         *mapping["rows"],
@@ -107,11 +107,12 @@ def sssom(mapping: dict[str, Any]) -> str:
     """
     rows = spokes(mapping)
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
+    formats = len({row["format"] for row in rows})
     metadata = (
         f"# mapping_set_id: {SITE}spokes-{tag}.sssom.tsv\n"
         f"# mapping_set_version: '{version}'\n"
         f"# mapping_set_title: codemeta-drift crosswalk hub spokes for CodeMeta {tag}\n"
-        "# mapping_set_description: Field correspondences between CodeMeta terms and seven metadata formats,"
+        f"# mapping_set_description: Field correspondences between CodeMeta terms and {formats} metadata formats,"
         " from the reviewed mapping export. The paths correspond; their values may need conversion.\n"
         f"# mapping_provider: {REPO}\n"
         "# creator_id:\n"

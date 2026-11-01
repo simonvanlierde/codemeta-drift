@@ -24,6 +24,9 @@ SHAPES = {
 }
 """What a cell of a crosswalk with no reviewed mapping shows: only its shape, from ``classify``."""
 
+SHORT_LABELS = {"ISO_19115-1": "ISO 19115-1", "Perl Module Description (CPAN::Meta)": "Perl (CPAN::Meta)"}
+"""Shorter names for the crosswalks whose own header runs long, keyed by file name."""
+
 COLUMNS = [fmt for fmt in FORMATS if fmt != "codemeta"]
 """The formats shown: codemeta.json is the hub every path is joined through, so it has no crosswalk to check."""
 
@@ -82,7 +85,8 @@ def unreviewed(files: Mapping[str, str], mapping: dict[str, Any]) -> dict[str, A
     """Every crosswalk in ``files`` the mapping does not review, each cell with the shape ``SHAPES`` names.
 
     ``files`` should be the mapping's own CodeMeta tag. A format is its crosswalk's file name without
-    ``.csv``; its label is the header's second cell.
+    ``.csv``, not a mapping format id; its label is the header's second cell, or ``SHORT_LABELS``.
+    Formats are sorted by label. Cells have the keys of ``coverage``'s, with no path and no reason.
     """
     reviewed = {FORMATS[fmt].crosswalk for fmt in COLUMNS}
     formats, cells = [], []
@@ -90,12 +94,24 @@ def unreviewed(files: Mapping[str, str], mapping: dict[str, Any]) -> dict[str, A
         if path in reviewed:
             continue
         fmt = path.removeprefix("crosswalks/").removesuffix(".csv")
-        formats.append({"format": fmt, "label": format_name(files[path]).strip(), "crosswalk": path})
+        label = SHORT_LABELS.get(fmt) or format_name(files[path]).strip()
+        formats.append({"format": fmt, "label": label, "crosswalk": path})
         joined = crosswalk_cells(files, path)
         for term, key in TERMS.items():
             cell = joined.get(key)
             status = "unmatched" if cell is None else classify(cell)
-            cells.append({"format": fmt, "term": term, "status": status, "cell": cell})
+            cells.append(
+                {
+                    "format": fmt,
+                    "term": term,
+                    "status": status,
+                    "path": None,
+                    "cell": cell,
+                    "crosswalk": path,
+                    "reason": None,
+                }
+            )
+    formats.sort(key=lambda f: f["label"].casefold())
     return {
         "codemeta_tag": mapping["codemeta_tag"],
         "statuses": {name: {"mark": mark, "meaning": meaning} for name, (mark, meaning) in SHAPES.items()},

@@ -86,6 +86,8 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates():
         },
     }
     assert "may need conversion" in header["mapping_set_description"]
+    # Counted from the rows, with Go's spoke, so a new format can't leave the number stale.
+    assert "and 11 metadata formats" in header["mapping_set_description"]
 
 
 def test_sssom_header_keeps_a_one_dot_zero_version_a_string():

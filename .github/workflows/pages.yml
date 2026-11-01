@@ -34,7 +34,7 @@ jobs:
       - run: uv sync --locked
       # Read only through git, never run: the build reads CodeMeta's files as data, at main and at the
       # export's tag, so the clone is full (about 11 MB).
-      - run: git clone https://github.com/codemeta/codemeta.git "${RUNNER_TEMP}/codemeta"
+      - run: git clone --no-checkout https://github.com/codemeta/codemeta.git "${RUNNER_TEMP}/codemeta"
       - run: uv run site/build.py --out _site --codemeta "${RUNNER_TEMP}/codemeta"
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:

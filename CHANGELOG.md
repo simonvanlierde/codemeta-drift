@@ -9,8 +9,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 **Breaking:** SSSOM `term:`, `field:` and `format:` identifiers and the `mapping_set_id` have new URIs.
 Regenerate stored SSSOM files with `codemeta-drift hub sssom` rather than joining them with 0.4.0 output.
-A consumer that validates the mapping export against a vendored schema must vendor the 1.4 schema with
-the new export, since R paths contain `@`.
+
+Upgrade step: a consumer that validates the mapping export against a vendored schema vendors the 1.4 schema
+with the new export, since R paths contain `@`. Readers that skip formats they don't use read it unchanged.
 
 ### Added
 

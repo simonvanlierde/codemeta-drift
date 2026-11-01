@@ -53,6 +53,9 @@ def test_path_grammar_accepts_example_paths(path: str):
         "a  | b",
         "a b",
         "1a",
+        "@@a",
+        "a[@@x=1]",
+        "a.@",
     ],
 )
 def test_path_grammar_rejects_malformed_paths(path: str):

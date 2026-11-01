@@ -133,9 +133,11 @@ def export_main(argv: list[str]) -> int:
 def coverage_text(mapping: dict, checkout: Path | None, *, as_json: bool) -> str:
     """``hub coverage`` output; a CodeMeta checkout adds the crosswalks nobody reviewed, read at the export's tag."""
     from codemeta_drift.coverage import coverage, markdown, unreviewed  # noqa: PLC0415 - only the hub command needs this
+    from codemeta_drift.hub import validate_mapping  # noqa: PLC0415 - only the hub command needs this
 
+    validate_mapping(mapping)  # before git sees its codemeta_tag
     try:
-        files = read_ref(checkout, str(mapping.get("codemeta_tag"))) if checkout else None
+        files = read_ref(checkout, mapping["codemeta_tag"]) if checkout else None
     except subprocess.CalledProcessError as err:
         msg = f"cannot read {checkout}: {err.stderr.decode().strip()}"
         raise ValueError(msg) from err

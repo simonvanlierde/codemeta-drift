@@ -8,8 +8,6 @@ const LABELS = {
 };
 const label = (fmt) => LABELS[fmt] ?? fmt;
 const ORDER = Object.keys(LABELS);
-// Shorter names for the crosswalks nobody reviewed, where the crosswalk's own header runs long.
-const SHORT = { "ISO_19115-1": "ISO 19115-1", "Perl Module Description (CPAN::Meta)": "Perl (CPAN::Meta)" };
 const rank = (fmt) => (ORDER.includes(fmt) ? ORDER.indexOf(fmt) : ORDER.length);
 
 // What each upstream state says about a cell on CodeMeta's main branch.
@@ -33,76 +31,71 @@ function el(tag, attrs = {}, ...children) {
 const code = (text) => el("code", {}, text);
 
 // One row per format, one column per term: each cell is a status mark, and its path is in the detail.
+// The reviewed formats come first; the crosswalks nobody reviewed follow in their own group.
 function matrix(data, unreviewed, onPick) {
   const table = document.getElementById("matrix");
   const head = el("tr", {}, el("th", { scope: "col" }, "Format"));
   for (const term of data.terms) head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, code(term))));
   head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, "as written")));
   table.append(el("thead", {}, head));
+  const formats = [...data.formats].sort((a, b) => rank(a) - rank(b)).map((format) => ({ format, label: label(format) }));
+  const legend = unreviewed && el("span", {}, "Reviewed. Every cell is checked, and each change has a reason.");
+  table.append(group(data.terms, formats, data, onPick, { legend, tally: usableTally }));
+  if (!unreviewed) return;
+  const shapes = el("span", {}, "Not reviewed. The mark says only what CodeMeta's cell looks like: ");
+  for (const [name, { mark }] of Object.entries(unreviewed.statuses)) shapes.append(el("span", { class: "mark" }, mark), ` ${name} `);
+  shapes.append(". The last column counts the cells that read as a path.");
+  table.append(group(data.terms, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed" }));
+}
+
+// One tbody: an optional group label row, then a row per format with a button per term and a tally.
+function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
   const body = el("tbody");
-  if (unreviewed) {
-    body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(data.terms.length + 2) },
-      el("span", {}, "Reviewed. Every cell is checked, and each change has a reason."))));
-  }
+  if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
-  for (const fmt of [...data.formats].sort((a, b) => rank(a) - rank(b))) {
-    const row = el("tr", {}, el("th", { scope: "row" }, label(fmt)));
-    const own = data.cells.filter((c) => c.format === fmt);
-    for (const term of data.terms) {
-      const cell = byKey.get(`${fmt} ${term}`);
+  for (const { format, label: name } of formats) {
+    const row = el("tr", {}, el("th", { scope: "row" }, name));
+    const own = [];
+    for (const term of terms) {
+      const cell = byKey.get(`${format} ${term}`);
       const td = el("td");
       if (cell) {
-        const { mark } = data.statuses[cell.status];
+        own.push(cell);
         const button = el(
           "button",
           { type: "button", class: `cell s-${cell.status.replace(" ", "-")}`, "data-status": cell.status,
-            "data-format": fmt, "data-term": term, "data-path": cell.path ?? "",
-            "aria-label": `${label(fmt)}, ${term}: ${cell.status}${cell.path ? `, ${cell.path}` : ""}` },
-          el("span", { class: "mark", "aria-hidden": "true" }, mark),
+            "data-format": format, "data-term": term, "data-path": cell.path ?? "",
+            "aria-label": `${name}, ${term}: ${cell.status}${cell.path ? `, ${cell.path}` : ""}${note}` },
+          el("span", { class: "mark", "aria-hidden": "true" }, data.statuses[cell.status].mark),
         );
         button.addEventListener("click", () => onPick(cell, button));
         td.append(button);
       }
       row.append(td);
     }
-    // How many cells of the format's crosswalk that name a field can be used unchanged.
-    const needed = own.filter((c) => c.status !== "no field");
-    const usable = own[0]?.crosswalk ? `${needed.filter((c) => c.status === "as-is").length} of ${needed.length}` : "–";
-    row.append(el("td", { class: "tally", "aria-label": own[0]?.crosswalk ? `${usable} usable as written` : "no CodeMeta crosswalk" }, usable));
-    body.append(row);
-  }
-  table.append(body);
-  if (unreviewed) table.append(others(data.terms, unreviewed, onPick));
-}
-
-// The crosswalks with no reviewed mapping, below the reviewed ones: each mark says only the cell's shape.
-function others(terms, data, onPick) {
-  const body = el("tbody", { class: "others" });
-  const legend = el("span", {}, "Not reviewed. The mark says only what CodeMeta's cell looks like: ");
-  for (const [name, { mark }] of Object.entries(data.statuses)) legend.append(el("span", { class: "mark" }, mark), ` ${name} `);
-  body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
-  const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
-  const name = (f) => SHORT[f.format] ?? f.label;
-  for (const fmt of [...data.formats].sort((a, b) => name(a).localeCompare(name(b), "en", { sensitivity: "base" }))) {
-    const row = el("tr", {}, el("th", { scope: "row" }, name(fmt)));
-    let paths = 0;
-    for (const term of terms) {
-      const cell = { ...byKey.get(`${fmt.format} ${term}`), label: name(fmt), crosswalk: fmt.crosswalk, reviewed: false };
-      if (cell.status === "path") paths += 1;
-      const button = el("button", { type: "button", class: `cell u-${cell.status}`, "data-status": cell.status,
-        "data-format": fmt.format, "data-term": term, "aria-label": `${name(fmt)}, ${term}: ${cell.status}, not reviewed` },
-        el("span", { class: "mark", "aria-hidden": "true" }, data.statuses[cell.status].mark));
-      button.addEventListener("click", () => onPick(cell, button));
-      row.append(el("td", {}, button));
-    }
-    // Not reviewed, so nothing is known to be usable: count the cells that at least read as a path.
-    row.append(el("td", { class: "tally", "aria-label": `${paths} cells read as a path` }, `${paths} ${data.statuses.path.mark}`));
+    row.append(el("td", { class: "tally" }, ...tally(own, data.statuses)));
     body.append(row);
   }
   return body;
 }
 
-function detail(data, unreviewed, upstream) {
+// The crosswalk cells for a term the format has a field for; the tally and the headline count these.
+const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no field");
+
+const usableTally = (cells) => {
+  if (!cells[0]?.crosswalk) return ["–", el("span", { class: "vh" }, " no CodeMeta crosswalk")];
+  const fields = needed(cells);
+  return [`${fields.filter((c) => c.status === "as-is").length} of ${fields.length}`, el("span", { class: "vh" }, " usable as written")];
+};
+
+// Nothing in a crosswalk nobody reviewed is known to work: count the cells that at least read as a path.
+const pathTally = (cells, statuses) => [
+  `${cells.filter((c) => c.status === "path").length} `,
+  el("span", { "aria-hidden": "true" }, statuses.path.mark),
+  el("span", { class: "vh" }, " read as a path"),
+];
+
+function detail(statuses, labels, reviewed, upstream) {
   const box = document.getElementById("detail");
   const hint = box.firstElementChild;
   const changes = new Map((upstream?.cells ?? []).map((c) => [`${c.format} ${c.term}`, c]));
@@ -112,12 +105,12 @@ function detail(data, unreviewed, upstream) {
     button.setAttribute("aria-pressed", "true");
     picked = button;
     const was = (cell.cell ?? "").trim();
-    const { mark, meaning } = cell.reviewed === false ? unreviewed.statuses[cell.status] : data.statuses[cell.status];
-    const name = cell.label ?? label(cell.format);
+    const { mark, meaning } = statuses[cell.status];
+    const name = labels.get(cell.format) ?? cell.format;
     const rows = [
       ["Status", `${mark} ${cell.status}: ${meaning}`],
       ["CodeMeta's cell", cell.crosswalk ? (was ? code(was) : cell.cell === null ? "can't be joined" : "empty") : "no CodeMeta crosswalk for this format"],
-      ["Path used", cell.reviewed === false ? "none yet: nobody has reviewed this crosswalk" : cell.path ? code(cell.path) : "none"],
+      ["Path used", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: nobody has reviewed this crosswalk"],
     ];
     if (cell.reason) rows.push(["Why", cell.reason]);
     const now = changes.get(`${cell.format} ${cell.term}`);
@@ -144,10 +137,11 @@ function filters(data) {
   const table = document.getElementById("matrix");
   const buttons = [];
   for (const name of ["all", ...Object.keys(data.statuses)]) {
-    const count = name === "all" ? data.cells.length : data.cells.filter((c) => c.status === name).length;
+    // "all" also shows the crosswalks nobody reviewed, which no status counts, so it has no number.
+    const count = name === "all" ? null : data.cells.filter((c) => c.status === name).length;
     const mark = name === "all" ? null : el("span", { class: "mark", "aria-hidden": "true" }, data.statuses[name].mark);
     const button = el("button", { type: "button", "aria-pressed": String(name === "all") }, mark, ` ${name} `,
-      el("span", { class: "n" }, String(count)));
+      count === null ? null : el("span", { class: "n" }, String(count)));
     button.addEventListener("click", () => {
       for (const b of buttons) b.setAttribute("aria-pressed", String(b === button));
       if (name === "all") delete table.dataset.only;
@@ -284,8 +278,8 @@ function follow() {
 // The headline: of the crosswalk cells for a field the format has, how many work as written, as a figure and a bar.
 function score(data) {
   const crosswalk = data.cells.filter((c) => c.crosswalk);
-  const needed = crosswalk.filter((c) => c.status !== "no field");
-  const count = (status) => needed.filter((c) => c.status === status).length;
+  const fields = needed(data.cells);
+  const count = (status) => fields.filter((c) => c.status === status).length;
   const formats = new Set(crosswalk.map((c) => c.format)).size;
   const bar = el("div", { class: "bar", "aria-hidden": "true" });
   for (const status of ["as-is", "corrected", "added"]) {
@@ -294,11 +288,11 @@ function score(data) {
     bar.append(part);
   }
   document.getElementById("score").append(
-    el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${needed.length}`)),
+    el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${fields.length}`)),
     bar,
     el("figcaption", {}, `cells in these ${formats} CodeMeta crosswalks can be used as written. `
       + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank although the format has the field. `
-      + `The other ${crosswalk.length - needed.length} are for terms the format has no field for.`),
+      + `The other ${crosswalk.length - fields.length} are for terms the format has no field for.`),
   );
 }
 
@@ -308,7 +302,9 @@ async function start() {
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
   score(coverage);
-  matrix(coverage, unreviewed, detail(coverage, unreviewed, upstream));
+  const labels = new Map([...coverage.formats.map((f) => [f, label(f)]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label])]);
+  const statuses = { ...coverage.statuses, ...unreviewed?.statuses };
+  matrix(coverage, unreviewed, detail(statuses, labels, coverage.statuses, upstream));
   filters(coverage);
   route(coverage);
   upstreamSection(upstream, coverage.codemeta_tag);

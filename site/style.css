@@ -94,6 +94,18 @@ a:hover {
 .skip:focus {
   top: 8px;
 }
+/* Every cell is a tab stop, so a keyboard user can jump past the matrix. */
+.skip-matrix:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.skip-matrix:focus {
+  display: inline-block;
+  margin-bottom: 8px;
+}
 .slug {
   display: flex;
   flex-wrap: wrap;
@@ -335,7 +347,7 @@ table {
 .s-added {
   color: var(--ochre);
 }
-/* The tint fills the whole table cell, not just the button, so a tall row reads as one block. */
+/* The tint fills the whole table cell, edge to edge, not just the button inside it. */
 #matrix td:has(.s-corrected) {
   background: var(--ochre-wash);
 }
@@ -346,15 +358,16 @@ table {
   color: var(--faint);
 }
 /* A crosswalk nobody reviewed gets no wash: its marks say only the cell's shape. Prose and unjoinable cells are ochre. */
-.u-path,
-.u-empty {
+.s-path,
+.s-empty {
   color: var(--faint);
 }
-.u-prose,
-.u-unmatched {
+.s-prose,
+.s-unmatched {
   color: var(--ochre);
 }
-#matrix .group th {
+/* tr.group outranks the sticky first-column rule: the label row spans the table and stays put. */
+#matrix tr.group th {
   position: static;
   box-shadow: none;
   padding: 18px 12px 6px;
@@ -363,17 +376,17 @@ table {
   color: var(--faint);
   white-space: normal;
 }
-#matrix tbody:first-of-type .group th {
+#matrix tbody:first-of-type tr.group th {
   padding-top: 8px;
 }
 /* The label spans the whole table; capped to the screen so it wraps where the reader can see it. */
-#matrix .group > th > span {
+#matrix tr.group > th > span {
   display: inline-block;
   position: sticky;
   left: 12px;
   max-width: min(44rem, calc(100vw - 4rem));
 }
-#matrix .group .mark {
+#matrix tr.group .mark {
   position: static;
   font-style: normal;
   color: var(--ink);
@@ -544,6 +557,13 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
 @media (forced-colors: active) {
   .tabs [role="tab"][aria-selected="true"] {
     border-bottom: 2px solid Highlight;
+  }
+  /* Forced colours drop backgrounds, which are all the headline bar has. */
+  .bar span {
+    border: 1px solid CanvasText;
+  }
+  .bar .s-as-is {
+    background: CanvasText;
   }
   /* Forced colours drop box-shadow, which marks the chosen cell and filter otherwise. */
   .cell[aria-pressed="true"],

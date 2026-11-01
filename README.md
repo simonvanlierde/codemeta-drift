@@ -87,7 +87,7 @@ exported; currently that is `3.1`.
 
 ## Crosswalk hub
 
-Derive field correspondences between two formats or write seven SSSOM spokes with
+Derive field correspondences between two formats or write SSSOM spokes for every format with
 [`codemeta-drift hub`](docs/crosswalk-hub.md). Values still need each format's parser and normalization.
 
 ## Schema watcher

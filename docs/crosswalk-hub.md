@@ -14,6 +14,9 @@ codemeta-drift hub coverage examples/mapping-3.1.json --out docs/coverage.md
 `coverage` writes the [coverage matrix](coverage.md): each term and format with its status
 (as-is, corrected, added or no field) and the reason for every curated cell. Add `--json`
 for the cells as data; the [coverage page](https://simonvanlierde.com/codemeta-drift/) reads that.
+`--codemeta <checkout>` also lists the CodeMeta crosswalks nobody has reviewed, read at the
+export's tag, each cell marked by its shape (path, prose, empty or unmatched); in `--json` they are
+under `unreviewed`.
 
 `pair` writes CSV columns `term,source,target`. It skips a term when either format has
 `path: null` or no row. Unknown source or target formats are errors. Paths that contain
@@ -37,7 +40,7 @@ the format itself; its URI prefix differs from `field:` so SSSOM readers can exp
 All three resolve on the [coverage page](https://simonvanlierde.com/codemeta-drift/), which
 opens the matching cell: `field:cargo/package.name` is
 <https://simonvanlierde.com/codemeta-drift/#field/cargo/package.name>. The page has no
-codemeta.json column, so `field:codemeta/...` opens the term's row instead (`swhid` shares
+codemeta.json row, so `field:codemeta/...` opens the term's first cell instead (`swhid` shares
 `identifier`'s, since codemeta.json holds both there). `format:codemeta` and the Go spoke's
 `field:gomod/module` and `format:gomod` have no cell. They are not registered w3id identifiers.
 
