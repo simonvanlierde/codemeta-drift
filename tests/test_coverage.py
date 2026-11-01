@@ -146,8 +146,18 @@ def test_upstream_says_missing_when_a_crosswalk_is_gone():
     assert states == {"missing"}
 
 
-def test_a_url_in_a_reason_is_shown_as_code():
+@pytest.mark.parametrize(
+    ("reason", "shown"),
+    [
+        ("a repository is written git+https://host/path.git; see it", "written `git+https://host/path.git`; see it."),
+        ("it says see (https://example.org/x) here", "see (`https://example.org/x`) here."),
+        ("it ends at https://example.org/x. Next", "ends at `https://example.org/x`. Next."),
+        ("it has an autolink <https://example.org/x> stays", "an autolink <https://example.org/x> stays."),
+        ("it is already `https://example.org/x` code", "already `https://example.org/x` code."),
+    ],
+)
+def test_a_url_in_a_reason_is_shown_as_code(reason: str, shown: str):
     data = mapping()
     row = next(r for r in data["rows"] if r["format"] == "cargo" and r["source"].startswith("curated:"))
-    row["source"] = "curated:a repository is written git+https://host/path.git; see it"
-    assert "written `git+https://host/path.git`; see it." in markdown(data)
+    row["source"] = f"curated:{reason}"
+    assert shown in markdown(data)
