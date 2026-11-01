@@ -141,7 +141,7 @@ How CodeMeta's 3.1 crosswalks map 17 CodeMeta terms in 9 formats, read from the 
 
 ### r-description
 
-- `name` (corrected): crosswalk cell `Title` → `Package`. The cell says Title, a short description of the package; the package's name is Package.
+- `name` (corrected): crosswalk cell `Title` → `Package`. The cell says Title, a short description; R's own citation tools take the name from Package and add Title after it.
 - `author` (corrected): crosswalk cell `[aut] in Author` → `Authors@R[role=aut]`. The cell says [aut] in Author, prose about the free-text Author field; R builds that from Authors@R, whose person() entries with role aut are the authors.
 - `author.givenName` (corrected): crosswalk cell `givenName` → `Authors@R[role=aut].given`. The cell says givenName, a CodeMeta term; a person() entry keeps the given name in given.
 - `author.familyName` (corrected): crosswalk cell `familyName` → `Authors@R[role=aut].family`. The cell says familyName, a CodeMeta term; a person() entry keeps the family name in family.

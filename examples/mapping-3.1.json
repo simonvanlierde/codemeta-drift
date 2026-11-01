@@ -851,7 +851,8 @@
       "format": "r-description",
       "term": "name",
       "path": "Package",
-      "source": "curated:the cell says Title, a short description of the package; the package's name is Package",
+      "source": "curated:the cell says Title, a short description; R's own citation tools take the name from Package and add Title after it",
+      "comment": "R's citation tools (cffr, codemetar) write the name as 'Package: Title', so a citation name joins the two, or uses Package alone when there is no Title.",
       "crosswalk_cell": "Title"
     },
     {
