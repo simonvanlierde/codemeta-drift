@@ -10,16 +10,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 **Breaking:** SSSOM `term:`, `field:` and `format:` identifiers and the `mapping_set_id` have new URIs.
 Regenerate stored SSSOM files with `codemeta-drift hub sssom` rather than joining them with 0.4.0 output.
 
-### Changed
-
-- SSSOM exports carry mapping-set metadata (title, description, version, curator ORCID and provider), and their
-  term, field and format identifiers resolve on the coverage page. See the [crosswalk hub](docs/crosswalk-hub.md).
 ### Added
 
 - See every crosswalk cell for CFF, Zenodo, `pyproject.toml`, Cargo and npm, and why a reviewed mapping changed it, in the
   [coverage matrix](docs/coverage.md) and on the [coverage page](https://simonvanlierde.com/codemeta-drift/).
   `codemeta-drift hub coverage` writes the matrix as Markdown or JSON.
 - The coverage page checks CodeMeta's main branch every Monday and lists the cells that changed since the pinned tag.
+
+### Changed
+
+- SSSOM exports carry mapping-set metadata (title, description, version, curator ORCID and provider), and their
+  term, field and format identifiers resolve on the coverage page. See the [crosswalk hub](docs/crosswalk-hub.md).
 
 ## [0.4.0] - 2026-11-01
 
