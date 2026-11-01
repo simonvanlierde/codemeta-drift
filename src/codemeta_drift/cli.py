@@ -132,17 +132,20 @@ def export_main(argv: list[str]) -> int:
 
 def hub_main(argv: list[str]) -> int:
     """Write SSSOM spokes or field correspondences between two formats."""
+    from codemeta_drift.coverage import coverage, markdown  # noqa: PLC0415 - only the hub command needs this
     from codemeta_drift.hub import crosswalk, pair_rows, sssom, table  # noqa: PLC0415 - only the hub command needs this
 
     parser = argparse.ArgumentParser(prog="codemeta-drift hub", description="Join curated field correspondences.")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("pair", "sssom", "crosswalk"):
+    for name in ("pair", "sssom", "crosswalk", "coverage"):
         command = commands.add_parser(name)
         command.add_argument("mapping", type=Path, help="a mapping JSON export")
         command.add_argument("--out", type=Path, help="write here instead of standard output")
         if name == "crosswalk":
             command.add_argument("checkout", type=Path, help="checkout with the property table to preserve")
             command.add_argument("--format", required=True, help="format id for the crosswalk column")
+        if name == "coverage":
+            command.add_argument("--json", action="store_true", help="write the cells as JSON instead of Markdown")
         if name == "pair":
             command.add_argument("--from", dest="source", required=True, help="source format id")
             command.add_argument("--to", dest="target", required=True, help="target format id")
@@ -151,6 +154,10 @@ def hub_main(argv: list[str]) -> int:
         mapping = json.loads(args.mapping.read_text("utf-8"))
         if args.command == "crosswalk":
             text = crosswalk(mapping, {TABLE: (args.checkout / TABLE).read_text("utf-8")}, args.format)
+        elif args.command == "coverage":
+            text = (
+                json.dumps(coverage(mapping), indent=2, ensure_ascii=False) + "\n" if args.json else markdown(mapping)
+            )
         elif args.command == "sssom":
             text = sssom(mapping)
         else:

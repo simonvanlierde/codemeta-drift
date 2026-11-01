@@ -20,6 +20,25 @@ just check             # lint, types, tests and the dependency audit (needs netw
 just hooks             # the YAML, Markdown, workflow and citation checks CI also runs
 ```
 
+## Coverage matrix and page
+
+`docs/coverage.md` is generated from the example export, and a test fails while it is stale.
+After changing the curated rows or the export, regenerate it:
+
+```sh
+uv run codemeta-drift hub coverage examples/mapping-3.1.json --out docs/coverage.md
+```
+
+To preview the page, build it with a CodeMeta clone and serve the output:
+
+```sh
+uv run site/build.py --out _site --codemeta ../codemeta
+python3 -m http.server -d _site
+```
+
+The `pages` workflow builds it on every pull request and deploys from main and every Monday.
+[`site/DESIGN.md`](../site/DESIGN.md) holds the design rules.
+
 ## Mutation tests
 
 `just mutation` tests modified copies of `checks.py`, `export.py` and `conformance.py`.

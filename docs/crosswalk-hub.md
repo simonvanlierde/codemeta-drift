@@ -8,7 +8,12 @@ need different parsers. A Go module path is not a repository URL.
 codemeta-drift hub pair examples/mapping-3.1.json --from pep621 --to cargo
 codemeta-drift hub sssom examples/mapping-3.1.json --out spokes.sssom.tsv
 codemeta-drift hub crosswalk examples/mapping-3.1.json ../codemeta --format cargo
+codemeta-drift hub coverage examples/mapping-3.1.json --out docs/coverage.md
 ```
+
+`coverage` writes the [coverage matrix](coverage.md): each term and format with its status
+(as-is, corrected, added or no field) and the reason for every curated cell. Add `--json`
+for the cells as data; the [coverage page](https://simonvanlierde.com/codemeta-drift/) reads that.
 
 `pair` writes CSV columns `term,source,target`. It skips a term when either format has
 `path: null` or no row. Unknown source or target formats are errors. Paths that contain

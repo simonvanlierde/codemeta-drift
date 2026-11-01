@@ -4,8 +4,9 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23774728.svg)](https://doi.org/10.5281/zenodo.23774728)
 
-Check where CodeMeta's vocabulary, definitions, examples and crosswalks disagree.
-Export reviewed field mappings for citation tools such as
+Show where CodeMeta's crosswalks to citation and package formats are wrong or missing,
+check where its vocabulary, definitions, examples and crosswalks disagree, and export
+reviewed field mappings for citation tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
 
 ## Why this exists
@@ -20,6 +21,15 @@ would attach a field to the wrong term. codemeta-drift compares names and report
 
 Use it to check the CodeMeta standard's own files. To keep a project's `CITATION.cff`,
 `codemeta.json` and package manifests in sync, use citesync.
+
+## How the crosswalks hold up
+
+At CodeMeta 3.1, the CFF, Zenodo, Cargo and npm crosswalks have 54 cells for fields those formats
+actually have, across the 17 terms citation tools need. Only 27 of them can be used as written:
+15 name the wrong field, list several at once or describe it in prose, and 12 are blank.
+CodeMeta has no crosswalk for `pyproject.toml` at all. The [coverage matrix](docs/coverage.md)
+shows every cell and the reason for each correction, and the
+[web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.
 
 ## Try it
 
@@ -64,6 +74,7 @@ exported; currently that is `3.1`.
 
 ## Documentation
 
+- [Crosswalk coverage matrix](docs/coverage.md): every term and format, with the reason for each correction.
 - [Offline schema recovery](docs/schema-recovery.md): preview a synthetic rename and apply an explicit approval.
 - [Zenodo path coverage](docs/zenodo-schema.md): verified paths, upstream source checks and validation limits.
 - [Understand findings and use the JSON interface](docs/checks.md).

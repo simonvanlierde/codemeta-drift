@@ -7,6 +7,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- See every crosswalk cell for CFF, Zenodo, `pyproject.toml`, Cargo and npm, and why a reviewed mapping changed it, in the
+  [coverage matrix](docs/coverage.md) and on the [coverage page](https://simonvanlierde.com/codemeta-drift/).
+  `codemeta-drift hub coverage` writes the matrix as Markdown or JSON.
+- The coverage page checks CodeMeta's main branch every Monday and lists the cells that changed since the pinned tag.
+
 ## [0.4.0] - 2026-11-01
 
 **Breaking:** Schema directories passed to `export --schemas` now also need `zenodo.json`.
