@@ -17,6 +17,8 @@ use read it unchanged.
   META.json, NuGet's .nuspec, Dart's pubspec.yaml, Cabal, `typst.toml` and Quarto's `_extension.yml`. Each row
   was checked against the format's own tools and spec, and its `schema_version` is 1.5. See the
   [mapping export](docs/mapping-export.md).
+- Ship `mapping-vectors.json` beside the mapping schema: test cases of path, document and the values the path
+  resolves to, for a consumer to run through its own resolver. See the [mapping export](docs/mapping-export.md#path-grammar).
 
 ### Fixed
 
