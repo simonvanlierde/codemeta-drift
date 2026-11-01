@@ -26,7 +26,8 @@ in one string, SPDX identifiers stored as URLs, and Go module paths.
 
 The `term:` namespace identifies the hub's terms from the JSON export, including compound
 person paths and `swhid`. It does not add terms to CodeMeta's vocabulary. The `field:`
-namespace identifies a format and its complete path, percent-encoded. These identifiers
+namespace identifies a format and its complete path, percent-encoded. `format:` identifies
+the format itself; its URI prefix differs from `field:` so SSSOM readers can expand both. These identifiers
 use this repository's documentation URLs. They are not registered w3id identifiers.
 
 The hub rejects unsupported schema versions, malformed headers and rows, duplicate
@@ -44,3 +45,9 @@ alternatives rather than CodeMeta's original prose.
 The hub does not register persistent w3id identifiers per crosswalk. It does not infer
 additional direct mappings where CodeMeta has no term, such as Cargo categories versus
 Python classifiers.
+
+## Validate the SSSOM export
+
+The [compatibility guide](sssom-compatibility.md) gives a repeatable reference validation
+and compares this export with CodeMeta's experimental SSSOM methodology. Valid SSSOM
+serialization does not establish that two fields mean the same thing.

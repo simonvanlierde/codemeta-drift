@@ -85,6 +85,15 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates():
     assert [row["object_id"] for row in go] == ["field:gomod/module"]
 
 
+def test_sssom_prefixes_have_distinct_uri_namespaces():
+    prefixes = {}
+    for line in sssom(mapping()).splitlines():
+        if line.startswith("#   "):
+            prefix, uri = line.removeprefix("#   ").split(": ", 1)
+            prefixes[prefix] = uri
+    assert len(set(prefixes.values())) == len(prefixes), "SSSOM readers reject duplicate URI prefixes"
+
+
 def test_cli_writes_pair_csv(capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "pair", str(EXAMPLE), "--from", "gomod", "--to", "cargo"]) == 0
     assert capsys.readouterr().out == "term,source,target\ncodeRepository,module,package.repository\n"

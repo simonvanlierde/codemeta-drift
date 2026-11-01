@@ -107,8 +107,8 @@ def sssom(mapping: dict[str, Any]) -> str:
         "# sssom_version: '1.0'\n"
         "# curie_map:\n"
         f"#   term: {REPO}blob/main/docs/mapping-export.md#\n"
-        f"#   field: {REPO}blob/main/docs/crosswalk-hub.md#\n"
-        f"#   format: {REPO}blob/main/docs/crosswalk-hub.md#\n"
+        f"#   field: {REPO}blob/main/docs/crosswalk-hub.md#field/\n"
+        f"#   format: {REPO}blob/main/docs/crosswalk-hub.md#format/\n"
         "#   skos: http://www.w3.org/2004/02/skos/core#\n"
         "#   semapv: https://w3id.org/semapv/vocab/\n"
     )
