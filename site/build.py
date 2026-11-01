@@ -23,7 +23,7 @@ from codemeta_drift.coverage import coverage, unreviewed, upstream
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
-STATIC = ("index.html", "style.css", "main.mjs", "favicon.svg")
+STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg")
 
 
 def upstream_data(checkout: Path, mapping: dict[str, Any]) -> dict[str, Any]:
