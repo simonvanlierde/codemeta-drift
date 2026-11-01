@@ -18,3 +18,6 @@ the source of truth for values.
 - **Copy.** Plain and specific. Upstream state names the commit and date it was read from.
 
 Don't add inline script or style, another host, or a mark whose meaning lives only in colour.
+
+The SSSOM export's identifiers resolve on this page: `#term/<term>`, `#field/<format>/<path>` and
+`#format/<format>` choose the first matching cell and scroll to it.

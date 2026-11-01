@@ -40,6 +40,7 @@ function matrix(data, onPick) {
         const button = el(
           "button",
           { type: "button", class: `cell s-${cell.status.replace(" ", "-")}`, "data-status": cell.status,
+            "data-format": fmt, "data-term": term, "data-path": cell.path ?? "",
             "aria-label": `${label(fmt)}, ${term}: ${cell.status}${cell.path ? `, ${cell.path}` : ""}` },
           el("span", { class: "mark", "aria-hidden": "true" }, mark),
           cell.path ? breakable(cell.path) : null,
@@ -151,6 +152,24 @@ function upstreamSection(upstream, tag) {
   table.append(body);
 }
 
+// The SSSOM export's identifiers resolve here: #term/<term>, #field/<format>/<path> and #format/<format>,
+// each percent-encoded as the export writes it. The first matching cell is chosen and scrolled to.
+function follow() {
+  const [kind, ...rest] = location.hash.slice(1).split("/");
+  const parts = rest.map(decodeURIComponent);
+  const match = {
+    term: (b) => b.dataset.term === parts[0],
+    format: (b) => b.dataset.format === parts[0],
+    field: (b) => b.dataset.format === parts[0] && b.dataset.path === parts.slice(1).join("/"),
+  }[kind];
+  if (!match) return;
+  const button = [...document.querySelectorAll("#matrix .cell")].find(match);
+  if (!button) return;
+  button.click();
+  button.scrollIntoView({ block: "center" });
+  button.focus({ preventScroll: true });
+}
+
 async function start() {
   const response = await fetch("data.json", { cache: "no-cache" });
   const { coverage, upstream } = await response.json();
@@ -164,6 +183,8 @@ async function start() {
   filters(coverage);
   route(coverage);
   upstreamSection(upstream, coverage.codemeta_tag);
+  follow();
+  window.addEventListener("hashchange", follow);
 }
 
 start().catch((err) => {
