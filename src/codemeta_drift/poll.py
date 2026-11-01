@@ -1,6 +1,8 @@
 """Poll public schema sources; publish deduplicated issue drafts only with an explicit flag."""
 
 import argparse
+import base64
+import hashlib
 import json
 import re
 import subprocess
@@ -32,6 +34,27 @@ def fetch_json(url: str) -> Any:  # noqa: ANN401
         return json.load(response)
 
 
+def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list[dict[str, str]]:
+    """Draft one citesync issue per `sha256 <hex> <local> <path>` line that differs from the file at the tag."""
+    plans = []
+    for line in source.splitlines():
+        if not line.startswith("sha256 "):
+            continue
+        _, digest, local, path = line.split()
+        published = fetch(API + f"simonvanlierde/codemeta-drift/contents/{path}?ref={quote(tag, safe='')}")
+        current = hashlib.sha256(base64.b64decode(published["content"])).hexdigest()
+        if current != digest:
+            plans.append(
+                {
+                    "repo": "simonvanlierde/citesync",
+                    "title": f"Update mapping pin hash for {local} at {tag}",
+                    "body": f"The sha256 of `{local}` in MAPPING_SOURCE is `{digest}`, but `{path}` at "
+                    f"{tag} hashes to `{current}`. Re-vendor the file and fix that line.",
+                }
+            )
+    return plans
+
+
 def poll(
     mapping: dict[str, Any], before: dict[str, Any], fetch: Callable[[str], Any] = fetch_json
 ) -> list[dict[str, str]]:
@@ -46,14 +69,13 @@ def poll(
     latest = fetch(API + "simonvanlierde/codemeta-drift/releases/latest")["tag_name"]
     pin = fetch(API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE")
     # The contents endpoint returns base64 so every source still uses the same JSON fetch contract.
-    import base64  # noqa: PLC0415 - needed only for polling the pin
-
     source = base64.b64decode(pin["content"], validate=False).decode("utf-8")
     pin_tags = [line.split()[1] for line in source.splitlines() if line.startswith("tag ")]
     if len(pin_tags) != 1:
         msg = "citesync MAPPING_SOURCE must have exactly one tag"
         raise ValueError(msg)
     plans = issue_plans(schema_changes(mapping["rows"], before, after), pin_tags[0], latest, set())
+    plans += stale_pin_hashes(source, pin_tags[0], fetch)
     # Zenodo has no current public JSON Schema: source changes need a fresh manual path review.
     source = before["zenodo"]["x-source"]
     for path, digest in sorted(source["files"].items()):

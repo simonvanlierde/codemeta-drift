@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import json
 from collections.abc import Callable
 from email.message import Message
@@ -68,6 +69,40 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
     publish(plans, titles.__getitem__, create)
     publish(plans, titles.__getitem__, create)
     assert created == plans
+
+
+def test_poll_flags_stale_pinned_hash_at_the_right_tag():
+    before = {fmt: {"properties": {}} for fmt in (*SCHEMA_URLS, "cff-1.2.0")}
+    before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
+    pinned = {"examples/mapping-3.1.json": b'{"rows": []}\n', "src/codemeta_drift/mapping.schema.json": b"{}\n"}
+    stale = hashlib.sha256(b"old").hexdigest()
+    fresh = hashlib.sha256(pinned["src/codemeta_drift/mapping.schema.json"]).hexdigest()
+    source = f"tag v0.4.0\nsha256 {stale} mapping-local.json examples/mapping-3.1.json\n"
+    source += f"sha256 {fresh} mapping.schema.json src/codemeta_drift/mapping.schema.json\n"
+    schema = {"properties": {}}
+    responses = {
+        API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": "1.2.0"},
+        API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
+        API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
+            "content": base64.b64encode(source.encode()).decode()
+        },
+        API + "codemeta/codemeta/tags?per_page=100": [],
+        **dict.fromkeys(SCHEMA_URLS.values(), schema),
+        "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": schema,
+        **{
+            API + f"simonvanlierde/codemeta-drift/contents/{path}?ref=v0.4.0": {
+                "content": base64.b64encode(data).decode()
+            }
+            for path, data in pinned.items()
+        },
+    }
+    zenodo = before["zenodo"]["x-source"]
+    responses.update({API + zenodo["repo"] + "/contents/" + p: {"sha": d} for p, d in zenodo["files"].items()})
+    plans = poll({"rows": []}, before, responses.__getitem__)
+    assert [plan["title"] for plan in plans] == ["Update mapping pin hash for mapping-local.json at v0.4.0"]
+    assert plans[0]["repo"] == "simonvanlierde/citesync"
+    assert "mapping-local.json" in plans[0]["body"]
+    assert "mapping.schema.json" not in plans[0]["body"]
 
 
 def test_publisher_fetches_closed_titles_and_publishes_once():
