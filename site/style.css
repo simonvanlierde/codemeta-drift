@@ -387,13 +387,17 @@ table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
   font-size: 12px;
   color: var(--faint);
 }
-@media (max-width: 999px) {
+@media (max-width: 999px) and (min-height: 480px) {
   /* A chosen cell's detail stays in view at the foot of the screen until it is closed. */
+  html:has(.detail dl) {
+    /* Tabbing scrolls a focused cell clear of the panel, not under it. */
+    scroll-padding-bottom: calc(min(30vh, 14rem) + 24px);
+  }
   .detail:has(dl) {
     position: sticky;
     bottom: 0;
     z-index: 2;
-    max-height: 30vh;
+    max-height: min(30vh, 14rem);
     overflow: auto;
     background: var(--paper);
     padding-bottom: 12px;

@@ -84,6 +84,16 @@ def test_upstream_derives_the_new_cell_before_calling_it_fixed(cell: str, term: 
     assert found["zenodo", term] == "fixed"
 
 
+def test_an_emptied_cell_is_not_a_fix_for_a_format_with_no_field():
+    files = read_dir(ROOT / "tests/fixtures/3.1")
+    npm = "crosswalks/NodeJS.csv"
+    assert "\nidentifier,name" in files[npm]
+    files[npm] = files[npm].replace("\nidentifier,name", "\nidentifier,", 1)
+    found = {(c["format"], c["term"]): c["state"] for c in upstream(files, mapping())}
+    # The export would refuse that empty cell without its curated row, so the row must stay.
+    assert found["npm", "identifier"] == "changed"
+
+
 def test_upstream_says_missing_when_a_crosswalk_is_gone():
     files = read_dir(ROOT / "tests/fixtures/3.1")
     del files["crosswalks/Cargo.csv"]

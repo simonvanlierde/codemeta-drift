@@ -6,7 +6,7 @@ const label = (fmt) => LABELS[fmt] ?? fmt;
 
 // What each upstream state says about a cell on CodeMeta's main branch.
 const STATES = {
-  missing: "has no crosswalk file on main",
+  missing: "has no crosswalk file or property table on main",
   unmatched: "can't be joined: the crosswalk and the property table list this property a different number of times",
   fixed: "now says what the reviewed mapping says, so the correction can go",
   changed: "has new text",
@@ -90,8 +90,10 @@ function detail(data, upstream) {
       button.removeAttribute("aria-pressed");
       picked = null;
       box.replaceChildren(hint);
-      button.focus();
+      // A filter may have made the cell inert; focus the filter that hid it instead.
+      (button.closest("[inert]") ? document.querySelector('#filters [aria-pressed="true"]') : button).focus();
     });
+    document.getElementById("picked").textContent = `${cell.term} in ${label(cell.format)}: ${cell.status}`;
     box.replaceChildren(el("div", { class: "detail-head" }, el("h3", {}, code(cell.term), ` in ${label(cell.format)}`), close), list);
   };
 }
@@ -190,6 +192,8 @@ function follow() {
   const hub = kind === "field" && parts[0] === "codemeta" && ((b) => b.dataset.term === parts.slice(1).join("/").replaceAll("[]", ""));
   const button = cells.find(match) ?? (hub ? cells.find(hub) : undefined);
   if (!button) return;
+  // A filtered-out cell can't take focus: show every cell first.
+  if (button.closest("[inert]")) document.querySelector("#filters button").click();
   button.click();
   button.scrollIntoView({ block: "center" });
   button.focus({ preventScroll: true });
@@ -204,7 +208,7 @@ async function start() {
   const needed = crosswalk.filter((c) => c.status !== "no field");
   const asIs = needed.filter((c) => c.status === "as-is").length;
   document.getElementById("lede").append(" ", el("strong", {},
-    `Of the ${crosswalk.length} cells in CodeMeta's own crosswalks, ${crosswalk.length - needed.length} are rightly empty; only ${asIs} of the other ${needed.length} can be used as written.`));
+    `Of the ${crosswalk.length} cells in CodeMeta's own crosswalks, ${crosswalk.length - needed.length} are for terms the format has no field for; only ${asIs} of the other ${needed.length} can be used as written.`));
   matrix(coverage, detail(coverage, upstream));
   filters(coverage);
   route(coverage);

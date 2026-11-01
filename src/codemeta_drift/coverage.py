@@ -133,10 +133,10 @@ def markdown(mapping: dict[str, Any]) -> str:
 def upstream(files: Mapping[str, str], mapping: dict[str, Any]) -> list[dict[str, Any]]:
     """The cells whose crosswalk text in ``files`` (a newer CodeMeta commit) differs from the export's tag.
 
-    ``state`` is ``missing`` when the new commit has no such crosswalk file; ``unmatched`` when its
-    crosswalk and property table list a property a different number of times, so its cell can't be
-    joined; ``fixed`` when a corrected or added cell now gives the reviewed path (or, for a format
-    with no field, is now empty), so the curated row could go; else ``changed``.
+    ``state`` is ``missing`` when the new commit has no such crosswalk file or no property table;
+    ``unmatched`` when its crosswalk and property table list a property a different number of times,
+    so its cell can't be joined; ``fixed`` when a corrected or added cell now gives the reviewed
+    path, so the curated row could go; else ``changed``.
     """
     paths = {(row["format"], row["term"]): row["path"] for row in mapping["rows"]}
     cells: dict[str, dict[tuple[str, str], str]] = {}
@@ -164,10 +164,11 @@ def upstream(files: Mapping[str, str], mapping: dict[str, Any]) -> list[dict[str
 
 
 def fixes(cell: dict[str, Any], now: str, paths: Mapping[tuple[str, str], str | None]) -> bool:
-    """Whether new crosswalk text means what the curated row says: the same path once derived, or nothing."""
-    if cell["path"] is None:
-        return not now
-    if not now or classify(now) != "path":
+    """Whether new crosswalk text gives the curated path once derived.
+
+    A row with no path never counts: the export refuses an empty cell without its curated row.
+    """
+    if cell["path"] is None or not now or classify(now) != "path":
         return False
     fmt = cell["format"]
     made = {term: paths.get((fmt, term)) for term in PEOPLE}
