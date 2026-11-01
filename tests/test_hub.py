@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 from codemeta_drift.cli import main
 from codemeta_drift.hub import pair_rows, sssom, validate_mapping
@@ -62,7 +63,40 @@ def test_mapping_rejects_invalid_input(change: str):
 
 def test_sssom_uses_curie_identifiers_and_conservative_predicates():
     text = sssom(mapping())
-    assert text.startswith("# mapping_set_id: https://github.com/simonvanlierde/codemeta-drift/")
+    # The metadata block is YAML behind "# ", as SSSOM readers parse it.
+    header = yaml.safe_load("\n".join(line[2:] for line in text.splitlines() if line.startswith("#")))
+    site = "https://simonvanlierde.com/codemeta-drift/"
+    assert header == {
+        "mapping_set_id": f"{site}spokes-3.1.sssom.tsv",
+        "mapping_set_version": mapping()["generator"]["version"],
+        "mapping_set_title": "codemeta-drift crosswalk hub spokes for CodeMeta 3.1",
+        "mapping_set_description": header["mapping_set_description"],
+        "mapping_provider": "https://github.com/simonvanlierde/codemeta-drift/",
+        "creator_id": ["orcid:0009-0006-6953-909X"],
+        "see_also": ["https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/crosswalk-hub.md"],
+        "license": "https://spdx.org/licenses/Apache-2.0.html",
+        "sssom_version": "1.0",
+        "curie_map": {
+            "term": f"{site}#term/",
+            "field": f"{site}#field/",
+            "format": f"{site}#format/",
+            "orcid": "https://orcid.org/",
+            "skos": "http://www.w3.org/2004/02/skos/core#",
+            "semapv": "https://w3id.org/semapv/vocab/",
+        },
+    }
+    assert "may need conversion" in header["mapping_set_description"]
+
+
+def test_sssom_header_keeps_a_one_dot_zero_version_a_string():
+    data = mapping()
+    data["generator"]["version"] = "1.0"
+    header = yaml.safe_load("\n".join(line[2:] for line in sssom(data).splitlines() if line.startswith("#")))
+    assert header["mapping_set_version"] == "1.0"
+
+
+def test_sssom_rows_use_curie_identifiers_and_conservative_predicates():
+    text = sssom(mapping())
     rows = list(
         csv.DictReader(
             io.StringIO("\n".join(line for line in text.splitlines() if not line.startswith("#"))), delimiter="\t"
@@ -87,7 +121,8 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates():
 
 def test_sssom_prefixes_have_distinct_uri_namespaces():
     prefixes = {}
-    for line in sssom(mapping()).splitlines():
+    curie_map = sssom(mapping()).split("# curie_map:\n", 1)[1]
+    for line in curie_map.splitlines():
         if line.startswith("#   "):
             prefix, uri = line.removeprefix("#   ").split(": ", 1)
             prefixes[prefix] = uri
