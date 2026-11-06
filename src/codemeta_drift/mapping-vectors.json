@@ -574,6 +574,52 @@
    ]
   },
   {
+   "name": "RIS tags are keys, and AU and KW are lists",
+   "path": "AU[]",
+   "document": {
+    "TY": "COMP",
+    "TI": "Carberry",
+    "AU": [
+     "Lovelace, Ada",
+     "Babbage, Charles"
+    ],
+    "ET": "1.2.0",
+    "KW": [
+     "analysis",
+     "notes"
+    ]
+   },
+   "expected": [
+    "Lovelace, Ada",
+    "Babbage, Charles"
+   ]
+  },
+  {
+   "name": "RIS keywords repeat",
+   "path": "KW[]",
+   "document": {
+    "KW": [
+     "analysis",
+     "notes"
+    ]
+   },
+   "expected": [
+    "analysis",
+    "notes"
+   ]
+  },
+  {
+   "name": "EndNote tag %7 is the key _7",
+   "path": "_7",
+   "document": {
+    "T": "Carberry",
+    "_7": "1.2.0"
+   },
+   "expected": [
+    "1.2.0"
+   ]
+  },
+  {
    "name": "prefixed keys",
    "path": "dcterms:creator[].foaf:name",
    "document": {

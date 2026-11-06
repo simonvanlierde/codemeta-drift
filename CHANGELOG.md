@@ -7,6 +7,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The mapping export covers RIS and EndNote's tagged format, with a row for each term. Neither has a CodeMeta
+  crosswalk, so each row cites the tag list it was read from, and `schema_version` is 1.7. See the
+  [mapping export](docs/mapping-export.md).
+
 ## [0.6.0] - 2026-11-01
 
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade

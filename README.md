@@ -28,7 +28,7 @@ At CodeMeta 3.1, the 28 crosswalks reviewed here, from CFF, Zenodo and DataCite 
 and Wikidata, have 476 cells for the 17 terms citation tools need. 151 are for terms the format has
 no field for. Of the other 325, only 111 can be used as written: 124 are wrong, ambiguous or prose
 (23 of them fill a term the format has no field for), and 90 are blank although the format has the field.
-CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml` or Quarto extensions at all. The [coverage matrix](docs/coverage.md)
+CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto extensions, RIS or EndNote at all. The [coverage matrix](docs/coverage.md)
 shows every cell and the reason for each correction, lists the other 16 crosswalks by the shape
 of their cells, and the
 [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.
@@ -65,7 +65,7 @@ Export the reviewed mappings for CodeMeta 3.1:
 uvx codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
 ```
 
-The export covers 32 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3 and Wikidata; the
+The export covers 34 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3 and Wikidata; the
 [mapping export](docs/mapping-export.md) lists them.
 It records the field path for each term, with a reason for each curated correction.
 It does not convert field values.

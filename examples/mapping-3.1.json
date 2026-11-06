@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.6",
+  "schema_version": "1.7",
   "codemeta_tag": "3.1",
   "generator": {
     "name": "codemeta-drift",
@@ -3980,6 +3980,253 @@
       "source": "curated:the cell says P577, which is not a key of the entity JSON; the date is the time field of a time value",
       "comment": "The value looks like +2020-05-01T00:00:00Z; precision (11 = day, 9 = year) says how much of it is real.",
       "crosswalk_cell": "P577"
+    },
+    {
+      "format": "ris",
+      "term": "name",
+      "path": "TI",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; TI is the title, once per record",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "version",
+      "path": "ET",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; RIS has no version tag, and ET (edition) is where a computer program's version goes",
+      "comment": "ET is an edition field, so this is a convention, not something the spec says.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "author",
+      "path": "AU[]",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; AU is the author, repeated once per person",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "author.givenName",
+      "path": "AU[]",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; each AU is 'Last, First' with an optional suffix",
+      "comment": "The consumer splits at the first comma.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "author.familyName",
+      "path": "AU[]",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; each AU is 'Last, First' with an optional suffix",
+      "comment": "The consumer splits at the first comma.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; a name tag holds a name only, no ORCID",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; A2 to A4 are secondary authors, editors or translators of the work, not contributors",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; no contributor tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; no contributor tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; no contributor tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "license",
+      "path": null,
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; no licence tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "identifier",
+      "path": "DO",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; DO is the DOI",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; no SWHID tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "codeRepository",
+      "path": "UR[]",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; UR is a URL and may repeat",
+      "comment": "The spec also lets one UR hold several URLs separated by semicolons. The consumer takes the repository URL among them.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "description",
+      "path": "AB",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; AB is the abstract",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "keywords",
+      "path": "KW[]",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; KW is one keyword or phrase per tag, repeated",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "ris",
+      "term": "datePublished",
+      "path": "PY",
+      "source": "curated:no RIS crosswalk upstream; tags from https://en.wikipedia.org/wiki/RIS_(file_format), with TY COMP; PY is the publication year in four digits",
+      "comment": "Year only. DA holds a full date, but its meaning varies (accessed, updated, released).",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "name",
+      "path": "T",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %T is the title",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "version",
+      "path": "_7",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %7 is the edition, where a computer program's version goes",
+      "comment": "EndNote has no version tag, so this is a convention.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "author",
+      "path": "A[]",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %A is the author, repeated once per person",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "author.givenName",
+      "path": "A[]",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; each %A is one name, written 'Family, Given' or 'Given Family'",
+      "comment": "The consumer splits the name; a comma means 'Family, Given'.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "author.familyName",
+      "path": "A[]",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; each %A is one name, written 'Family, Given' or 'Given Family'",
+      "comment": "The consumer splits the name; a comma means 'Family, Given'.",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; a name tag holds a name only, no ORCID",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %E is an editor, and no tag marks a contributor",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; no contributor tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; no contributor tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; no contributor tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "license",
+      "path": null,
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; no licence tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "identifier",
+      "path": "R",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %R is the electronic resource number, which EndNote uses for the DOI",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; no SWHID tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "codeRepository",
+      "path": "U",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %U is the URL",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "description",
+      "path": "X",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %X is the abstract",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "keywords",
+      "path": "K[]",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %K is a keyword, one per tag as EndNote writes them",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "endnote",
+      "term": "datePublished",
+      "path": "D",
+      "source": "curated:no EndNote crosswalk upstream; tags from the Refer/EndNote tagged format as read by https://github.com/zotero/translators/blob/master/ReferBibIX.js, with %0 Computer Program; %D is the year",
+      "comment": "Year only for most records; the consumer keeps what %D holds.",
+      "crosswalk_cell": null
     }
   ]
 }

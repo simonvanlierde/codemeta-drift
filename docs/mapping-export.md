@@ -74,7 +74,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.6",
+  "schema_version": "1.7",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.6.0"},
   "rows": [
@@ -109,9 +109,10 @@ Each row:
   `bio-tools` (a bio.tools entry), `leiningen` (project.clj), `octave` (an Octave package's
   DESCRIPTION), `publiccode-0.8` (publiccode.yml), `swmath` (a zbMATH Open software record),
   `spdx-2.3` (an SPDX 2.3 package in JSON), `codemeta-2` (a codemeta.json written to the 2.0
-  context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project) or `wikidata` (a Wikidata
-  item). A format whose versions differ puts the version in the id. `pkg-info` to `bibtex` were
-  added in schema 1.4, and `datacite` to `wikidata` in 1.5.
+  context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project), `wikidata` (a Wikidata
+  item), `ris` (a RIS record with `TY  - COMP`) or `endnote` (an EndNote tagged record with
+  `%0 Computer Program`). A format whose versions differ puts the version in the id. `pkg-info` to
+  `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, and `ris` and `endnote` in 1.7.
 - `term` is one of the eleven terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords` and `datePublished`, or a person
   sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
@@ -184,6 +185,12 @@ them into one first. These cases need more than the grammar below says:
   compacted with a context that defines only the prefixes `dcat`, `dcterms`, `owl`, `foaf` and
   `doap`, so each key is a prefixed name such as `dcterms:title`. A property may hold one value or
   a list, a link is an object with `@id`, and a typed date may be an object with `@value`.
+- RIS and EndNote tagged are line formats. A consumer reads one record into a tree: each tag is a
+  key (RIS `TI`, EndNote `%T` as `T`, and `%7` as `_7`, since a key cannot start with a digit), the
+  value is the text after the tag, and a repeated tag becomes a list. `AU`, `KW` and `UR` repeat in
+  RIS; `%A` and `%K` repeat in EndNote. Any other tag that repeats counts once, by its first occurrence.
+  Neither format has a tag for a software version, so `ET` and `%7` (edition) carry it by convention.
+  Neither format has a CodeMeta crosswalk; the rows cite the tag lists they were read from.
 - Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
   element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object
   with `id` for an item, or an object with `time` for a date. A deprecated statement is skipped.
@@ -195,7 +202,7 @@ A (format, term) pair appears at most once. The schema cannot enforce uniqueness
 those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, and within a format in the order `name`, `version`, `author`,
+`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
 `contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`. The same inputs give the same bytes, so a consumer
@@ -260,7 +267,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
 2. Validate the file against the schema it vendors beside it, and update the two together:
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
-   path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas. Update the
+   path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas. Schema 1.7 adds only the `ris` and `endnote` format ids to 1.6. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
