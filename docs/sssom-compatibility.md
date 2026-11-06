@@ -8,19 +8,19 @@ and `skos:relatedMatch`; it does not assert that field values can be copied unch
 From the repository root:
 
 ```sh
-uv run codemeta-drift hub sssom examples/mapping-3.1.json --out spokes.sssom.tsv
-uvx --python 3.13 --from sssom==0.4.21 sssom validate spokes.sssom.tsv
+just sssom-validate
 ```
 
-The second command runs the pinned [SSSOM Python reference tool](https://mapping-commons.github.io/sssom-py/cli/commands/#sssom-validate)
-in a separate tool environment. It checks the JSON schema, prefix-map completeness and
-CURIE syntax. It does not require a runtime dependency in codemeta-drift.
+The recipe writes the bundled mapping for CodeMeta 3.1 to a temporary file with
+`codemeta-drift hub sssom`, then runs the pinned
+[SSSOM Python reference tool](https://mapping-commons.github.io/sssom-py/cli/commands/#sssom-validate)
+(`uvx --python 3.13 --from sssom==0.4.21 sssom validate`) in a separate tool environment.
+It checks the JSON schema, prefix-map completeness and CURIE syntax, and needs network
+access for `uvx`. It does not require a runtime dependency in codemeta-drift.
 
-Checked on 2026-11-01 with the bundled mapping for CodeMeta 3.1: validation passed,
-and the reference parser retained all 343 rows across 33 formats and the set's title,
-version and curator ORCID. The parser rejects
-an export whose `field:` and `format:` prefixes have the same URI base. The hub uses
-separate `#field/` and `#format/` bases, with a regression test for that requirement.
+The parser rejects an export whose `field:` and `format:` prefixes have the same URI base.
+The hub uses separate `#field/` and `#format/` bases, with a regression test for that
+requirement.
 
 This check establishes that this reference tool can read the export. It does not validate
 the meaning of a mapping or certify conformance with CodeMeta's methodology.

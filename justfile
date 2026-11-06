@@ -47,6 +47,15 @@ mutation:
     echo "${gone:-none}"
     [ -z "$new$gone" ]
 
+# Write the 3.1 SSSOM export to a temp file and validate it with the pinned reference tool (needs network for uvx).
+sssom-validate:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    out=$(mktemp -d)
+    trap 'rm -rf "$out"' EXIT
+    uv run codemeta-drift hub sssom examples/mapping-3.1.json --out "$out/spokes.sssom.tsv"
+    uvx --python 3.13 --from sssom==0.4.21 sssom validate "$out/spokes.sssom.tsv"
+
 # Rewrite codemeta.json to agree with CITATION.cff, then check. The writer
 # exits 1 whenever it changes a file, so the check that follows decides the result.
 citation:
