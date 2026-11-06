@@ -1,5 +1,7 @@
 # codemeta-drift
 
+[![PyPI](https://img.shields.io/pypi/v/codemeta-drift.svg)](https://pypi.org/project/codemeta-drift/)
+[![Python versions](https://img.shields.io/pypi/pyversions/codemeta-drift.svg)](https://pypi.org/project/codemeta-drift/)
 [![python](https://github.com/simonvanlierde/codemeta-drift/actions/workflows/python.yml/badge.svg)](https://github.com/simonvanlierde/codemeta-drift/actions/workflows/python.yml)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23774728.svg)](https://doi.org/10.5281/zenodo.23774728)
@@ -28,7 +30,7 @@ At CodeMeta 3.1, the 28 crosswalks reviewed here, from CFF, Zenodo and DataCite 
 and Wikidata, have 532 cells for the 19 terms citation tools need. 194 are for terms the format has
 no field for. Of the other 338, only 112 can be used as written: 129 are wrong, ambiguous or prose
 (23 of them fill a term the format has no field for), and 97 are blank although the format has the field.
-CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml` or Quarto extensions at all. The [coverage matrix](docs/coverage.md)
+CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml` or Quarto extensions at all. The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md)
 shows every cell and the reason for each correction, lists the other 16 crosswalks by the shape
 of their cells, and the
 [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.
@@ -55,7 +57,7 @@ EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codem
 Exit codes are **0** when the checked files agree, **1** when they disagree, and **2**
 when the check cannot run. A check with no findings prints nothing; `SKIPPED` notices
 for optional files do not make it fail. Add `--json` for structured output.
-See [finding codes, compared files and JSON output](docs/checks.md).
+See [finding codes, compared files and JSON output](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md).
 
 ## Mapping export
 
@@ -65,35 +67,35 @@ Export the reviewed mappings for CodeMeta 3.1:
 uvx codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
 ```
 
-The export covers 32 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3 and Wikidata; the
-[mapping export](docs/mapping-export.md) lists them.
+The export covers 34 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3 and Wikidata; the
+[mapping export](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md) lists them.
 It records the field path for each term, with a reason for each curated correction.
 It does not convert field values.
 The exporter reads the tag's commit and refuses rows it cannot resolve.
 
-Read the [export guide and contract](docs/mapping-export.md), or inspect the
-[committed example](examples/mapping-3.1.json). Only tags with curated mappings can be
+Read the [export guide and contract](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md), or inspect the
+[committed example](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-3.1.json). Only tags with curated mappings can be
 exported; currently that is `3.1`.
 
 ## Documentation
 
-- [Crosswalk coverage matrix](docs/coverage.md): every term and format, with the reason for each correction.
-- [Offline schema recovery](docs/schema-recovery.md): preview a synthetic rename and apply an explicit approval.
-- [Zenodo path coverage](docs/zenodo-schema.md): verified paths, upstream source checks and validation limits.
-- [Understand findings and use the JSON interface](docs/checks.md).
-- [Inspect the dated CodeMeta findings report](docs/findings.md).
-- [Export mappings and validate paths against schemas](docs/mapping-export.md).
-- [Set up development and run tests](docs/development.md).
+- [Crosswalk coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md): every term and format, with the reason for each correction.
+- [Offline schema recovery](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-recovery.md): preview a synthetic rename and apply an explicit approval.
+- [Zenodo path coverage](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/zenodo-schema.md): verified paths, upstream source checks and validation limits.
+- [Understand findings and use the JSON interface](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md).
+- [Inspect the dated CodeMeta findings report](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/findings.md).
+- [Export mappings and validate paths against schemas](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md).
+- [Set up development and run tests](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/development.md).
 
 ## Crosswalk hub
 
 Derive field correspondences between two formats or write SSSOM spokes for every format with
-[`codemeta-drift hub`](docs/crosswalk-hub.md). Values still need each format's parser and normalization.
+[`codemeta-drift hub`](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/crosswalk-hub.md). Values still need each format's parser and normalization.
 
 ## Schema watcher
 
 Compare downloaded schemas and prepare issue drafts with the
-[schema watcher](docs/schema-watcher.md). The weekly workflow polls public sources and
+[schema watcher](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-watcher.md). The weekly workflow polls public sources and
 also checks citesync's mapping pin. Publishing requires a configured token.
 
 ## Development
@@ -105,9 +107,9 @@ uv sync
 just check
 ```
 
-The [development guide](docs/development.md) covers hooks, fixture updates and mutation
-testing. [CONTRIBUTING.md](.github/CONTRIBUTING.md) gives the commit and sign-off rules.
+The [development guide](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/development.md) covers hooks, fixture updates and mutation
+testing. [CONTRIBUTING.md](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/CONTRIBUTING.md) gives the commit and sign-off rules.
 
 ## License
 
-[Apache-2.0](LICENSE). The CodeMeta test fixtures use the same licence; see [NOTICE](NOTICE).
+[Apache-2.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE). The CodeMeta test fixtures use the same licence; see [NOTICE](https://github.com/simonvanlierde/codemeta-drift/blob/main/NOTICE).

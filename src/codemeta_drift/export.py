@@ -98,6 +98,8 @@ FORMATS = {
     "dcat-3": Spoke("crosswalks/DCAT-3.csv", person_list=True),
     "doap": Spoke("crosswalks/DOAP.csv", person_list=True),
     "wikidata": Spoke("crosswalks/Wikidata.csv", person_list=True),
+    "ris": Spoke(None),
+    "endnote": Spoke(None),
 }
 
 PATH = re.compile(

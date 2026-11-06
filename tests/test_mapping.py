@@ -97,8 +97,19 @@ def test_person_sub_terms_line_up_with_their_term():
 
 
 # Formats with a place for the publisher and the resource type; every other format has a null row.
-PUBLISHER = {"codemeta", "codemeta-2", "bibtex", "datacite", "dcat-3", "doap", "wikidata"}
-RESOURCE_TYPE = {"codemeta", "codemeta-2", "cff-1.2.0", "zenodo", "figshare", "datacite", "dcat-3", "wikidata"}
+PUBLISHER = {"codemeta", "codemeta-2", "bibtex", "datacite", "dcat-3", "doap", "wikidata", "ris", "endnote"}
+RESOURCE_TYPE = {
+    "codemeta",
+    "codemeta-2",
+    "cff-1.2.0",
+    "zenodo",
+    "figshare",
+    "datacite",
+    "dcat-3",
+    "wikidata",
+    "ris",
+    "endnote",
+}
 
 
 def test_example_null_rows():
@@ -340,6 +351,19 @@ def test_example_null_rows():
         }
         | {(f, "publisher") for f in ALL_FORMATS if f not in PUBLISHER}
         | {(f, "resourceType") for f in ALL_FORMATS if f not in RESOURCE_TYPE}
+        | {
+            (fmt, t)
+            for fmt in ("ris", "endnote")
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "license",
+                "swhid",
+            )
+        }
     )
 
 

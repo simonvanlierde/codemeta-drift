@@ -3434,6 +3434,247 @@
       "path": "dcterms:publisher.foaf:name | dcterms:publisher",
       "cell": "dcterms:publisher",
       "reason": "the cell says dcterms:publisher, whose value is an agent (usually a foaf:Agent), so its name is foaf:name; an IRI value has no name sub-field"
+    },
+    {
+      "format": "ris",
+      "term": "name",
+      "path": "TI",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; TI is the title, once per record"
+    },
+    {
+      "format": "ris",
+      "term": "version",
+      "path": "ET",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; RIS has no version tag, and ET (edition) is where a computer program's version goes",
+      "comment": "ET is an edition field, so this is a convention. Zotero's RIS translator has the same precedent: it maps ET to versionNumber for computerProgram."
+    },
+    {
+      "format": "ris",
+      "term": "author",
+      "path": "AU[]",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; AU is the author, repeated once per person"
+    },
+    {
+      "format": "ris",
+      "term": "author.givenName",
+      "path": "AU[]",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; each AU is 'Last, First' with an optional suffix",
+      "comment": "The consumer splits at the first comma."
+    },
+    {
+      "format": "ris",
+      "term": "author.familyName",
+      "path": "AU[]",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; each AU is 'Last, First' with an optional suffix",
+      "comment": "The consumer splits at the first comma."
+    },
+    {
+      "format": "ris",
+      "term": "author.@id",
+      "path": null,
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; a name tag holds a name only, no ORCID"
+    },
+    {
+      "format": "ris",
+      "term": "contributor",
+      "path": null,
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; A2 to A4 are secondary authors, editors or translators of the work, not contributors"
+    },
+    {
+      "format": "ris",
+      "term": "contributor.givenName",
+      "path": null,
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; no contributor tag"
+    },
+    {
+      "format": "ris",
+      "term": "contributor.familyName",
+      "path": null,
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; no contributor tag"
+    },
+    {
+      "format": "ris",
+      "term": "contributor.@id",
+      "path": null,
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; no contributor tag"
+    },
+    {
+      "format": "ris",
+      "term": "license",
+      "path": null,
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; no licence tag"
+    },
+    {
+      "format": "ris",
+      "term": "identifier",
+      "path": "DO",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; DO is the DOI"
+    },
+    {
+      "format": "ris",
+      "term": "swhid",
+      "path": null,
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; no SWHID tag"
+    },
+    {
+      "format": "ris",
+      "term": "codeRepository",
+      "path": "UR[]",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; UR is a URL and may repeat",
+      "comment": "The spec also lets one UR hold several URLs separated by semicolons. The consumer takes the repository URL among them."
+    },
+    {
+      "format": "ris",
+      "term": "description",
+      "path": "AB",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; AB is the abstract"
+    },
+    {
+      "format": "ris",
+      "term": "keywords",
+      "path": "KW[]",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; KW is one keyword or phrase per tag, repeated"
+    },
+    {
+      "format": "ris",
+      "term": "datePublished",
+      "path": "PY",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; PY is the publication year in four digits",
+      "comment": "PY is a year, so the consumer cuts an ISO date to its first four digits. DA (YYYY/MM/DD/other) holds a full date, but its meaning varies (accessed, updated, released)."
+    },
+    {
+      "format": "endnote",
+      "term": "name",
+      "path": "T",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %T is the title"
+    },
+    {
+      "format": "endnote",
+      "term": "version",
+      "path": "_7",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %7 is the edition",
+      "comment": "EndNote and Zotero's ReferBibIX.js both read %7 as edition. A program's version in %7 is this project's convention; EndNote has no version tag."
+    },
+    {
+      "format": "endnote",
+      "term": "author",
+      "path": "A[]",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %A is the author, repeated once per person"
+    },
+    {
+      "format": "endnote",
+      "term": "author.givenName",
+      "path": "A[]",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; each %A is one name, written 'Family, Given' or 'Given Family'",
+      "comment": "The consumer splits the name; a comma means 'Family, Given'."
+    },
+    {
+      "format": "endnote",
+      "term": "author.familyName",
+      "path": "A[]",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; each %A is one name, written 'Family, Given' or 'Given Family'",
+      "comment": "The consumer splits the name; a comma means 'Family, Given'."
+    },
+    {
+      "format": "endnote",
+      "term": "author.@id",
+      "path": null,
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; a name tag holds a name only, no ORCID"
+    },
+    {
+      "format": "endnote",
+      "term": "contributor",
+      "path": null,
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %E is an editor, and no tag marks a contributor"
+    },
+    {
+      "format": "endnote",
+      "term": "contributor.givenName",
+      "path": null,
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; no contributor tag"
+    },
+    {
+      "format": "endnote",
+      "term": "contributor.familyName",
+      "path": null,
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; no contributor tag"
+    },
+    {
+      "format": "endnote",
+      "term": "contributor.@id",
+      "path": null,
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; no contributor tag"
+    },
+    {
+      "format": "endnote",
+      "term": "license",
+      "path": null,
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; no licence tag"
+    },
+    {
+      "format": "endnote",
+      "term": "identifier",
+      "path": "R",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %R is the DOI",
+      "comment": "EndNote's own field: %R is the DOI in EndNote's tag table (older EndNote versions called it Electronic Resource Number). Zotero's ReferBibIX.js reads %R as type instead, so a file Zotero wrote may hold no DOI there. https://github.com/zotero/translators/blob/master/ReferBibIX.js"
+    },
+    {
+      "format": "endnote",
+      "term": "swhid",
+      "path": null,
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; no SWHID tag"
+    },
+    {
+      "format": "endnote",
+      "term": "codeRepository",
+      "path": "U",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %U is the URL"
+    },
+    {
+      "format": "endnote",
+      "term": "description",
+      "path": "X",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %X is the abstract"
+    },
+    {
+      "format": "endnote",
+      "term": "keywords",
+      "path": "K[]",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %K is the keywords",
+      "comment": "A %K tag may hold continuation lines, one keyword per line, as Zotero writes it. The consumer splits the value at line breaks and also reads repeated %K tags."
+    },
+    {
+      "format": "endnote",
+      "term": "datePublished",
+      "path": "D",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %D is the year",
+      "comment": "Zotero writes the item's full date string to %D (ReferBibIX.js, addTag(\"D\", item.date)), so it may hold more than a year. The consumer cuts an ISO date to the year only when it needs one."
+    },
+    {
+      "format": "ris",
+      "term": "publisher",
+      "path": "PB",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; PB is the publisher, and Zotero's translator reads it into a computer program's company field"
+    },
+    {
+      "format": "ris",
+      "term": "resourceType",
+      "path": "TY",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; TY is the reference type, and COMP is a computer program",
+      "comment": "Software is COMP. The consumer writes the type tag first in the record."
+    },
+    {
+      "format": "endnote",
+      "term": "publisher",
+      "path": "I",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm, with %0 Computer Program; %I is the publisher"
+    },
+    {
+      "format": "endnote",
+      "term": "resourceType",
+      "path": "_0",
+      "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm; %0 is the reference type, and Computer Program is software",
+      "comment": "Software is 'Computer Program'. The key is _0 because a path key cannot start with a digit, as with _7 (edition)."
     }
   ]
 }
