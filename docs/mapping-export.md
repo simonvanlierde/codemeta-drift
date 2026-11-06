@@ -147,9 +147,13 @@ a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says s
 PKG-INFO, R's DESCRIPTION and several of the newer formats are not trees, so a consumer reads
 them into one first. These cases need more than the grammar below says:
 
-- PKG-INFO: each field is a key, and a field that repeats is a list. `Author` splits on commas into
-  names and `Author-email` into RFC 822 addresses (`Ada Lovelace <ada@example.org>, B <b@example.org>`
-  is two), and both are always lists, even for one value, so the author rows read `Author[] + Author-email[]`. `Project-URL` becomes
+- PKG-INFO: each field is a key, and a field that repeats is a list. `Author` is free text, one
+  string that is never split (the spec's example `C. Schultz, Universal Features Syndicate, Los Angeles, CA`
+  is one author). `Author-email` is an RFC 822 address list: the parser splits it at commas that are
+  outside double quotes and angle brackets, so `"Smith, Jane" <j@example.org>, Ada Lovelace <ada@example.org>`
+  is two addresses, and it is always a list, even for one. The author rows read `Author + Author-email[]`.
+  A consumer combines them in that order: `Author` as one name string, then the display name of each
+  address, and never treats a comma in `Author` as a separator. `Project-URL` becomes
   elements with `label` and `url`, the label normalised as the
   [well-known project URLs spec](https://packaging.python.org/en/latest/specifications/well-known-project-urls/)
   says: lower case, no punctuation or whitespace, so `Source Code` matches `sourcecode`.
@@ -191,7 +195,12 @@ them into one first. These cases need more than the grammar below says:
   key (RIS `TI`, EndNote `%T` as `T`, and `%7` as `_7`, since a key cannot start with a digit), the
   value is the text after the tag, and a repeated tag becomes a list. `AU`, `KW` and `UR` repeat in
   RIS; `%A` and `%K` repeat in EndNote. Any other tag that repeats counts once, by its first occurrence.
-  Neither format has a tag for a software version, so `ET` and `%7` (edition) carry it by convention.
+  A `%K` tag may also hold continuation lines, one keyword per line, as Zotero writes it: the parser
+  splits them, so `K[]` holds one keyword each. Neither format has a tag for a software version, so
+  `ET` and `%7` (edition) carry it by convention; Zotero's RIS translator reads `ET` as `versionNumber` for
+  a computer program. RIS `PY` is a year and `DA` is `YYYY/MM/DD/other`, so for `datePublished` the
+  consumer cuts an ISO date to its first four digits; Zotero writes the full date to EndNote `%D`.
+  EndNote's tag table calls `%R` the DOI; Zotero's reader takes it as `type`.
   Neither format has a CodeMeta crosswalk; the rows cite the tag lists they were read from.
 - Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
   element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object
@@ -220,7 +229,7 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 | `key` | the value under `key` | `package.name` |
 | `key[]` | each element of the list under `key` | `authors[]` |
 | `key[k=v]` | each element of the list under `key` whose `k` equals `v`, or is a list that holds `v` | `identifiers[type=doi].value` |
-| `a + b` | the values of `a`, then those of `b` | `Author[] + Author-email[]` |
+| `a + b` | the values of `a`, then those of `b` | `Author + Author-email[]` |
 | `a \| b` | `a` if it has any value, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
 
 - A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
