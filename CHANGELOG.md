@@ -7,8 +7,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The mapping export covers RIS and EndNote's tagged format, with a row for each term. Neither has a CodeMeta
+  crosswalk, so each row cites the tag list it was read from (Zotero's RIS translator and EndNote's import format docs), and `schema_version` is 1.7. See the
+  [mapping export](docs/mapping-export.md).
+
 ### Changed
 
+- The PKG-INFO author rows read `Author + Author-email[]`: `Author` is one free-text string and is not split, and
+  `Author-email` is a list of RFC 822 addresses, split outside quotes and angle brackets. See the
+  [mapping export](docs/mapping-export.md).
 - Update the project template to v0.13.0: new git hooks (`reuse`, `citesync`, `dco-signoff`), `just release`, `just py-matrix`, and a REUSE.toml with `LICENSES/`. `.zenodo.json` is gone, since Zenodo reads `CITATION.cff`.
 
 ### Removed

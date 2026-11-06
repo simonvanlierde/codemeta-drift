@@ -6,7 +6,7 @@ import { parseFragment } from "./fragment.mjs";
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
   "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
-  github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", "bio-tools": "bio.tools",
+  github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", "bio-tools": "bio.tools",
   "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
   "setup-py": "setup.py", cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
   "ruby-gem": "Ruby gemspec", maven: "Maven pom.xml", "cpan-meta-2": "CPAN META.json", nuget: "NuGet .nuspec",

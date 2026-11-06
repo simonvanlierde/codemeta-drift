@@ -332,6 +332,19 @@ def test_example_null_rows():
                 "contributor.@id",
             )
         }
+        | {
+            (fmt, t)
+            for fmt in ("ris", "endnote")
+            for t in (
+                "author.@id",
+                "contributor",
+                "contributor.givenName",
+                "contributor.familyName",
+                "contributor.@id",
+                "license",
+                "swhid",
+            )
+        }
     )
 
 
