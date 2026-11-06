@@ -128,6 +128,11 @@ def test_a_pinned_file_missing_at_the_tag_is_an_issue_not_a_crash():
     assert "src/codemeta_drift/mapping-vectors.json" in plans[0]["body"]
 
 
+def test_a_malformed_pin_line_names_the_line():
+    with pytest.raises(ValueError, match=r"sha256 abc local\.json"):
+        runner.stale_pin_hashes("sha256 abc local.json\n", "v0.6.0", lambda _: {})
+
+
 def test_publisher_fetches_closed_titles_and_publishes_once():
     existing = {"simonvanlierde/codemeta-drift": {"closed"}}
     created = []

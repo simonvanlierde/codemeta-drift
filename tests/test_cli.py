@@ -88,6 +88,16 @@ def test_no_drift_exits_0(tmp_path: Path):
     assert main([str(tmp_path)]) == 0
 
 
+def test_no_findings_prints_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    (tmp_path / "codemeta.jsonld").write_text("{}")
+    (tmp_path / "properties_description.csv").write_text("")
+    monkeypatch.setattr("codemeta_drift.cli.check", lambda _: [])
+    assert main([str(tmp_path)]) == 0
+    assert capsys.readouterr().out == ""
+
+
 def test_star_does_not_cross_directories():
     assert is_input("crosswalks/Zenodo.csv")
     assert is_input("codemeta.json")

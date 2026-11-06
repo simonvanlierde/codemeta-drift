@@ -7,6 +7,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- A check with no findings prints nothing, as the README says, instead of an empty line.
+- The schema watcher names a malformed `sha256` line in citesync's `MAPPING_SOURCE` instead of failing on
+  `ValueError: not enough values to unpack`.
+
 ## [0.6.0] - 2026-11-01
 
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade
