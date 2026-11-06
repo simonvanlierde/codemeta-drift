@@ -299,6 +299,7 @@ async function start() {
   const response = await fetch("data.json", { cache: "no-cache" });
   const { coverage, unreviewed, upstream } = await response.json();
   document.getElementById("tag").textContent = coverage.codemeta_tag;
+  document.getElementById("matrix-md").href = `${document.getElementById("matrix-md").href}coverage-${coverage.codemeta_tag}.md`;
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
   score(coverage);
   const labels = new Map([...coverage.formats.map((f) => [f, label(f)]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label])]);

@@ -153,6 +153,11 @@ def curated_tags() -> list[str]:
     return sorted(n.removeprefix("curated-").removesuffix(".json") for n in names if n.startswith("curated-"))
 
 
+def latest_tag() -> str:
+    """The newest CodeMeta tag with a curated file, by version number."""
+    return max(curated_tags(), key=lambda tag: tuple(map(int, tag.split("."))))
+
+
 def read_curated(tag: str) -> list[dict[str, Any]]:
     """The curated rows for a CodeMeta tag. Raises KeyError for a tag with no file."""
     if tag not in curated_tags():

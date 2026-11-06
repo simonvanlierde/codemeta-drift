@@ -85,11 +85,12 @@ def test_property_counts_that_differ_get_no_cell():
     assert cells[("schema:Person", "givenName")] == "person.given-names"
 
 
-def test_export_3_1_equals_the_example_in_order():
-    mapping, findings = export(read_dir(FIXTURE), "3.1")
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_export_equals_the_example_in_order(tag: str):
+    mapping, findings = export(read_dir(ROOT / "tests/fixtures" / tag), tag)
     assert findings == []
     Draft202012Validator(SCHEMA).validate(mapping)
-    assert mapping == EXAMPLE
+    assert mapping == json.loads((ROOT / f"examples/mapping-{tag}.json").read_text())
 
 
 @pytest.mark.parametrize(
@@ -378,7 +379,7 @@ def test_cli_export_bad_curated_row_exits_2_and_names_the_file(
 @pytest.mark.parametrize("args", [["--tag", "9.9"], ["--tag", "../3.1"]])
 def test_cli_export_exits_2(args: list[str], tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     assert main(["export", str(tmp_path), *args]) == 2
-    assert capsys.readouterr().err == f"codemeta-drift: no curated rows for {args[1]}; have 3.1\n"
+    assert capsys.readouterr().err == f"codemeta-drift: no curated rows for {args[1]}; have 3.1, 4.0\n"
 
 
 def test_cli_export_prints_from_the_current_directory(

@@ -5,13 +5,13 @@ it does not convert their values. A Cargo author string and a CFF person object 
 need different parsers. A Go module path is not a repository URL.
 
 ```sh
-codemeta-drift hub pair examples/mapping-3.1.json --from pep621 --to cargo
-codemeta-drift hub sssom examples/mapping-3.1.json --out spokes.sssom.tsv
-codemeta-drift hub crosswalk examples/mapping-3.1.json ../codemeta --format cargo
-codemeta-drift hub coverage examples/mapping-3.1.json --out docs/coverage.md
+codemeta-drift hub pair examples/mapping-4.0.json --from pep621 --to cargo
+codemeta-drift hub sssom examples/mapping-4.0.json --out spokes.sssom.tsv
+codemeta-drift hub crosswalk examples/mapping-4.0.json ../codemeta --format cargo
+codemeta-drift hub coverage examples/mapping-4.0.json --out docs/coverage-4.0.md
 ```
 
-`coverage` writes the [coverage matrix](coverage.md): each term and format with its status
+`coverage` writes the [coverage matrix](coverage-4.0.md): each term and format with its status
 (as-is, corrected, added or no field) and the reason for every curated cell. Add `--json`
 for the cells as data; the [coverage page](https://simonvanlierde.com/codemeta-drift/) reads that.
 `--codemeta <checkout>` also lists the CodeMeta crosswalks nobody has reviewed, read at the

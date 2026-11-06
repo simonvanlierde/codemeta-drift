@@ -6,8 +6,9 @@ term sits in each metadata format. Tools that keep `CITATION.cff`, `codemeta.jso
 tables, whose cells are prose and sometimes wrong.
 
 The schema is [`src/codemeta_drift/mapping.schema.json`](../src/codemeta_drift/mapping.schema.json)
-(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) is the
-export for CodeMeta 3.1, written by `codemeta-drift export`.
+(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) and
+[`examples/mapping-4.0.json`](../examples/mapping-4.0.json) are the exports for CodeMeta 3.1 and 4.0,
+written by `codemeta-drift export`.
 
 ## Export a mapping
 
@@ -16,16 +17,16 @@ checkout at `codemeta`, as in the [quick start](../README.md#try-it). It must co
 the selected tag:
 
 ```sh
-codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
+codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
 The exporter reads the tag's commit, not the working tree. Only tags with a bundled
-curated file can be exported; currently that is `3.1`. To check a directory named
+curated file can be exported; currently those are `3.1` and `4.0`. To check a directory named
 `export`, write `./export` so the CLI does not treat it as the subcommand.
 
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
-Other rows use [`curated-3.1.json`](../src/codemeta_drift/curated-3.1.json), which records
-the replacement path and reason. The exporter refuses an unresolved cell, prints the
+Other rows use `curated-<tag>.json` ([3.1](../src/codemeta_drift/curated-3.1.json),
+[4.0](../src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell, prints the
 findings on standard error and exits 1 without writing output. A successful export exits 0;
 invalid arguments or unreadable inputs exit 2. Without `--out`, JSON goes to standard output.
 
@@ -50,8 +51,8 @@ The bundled schema snapshots are in a codemeta-drift source checkout. From its r
 use `../codemeta` for a CodeMeta checkout beside it:
 
 ```sh
-uv run codemeta-drift export ../codemeta --tag 3.1 \
-  --schemas tests/fixtures/schemas --out mapping-3.1.json
+uv run codemeta-drift export ../codemeta --tag 4.0 \
+  --schemas tests/fixtures/schemas --out mapping-4.0.json
 ```
 
 `--schemas DIR` adds `PATH_NOT_IN_SCHEMA` findings for paths absent from the format's
