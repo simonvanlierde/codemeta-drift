@@ -26,6 +26,10 @@ The [development guide](../docs/development.md) covers tools, dependencies and g
 `just check` runs lint, types, tests and the dependency audit. `just hooks` runs the
 remaining repository checks. `just fmt` formats the code and applies lint fixes.
 
+uv locks only releases at least a week old. If `just check` fails on
+a security fix newer than that, add the package to `exclude-newer-package` under `[tool.uv]` in `pyproject.toml`,
+and remove it a week later ([how](https://github.com/simonvanlierde/project-templates/blob/main/docs/tooling.md#dependencies)).
+
 ## Write commits and pull requests
 
 - **Commits** follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/):
@@ -39,20 +43,32 @@ remaining repository checks. `just fmt` formats the code and applies lint fixes.
   `Revert "..."` title that GitHub's Revert button writes.
 - **The pull request body** has the shape of
   [the pull request template](pull_request_template.md): what it fixes and why, three or
-  four bullets, and a `Tests:` line.
+  four bullets, a `Tests:` line, and a `How I know it works:` line with the proof (the
+  command and its output, or a test that fails without the change). Add a `What to check:` line for
+  what only a person can judge.
 - **The changelog** ([CHANGELOG.md](../CHANGELOG.md)) follows
   [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/). Write each entry for
   the people who use the project, not as a commit subject. Mark breaking changes
   **Breaking**, and put upgrade steps first under the version.
 - **The release notes** are that version's changelog section.
 
+## Make a release
+
+The maintainer runs `just release X.Y.Z`. [Publishing](https://github.com/simonvanlierde/project-templates/blob/main/docs/usage.md#publishing) has the steps and the one-time setup.
+
 ## Sign off your commits
 
 Every commit in a pull request carries a `Signed-off-by:` line, which says you wrote the
 change or have the right to submit it under this project's license: the
 [Developer Certificate of Origin 1.1](https://developercertificate.org/). `git commit -s`
-adds the line. For an unpushed branch based on `origin/main`,
-`git rebase --signoff origin/main` adds missing sign-offs to its commits.
+adds the line, and the commit-msg hook refuses a commit without it.
+
+To add it to commits you already made, run `git fetch origin`, then
+`git rebase --signoff origin/main`. That works in a clone of this repository, where `origin`
+is the only remote. If you work from a fork, use the remote that points at this repository
+(often `upstream`) in place of `origin`. If you have not pushed the branch yet, that is all.
+If you pushed it already, update it with `git push --force-with-lease`, which refuses to
+overwrite work you have not seen. Do not use a plain `git push --force`.
 
 The `dco` workflow checks pull requests from forks and fails on a commit without a sign-off.
 Pull requests from this repository skip that check because pushing already required write
