@@ -543,10 +543,14 @@
   },
   {
    "name": "+ reads every part, part by part",
-   "path": "Author + Author-email",
+   "path": "Author[] + Author-email[]",
    "document": {
-    "Author": "Tu Youyou",
-    "Author-email": "Antonie van Leeuwenhoek <antonie@example.org>"
+    "Author": [
+     "Tu Youyou"
+    ],
+    "Author-email": [
+     "Antonie van Leeuwenhoek <antonie@example.org>"
+    ]
    },
    "expected": [
     "Tu Youyou",
@@ -554,10 +558,32 @@
    ]
   },
   {
-   "name": "+ with one part missing reads the other",
-   "path": "Author + Author-email",
+   "name": "Author and Author-email are lists, one element per name and per address",
+   "path": "Author[] + Author-email[]",
    "document": {
-    "Author-email": "Marie Skłodowska-Curie <marie@example.org>"
+    "Author": [
+     "Ada Lovelace",
+     "Charles Babbage"
+    ],
+    "Author-email": [
+     "Ada Lovelace <ada@example.org>",
+     "B <b@example.org>"
+    ]
+   },
+   "expected": [
+    "Ada Lovelace",
+    "Charles Babbage",
+    "Ada Lovelace <ada@example.org>",
+    "B <b@example.org>"
+   ]
+  },
+  {
+   "name": "+ with one part missing reads the other",
+   "path": "Author[] + Author-email[]",
+   "document": {
+    "Author-email": [
+     "Marie Skłodowska-Curie <marie@example.org>"
+    ]
    },
    "expected": [
     "Marie Skłodowska-Curie <marie@example.org>"
@@ -565,7 +591,7 @@
   },
   {
    "name": "+ binds tighter than |: an empty alternative falls through",
-   "path": "Author + Author-email | Maintainer",
+   "path": "Author[] + Author-email[] | Maintainer",
    "document": {
     "Maintainer": "Tu Youyou"
    },

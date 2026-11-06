@@ -403,21 +403,21 @@
     {
       "format": "pkg-info",
       "term": "author",
-      "path": "Author + Author-email",
+      "path": "Author[] + Author-email[]",
       "cell": "Author",
       "reason": "the cell says Author; packaging tools write an author who has an email to Author-email as 'Name <email>', and only a name-only author to Author"
     },
     {
       "format": "pkg-info",
       "term": "author.givenName",
-      "path": "Author + Author-email",
+      "path": "Author[] + Author-email[]",
       "cell": "",
       "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
     },
     {
       "format": "pkg-info",
       "term": "author.familyName",
-      "path": "Author + Author-email",
+      "path": "Author[] + Author-email[]",
       "cell": "",
       "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
     },
