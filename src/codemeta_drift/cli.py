@@ -271,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         tool = {"name": "codemeta-drift", "version": metadata.version("codemeta-drift")}
         print(json.dumps({"version": JSON_VERSION, "tool": tool, "findings": [asdict(f) for f in findings]}, indent=2))
-    else:
+    elif findings:
         print("\n".join(map(str, findings)))
     return 1 if any(f.code != "SKIPPED" for f in findings) else 0
 
