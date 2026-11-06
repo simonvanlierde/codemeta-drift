@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Update the project template to v0.13.0: new git hooks (`reuse`, `citesync`, `dco-signoff`), `just release`, `just py-matrix`, and a REUSE.toml with `LICENSES/`. `.zenodo.json` is gone, since Zenodo reads `CITATION.cff`.
+
+### Removed
+
+- **Breaking:** Python 3.12 is no longer supported.
+
 ## [0.6.0] - 2026-11-01
 
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade

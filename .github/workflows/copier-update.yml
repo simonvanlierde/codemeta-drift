@@ -41,7 +41,7 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: false
-          version: "0.13.1"
+          version: "0.13.6"
 
       # The template runs no Copier tasks, so there is no --trust.
       - name: Update from the newest template tag
@@ -49,10 +49,10 @@ jobs:
         run: |-
           src=$(sed -n "s/^_src_path: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" .copier-answers.yml)
           url=${src/#gh:/https://github.com/}
-          latest=$(git ls-remote --tags --refs --sort=-v:refname "$url" 'v*' | sed -n '1s|.*refs/tags/||p')
+          latest=$(git ls-remote --tags --refs --sort=-v:refname "$url" 'v*' | sed 's|.*refs/tags/||' | sed -n '/-/!{p;q;}')
           current=$(sed -n "s/^_commit: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" .copier-answers.yml)
           if [ -z "$latest" ]; then
-            echo "::error::no v* tag found at $url (_src_path: $src)"
+            echo "::error::no stable v* tag found at $url (_src_path: $src)"
             exit 1
           fi
           if [ "$current" = "$latest" ]; then
@@ -160,6 +160,10 @@ jobs:
             fi
             echo "::warning::$title: GITHUB_TOKEN can't push workflow changes"
             exit 0
+          fi
+
+          if [ "$HAS_TOKEN" != true ]; then
+            printf '\n%s\n' "This PR was opened without \`COPIER_UPDATE_TOKEN\`, so its checks do not start: close it and reopen it to run them." >>"$RUNNER_TEMP/copier-update/body.md"
           fi
 
           git -c core.hooksPath=/dev/null push --force "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "$branch"

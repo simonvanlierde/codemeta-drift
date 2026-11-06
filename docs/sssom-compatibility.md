@@ -9,7 +9,7 @@ From the repository root:
 
 ```sh
 uv run codemeta-drift hub sssom examples/mapping-3.1.json --out spokes.sssom.tsv
-uvx --python 3.12 --from sssom==0.4.21 sssom validate spokes.sssom.tsv
+uvx --python 3.13 --from sssom==0.4.21 sssom validate spokes.sssom.tsv
 ```
 
 The second command runs the pinned [SSSOM Python reference tool](https://mapping-commons.github.io/sssom-py/cli/commands/#sssom-validate)
