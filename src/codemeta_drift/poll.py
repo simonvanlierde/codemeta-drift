@@ -40,7 +40,10 @@ def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list
     for line in source.splitlines():
         if not line.startswith("sha256 "):
             continue
-        _, digest, local, path = line.split()
+        if len(fields := line.split()) != 4:
+            msg = f"citesync MAPPING_SOURCE line is not `sha256 <hex> <local> <path>`: {line}"
+            raise ValueError(msg)
+        _, digest, local, path = fields
         try:
             published = fetch(API + f"simonvanlierde/codemeta-drift/contents/{path}?ref={quote(tag, safe='')}")
         except HTTPError as err:
