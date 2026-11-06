@@ -16,7 +16,7 @@ from typing import Any
 
 from codemeta_drift.checks import Finding, csv_rows, table_rows
 
-SCHEMA_VERSION = "1.6"
+SCHEMA_VERSION = "1.7"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -38,6 +38,9 @@ TERMS = {
     "description": ("schema:Thing", "description"),
     "keywords": ("schema:CreativeWork", "keywords"),
     "datePublished": ("schema:CreativeWork", "datePublished"),
+    "publisher": ("schema:CreativeWork", "publisher"),
+    # The resource type (DataCite's resourceTypeGeneral): CodeMeta has no term for it, so no cell joins to it.
+    "resourceType": ("schema:Thing", "@type"),
 }
 """Each exported term and the property table row (parent type, property) its crosswalk cell sits on."""
 PEOPLE = ("author", "contributor")

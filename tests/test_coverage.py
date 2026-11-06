@@ -32,7 +32,7 @@ def test_unreviewed_lists_every_other_crosswalk_by_shape():
     assert "Zenodo" not in names
     assert "NodeJS" not in names
     found = {(c["format"], c["term"]): c["status"] for c in data["cells"]}
-    assert len(found) == 16 * 17
+    assert len(found) == 16 * 19
     assert found["ASCL", "name"] == "path"
     assert found["DCAT", "name"] == "path"  # dcterms:title, a prefixed key since schema 1.6
     assert found["MODS", "name"] == "prose"
@@ -84,14 +84,14 @@ def test_known_cells_get_their_status():
 
 def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if FORMATS[fmt].crosswalk]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 111, "corrected": 124, "added": 90, "no field": 151}
+    assert {s: found.count(s) for s in set(found)} == {"as-is": 114, "corrected": 127, "added": 97, "no field": 194}
 
 
 def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(EXAMPLE), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == "3.1"
-    assert len(data["cells"]) == 31 * 17
+    assert len(data["cells"]) == 31 * 19
     assert "unreviewed" not in data  # only with --codemeta
 
 

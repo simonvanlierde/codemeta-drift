@@ -3019,6 +3019,399 @@
       "path": "doap:category",
       "cell": "category",
       "reason": "the cell says category, DOAP's doap:category; the path names it with its prefix"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; cff-1.2.0 has no publisher field"
+    },
+    {
+      "format": "zenodo",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; zenodo has no publisher field"
+    },
+    {
+      "format": "pep621",
+      "term": "publisher",
+      "path": null,
+      "reason": "no crosswalk; pep621 has no publisher field"
+    },
+    {
+      "format": "cargo",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; cargo has no publisher field"
+    },
+    {
+      "format": "npm",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; npm has no publisher field"
+    },
+    {
+      "format": "pkg-info",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; pkg-info has no publisher field"
+    },
+    {
+      "format": "r-description",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; r-description has no publisher field"
+    },
+    {
+      "format": "julia",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; julia has no publisher field"
+    },
+    {
+      "format": "datacite",
+      "term": "publisher",
+      "path": "publisher.name | publisher",
+      "cell": "publisher",
+      "reason": "the cell says publisher, the XML element; since schema 4.5 the REST JSON holds an object whose name is the publisher, and an older record holds the name as a string",
+      "comment": "A publisher object may also carry publisherIdentifier (a ROR, say), publisherIdentifierScheme, schemeUri and lang. Schema 4.7 is current; publisher is mandatory."
+    },
+    {
+      "format": "setup-py",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; setup-py has no publisher field"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; ruby-gem has no publisher field"
+    },
+    {
+      "format": "maven",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; maven has no publisher field"
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; cpan-meta-2 has no publisher field"
+    },
+    {
+      "format": "nuget",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; nuget has no publisher field"
+    },
+    {
+      "format": "pubspec",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; pubspec has no publisher field"
+    },
+    {
+      "format": "cabal",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; cabal has no publisher field"
+    },
+    {
+      "format": "typst",
+      "term": "publisher",
+      "path": null,
+      "reason": "no crosswalk; typst has no publisher field"
+    },
+    {
+      "format": "quarto",
+      "term": "publisher",
+      "path": null,
+      "reason": "no crosswalk; quarto has no publisher field"
+    },
+    {
+      "format": "github",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; github has no publisher field"
+    },
+    {
+      "format": "figshare",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; figshare has no publisher field"
+    },
+    {
+      "format": "bio-tools",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; bio-tools has no publisher field"
+    },
+    {
+      "format": "leiningen",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; leiningen has no publisher field"
+    },
+    {
+      "format": "octave",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; octave has no publisher field"
+    },
+    {
+      "format": "publiccode-0.8",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; publiccode-0.8 has no publisher field"
+    },
+    {
+      "format": "swmath",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; swmath has no publisher field"
+    },
+    {
+      "format": "spdx-2.3",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; spdx-2.3 has no publisher field"
+    },
+    {
+      "format": "doap",
+      "term": "publisher",
+      "path": "doap:vendor",
+      "cell": "vendor",
+      "reason": "the cell says vendor, DOAP's doap:vendor; the path names it with its prefix"
+    },
+    {
+      "format": "wikidata",
+      "term": "publisher",
+      "path": "claims.P123[].mainsnak.datavalue.value.id",
+      "cell": "P123",
+      "reason": "the cell says P123, which is not a key of the entity JSON; publisher holds items, so the value is the id of the item under the statement's main snak"
+    },
+    {
+      "format": "cff-1.2.0",
+      "term": "resourceType",
+      "path": "type",
+      "reason": "CodeMeta has no term for the resource type; CFF states its resource type in the top-level type key",
+      "comment": "software or dataset; the default is software."
+    },
+    {
+      "format": "codemeta",
+      "term": "resourceType",
+      "path": "@type",
+      "reason": "CodeMeta has no term for the resource type; a CodeMeta document states its resource type in @type",
+      "comment": "SoftwareSourceCode for source code, SoftwareApplication for an application."
+    },
+    {
+      "format": "zenodo",
+      "term": "resourceType",
+      "path": "upload_type",
+      "reason": "CodeMeta has no term for the resource type; a Zenodo deposit states its resource type in upload_type",
+      "comment": "software for code; upload_type is required."
+    },
+    {
+      "format": "pep621",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; pep621 has no field for it"
+    },
+    {
+      "format": "cargo",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; cargo has no field for it"
+    },
+    {
+      "format": "npm",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; npm has no field for it"
+    },
+    {
+      "format": "pkg-info",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; pkg-info has no field for it"
+    },
+    {
+      "format": "r-description",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; r-description has no field for it"
+    },
+    {
+      "format": "julia",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; julia has no field for it"
+    },
+    {
+      "format": "bibtex",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; bibtex has no field for it"
+    },
+    {
+      "format": "datacite",
+      "term": "resourceType",
+      "path": "types.resourceTypeGeneral",
+      "reason": "DataCite requires types.resourceTypeGeneral; CodeMeta has no term for it",
+      "comment": "The value for software is Software (a controlled list)."
+    },
+    {
+      "format": "setup-py",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; setup-py has no field for it"
+    },
+    {
+      "format": "ruby-gem",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; ruby-gem has no field for it"
+    },
+    {
+      "format": "maven",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; maven has no field for it"
+    },
+    {
+      "format": "cpan-meta-2",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; cpan-meta-2 has no field for it"
+    },
+    {
+      "format": "nuget",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; nuget has no field for it"
+    },
+    {
+      "format": "pubspec",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; pubspec has no field for it"
+    },
+    {
+      "format": "cabal",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; cabal has no field for it"
+    },
+    {
+      "format": "typst",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; typst has no field for it"
+    },
+    {
+      "format": "quarto",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; quarto has no field for it"
+    },
+    {
+      "format": "github",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; github has no field for it"
+    },
+    {
+      "format": "figshare",
+      "term": "resourceType",
+      "path": "defined_type_name",
+      "reason": "CodeMeta has no term for the resource type; a Figshare article states its resource type in defined_type_name (defined_type is the numeric form)",
+      "comment": "software for code."
+    },
+    {
+      "format": "bio-tools",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; bio-tools has no field for it"
+    },
+    {
+      "format": "leiningen",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; leiningen has no field for it"
+    },
+    {
+      "format": "octave",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; octave has no field for it"
+    },
+    {
+      "format": "publiccode-0.8",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; publiccode-0.8 has no field for it"
+    },
+    {
+      "format": "swmath",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; swmath has no field for it"
+    },
+    {
+      "format": "spdx-2.3",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; spdx-2.3 has no field for it"
+    },
+    {
+      "format": "codemeta-2",
+      "term": "resourceType",
+      "path": "@type",
+      "reason": "CodeMeta has no term for the resource type; a CodeMeta document states its resource type in @type",
+      "comment": "SoftwareSourceCode for source code, SoftwareApplication for an application."
+    },
+    {
+      "format": "dcat-3",
+      "term": "resourceType",
+      "path": "dcterms:type",
+      "reason": "CodeMeta has no term for the resource type; DCAT states a dataset's kind with dcterms:type; the node's own @type is dcat:Dataset"
+    },
+    {
+      "format": "doap",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; doap has no field for it"
+    },
+    {
+      "format": "wikidata",
+      "term": "resourceType",
+      "path": "claims.P31[].mainsnak.datavalue.value.id",
+      "reason": "CodeMeta has no term for the resource type; a Wikidata item states its kind with instance of (P31), whose value is an item id",
+      "comment": "Q7397 is software."
     }
   ]
 }

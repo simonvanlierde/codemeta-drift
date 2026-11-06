@@ -7,6 +7,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The mapping export (schema 1.7) has rows for two more terms in all 32 formats: `publisher`, and `resourceType`,
+  the kind of resource, which DataCite requires as `types.resourceTypeGeneral`. The DataCite publisher row reads
+  `publisher.name | publisher`, for the object of schema 4.5 and later and the string before it. A format with no
+  field for either has a `null` row. See the [mapping export](docs/mapping-export.md).
+
 ## [0.6.0] - 2026-11-01
 
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade
