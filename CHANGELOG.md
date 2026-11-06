@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The PKG-INFO author rows read `Author[] + Author-email[]`: `Author` splits on commas into names and
+  `Author-email` into RFC 822 addresses, always as lists. See the [mapping export](docs/mapping-export.md).
+
 ## [0.6.0] - 2026-11-01
 
 Upgrade step: the `hub` commands of 0.5.0 and older refuse an export with the new formats, so upgrade

@@ -146,7 +146,9 @@ a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says s
 PKG-INFO, R's DESCRIPTION and several of the newer formats are not trees, so a consumer reads
 them into one first. These cases need more than the grammar below says:
 
-- PKG-INFO: each field is a key, and a field that repeats is a list. `Project-URL` becomes
+- PKG-INFO: each field is a key, and a field that repeats is a list. `Author` splits on commas into
+  names and `Author-email` into RFC 822 addresses (`Ada Lovelace <ada@example.org>, B <b@example.org>`
+  is two), and both are always lists, even for one value, so the author rows read `Author[] + Author-email[]`. `Project-URL` becomes
   elements with `label` and `url`, the label normalised as the
   [well-known project URLs spec](https://packaging.python.org/en/latest/specifications/well-known-project-urls/)
   says: lower case, no punctuation or whitespace, so `Source Code` matches `sourcecode`.
@@ -211,7 +213,7 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 | `key` | the value under `key` | `package.name` |
 | `key[]` | each element of the list under `key` | `authors[]` |
 | `key[k=v]` | each element of the list under `key` whose `k` equals `v`, or is a list that holds `v` | `identifiers[type=doi].value` |
-| `a + b` | the values of `a`, then those of `b` | `Author + Author-email` |
+| `a + b` | the values of `a`, then those of `b` | `Author[] + Author-email[]` |
 | `a \| b` | `a` if it has any value, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
 
 - A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
