@@ -8,7 +8,15 @@ authors = [{ name = "Simon van Lierde", email = "code@duinlab.nl" }]
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 dependencies = []
-keywords = [] # citesync compares this list to keywords in CITATION.cff
+keywords = [ # citesync compares this list to keywords in CITATION.cff
+  "CodeMeta",
+  "software metadata",
+  "crosswalk",
+  "crosswalk coverage",
+  "JSON-LD",
+  "SSSOM",
+  "schema drift",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3",
@@ -22,7 +30,10 @@ codemeta-drift = "codemeta_drift.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/simonvanlierde/codemeta-drift"
+Documentation = "https://simonvanlierde.com/codemeta-drift/"
+Source = "https://github.com/simonvanlierde/codemeta-drift"
 Issues = "https://github.com/simonvanlierde/codemeta-drift/issues"
+DOI = "https://doi.org/10.5281/zenodo.23774728"
 Changelog = "https://github.com/simonvanlierde/codemeta-drift/blob/main/CHANGELOG.md"
 
 [dependency-groups]
