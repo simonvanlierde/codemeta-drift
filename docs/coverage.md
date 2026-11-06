@@ -42,8 +42,8 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 | publiccode-0.8 | `publiccode.csv` | 4 | 3 | 0 | 12 |
 | swmath | `swMATH.csv` | 5 | 2 | 3 | 9 |
 | spdx-2.3 | `SPDX_2_3.csv` | 0 | 7 | 3 | 9 |
-| codemeta-2 | `codemeta-V2.csv` | 16 | 2 | 1 | 0 |
-| dcat-3 | `DCAT-3.csv` | 8 | 6 | 5 | 0 |
+| codemeta-2 | `codemeta-V2.csv` | 15 | 3 | 1 | 0 |
+| dcat-3 | `DCAT-3.csv` | 7 | 7 | 5 | 0 |
 | doap | `DOAP.csv` | 0 | 9 | 7 | 3 |
 | wikidata | `Wikidata.csv` | 0 | 11 | 6 | 2 |
 
@@ -68,7 +68,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 | `description` | ✓ `abstract` | ✓ `description` | [+](#pep621) `project.description` | [+](#cargo) `package.description` | ✓ `description` | [✎](#pkg-info) `Summary` | ✓ `Description` | [–](#julia) | ✓ `abstract` | [✎](#datacite) `descriptions[descriptionType=Abstract].description` | [✎](#setup-py) `description` | [✎](#ruby-gem) `summary` | ✓ `description` | [✎](#cpan-meta-2) `abstract` | [✎](#nuget) `description` | ✓ `description` | [✎](#cabal) `synopsis` | [+](#typst) `package.description` | [–](#quarto) | ✓ `description` | [✎](#figshare) `description` | ✓ `description` | ✓ `description` | [✎](#octave) `description` | [✎](#publiccode-08) `description[].shortDescription` | ✓ `description` | [✎](#spdx-23) `packages[].description \| packages[].summary` | ✓ `description` | ✓ `dcterms:description` | [✎](#doap) `doap:description` | [+](#wikidata) `descriptions.en.value` |
 | `keywords` | ✓ `keywords` | ✓ `keywords` | [+](#pep621) `project.keywords` | [✎](#cargo) `package.keywords` | ✓ `keywords` | ✓ `Keywords` | [–](#r-description) | [–](#julia) | [+](#bibtex) `keywords` | [✎](#datacite) `subjects[].subject` | ✓ `keywords` | [–](#ruby-gem) | [–](#maven) | ✓ `keywords` | ✓ `tags` | [✎](#pubspec) `topics` | ✓ `category` | [+](#typst) `package.keywords` | [–](#quarto) | ✓ `topics` | ✓ `tags` | [✎](#bio-tools) `topic[].term` | [–](#leiningen) | [–](#octave) | [✎](#publiccode-08) | ✓ `keywords` | [–](#spdx-23) | ✓ `keywords` | ✓ `dcat:keyword` | [✎](#doap) `doap:category` | [✎](#wikidata) `claims.P921[].mainsnak.datavalue.value.id` |
 | `datePublished` | ✓ `date-released` | ✓ `publication_date` | [–](#pep621) | [–](#cargo) | [–](#npm) | [–](#pkg-info) | ✓ `Date` | [–](#julia) | [✎](#bibtex) `date \| year` | [✎](#datacite) `dates[dateType=Issued].date \| publicationYear` | [–](#setup-py) | [–](#ruby-gem) | [–](#maven) | [–](#cpan-meta-2) | [–](#nuget) | [–](#pubspec) | [–](#cabal) | [–](#typst) | [–](#quarto) | [–](#github) | [✎](#figshare) `published_date` | [–](#bio-tools) | [–](#leiningen) | [✎](#octave) `date` | ✓ `releaseDate` | [–](#swmath) | [✎](#spdx-23) `packages[].releaseDate` | ✓ `datePublished` | ✓ `dcterms:issued` | [+](#doap) `doap:release[].doap:created` | [✎](#wikidata) `claims.P577[].mainsnak.datavalue.value.time` |
-| `publisher` | [–](#cff-120) | [–](#zenodo) | [–](#pep621) | [–](#cargo) | [–](#npm) | [–](#pkg-info) | [–](#r-description) | [–](#julia) | ✓ `publisher` | [✎](#datacite) `publisher.name \| publisher` | [–](#setup-py) | [–](#ruby-gem) | [–](#maven) | [–](#cpan-meta-2) | [–](#nuget) | [–](#pubspec) | [–](#cabal) | [–](#typst) | [–](#quarto) | [–](#github) | [–](#figshare) | [–](#bio-tools) | [–](#leiningen) | [–](#octave) | [–](#publiccode-08) | [–](#swmath) | [–](#spdx-23) | ✓ `publisher` | ✓ `dcterms:publisher` | [✎](#doap) `doap:vendor` | [✎](#wikidata) `claims.P123[].mainsnak.datavalue.value.id` |
+| `publisher` | [–](#cff-120) | [–](#zenodo) | [–](#pep621) | [–](#cargo) | [–](#npm) | [–](#pkg-info) | [–](#r-description) | [–](#julia) | ✓ `publisher` | [✎](#datacite) `publisher.name \| publisher` | [–](#setup-py) | [–](#ruby-gem) | [–](#maven) | [–](#cpan-meta-2) | [–](#nuget) | [–](#pubspec) | [–](#cabal) | [–](#typst) | [–](#quarto) | [–](#github) | [–](#figshare) | [–](#bio-tools) | [–](#leiningen) | [–](#octave) | [–](#publiccode-08) | [–](#swmath) | [–](#spdx-23) | [✎](#codemeta-2) `publisher.name \| publisher` | [✎](#dcat-3) `dcterms:publisher.foaf:name \| dcterms:publisher` | [✎](#doap) `doap:vendor.foaf:name \| doap:vendor` | [✎](#wikidata) `claims.P123[].mainsnak.datavalue.value.id` |
 | `resourceType` | [+](#cff-120) `type` | [+](#zenodo) `upload_type` | [–](#pep621) | [–](#cargo) | [–](#npm) | [–](#pkg-info) | [–](#r-description) | [–](#julia) | [–](#bibtex) | [+](#datacite) `types.resourceTypeGeneral` | [–](#setup-py) | [–](#ruby-gem) | [–](#maven) | [–](#cpan-meta-2) | [–](#nuget) | [–](#pubspec) | [–](#cabal) | [–](#typst) | [–](#quarto) | [–](#github) | [+](#figshare) `defined_type_name` | [–](#bio-tools) | [–](#leiningen) | [–](#octave) | [–](#publiccode-08) | [–](#swmath) | [–](#spdx-23) | [+](#codemeta-2) `@type` | [+](#dcat-3) `dcterms:type` | [–](#doap) | [+](#wikidata) `claims.P31[].mainsnak.datavalue.value.id` |
 
 ## Curated cells
@@ -83,7 +83,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `license` (corrected): crosswalk cell `license / license-url` → `license`. The cell lists license / license-url; license-url holds a licence URL, not an SPDX id.
 - `identifier` (corrected): crosswalk cell `identifiers / person.orcid / doi` → `doi | identifiers[type=doi].value`. The cell lists identifiers / person.orcid / doi; the software DOI is doi, or the doi entry of identifiers.
 - `swhid` (corrected): crosswalk cell `identifiers / person.orcid / doi` → `identifiers[type=swh].value`. The cell lists identifiers / person.orcid / doi; a SWHID is the swh entry of identifiers.
-- `publisher` (no field): no crosswalk cell → no path. The cell is empty; cff-1.2.0 has no publisher field.
+- `publisher` (no field): no crosswalk cell → no path. The cell is empty; CFF has publisher only inside references[] and preferred-citation, which describe other works.
 - `resourceType` (added): no crosswalk cell → `type`. CodeMeta has no term for the resource type; CFF states its resource type in the top-level type key.
 
 ### zenodo
@@ -98,7 +98,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `identifier` (corrected): crosswalk cell `id` → `doi`. The cell says id, the Zenodo record id; the DOI field is doi.
 - `swhid` (corrected): crosswalk cell `id` → `related_identifiers[scheme=swh].identifier`. The cell says id, the Zenodo record id; a SWHID is the identifier of the related_identifiers entry with scheme swh.
 - `codeRepository` (corrected): crosswalk cell `related_identifiers.isSupplementTo` → `related_identifiers[relation=isSupplementTo].identifier`. The cell says related_identifiers.isSupplementTo, a relation, not a key; the URL is the identifier of the entry with that relation.
-- `publisher` (no field): no crosswalk cell → no path. The cell is empty; zenodo has no publisher field.
+- `publisher` (no field): no crosswalk cell → no path. The cell is empty; imprint_publisher exists but only for books, reports and chapters, and Zenodo names itself as the publisher in its DataCite record.
 - `resourceType` (added): no crosswalk cell → `upload_type`. CodeMeta has no term for the resource type; a Zenodo deposit states its resource type in upload_type.
 
 ### pep621
@@ -228,7 +228,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `codeRepository` (corrected): crosswalk cell `repository` → `repository | url`. The cell says repository, which biblatex-software adds; plain BibTeX styles print only url, so the path falls back to it.
 - `keywords` (added): no crosswalk cell → `keywords`. No cell; biblatex keeps keywords in keywords, separated by commas.
 - `datePublished` (corrected): crosswalk cell `date / (year) / (month)` → `date | year`. The cell lists date / (year) / (month); biblatex writes the release date in date, and classic BibTeX gives only year and month.
-- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; bibtex has no field for it.
+- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; BibTeX states it in the entry type (@software), which a path cannot reach.
 
 ### datacite
 
@@ -243,7 +243,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `description` (corrected): crosswalk cell `description` → `descriptions[descriptionType=Abstract].description`. The cell says description, the XML element; in the REST JSON descriptions is a list, and the summary is the one with descriptionType Abstract. bolognese's CodeMeta writer takes the first description, which is the Abstract in most records.
 - `keywords` (corrected): crosswalk cell `subject` → `subjects[].subject`. The cell says subject, the XML element; in the REST JSON subjects is a list of objects with a subject key.
 - `datePublished` (corrected): crosswalk cell `publicationYear` → `dates[dateType=Issued].date | publicationYear`. The cell says publicationYear, a bare year; bolognese's writers give datePublished as the Issued date and use publicationYear only when there is none.
-- `publisher` (corrected): crosswalk cell `publisher` → `publisher.name | publisher`. The cell says publisher, the XML element; since schema 4.5 the REST JSON holds an object whose name is the publisher, and an older record holds the name as a string.
+- `publisher` (corrected): crosswalk cell `publisher` → `publisher.name | publisher`. The cell says publisher, the XML element; the REST API returns the name as a string by default, and an object with a name key (since schema 4.5) only when the request has publisher=true.
 - `resourceType` (added): no crosswalk cell → `types.resourceTypeGeneral`. DataCite requires types.resourceTypeGeneral; CodeMeta has no term for it.
 
 ### setup-py
@@ -301,7 +301,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `codeRepository` (corrected): crosswalk cell `scm / url` → `scm.url`. The cell lists scm / url; the repository link is the url inside scm, as codemetapy reads it (swh-indexer instead builds a Maven artifact repository URL from groupId and artifactId, which is not the source).
 - `keywords` (no field): no crosswalk cell → no path. No cell; the pom schema has no keyword or tag element.
 - `datePublished` (no field): no crosswalk cell → no path. No cell; a pom records no release date (inceptionYear is the start of the project).
-- `publisher` (no field): no crosswalk cell → no path. The cell is empty; maven has no publisher field.
+- `publisher` (no field): no crosswalk cell → no path. The cell is empty; Maven's <organization> names who produces the project, which is closer to CodeMeta's producer than to its publisher.
 - `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; maven has no field for it.
 
 ### cpan-meta-2
@@ -478,7 +478,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `keywords` (corrected): crosswalk cell `topic.term` → `topic[].term`. The cell says topic.term, but topic is a list of {term, uri} objects.
 - `datePublished` (no field): no crosswalk cell → no path. The cell is empty; additionDate is when the entry was added to bio.tools, not a release date.
 - `publisher` (no field): no crosswalk cell → no path. The cell is empty; bio-tools has no publisher field.
-- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; bio-tools has no field for it.
+- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; toolType only subdivides software, so a consumer defaults to Software.
 
 ### leiningen
 
@@ -536,7 +536,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `description` (corrected): crosswalk cell `description.[lang].shortDescription / description.[lang].longDescription` → `description[].shortDescription`. The cell lists shortDescription and longDescription; a description is kept per language, so the path runs over each language entry, and shortDescription is the plain one-sentence text (longDescription is Markdown of 150 to 10000 characters).
 - `keywords` (corrected): crosswalk cell `description.[lang].features` → no path. The cell says description.[lang].features, which is a list of what the software can do, not keywords; categories and intendedAudience.scope take values from fixed lists, and the crosswalk maps categories to applicationCategory.
 - `publisher` (no field): no crosswalk cell → no path. The cell is empty; publiccode-0.8 has no publisher field.
-- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; publiccode-0.8 has no field for it.
+- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; softwareType only subdivides software, so a consumer defaults to Software.
 
 ### swmath
 
@@ -574,13 +574,14 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `description` (corrected): crosswalk cell `PackageSummary / PackageDescription` → `packages[].description | packages[].summary`. The cell lists PackageSummary and PackageDescription; description is the detailed text and summary the short one, so the detailed text leads.
 - `keywords` (no field): no crosswalk cell → no path. No cell; a package has no keywords field.
 - `datePublished` (corrected): crosswalk cell `ReleaseDate` → `packages[].releaseDate`. The cell is the tag-value field ReleaseDate; the JSON key is releaseDate.
-- `publisher` (no field): no crosswalk cell → no path. The cell is empty; spdx-2.3 has no publisher field.
-- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; spdx-2.3 has no field for it.
+- `publisher` (no field): no crosswalk cell → no path. The cell is empty; PackageSupplier is CodeMeta's provider (SPDX_2_3.csv), and the author rows already read it.
+- `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; primaryPackagePurpose only subdivides software, so a consumer defaults to Software.
 
 ### codemeta-2
 
 - `author.@id` (corrected): crosswalk cell `identifier` → `author[].@id`. The cell says identifier, which is schema:identifier; the 2.0 example and the context put a person's ORCID in @id (the context also aliases id to @id).
 - `contributor.@id` (corrected): crosswalk cell `identifier` → `contributor[].@id`. The cell says identifier, which is schema:identifier; the 2.0 example and the context put a person's ORCID in @id (the context also aliases id to @id).
+- `publisher` (corrected): crosswalk cell `publisher` → `publisher.name | publisher`. CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name.
 - `resourceType` (added): no crosswalk cell → `@type`. CodeMeta has no term for the resource type; a CodeMeta document states its resource type in @type.
 
 ### dcat-3
@@ -595,6 +596,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `license` (corrected): crosswalk cell `dcterms:license` → `dcterms:license | dcat:distribution[].dcterms:license`. The cell says dcterms:license, which DCAT allows on the dataset and on each distribution; the path reads the dataset's, else a distribution's.
 - `swhid` (corrected): crosswalk cell `dcterms:identifier` → no path. The cell says dcterms:identifier, which holds the DOI; DCAT has no property of its own for a SWHID.
 - `codeRepository` (corrected): crosswalk cell `dcat:accessURL` → no path. The cell says dcat:accessURL, a property of dcat:Distribution that usually points at a landing page or a download, not a repository.
+- `publisher` (corrected): crosswalk cell `dcterms:publisher` → `dcterms:publisher.foaf:name | dcterms:publisher`. The cell says dcterms:publisher, whose value is an agent (usually a foaf:Agent), so its name is foaf:name; an IRI value has no name sub-field.
 - `resourceType` (added): no crosswalk cell → `dcterms:type`. CodeMeta has no term for the resource type; DCAT states a dataset's kind with dcterms:type; the node's own @type is dcat:Dataset.
 
 ### doap
@@ -616,7 +618,7 @@ How CodeMeta's 3.1 crosswalks map 19 CodeMeta terms in 31 formats, read from the
 - `description` (corrected): crosswalk cell `description` → `doap:description`. The cell says description, DOAP's doap:description; the path names it with its prefix.
 - `keywords` (corrected): crosswalk cell `category` → `doap:category`. The cell says category, DOAP's doap:category; the path names it with its prefix.
 - `datePublished` (added): no crosswalk cell → `doap:release[].doap:created`. The cell is empty; a release's date is doap:created on its doap:Version node, so the path is release[].created.
-- `publisher` (corrected): crosswalk cell `vendor` → `doap:vendor`. The cell says vendor, DOAP's doap:vendor; the path names it with its prefix.
+- `publisher` (corrected): crosswalk cell `vendor` → `doap:vendor.foaf:name | doap:vendor`. The cell says vendor, DOAP's doap:vendor, whose value is an organisation node; its name is foaf:name, and the path names both keys with their prefix.
 - `resourceType` (no field): no crosswalk cell → no path. CodeMeta has no term for the resource type; doap has no field for it.
 
 ### wikidata
@@ -650,23 +652,24 @@ CodeMeta has 16 more crosswalks with no reviewed mapping. A mark here says only 
 | • | path | the cell reads as a path, but nobody has checked that it is right |
 | ¶ | prose | the cell is prose or a list, not one path |
 | ○ | empty | the cell is empty: the format may have no field, or the crosswalk leaves it out |
+| ∅ | no-term | CodeMeta's property table has no row for this term, so no crosswalk has a cell |
 | ? | unmatched | the crosswalk and the property table list this property a different number of times |
 
 | Format | `name` | `version` | `author` | `author.givenName` | `author.familyName` | `author.@id` | `contributor` | `contributor.givenName` | `contributor.familyName` | `contributor.@id` | `license` | `identifier` | `swhid` | `codeRepository` | `description` | `keywords` | `datePublished` | `publisher` | `resourceType` |
 | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| ASCL | • | ○ | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | • | ○ | ○ | ○ | ? |
-| codemeta-V1 | • | • | • | ○ | ○ | • | ○ | ○ | ○ | • | • | • | • | • | • | • | • | • | ? |
-| csdms | ¶ | ○ | ○ | ¶ | ¶ | ○ | ○ | ¶ | ¶ | ○ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ○ | ○ | ? |
-| DCAT-2 | • | ○ | • | • | • | • | • | • | • | • | • | • | • | ○ | • | ¶ | • | • | ? |
-| Debian Package | ○ | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | • | ○ | ○ | ○ | ? |
-| Dublin Core | • | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | ○ | • | ○ | • | • | ? |
-| ISO 19115-1 | • | • | ¶ | ¶ | ¶ | • | ¶ | ¶ | ¶ | • | • | • | • | ○ | • | ¶ | ¶ | ¶ | ? |
-| MODS | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | • | • | ¶ | • | • | ¶ | ¶ | ? |
-| OntoSoft | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | ○ | • | • | ○ | • | ? |
-| SciCrunchRegistry | ¶ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | ¶ | ¶ | ○ | • | ¶ | ○ | ○ | ? |
-| Software Discovery Index | ¶ | ¶ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ¶ | ¶ | ¶ | ○ | ○ | ○ | ○ | ○ | ? |
-| Software Ontology | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ¶ | ○ | ○ | ○ | • | ○ | ○ | ¶ | ? |
-| SPASE | ¶ | ○ | ○ | ○ | ○ | ¶ | ○ | ○ | ○ | ¶ | ○ | • | • | ¶ | ¶ | ○ | ¶ | ○ | ? |
-| Trove Software Map | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | ○ | ○ | ○ | • | ○ | ○ | ○ | ? |
-| usgs-modelcatalog | • | • | ¶ | ○ | ○ | • | ○ | ○ | ○ | • | • | • | • | ¶ | • | ¶ | • | ○ | ? |
-| VIVO | • | • | • | ○ | ○ | ¶ | ○ | ○ | ○ | ¶ | ○ | • | • | ○ | • | • | ¶ | ○ | ? |
+| ASCL | • | ○ | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | • | ○ | ○ | ○ | ∅ |
+| codemeta-V1 | • | • | • | ○ | ○ | • | ○ | ○ | ○ | • | • | • | • | • | • | • | • | • | ∅ |
+| csdms | ¶ | ○ | ○ | ¶ | ¶ | ○ | ○ | ¶ | ¶ | ○ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ○ | ○ | ∅ |
+| DCAT-2 | • | ○ | • | • | • | • | • | • | • | • | • | • | • | ○ | • | ¶ | • | • | ∅ |
+| Debian Package | ○ | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | • | ○ | ○ | ○ | ∅ |
+| Dublin Core | • | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | ○ | • | ○ | • | • | ∅ |
+| ISO 19115-1 | • | • | ¶ | ¶ | ¶ | • | ¶ | ¶ | ¶ | • | • | • | • | ○ | • | ¶ | ¶ | ¶ | ∅ |
+| MODS | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | ¶ | • | • | ¶ | • | • | ¶ | ¶ | ∅ |
+| OntoSoft | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | • | • | ○ | • | • | ○ | • | ∅ |
+| SciCrunchRegistry | ¶ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | ¶ | ¶ | ○ | • | ¶ | ○ | ○ | ∅ |
+| Software Discovery Index | ¶ | ¶ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ¶ | ¶ | ¶ | ○ | ○ | ○ | ○ | ○ | ∅ |
+| Software Ontology | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ¶ | ○ | ○ | ○ | • | ○ | ○ | ¶ | ∅ |
+| SPASE | ¶ | ○ | ○ | ○ | ○ | ¶ | ○ | ○ | ○ | ¶ | ○ | • | • | ¶ | ¶ | ○ | ¶ | ○ | ∅ |
+| Trove Software Map | • | • | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | • | ○ | ○ | ○ | • | ○ | ○ | ○ | ∅ |
+| usgs-modelcatalog | • | • | ¶ | ○ | ○ | • | ○ | ○ | ○ | • | • | • | • | ¶ | • | ¶ | • | ○ | ∅ |
+| VIVO | • | • | • | ○ | ○ | ¶ | ○ | ○ | ○ | ¶ | ○ | • | • | ○ | • | • | ¶ | ○ | ∅ |

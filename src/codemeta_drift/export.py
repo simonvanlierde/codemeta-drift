@@ -39,10 +39,11 @@ TERMS = {
     "keywords": ("schema:CreativeWork", "keywords"),
     "datePublished": ("schema:CreativeWork", "datePublished"),
     "publisher": ("schema:CreativeWork", "publisher"),
-    # The resource type (DataCite's resourceTypeGeneral): CodeMeta has no term for it, so no cell joins to it.
     "resourceType": ("schema:Thing", "@type"),
 }
 """Each exported term and the property table row (parent type, property) its crosswalk cell sits on."""
+NO_PROPERTY = frozenset({"resourceType"})
+"""Terms with no property table row (resourceType): their key in ``TERMS`` is a placeholder no cell joins to."""
 PEOPLE = ("author", "contributor")
 """The terms that hold people; each has the person sub-terms ``<term>.givenName``, ``.familyName`` and ``.@id``."""
 

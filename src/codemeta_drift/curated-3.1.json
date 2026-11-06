@@ -3025,14 +3025,14 @@
       "term": "publisher",
       "path": null,
       "cell": "",
-      "reason": "the cell is empty; cff-1.2.0 has no publisher field"
+      "reason": "the cell is empty; CFF has publisher only inside references[] and preferred-citation, which describe other works"
     },
     {
       "format": "zenodo",
       "term": "publisher",
       "path": null,
       "cell": "",
-      "reason": "the cell is empty; zenodo has no publisher field"
+      "reason": "the cell is empty; imprint_publisher exists but only for books, reports and chapters, and Zenodo names itself as the publisher in its DataCite record"
     },
     {
       "format": "pep621",
@@ -3080,8 +3080,8 @@
       "term": "publisher",
       "path": "publisher.name | publisher",
       "cell": "publisher",
-      "reason": "the cell says publisher, the XML element; since schema 4.5 the REST JSON holds an object whose name is the publisher, and an older record holds the name as a string",
-      "comment": "A publisher object may also carry publisherIdentifier (a ROR, say), publisherIdentifierScheme, schemeUri and lang. Schema 4.7 is current; publisher is mandatory."
+      "reason": "the cell says publisher, the XML element; the REST API returns the name as a string by default, and an object with a name key (since schema 4.5) only when the request has publisher=true",
+      "comment": "Read a string as the name and an object's name key as the name. An object may also carry publisherIdentifier (a ROR, say), publisherIdentifierScheme, schemeUri and lang. Schema 4.7 is current; publisher is mandatory."
     },
     {
       "format": "setup-py",
@@ -3102,7 +3102,7 @@
       "term": "publisher",
       "path": null,
       "cell": "",
-      "reason": "the cell is empty; maven has no publisher field"
+      "reason": "the cell is empty; Maven's <organization> names who produces the project, which is closer to CodeMeta's producer than to its publisher"
     },
     {
       "format": "cpan-meta-2",
@@ -3198,21 +3198,22 @@
       "term": "publisher",
       "path": null,
       "cell": "",
-      "reason": "the cell is empty; spdx-2.3 has no publisher field"
+      "reason": "the cell is empty; PackageSupplier is CodeMeta's provider (SPDX_2_3.csv), and the author rows already read it"
     },
     {
       "format": "doap",
       "term": "publisher",
-      "path": "doap:vendor",
+      "path": "doap:vendor.foaf:name | doap:vendor",
       "cell": "vendor",
-      "reason": "the cell says vendor, DOAP's doap:vendor; the path names it with its prefix"
+      "reason": "the cell says vendor, DOAP's doap:vendor, whose value is an organisation node; its name is foaf:name, and the path names both keys with their prefix"
     },
     {
       "format": "wikidata",
       "term": "publisher",
       "path": "claims.P123[].mainsnak.datavalue.value.id",
       "cell": "P123",
-      "reason": "the cell says P123, which is not a key of the entity JSON; publisher holds items, so the value is the id of the item under the statement's main snak"
+      "reason": "the cell says P123, which is not a key of the entity JSON; publisher holds items, so the value is the id of the item under the statement's main snak",
+      "comment": "Wikidata has no free-text publisher. P123 holds items, and the label of each Q id is the publisher's name."
     },
     {
       "format": "cff-1.2.0",
@@ -3275,7 +3276,7 @@
       "format": "bibtex",
       "term": "resourceType",
       "path": null,
-      "reason": "CodeMeta has no term for the resource type; bibtex has no field for it"
+      "reason": "CodeMeta has no term for the resource type; BibTeX states it in the entry type (@software), which a path cannot reach"
     },
     {
       "format": "datacite",
@@ -3355,7 +3356,7 @@
       "format": "bio-tools",
       "term": "resourceType",
       "path": null,
-      "reason": "CodeMeta has no term for the resource type; bio-tools has no field for it"
+      "reason": "CodeMeta has no term for the resource type; toolType only subdivides software, so a consumer defaults to Software"
     },
     {
       "format": "leiningen",
@@ -3373,7 +3374,7 @@
       "format": "publiccode-0.8",
       "term": "resourceType",
       "path": null,
-      "reason": "CodeMeta has no term for the resource type; publiccode-0.8 has no field for it"
+      "reason": "CodeMeta has no term for the resource type; softwareType only subdivides software, so a consumer defaults to Software"
     },
     {
       "format": "swmath",
@@ -3385,7 +3386,7 @@
       "format": "spdx-2.3",
       "term": "resourceType",
       "path": null,
-      "reason": "CodeMeta has no term for the resource type; spdx-2.3 has no field for it"
+      "reason": "CodeMeta has no term for the resource type; primaryPackagePurpose only subdivides software, so a consumer defaults to Software"
     },
     {
       "format": "codemeta-2",
@@ -3398,7 +3399,8 @@
       "format": "dcat-3",
       "term": "resourceType",
       "path": "dcterms:type",
-      "reason": "CodeMeta has no term for the resource type; DCAT states a dataset's kind with dcterms:type; the node's own @type is dcat:Dataset"
+      "reason": "CodeMeta has no term for the resource type; DCAT states a dataset's kind with dcterms:type; the node's own @type is dcat:Dataset",
+      "comment": "The value is an IRI object, usually from the DCMI Type vocabulary (dctype:Software, dctype:Dataset); a record may give several types."
     },
     {
       "format": "doap",
@@ -3411,7 +3413,27 @@
       "term": "resourceType",
       "path": "claims.P31[].mainsnak.datavalue.value.id",
       "reason": "CodeMeta has no term for the resource type; a Wikidata item states its kind with instance of (P31), whose value is an item id",
-      "comment": "Q7397 is software."
+      "comment": "P31 (instance of) usually names a subclass of software (Q7397), so a consumer follows subclass of (P279) up to Q7397."
+    },
+    {
+      "format": "codemeta",
+      "term": "publisher",
+      "path": "publisher.name | publisher",
+      "reason": "CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name"
+    },
+    {
+      "format": "codemeta-2",
+      "term": "publisher",
+      "path": "publisher.name | publisher",
+      "cell": "publisher",
+      "reason": "CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name"
+    },
+    {
+      "format": "dcat-3",
+      "term": "publisher",
+      "path": "dcterms:publisher.foaf:name | dcterms:publisher",
+      "cell": "dcterms:publisher",
+      "reason": "the cell says dcterms:publisher, whose value is an agent (usually a foaf:Agent), so its name is foaf:name; an IRI value has no name sub-field"
     }
   ]
 }

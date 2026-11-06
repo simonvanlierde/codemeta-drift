@@ -264,7 +264,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
 2. Validate the file against the schema it vendors beside it, and update the two together:
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
-   path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas. Update the
+   path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas.
+   Schema 1.7 only adds terms, so a 1.7 file passes the 1.6 schema. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
