@@ -1,6 +1,8 @@
 import base64
 import hashlib
+import io
 import json
+import subprocess
 from collections.abc import Callable
 from email.message import Message
 from pathlib import Path
@@ -195,3 +197,94 @@ def test_zenodo_importer_source_contract(*, live: bool):
             raise
         assert isinstance(result["sha"], str)
         assert len(result["sha"]) == 40
+
+
+def _sources(pin: str, tags: list[str]) -> tuple[dict[str, Any], Callable[[str], Any]]:
+    """The `before` snapshots and a fetch that serves unchanged schemas, the given pin file and CodeMeta tags."""
+    before = {fmt: {"properties": {}} for fmt in (*SCHEMA_URLS, "cff-1.2.0")}
+    before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
+    zenodo = before["zenodo"]["x-source"]
+    responses = {
+        API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": "1.2.0"},
+        API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
+        API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
+            "content": base64.b64encode(pin.encode()).decode()
+        },
+        API + "codemeta/codemeta/tags?per_page=100": [{"name": tag} for tag in tags],
+        **{url: {"properties": {}} for url in SCHEMA_URLS.values()},
+        "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": {
+            "properties": {}
+        },
+        **{API + zenodo["repo"] + "/contents/" + p: {"sha": d} for p, d in zenodo["files"].items()},
+    }
+    return before, responses.__getitem__
+
+
+def test_poll_rejects_a_pin_file_without_exactly_one_tag():
+    before, fetch = _sources("tag v0.3.0\ntag v0.4.0\n", [])
+    with pytest.raises(ValueError, match="exactly one tag"):
+        poll({"rows": []}, before, fetch)
+
+
+def test_poll_is_quiet_when_the_newest_codemeta_tag_has_an_export():
+    before, fetch = _sources("tag v0.4.0\n", ["3.1", "2.0"])
+    assert poll({"rows": []}, before, fetch) == []
+
+
+def test_a_pin_hash_lookup_that_fails_for_another_reason_than_404_propagates():
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        raise HTTPError(target, 500, "Server Error", Message(), None)
+
+    with pytest.raises(HTTPError) as caught:
+        runner.stale_pin_hashes("sha256 abc local.json path.json\n", "v0.5.0", fetch)
+    assert caught.value.code == 500
+
+
+def test_fetch_json_refuses_plain_http_before_any_request(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(runner, "urlopen", lambda *_a, **_k: pytest.fail("must not open a plain-HTTP URL"))
+    with pytest.raises(ValueError, match="HTTPS"):
+        fetch_json("http://example.org/schema.json")
+
+
+def test_fetch_json_parses_the_response_with_a_timeout(monkeypatch: pytest.MonkeyPatch):
+    seen = {}
+
+    def urlopen(url: str, *, timeout: int) -> io.BytesIO:
+        seen.update(url=url, timeout=timeout)
+        return io.BytesIO(b'{"tag_name": "v1"}')
+
+    monkeypatch.setattr(runner, "urlopen", urlopen)
+    assert fetch_json("https://example.org/x") == {"tag_name": "v1"}
+    assert seen == {"url": "https://example.org/x", "timeout": 30}
+
+
+def test_main_writes_the_drafts_and_publishes_only_missing_issues(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    plans = [{"repo": "o/r", "title": title, "body": f"body of {title}"} for title in ("closed", "new")]
+    monkeypatch.setattr(runner, "poll", lambda *_: plans)
+    monkeypatch.setattr(runner.time, "sleep", lambda _: None)
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout='[[{"title": "closed"}]]')
+
+    monkeypatch.setattr(runner.subprocess, "run", run)
+    out = tmp_path / "drafts.json"
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr("sys.argv", ["poll", "--root", str(root), "--out", str(out), "--publish"])
+    runner.main()
+    assert json.loads(out.read_text()) == plans
+    assert calls[0] == ["gh", "api", "rate_limit"]
+    created = [call for call in calls if call[:3] == ["gh", "issue", "create"]]
+    assert [call[call.index("--title") + 1] for call in created] == ["new"]
+    assert created[0][created[0].index("--body") + 1] == "body of new"
+
+
+def test_main_without_publish_never_calls_gh(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(runner, "poll", lambda *_: [])
+    monkeypatch.setattr(runner.subprocess, "run", lambda *_a, **_k: pytest.fail("gh must not run without --publish"))
+    out = tmp_path / "drafts.json"
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr("sys.argv", ["poll", "--root", str(root), "--out", str(out)])
+    runner.main()
+    assert json.loads(out.read_text()) == []

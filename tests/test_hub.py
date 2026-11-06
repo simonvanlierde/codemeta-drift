@@ -189,3 +189,33 @@ def test_hub_rejects_malformed_original_cells(cell: object):
     data["rows"][0]["crosswalk_cell"] = cell
     with pytest.raises(ValueError, match="mapping row"):
         validate_mapping(data)
+
+
+def test_cli_writes_sssom_to_out_and_nothing_to_stdout(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    out = tmp_path / "spokes.sssom.tsv"
+    assert main(["hub", "sssom", str(EXAMPLE), "--out", str(out)]) == 0
+    assert capsys.readouterr().out == ""
+    assert out.read_text("utf-8") == sssom(mapping())
+
+
+def test_cli_coverage_prints_markdown_and_json_on_request(capsys: pytest.CaptureFixture[str]):
+    assert main(["hub", "coverage", str(EXAMPLE)]) == 0
+    text = capsys.readouterr().out
+    assert text.startswith("# Crosswalk coverage at CodeMeta 3.1\n")
+    assert "| Mark | Status | Meaning |" in text
+    assert main(["hub", "coverage", str(EXAMPLE), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out)["codemeta_tag"] == "3.1"
+
+
+@pytest.mark.parametrize("data", [[], {"schema_version": 1.0}])
+def test_mapping_must_be_an_object_with_a_version_string(data: object):
+    with pytest.raises(ValueError, match="schema_version string"):
+        validate_mapping(data)
+
+
+def test_crosswalk_rejects_a_format_the_mapping_has_no_rows_for(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    (tmp_path / "properties_description.csv").write_text("Parent Type,Property\nschema:Thing,name\n")
+    assert main(["hub", "crosswalk", str(EXAMPLE), str(tmp_path), "--format", "nope"]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "unknown format 'nope'" in captured.err
