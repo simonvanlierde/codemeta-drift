@@ -15,6 +15,7 @@ from codemeta_drift.export import (
     build_rows,
     classify,
     crosswalk_cells,
+    curated_tags,
     export,
     read_curated,
     shared_paths,
@@ -85,7 +86,7 @@ def test_property_counts_that_differ_get_no_cell():
     assert cells[("schema:Person", "givenName")] == "person.given-names"
 
 
-@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+@pytest.mark.parametrize("tag", curated_tags())
 def test_export_equals_the_example_in_order(tag: str):
     mapping, findings = export(read_dir(ROOT / "tests/fixtures" / tag), tag)
     assert findings == []
@@ -401,7 +402,7 @@ def test_help_names_the_export_subcommand(capsys: pytest.CaptureFixture[str]):
     assert "codemeta-drift export" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+@pytest.mark.parametrize("tag", curated_tags())
 def test_placeholder_keys_are_not_property_names(tag: str):
     """A term in NO_PROPERTY has a key no crosswalk cell may join to, so the property table must never list it."""
     properties = {row[1] for _, row in table_rows(read_dir(ROOT / "tests/fixtures" / tag))}

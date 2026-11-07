@@ -6,7 +6,7 @@ import pytest
 
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.coverage import coverage, markdown, unreviewed, upstream
-from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS
+from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS, curated_tags
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/mapping-3.1.json"
@@ -21,7 +21,12 @@ def statuses():
     return {(c["format"], c["term"]): c["status"] for c in coverage(mapping())["cells"]}
 
 
-@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_coverage_index_links_every_tag():
+    index = (ROOT / "docs/coverage.md").read_text("utf-8")
+    assert all(f"(coverage-{tag}.md)" in index for tag in curated_tags())
+
+
+@pytest.mark.parametrize("tag", curated_tags())
 def test_docs_page_is_generated_from_the_example(tag: str):
     # Regenerate as docs/development.md says, with a CodeMeta clone that has the tag.
     example = json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8"))

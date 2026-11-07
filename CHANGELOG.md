@@ -9,8 +9,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Upgrade step: the `hub` commands of 0.6.0 and older refuse an export with the new formats and terms, so upgrade
 codemeta-drift with the file. A PKG-INFO parser must keep `Author` and `Author-email` as lists, even for one name,
-or the author rows read no one from them: it splits `Author` at commas outside double quotes and `Author-email` at
-commas outside quotes and angle brackets.
+or the author rows read no one from them: it splits `Author` at commas outside double quotes, keeps a company
+suffix such as `Inc.` with the name before it and drops `et al.`, and splits `Author-email` at commas outside
+quotes and angle brackets.
 
 ### Added
 

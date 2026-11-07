@@ -162,8 +162,8 @@ them into one first. These cases need more than the grammar below says:
   build backends write `Author: A, B`. The parser splits `Author` at commas outside double quotes and
   trims each piece. A company suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a
   dot) stays with the piece before it, so `Datadog, Inc.` is one name, and a piece that is `et al.` is
-  dropped. The split loses one case: a name written `Last, First`, and the core metadata spec's own
-  example `C. Schultz, Universal Features Syndicate, Los Angeles, CA`, read as several names; quote such
+  dropped. The split loses names that hold a comma, such as `Last, First` and the core metadata spec's own
+  example `C. Schultz, Universal Features Syndicate, Los Angeles, CA`: they read as several names; quote such
   a name (`"Smith, Jane"`) to keep it whole, and the parser drops the quotes. `Author-email` is an RFC 822 address list: the parser
   splits it at commas that are outside double quotes and angle brackets, so
   `"Smith, Jane" <j@example.org>, Ada Lovelace <ada@example.org>` is two addresses. Both fields are
