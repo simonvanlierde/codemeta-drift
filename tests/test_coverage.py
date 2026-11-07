@@ -6,7 +6,7 @@ import pytest
 
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.coverage import coverage, markdown, unreviewed, upstream
-from codemeta_drift.export import FORMATS, TERMS
+from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/mapping-3.1.json"
@@ -86,17 +86,19 @@ def test_known_cells_get_their_status():
 
 def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if FORMATS[fmt].crosswalk]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 112, "corrected": 129, "added": 97, "no field": 194}
+    counts = {s: found.count(s) for s in set(found)}
+    assert counts == {"as-is": 112, "corrected": 129, "added": 90, "no field": 194, "no term": 7}
 
 
 def test_readme_figures_match_the_counts():
-    cells = [c for c in coverage(mapping())["cells"] if c["crosswalk"]]
+    # resourceType has no CodeMeta property row, so no crosswalk could have its cell.
+    cells = [c for c in coverage(mapping())["cells"] if c["crosswalk"] and c["term"] not in NO_PROPERTY]
     count = Counter(c["status"] for c in cells)
     null_corrected = sum(c["status"] == "corrected" and c["path"] is None for c in cells)
     text = " ".join((ROOT / "README.md").read_text("utf-8").split())
-    other = len(cells) - count["no field"]
+    other, terms = len(cells) - count["no field"], len(TERMS) - len(NO_PROPERTY)
     assert (
-        f"have {len(cells)} cells for the {len(TERMS)} terms citation tools need. {count['no field']} are for terms"
+        f"have {len(cells)} cells for the {terms} terms citation tools need. {count['no field']} are for terms"
         f" the format has no field for. Of the other {other}, only {count['as-is']} can be used as written:"
         f" {count['corrected']} are wrong, ambiguous or prose ({null_corrected} of them fill a term the format has"
         f" no field for), and {count['added']} are blank"

@@ -13,6 +13,7 @@ STATUSES = {
     "corrected": ("✎", "the crosswalk cell is wrong, ambiguous or prose; a curated row replaces it"),
     "added": ("+", "the format has the field but the crosswalk has no cell for it; a curated row adds it"),
     "no field": ("–", "the format has no field for this term"),  # noqa: RUF001 - an en dash, as in the docs
+    "no term": ("∅", "CodeMeta has no property for this term, so no crosswalk can have a cell; a curated row adds it"),
 }
 """Each cell status, its mark and what it means. The order is the legend's."""
 
@@ -42,6 +43,8 @@ def status(row: dict[str, Any], parents: dict[str, str | None]) -> str:
     """One export row's status; ``parents`` holds the format's people paths (author, contributor)."""
     if row["source"].startswith("crosswalk:"):
         return "as-is"
+    if row["term"] in NO_PROPERTY and row["path"] is not None:
+        return "no term"
     cell = (row.get("crosswalk_cell") or "").strip()
     parent = row["term"].partition(".")[0]
     # A person sub-term reads the shared Person row, so its cell says nothing when its list has no field.
@@ -142,8 +145,9 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
         "",
         (
             f"How CodeMeta's {tag} crosswalks map {len(data['terms'])} CodeMeta terms in {len(formats)} formats, "
-            "read from the reviewed [mapping export](mapping-export.md). PEP 621 has no CodeMeta crosswalk, so "
-            "each of its paths is added here. This page shows the pinned tag; the "
+            "read from the reviewed [mapping export](mapping-export.md). "
+            f"{', '.join(f'`{f}`' for f in formats if not FORMATS[f].crosswalk)} have no CodeMeta crosswalk, "
+            "so each of their paths is added here. This page shows the pinned tag; the "
             "[web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch "
             "each week."
         ),

@@ -7,15 +7,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+Upgrade step: the `hub` commands of 0.6.0 and older refuse an export with the new formats and terms, so upgrade
+codemeta-drift with the file. A PKG-INFO parser must keep `Author-email` as a list, even for one address, or the
+author rows read no one from it.
+
 ### Added
 
-- The mapping export (schema 1.7) has rows for two more terms in all 33 formats: `publisher`, and `resourceType`,
+- The mapping export (schema 1.7) has rows for two more terms in all 34 formats: `publisher`, and `resourceType`,
   the kind of resource, which DataCite requires as `types.resourceTypeGeneral`. The DataCite publisher row reads
-  `publisher.name | publisher`, for the object of schema 4.5 and later and the string before it. A format with no
+  `publisher.name | publisher`: the REST API returns a string, or an object with a `name` when asked with
+  `publisher=true`. A format with no
   field for either has a `null` row. See the [mapping export](docs/mapping-export.md).
 - The mapping export covers RIS and EndNote's tagged format, with a row for each term. Neither has a CodeMeta
   crosswalk, so each row cites the tag list it was read from (Zotero's RIS translator and EndNote's import format docs), and `schema_version` is 1.7. See the
   [mapping export](docs/mapping-export.md).
+- The coverage page and `hub coverage` mark a curated row for `resourceType` as `no term` (`∅`), since CodeMeta has
+  no property for it, and leave it out of the counts. See [coverage](docs/coverage.md).
+- The PyPI page has keywords, classifiers and links to the docs, changelog and DOI.
 
 ### Changed
 
