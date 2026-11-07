@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import quote
 
 from codemeta_drift.checks import table_rows
-from codemeta_drift.export import FORMATS, PATH, TERMS
+from codemeta_drift.export import PATH, TERMS, formats
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
 SITE = "https://simonvanlierde.com/codemeta-drift/"
@@ -18,7 +18,7 @@ CREATOR = "orcid:0009-0006-6953-909X"
 
 
 def validate_mapping(data: Any) -> None:  # noqa: ANN401
-    """Reject unsupported versions, malformed rows and repeated format/term pairs before joining."""
+    """Reject malformed exports, formats predating their tag and repeated format/term pairs."""
     if not isinstance(data, dict) or not isinstance(data.get("schema_version"), str):
         msg = "mapping must have a schema_version string"
         raise ValueError(msg)  # noqa: TRY004 - malformed JSON documents share one CLI error
@@ -35,6 +35,10 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
     ):
         msg = "mapping needs codemeta_tag, generator name/version and rows"
         raise ValueError(msg)
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*", data["codemeta_tag"]):
+        msg = "mapping codemeta_tag must be a numeric version"
+        raise ValueError(msg)
+    allowed_formats = formats(data["codemeta_tag"])
     seen = set()
     for i, row in enumerate(data["rows"], 1):
         if not isinstance(row, dict) or not {"format", "term", "path", "source"} <= row.keys():
@@ -42,7 +46,7 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
             raise ValueError(msg)
         if (
             not isinstance(row["format"], str)
-            or row["format"] not in FORMATS
+            or row["format"] not in allowed_formats
             or not isinstance(row["term"], str)
             or row["term"] not in TERMS
             or not isinstance(row["source"], str)

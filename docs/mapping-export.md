@@ -272,6 +272,10 @@ The schema's `path` pattern accepts exactly this grammar.
 and `expected`. `expected` is the list of values the path resolves to in `document`, in document order,
 from the first alternative that yields any value. A consumer vendors the file with the schema and runs
 every case through its own resolver, so the copies of the grammar stay in step.
+Cases with `raw_input` also test parsing: its `format` names the parser and its `text` is the source
+file content. Parse that text and compare the resulting tree to `document` before resolving `path`.
+The PKG-INFO cases cover comma separation, quoted names, company suffixes and `et al.`.
+The resolver tests alone do not check those parser rules.
 
 ## Compatibility
 

@@ -1,0 +1,70 @@
+case_id	format	source_path	method	rank	candidate_term	score
+1	cff-1.2.0	title	jaccard			0.00000000
+1	cff-1.2.0	title	characters	1	identifier	0.40000000
+1	cff-1.2.0	title	characters	2	contributor	0.37500000
+1	cff-1.2.0	title	characters	3	contributor.familyName	0.35714286
+1	cff-1.2.0	title	tfidf			0.00000000
+2	cff-1.2.0	authors[].family-names	jaccard	1	author.familyName	0.20000000
+2	cff-1.2.0	authors[].family-names	jaccard	2	contributor.familyName	0.20000000
+2	cff-1.2.0	authors[].family-names	characters	1	author.familyName	0.94736842
+2	cff-1.2.0	authors[].family-names	characters	2	contributor.familyName	0.74418605
+2	cff-1.2.0	authors[].family-names	characters	3	author.givenName	0.70270270
+2	cff-1.2.0	authors[].family-names	tfidf	1	author.familyName	0.29861302
+2	cff-1.2.0	authors[].family-names	tfidf	2	contributor.familyName	0.29861302
+2	cff-1.2.0	authors[].family-names	tfidf	3	author.givenName	0.15078836
+3	pep621	project.version	jaccard	1	version	0.50000000
+3	pep621	project.version	characters	1	version	0.63636364
+3	pep621	project.version	characters	2	description	0.38461538
+3	pep621	project.version	characters	3	codeRepository	0.33333333
+3	pep621	project.version	tfidf	1	version	0.64168642
+4	cargo	package.repository	jaccard	1	codeRepository	0.33333333
+4	cargo	package.repository	characters	1	codeRepository	0.78787879
+4	cargo	package.repository	characters	2	contributor	0.41379310
+4	cargo	package.repository	characters	3	version	0.40000000
+4	cargo	package.repository	tfidf	1	codeRepository	0.31048649
+5	zenodo	description	jaccard	1	description	1.00000000
+5	zenodo	description	characters	1	description	1.00000000
+5	zenodo	description	characters	2	version	0.55555556
+5	zenodo	description	characters	3	contributor	0.45454545
+5	zenodo	description	tfidf	1	description	0.86587026
+6	npm	keywords	jaccard	1	keywords	1.00000000
+6	npm	keywords	characters	1	keywords	1.00000000
+6	npm	keywords	characters	2	author.@id	0.35294118
+6	npm	keywords	characters	3	swhid	0.30769231
+6	npm	keywords	tfidf	1	keywords	0.65117091
+7	datacite	publisher.name | publisher	jaccard	1	name	0.50000000
+7	datacite	publisher.name | publisher	jaccard	2	publisher	0.50000000
+7	datacite	publisher.name | publisher	jaccard	3	author.familyName	0.25000000
+7	datacite	publisher.name | publisher	characters	1	datePublished	0.57894737
+7	datacite	publisher.name | publisher	characters	2	publisher	0.54545455
+7	datacite	publisher.name | publisher	characters	3	author.givenName	0.39024390
+7	datacite	publisher.name | publisher	tfidf	1	publisher	0.76743431
+7	datacite	publisher.name | publisher	tfidf	2	author.givenName	0.22040383
+7	datacite	publisher.name | publisher	tfidf	3	contributor.givenName	0.22040383
+8	ris	PY	jaccard			0.00000000
+8	ris	PY	characters	1	codeRepository	0.23529412
+8	ris	PY	characters	2	keywords	0.20000000
+8	ris	PY	characters	3	publisher	0.18181818
+8	ris	PY	tfidf			0.00000000
+9	gitlab	license.key	jaccard	1	license	0.50000000
+9	gitlab	license.key	characters	1	license	0.77777778
+9	gitlab	license.key	characters	2	codeRepository	0.38461538
+9	gitlab	license.key	characters	3	identifier	0.38095238
+9	gitlab	license.key	tfidf	1	license	0.59696713
+10	code-json-2.0	name	jaccard	1	name	1.00000000
+10	code-json-2.0	name	jaccard	2	author.familyName	0.33333333
+10	code-json-2.0	name	jaccard	3	author.givenName	0.33333333
+10	code-json-2.0	name	characters	1	name	1.00000000
+10	code-json-2.0	name	characters	2	author.givenName	0.38095238
+10	code-json-2.0	name	characters	3	author.familyName	0.36363636
+10	code-json-2.0	name	tfidf	1	author.givenName	0.69633791
+10	code-json-2.0	name	tfidf	2	contributor.givenName	0.69633791
+10	code-json-2.0	name	tfidf	3	author.familyName	0.68949476
+11	control	qxz	jaccard			0.00000000
+11	control	qxz	characters			0.00000000
+11	control	qxz	tfidf			0.00000000
+12	control	funding	jaccard			0.00000000
+12	control	funding	characters	1	author.@id	0.25000000
+12	control	funding	characters	2	author.givenName	0.25000000
+12	control	funding	characters	3	publisher	0.25000000
+12	control	funding	tfidf			0.00000000
