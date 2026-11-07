@@ -403,23 +403,23 @@
     {
       "format": "pkg-info",
       "term": "author",
-      "path": "Author + Author-email",
+      "path": "Author + Author-email[]",
       "cell": "Author",
-      "reason": "the cell says Author; packaging tools write an author who has an email to Author-email as 'Name <email>', and only a name-only author to Author"
+      "reason": "the cell says Author; Author is one free-text string (core metadata spec), and an author who has an email goes to Author-email as 'Name <email>', a list of addresses"
     },
     {
       "format": "pkg-info",
       "term": "author.givenName",
-      "path": "Author + Author-email",
+      "path": "Author + Author-email[]",
       "cell": "",
-      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
+      "reason": "no cell; Author is free text and Author-email holds 'Name <email>' addresses, so a consumer takes a name from an address and splits Author no further"
     },
     {
       "format": "pkg-info",
       "term": "author.familyName",
-      "path": "Author + Author-email",
+      "path": "Author + Author-email[]",
       "cell": "",
-      "reason": "no cell; core metadata keeps one name string per author, in Author or in Author-email"
+      "reason": "no cell; Author is free text and Author-email holds 'Name <email>' addresses, so a consumer takes a name from an address and splits Author no further"
     },
     {
       "format": "pkg-info",
