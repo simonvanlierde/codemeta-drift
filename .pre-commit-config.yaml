@@ -50,7 +50,7 @@ repos:
 
   # Every file has a copyright and license, from REUSE.toml or its own header.
   - repo: https://github.com/fsfe/reuse-tool
-    rev: a1bb792acda6fd0724936b4ebbdbc8eceb9c0459 # frozen: v6.2.0
+    rev: ea739bff9c6daa1c4c8a5c5dfd069f3fb0374728 # frozen: v6.3.0
     hooks:
       - id: reuse
 
@@ -92,7 +92,7 @@ repos:
   # and shellcheck over every `run:` when shellcheck is on PATH. jactionlint is a
   # maintained fork of actionlint that adds release, cache and concurrency checks.
   - repo: https://github.com/jdx/jactionlint
-    rev: a65ab044e916760429068fe5794b8306abdfcbb9 # frozen: v2.3.0
+    rev: baa8d685e2b27ff5821558c9eeabb2051c1da61b # frozen: v2.4.0
     hooks:
       - id: jactionlint
 
@@ -106,7 +106,7 @@ repos:
   # CITATION.cff is the source: codemeta.json, any .zenodo.json and the package manifests
   # must agree with it. `just citation` runs the manual-stage writer to fix them.
   - repo: https://github.com/simonvanlierde/citesync
-    rev: a3c5a9794449e78a33583e456af41bb24ebd240e # frozen: v0.1.0
+    rev: 0847ad93d4db06575aa6d57b675c7b9334ed46ef # frozen: v0.2.0
     hooks:
       - id: citesync
       - id: citesync-write
@@ -117,7 +117,7 @@ repos:
       - id: nbstripout
         exclude: ^(data|tests/fixtures)/
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: eaeb8abc646954face3eb41726f085385410f761 # frozen: v0.3.1
+    rev: b0cff962ee693b9e612c097d22e71e0cba127447 # frozen: v0.3.2
     hooks:
       - id: rumdl
         args: [--fix]
