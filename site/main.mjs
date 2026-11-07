@@ -6,7 +6,7 @@ import { parseFragment } from "./fragment.mjs";
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
   "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
-  github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", "bio-tools": "bio.tools",
+  github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", gitlab: "GitLab API", "code-json-2.0": "code.json 2.0", "bio-tools": "bio.tools",
   "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
   "setup-py": "setup.py", cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
   "ruby-gem": "Ruby gemspec", maven: "Maven pom.xml", "cpan-meta-2": "CPAN META.json", nuget: "NuGet .nuspec",
@@ -299,6 +299,8 @@ async function start() {
   const response = await fetch("data.json", { cache: "no-cache" });
   const { coverage, unreviewed, upstream } = await response.json();
   document.getElementById("tag").textContent = coverage.codemeta_tag;
+  const matrix = document.getElementById("matrix-md");
+  matrix.href = matrix.href.replace(/coverage\.md$/, `coverage-${coverage.codemeta_tag}.md`);
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
   score(coverage);
   const labels = new Map([...coverage.formats.map((f) => [f, label(f)]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label])]);

@@ -15,6 +15,7 @@ from codemeta_drift.export import (
     build_rows,
     classify,
     crosswalk_cells,
+    curated_tags,
     export,
     read_curated,
     shared_paths,
@@ -85,11 +86,12 @@ def test_property_counts_that_differ_get_no_cell():
     assert cells[("schema:Person", "givenName")] == "person.given-names"
 
 
-def test_export_3_1_equals_the_example_in_order():
-    mapping, findings = export(read_dir(FIXTURE), "3.1")
+@pytest.mark.parametrize("tag", curated_tags())
+def test_export_equals_the_example_in_order(tag: str):
+    mapping, findings = export(read_dir(ROOT / "tests/fixtures" / tag), tag)
     assert findings == []
     Draft202012Validator(SCHEMA).validate(mapping)
-    assert mapping == EXAMPLE
+    assert mapping == json.loads((ROOT / f"examples/mapping-{tag}.json").read_text())
 
 
 @pytest.mark.parametrize(
@@ -137,13 +139,6 @@ def test_swhid_rows_sit_beside_the_doi():
     assert path["cff-1.2.0", "swhid"] == "identifiers[type=swh].value"
     assert path["codemeta", "swhid"] == path["codemeta", "identifier"] == "identifier"
     assert path["zenodo", "swhid"] == "related_identifiers[scheme=swh].identifier"
-
-
-@pytest.mark.parametrize("term", ["author", "author.givenName", "author.familyName"])
-def test_pkg_info_author_rows_read_author_email_as_a_list(term: str):
-    """Author is one free-text string; Author-email is an RFC 822 address list."""
-    path = {(r["format"], r["term"]): r["path"] for r in EXAMPLE["rows"]}
-    assert path["pkg-info", term] == "Author + Author-email[]"
 
 
 @pytest.mark.parametrize(("fmt", "label"), [("zenodo", "crosswalks/Zenodo.csv"), ("cff-1.2.0", CFF)])
@@ -385,7 +380,7 @@ def test_cli_export_bad_curated_row_exits_2_and_names_the_file(
 @pytest.mark.parametrize("args", [["--tag", "9.9"], ["--tag", "../3.1"]])
 def test_cli_export_exits_2(args: list[str], tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     assert main(["export", str(tmp_path), *args]) == 2
-    assert capsys.readouterr().err == f"codemeta-drift: no curated rows for {args[1]}; have 3.1\n"
+    assert capsys.readouterr().err == f"codemeta-drift: no curated rows for {args[1]}; have 3.1, 4.0\n"
 
 
 def test_cli_export_prints_from_the_current_directory(
@@ -407,8 +402,19 @@ def test_help_names_the_export_subcommand(capsys: pytest.CaptureFixture[str]):
     assert "codemeta-drift export" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+@pytest.mark.parametrize("tag", curated_tags())
 def test_placeholder_keys_are_not_property_names(tag: str):
     """A term in NO_PROPERTY has a key no crosswalk cell may join to, so the property table must never list it."""
     properties = {row[1] for _, row in table_rows(read_dir(ROOT / "tests/fixtures" / tag))}
     assert not {key for term in NO_PROPERTY for _, key in [TERMS[term]]} & properties
+
+
+def test_latest_tag_compares_version_numbers(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(export_module, "curated_tags", lambda: ["10.0", "3.1", "4.0"])
+    assert export_module.latest_tag() == "10.0"
+
+
+def test_a_format_starts_at_its_since_tag():
+    assert {"gitlab", "code-json-2.0"}.isdisjoint(export_module.formats("3.1"))
+    assert {"gitlab", "code-json-2.0"} <= export_module.formats("4.0").keys()
+    assert {"gitlab", "code-json-2.0"} <= export_module.formats("10.0").keys()

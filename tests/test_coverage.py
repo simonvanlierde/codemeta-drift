@@ -6,7 +6,7 @@ import pytest
 
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.coverage import coverage, markdown, unreviewed, upstream
-from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS
+from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS, curated_tags
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/mapping-3.1.json"
@@ -21,9 +21,17 @@ def statuses():
     return {(c["format"], c["term"]): c["status"] for c in coverage(mapping())["cells"]}
 
 
-def test_docs_page_is_generated_from_the_example():
+def test_coverage_index_links_every_tag():
+    index = (ROOT / "docs/coverage.md").read_text("utf-8")
+    assert all(f"(coverage-{tag}.md)" in index for tag in curated_tags())
+
+
+@pytest.mark.parametrize("tag", curated_tags())
+def test_docs_page_is_generated_from_the_example(tag: str):
     # Regenerate as docs/development.md says, with a CodeMeta clone that has the tag.
-    assert (ROOT / "docs/coverage.md").read_text("utf-8") == markdown(mapping(), read_dir(TAG_FILES))
+    example = json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8"))
+    page = (ROOT / f"docs/coverage-{tag}.md").read_text("utf-8")
+    assert page == markdown(example, read_dir(ROOT / "tests/fixtures" / tag))
 
 
 def test_unreviewed_lists_every_other_crosswalk_by_shape():
@@ -87,7 +95,7 @@ def test_known_cells_get_their_status():
 def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if FORMATS[fmt].crosswalk]
     counts = {s: found.count(s) for s in set(found)}
-    assert counts == {"as-is": 112, "corrected": 129, "added": 90, "no field": 194, "no term": 7}
+    assert counts == {"as-is": 111, "corrected": 130, "added": 90, "no field": 194, "no term": 7}
 
 
 def test_readme_figures_match_the_counts():

@@ -6,8 +6,9 @@ term sits in each metadata format. Tools that keep `CITATION.cff`, `codemeta.jso
 tables, whose cells are prose and sometimes wrong.
 
 The schema is [`src/codemeta_drift/mapping.schema.json`](../src/codemeta_drift/mapping.schema.json)
-(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) is the
-export for CodeMeta 3.1, written by `codemeta-drift export`.
+(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) and
+[`examples/mapping-4.0.json`](../examples/mapping-4.0.json) are the exports for CodeMeta 3.1 and 4.0,
+written by `codemeta-drift export`.
 
 ## Export a mapping
 
@@ -16,16 +17,16 @@ checkout at `codemeta`, as in the [quick start](../README.md#try-it). It must co
 the selected tag:
 
 ```sh
-codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
+codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
 The exporter reads the tag's commit, not the working tree. Only tags with a bundled
-curated file can be exported; currently that is `3.1`. To check a directory named
+curated file can be exported; currently those are `3.1` and `4.0`. To check a directory named
 `export`, write `./export` so the CLI does not treat it as the subcommand.
 
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
-Other rows use [`curated-3.1.json`](../src/codemeta_drift/curated-3.1.json), which records
-the replacement path and reason. The exporter refuses an unresolved cell, prints the
+Other rows use `curated-<tag>.json` ([3.1](../src/codemeta_drift/curated-3.1.json),
+[4.0](../src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell, prints the
 findings on standard error and exits 1 without writing output. A successful export exits 0;
 invalid arguments or unreadable inputs exit 2. Without `--out`, JSON goes to standard output.
 
@@ -50,8 +51,8 @@ The bundled schema snapshots are in a codemeta-drift source checkout. From its r
 use `../codemeta` for a CodeMeta checkout beside it:
 
 ```sh
-uv run codemeta-drift export ../codemeta --tag 3.1 \
-  --schemas tests/fixtures/schemas --out mapping-3.1.json
+uv run codemeta-drift export ../codemeta --tag 4.0 \
+  --schemas tests/fixtures/schemas --out mapping-4.0.json
 ```
 
 `--schemas DIR` adds `PATH_NOT_IN_SCHEMA` findings for paths absent from the format's
@@ -110,9 +111,12 @@ Each row:
   DESCRIPTION), `publiccode-0.8` (publiccode.yml), `swmath` (a zbMATH Open software record),
   `spdx-2.3` (an SPDX 2.3 package in JSON), `codemeta-2` (a codemeta.json written to the 2.0
   context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project), `wikidata` (a Wikidata
-  item), `ris` (a RIS record with `TY  - COMP`) or `endnote` (an EndNote tagged record with
-  `%0 Computer Program`). A format whose versions differ puts the version in the id. `pkg-info` to
-  `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, and `ris` and `endnote` in 1.7.
+  item), `ris` (a RIS record with `TY  - COMP`), `endnote` (an EndNote tagged record with
+  `%0 Computer Program`), `gitlab` (the GitLab REST API's project JSON) or `code-json-2.0` (a
+  code.json 2.0 file, the US federal source code metadata). A format whose versions differ puts the
+  version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to `wikidata` in
+  1.5, and `ris` to `code-json-2.0` in 1.7. `gitlab` and `code-json-2.0` have rows from the 4.0
+  export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
   `resourceType`, or a person sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
@@ -151,13 +155,20 @@ a `Jr.` in `name-suffix` ends it. The `cff-1.2.0` `author.familyName` row says s
 PKG-INFO, R's DESCRIPTION and several of the newer formats are not trees, so a consumer reads
 them into one first. These cases need more than the grammar below says:
 
-- PKG-INFO: each field is a key, and a field that repeats is a list. `Author` is free text, one
-  string that is never split (the spec's example `C. Schultz, Universal Features Syndicate, Los Angeles, CA`
-  is one author). `Author-email` is an RFC 822 address list: the parser splits it at commas that are
-  outside double quotes and angle brackets, so `"Smith, Jane" <j@example.org>, Ada Lovelace <ada@example.org>`
-  is two addresses, and it is always a list, even for one. The author rows read `Author + Author-email[]`.
-  A consumer combines them in that order: `Author` as one name string, then the display name of each
-  address, and never treats a comma in `Author` as a separator. `Project-URL` becomes
+- PKG-INFO: each field is a key, and a field that repeats is a list. `Author` holds the authors
+  who have no email, separated by commas: the
+  [pyproject.toml spec](https://packaging.python.org/en/latest/specifications/pyproject-toml/#authors-maintainers)
+  says a name must not contain commas and "Multiple values should be separated by commas", and most
+  build backends write `Author: A, B`. The parser splits `Author` at commas outside double quotes and
+  trims each piece. A company suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a
+  dot) stays with the piece before it, so `Datadog, Inc.` is one name, and a piece that is `et al.` is
+  dropped. The split loses names that hold a comma, such as `Last, First` and the core metadata spec's own
+  example `C. Schultz, Universal Features Syndicate, Los Angeles, CA`: they read as several names; quote such
+  a name (`"Smith, Jane"`) to keep it whole, and the parser drops the quotes. `Author-email` is an RFC 822 address list: the parser
+  splits it at commas that are outside double quotes and angle brackets, so
+  `"Smith, Jane" <j@example.org>, Ada Lovelace <ada@example.org>` is two addresses. Both fields are
+  always lists, even for one. The author rows read `Author[] + Author-email[]`: a consumer takes each
+  `Author` name, then the display name of each address. `Project-URL` becomes
   elements with `label` and `url`, the label normalised as the
   [well-known project URLs spec](https://packaging.python.org/en/latest/specifications/well-known-project-urls/)
   says: lower case, no punctuation or whitespace, so `Source Code` matches `sourcecode`.
@@ -217,7 +228,7 @@ A (format, term) pair appears at most once. The schema cannot enforce uniqueness
 those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, and within a format in the order `name`, `version`, `author`,
+`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
 `contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer
@@ -233,7 +244,7 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 | `key` | the value under `key` | `package.name` |
 | `key[]` | each element of the list under `key` | `authors[]` |
 | `key[k=v]` | each element of the list under `key` whose `k` equals `v`, or is a list that holds `v` | `identifiers[type=doi].value` |
-| `a + b` | the values of `a`, then those of `b` | `Author + Author-email[]` |
+| `a + b` | the values of `a`, then those of `b` | `Author[] + Author-email[]` |
 | `a \| b` | `a` if it has any value, else `b`; any number, read left to right | `project.urls.Source \| project.urls.Repository \| project.urls.Homepage` |
 
 - A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
@@ -283,13 +294,15 @@ They come with a new codemeta tag or a new codemeta-drift release.
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
    path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas.
-   Schema 1.7 adds the `ris` and `endnote` format ids and the `publisher` and `resourceType` terms, so a 1.7 file
-   passes the 1.6 schema, but the `hub` of 0.6.0 refuses it. Its PKG-INFO author rows read `Author-email[]`, so the
-   parser must keep `Author-email` as a list. Update the
+   Schema 1.7 adds the `ris`, `endnote`, `gitlab` and `code-json-2.0` format ids and the `publisher` and `resourceType` terms, so a 1.7 file
+   passes the 1.6 schema, but the `hub` of 0.6.0 refuses it. Its PKG-INFO author rows read `Author[] + Author-email[]`, so
+   the parser must keep both as lists. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
-4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2).
+4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2). A format
+   that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from
+   a file for that tag or later.
    A row with `path: null` is not missing: the format has no place for that term.
 5. Treat two rows for the same (format, term) as an error.
 

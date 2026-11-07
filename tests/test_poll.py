@@ -26,7 +26,7 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
         API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
             "content": base64.b64encode(b"tag v0.3.0\n").decode()
         },
-        API + "codemeta/codemeta/tags?per_page=100": [{"name": "4.0"}, {"name": "3.1"}, {"name": "old"}],
+        API + "codemeta/codemeta/tags?per_page=100": [{"name": "99.0"}, {"name": "4.0"}, {"name": "old"}],
         **dict.fromkeys(SCHEMA_URLS.values(), schema),
         "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": schema,
     }
@@ -38,7 +38,7 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
     assert len(plans) == 3
     assert "name" in plans[0]["body"]
     assert plans[1]["title"] == "Update mapping pin to v0.4.0"
-    assert plans[2]["title"] == "Review CodeMeta tag 4.0"
+    assert plans[2]["title"] == "Review CodeMeta tag 99.0"
     changed = next(iter(source["files"]))
     changed_url = API + source["repo"] + "/contents/" + changed
 
@@ -227,7 +227,7 @@ def test_poll_rejects_a_pin_file_without_exactly_one_tag():
 
 
 def test_poll_is_quiet_when_the_newest_codemeta_tag_has_an_export():
-    before, fetch = _sources("tag v0.4.0\n", ["3.1", "2.0"])
+    before, fetch = _sources("tag v0.4.0\n", ["4.0", "3.1"])
     assert poll({"rows": []}, before, fetch) == []
 
 

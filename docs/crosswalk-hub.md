@@ -5,13 +5,13 @@ it does not convert their values. A Cargo author string and a CFF person object 
 need different parsers. A Go module path is not a repository URL.
 
 ```sh
-codemeta-drift hub pair examples/mapping-3.1.json --from pep621 --to cargo
-codemeta-drift hub sssom examples/mapping-3.1.json --out spokes.sssom.tsv
-codemeta-drift hub crosswalk examples/mapping-3.1.json ../codemeta --format cargo
-codemeta-drift hub coverage examples/mapping-3.1.json --out docs/coverage.md
+codemeta-drift hub pair examples/mapping-4.0.json --from pep621 --to cargo
+codemeta-drift hub sssom examples/mapping-4.0.json --out spokes.sssom.tsv
+codemeta-drift hub crosswalk examples/mapping-4.0.json ../codemeta --format cargo
+codemeta-drift hub coverage examples/mapping-4.0.json --out docs/coverage-4.0.md
 ```
 
-`coverage` writes the [coverage matrix](coverage.md): each term and format with its status
+`coverage` writes the [coverage matrix](coverage-4.0.md): each term and format with its status
 (as-is, corrected, added or no field) and the reason for every curated cell. Add `--json`
 for the cells as data; the [coverage page](https://simonvanlierde.com/codemeta-drift/) reads that.
 `--codemeta <checkout>` also lists the CodeMeta crosswalks nobody has reviewed, read at the
@@ -24,8 +24,8 @@ alternatives retain their order and selectors. These are field correspondences, 
 instructions to copy a value unchanged.
 
 `sssom` writes [SSSOM 1.0 TSV](https://mapping-commons.github.io/sssom/1.0/spec-formats-tsv/)
-with an embedded metadata block and explicit CURIE prefixes. It covers the 34 formats
-in the JSON export and `gomod`. The Go spoke has only `codeRepository`, corresponding
+with an embedded metadata block and explicit CURIE prefixes. It covers the 36 formats
+in the 4.0 JSON export and `gomod`. The Go spoke has only `codeRepository`, corresponding
 to the `module` directive; other terms have no Go mapping. The JSON export stays unchanged.
 
 All predicates are `skos:relatedMatch`. The paths describe where values sit, but do not
@@ -49,7 +49,7 @@ ORCID (`creator_id`) and this repository as `mapping_provider`.
 
 The hub rejects unsupported schema versions, malformed headers and rows, duplicate
 (format, term) rows, and unknown terms or formats before writing output. It supports the
-34 formats and terms in the bundled mapping contract; it does not silently interpret new
+36 formats and terms in the bundled mapping contract; it does not silently interpret new
 terms added by a later producer. Optional fields it does not use are ignored.
 
 `crosswalk` writes CodeMeta's two-column CSV layout, `Property,<format>`. It reads the

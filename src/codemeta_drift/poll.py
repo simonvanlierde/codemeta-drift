@@ -14,7 +14,7 @@ from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import urlopen
 
-from codemeta_drift.export import curated_tags
+from codemeta_drift.export import curated_tags, latest_tag
 from codemeta_drift.watcher import issue_plans, schema_changes
 
 API = "https://api.github.com/repos/"
@@ -147,7 +147,7 @@ def main() -> None:
     args = parser.parse_args()
     from codemeta_drift.conformance import SCHEMA_FILES  # noqa: PLC0415 - CLI snapshot loading
 
-    mapping = json.loads((args.root / "examples/mapping-3.1.json").read_text("utf-8"))
+    mapping = json.loads((args.root / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
     before = {
         fmt: json.loads((args.root / "tests/fixtures/schemas" / name).read_text("utf-8"))
         for fmt, name in SCHEMA_FILES.items()

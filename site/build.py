@@ -20,6 +20,7 @@ from typing import Any
 from codemeta_drift.checks import check
 from codemeta_drift.cli import read_ref
 from codemeta_drift.coverage import coverage, unreviewed, upstream
+from codemeta_drift.export import curated_tags, latest_tag
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -49,7 +50,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True, help="output directory, replaced if it exists")
     parser.add_argument("--codemeta", type=Path, help="a CodeMeta clone whose HEAD to compare")
     args = parser.parse_args()
-    mapping = json.loads((ROOT / "examples/mapping-3.1.json").read_text("utf-8"))
+    mapping = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
     data = {
         "coverage": coverage(mapping),
         "unreviewed": unreviewed(read_ref(args.codemeta, mapping["codemeta_tag"]), mapping) if args.codemeta else None,
@@ -62,8 +63,10 @@ def main() -> None:
     args.out.mkdir(parents=True)
     for name in STATIC:
         shutil.copy(ROOT / "site" / name, args.out / name)
-    # The SSSOM export's mapping_set_id points here.
-    (args.out / f"spokes-{mapping['codemeta_tag']}.sssom.tsv").write_text(sssom(mapping), encoding="utf-8")
+    # The SSSOM export's mapping_set_id points here, for every tag with an export, so an older set's id still resolves.
+    for tag in curated_tags():
+        tagged = json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8"))
+        (args.out / f"spokes-{tag}.sssom.tsv").write_text(sssom(tagged), encoding="utf-8")
     (args.out / "data.json").write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
