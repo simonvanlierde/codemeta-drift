@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-07
+
 Upgrade step: the `hub` commands of 0.6.0 and older refuse an export with the new formats and terms, so upgrade
 codemeta-drift with the file. A PKG-INFO parser must keep `Author` and `Author-email` as lists, even for one name,
 or the author rows read no one from them: it splits `Author` at commas outside double quotes, keeps a company
@@ -193,7 +195,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.3.0...v0.4.0
