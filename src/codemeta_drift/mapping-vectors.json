@@ -669,6 +669,19 @@
    ]
   },
   {
+   "name": "RIS AU is a list even with one author",
+   "path": "AU[]",
+   "document": {
+    "TY": "COMP",
+    "AU": [
+     "Lovelace, Ada"
+    ]
+   },
+   "expected": [
+    "Lovelace, Ada"
+   ]
+  },
+  {
    "name": "EndNote tag %7 is the key _7",
    "path": "_7",
    "document": {

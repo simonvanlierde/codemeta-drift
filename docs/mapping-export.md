@@ -197,8 +197,8 @@ them into one first. These cases need more than the grammar below says:
   a list, a link is an object with `@id`, and a typed date may be an object with `@value`.
 - RIS and EndNote tagged are line formats. A consumer reads one record into a tree: each tag is a
   key (RIS `TI`, EndNote `%T` as `T`, and `%7` as `_7`, since a key cannot start with a digit), the
-  value is the text after the tag, and a repeated tag becomes a list. `AU`, `KW` and `UR` repeat in
-  RIS; `%A` and `%K` repeat in EndNote. Any other tag that repeats counts once, by its first occurrence.
+  value is the text after the tag. `AU`, `KW` and `UR` in RIS, and `%A` and `%K` in EndNote, are always lists,
+  even when the tag appears once. Any other tag that repeats counts once, by its first occurrence.
   A `%K` tag may also hold continuation lines, one keyword per line, as Zotero writes it: the parser
   splits them, so `K[]` holds one keyword each. Neither format has a tag for a software version, so
   `ET` and `%7` (edition) carry it by convention; Zotero's RIS translator reads `ET` as `versionNumber` for
@@ -283,7 +283,9 @@ They come with a new codemeta tag or a new codemeta-drift release.
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
    path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas.
-   Schema 1.7 only adds the `ris` and `endnote` format ids and the `publisher` and `resourceType` terms, so a 1.7 file passes the 1.6 schema. Update the
+   Schema 1.7 adds the `ris` and `endnote` format ids and the `publisher` and `resourceType` terms, so a 1.7 file
+   passes the 1.6 schema, but the `hub` of 0.6.0 refuses it. Its PKG-INFO author rows read `Author-email[]`, so the
+   parser must keep `Author-email` as a list. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.

@@ -139,6 +139,13 @@ def test_swhid_rows_sit_beside_the_doi():
     assert path["zenodo", "swhid"] == "related_identifiers[scheme=swh].identifier"
 
 
+@pytest.mark.parametrize("term", ["author", "author.givenName", "author.familyName"])
+def test_pkg_info_author_rows_read_author_email_as_a_list(term: str):
+    """Author is one free-text string; Author-email is an RFC 822 address list."""
+    path = {(r["format"], r["term"]): r["path"] for r in EXAMPLE["rows"]}
+    assert path["pkg-info", term] == "Author + Author-email[]"
+
+
 @pytest.mark.parametrize(("fmt", "label"), [("zenodo", "crosswalks/Zenodo.csv"), ("cff-1.2.0", CFF)])
 def test_swhid_on_the_doi_path_is_shared_outside_codemeta(fmt: str, label: str):
     """Only codemeta.json holds the SWHID and the DOI in one key; elsewhere that path is a wrong row."""
