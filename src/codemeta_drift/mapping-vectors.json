@@ -577,7 +577,11 @@
     "Los Angeles",
     "CA",
     "B <b@example.org>"
-   ]
+   ],
+   "raw_input": {
+    "format": "pkg-info",
+    "text": "Author: C. Schultz, Universal Features Syndicate, Los Angeles, CA\nAuthor-email: B <b@example.org>\n"
+   }
   },
   {
    "name": "Author 'Ada Lovelace, Grace Hopper' is split by the parser at commas into two names",
@@ -591,7 +595,11 @@
    "expected": [
     "Ada Lovelace",
     "Grace Hopper"
-   ]
+   ],
+   "raw_input": {
+    "format": "pkg-info",
+    "text": "Author: Ada Lovelace, Grace Hopper\n"
+   }
   },
   {
    "name": "Author 'Datadog, Inc.' stays one name: the parser keeps a company suffix with the piece before it",
@@ -603,7 +611,11 @@
    },
    "expected": [
     "Datadog, Inc."
-   ]
+   ],
+   "raw_input": {
+    "format": "pkg-info",
+    "text": "Author: Datadog, Inc.\n"
+   }
   },
   {
    "name": "Author 'A, B, et al.' is two names: the parser drops an et al. piece",
@@ -617,7 +629,11 @@
    "expected": [
     "A",
     "B"
-   ]
+   ],
+   "raw_input": {
+    "format": "pkg-info",
+    "text": "Author: A, B, et al.\n"
+   }
   },
   {
    "name": "Author '\"Smith, Jane\"' stays one name: the parser does not split inside double quotes",
@@ -629,7 +645,11 @@
    },
    "expected": [
     "Smith, Jane"
-   ]
+   ],
+   "raw_input": {
+    "format": "pkg-info",
+    "text": "Author: \"Smith, Jane\"\n"
+   }
   },
   {
    "name": "Author-email is split by the parser at commas outside quotes and angle brackets",
@@ -643,7 +663,11 @@
    "expected": [
     "\"Smith, Jane\" <jane@example.org>",
     "Ada Lovelace <ada@example.org>"
-   ]
+   ],
+   "raw_input": {
+    "format": "pkg-info",
+    "text": "Author-email: \"Smith, Jane\" <jane@example.org>, Ada Lovelace <ada@example.org>\n"
+   }
   },
   {
    "name": "EndNote %K with continuation lines is split into one keyword per line by the parser",

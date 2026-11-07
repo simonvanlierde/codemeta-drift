@@ -27,3 +27,12 @@ def test_vectors_cover_each_form() -> None:
     paths = " ".join(c["path"] for c in CASES)
     for form in (" | ", " + ", "[]", "[type=", "@url", "Authors@R", "dcterms:", ".url"):
         assert form in paths
+
+
+@pytest.mark.parametrize(
+    "case", [c for c in CASES if "parser" in c["name"] and "Author" in c["name"]], ids=lambda c: c["name"]
+)
+def test_pkg_info_parser_vectors_include_raw_headers(case: dict) -> None:
+    assert case["raw_input"]["format"] == "pkg-info"
+    assert case["raw_input"]["text"].startswith(("Author: ", "Author-email: "))
+    assert case["raw_input"]["text"].endswith("\n")
