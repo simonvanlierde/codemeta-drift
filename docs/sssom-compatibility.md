@@ -11,7 +11,7 @@ From the repository root:
 just sssom-validate
 ```
 
-The recipe writes the bundled mapping for CodeMeta 3.1 to a temporary file with
+The recipe writes each bundled mapping (CodeMeta 3.1 and 4.0) to a temporary file with
 `codemeta-drift hub sssom`, then runs the pinned
 [SSSOM Python reference tool](https://mapping-commons.github.io/sssom-py/cli/commands/#sssom-validate)
 (`uvx --python 3.13 --from sssom==0.4.21 sssom validate`) in a separate tool environment.

@@ -403,23 +403,23 @@
     {
       "format": "pkg-info",
       "term": "author",
-      "path": "Author + Author-email[]",
+      "path": "Author[] + Author-email[]",
       "cell": "Author",
-      "reason": "the cell says Author; Author is one free-text string (core metadata spec), and an author who has an email goes to Author-email as 'Name <email>', a list of addresses"
+      "reason": "the cell says Author; the pyproject.toml spec puts an author without an email in Author and one with an email in Author-email as 'Name <email>', and says a name must not contain commas and multiple values should be separated by commas, so both are lists"
     },
     {
       "format": "pkg-info",
       "term": "author.givenName",
-      "path": "Author + Author-email[]",
+      "path": "Author[] + Author-email[]",
       "cell": "",
-      "reason": "no cell; Author is free text and Author-email holds 'Name <email>' addresses, so a consumer takes a name from an address and splits Author no further"
+      "reason": "no cell; each Author piece and each Author-email display name is one full name, which core metadata does not split further"
     },
     {
       "format": "pkg-info",
       "term": "author.familyName",
-      "path": "Author + Author-email[]",
+      "path": "Author[] + Author-email[]",
       "cell": "",
-      "reason": "no cell; Author is free text and Author-email holds 'Name <email>' addresses, so a consumer takes a name from an address and splits Author no further"
+      "reason": "no cell; each Author piece and each Author-email display name is one full name, which core metadata does not split further"
     },
     {
       "format": "pkg-info",
@@ -1911,6 +1911,13 @@
       "path": null,
       "cell": "",
       "reason": "the cell is empty; created_at, updated_at and pushed_at are dateCreated and dateModified, and a repository has no publication date"
+    },
+    {
+      "format": "github",
+      "term": "name",
+      "path": "name",
+      "cell": "full_name",
+      "reason": "the cell says full_name, which is owner/repo; the repository object's name is the project name"
     },
     {
       "format": "figshare",

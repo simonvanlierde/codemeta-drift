@@ -4,7 +4,7 @@
 sends no requests and opens no issues.
 
 ```sh
-codemeta-drift watch ../codemeta --tag 3.1 \
+codemeta-drift watch ../codemeta --tag 4.0 \
   --before previous-schemas --after new-schemas \
   --citesync-source ../citesync/src/citesync/MAPPING_SOURCE \
   --latest v0.6.0 --existing issue-titles.json

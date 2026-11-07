@@ -828,22 +828,22 @@
     {
       "format": "pkg-info",
       "term": "author",
-      "path": "Author + Author-email[]",
-      "source": "curated:the cell says Author; Author is one free-text string (core metadata spec), and an author who has an email goes to Author-email as 'Name <email>', a list of addresses",
+      "path": "Author[] + Author-email[]",
+      "source": "curated:the cell says Author; the pyproject.toml spec puts an author without an email in Author and one with an email in Author-email as 'Name <email>', and says a name must not contain commas and multiple values should be separated by commas, so both are lists",
       "crosswalk_cell": "Author"
     },
     {
       "format": "pkg-info",
       "term": "author.givenName",
-      "path": "Author + Author-email[]",
-      "source": "curated:no cell; Author is free text and Author-email holds 'Name <email>' addresses, so a consumer takes a name from an address and splits Author no further",
+      "path": "Author[] + Author-email[]",
+      "source": "curated:no cell; each Author piece and each Author-email display name is one full name, which core metadata does not split further",
       "crosswalk_cell": ""
     },
     {
       "format": "pkg-info",
       "term": "author.familyName",
-      "path": "Author + Author-email[]",
-      "source": "curated:no cell; Author is free text and Author-email holds 'Name <email>' addresses, so a consumer takes a name from an address and splits Author no further",
+      "path": "Author[] + Author-email[]",
+      "source": "curated:no cell; each Author piece and each Author-email display name is one full name, which core metadata does not split further",
       "crosswalk_cell": ""
     },
     {
@@ -2758,8 +2758,8 @@
     {
       "format": "github",
       "term": "name",
-      "path": "full_name",
-      "source": "crosswalk:crosswalks/GitHub.csv@3.1",
+      "path": "name",
+      "source": "curated:the cell says full_name, which is owner/repo; the repository object's name is the project name",
       "crosswalk_cell": "full_name"
     },
     {
