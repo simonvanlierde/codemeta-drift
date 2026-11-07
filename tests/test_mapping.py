@@ -96,6 +96,12 @@ def test_person_sub_terms_line_up_with_their_term():
         assert all(sub.startswith(alt) for sub, alt in zip(subs, terms, strict=True)), (fmt, term)
 
 
+def test_pkg_info_author_email_is_a_list():
+    """Core metadata's Author-email is a list of RFC 822 addresses; Author is one free-text string."""
+    paths = {row["path"] for row in EXAMPLE["rows"] if row["format"] == "pkg-info" and row["term"].startswith("author")}
+    assert paths == {"Author + Author-email[]", None}
+
+
 # Formats with a place for the publisher and the resource type; every other format has a null row.
 PUBLISHER = {"codemeta", "codemeta-2", "bibtex", "datacite", "dcat-3", "doap", "wikidata", "ris", "endnote"}
 RESOURCE_TYPE = {
