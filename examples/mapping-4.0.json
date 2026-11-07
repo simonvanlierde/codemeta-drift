@@ -4717,6 +4717,276 @@
       "source": "curated:no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm; %0 is the reference type, and Computer Program is software",
       "comment": "Software is 'Computer Program'. The key is _0 because a path key cannot start with a digit, as with _7 (edition).",
       "crosswalk_cell": null
+    },
+    {
+      "format": "gitlab",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/GitLab.csv@4.0",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "gitlab",
+      "term": "version",
+      "path": null,
+      "source": "curated:the cell is empty; the project object has no version, releases are the separate /projects/:id/releases endpoint",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "gitlab",
+      "term": "author",
+      "path": "owner.name",
+      "source": "curated:the cell says creator_id, the numeric id of the user who created the project; the project response names its owner in owner.name",
+      "comment": "owner is the user who owns a personal project. A project in a group namespace (namespace.kind is group) may have no owner; the group in namespace.name is then a producer, not an author.",
+      "crosswalk_cell": "creator_id"
+    },
+    {
+      "format": "gitlab",
+      "term": "author.givenName",
+      "path": null,
+      "source": "curated:the cell names the members endpoint, a second call; the project response holds the owner's name as one string",
+      "crosswalk_cell": "/projects/:id/members/all/:id/name"
+    },
+    {
+      "format": "gitlab",
+      "term": "author.familyName",
+      "path": null,
+      "source": "curated:the cell names the members endpoint, a second call; the project response holds the owner's name as one string",
+      "crosswalk_cell": "/projects/:id/members/all/:id/name"
+    },
+    {
+      "format": "gitlab",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:the cell names the members endpoint, whose id is GitLab's numeric user id, not an ORCID",
+      "crosswalk_cell": "/projects/:id/members/all/:id"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:the cell names the members endpoint, a second call, not the project object",
+      "crosswalk_cell": "/projects/:id/members/:id"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no contributor in the project response",
+      "crosswalk_cell": "/projects/:id/members/all/:id/name"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no contributor in the project response",
+      "crosswalk_cell": "/projects/:id/members/all/:id/name"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no contributor in the project response",
+      "crosswalk_cell": "/projects/:id/members/all/:id"
+    },
+    {
+      "format": "gitlab",
+      "term": "license",
+      "path": "license.key",
+      "source": "curated:the cell is empty; with license=true in the request, the project response has a license object (key, name, nickname, html_url, source_url), and key is the licence id",
+      "comment": "key is a lowercase licensee id (mit, apache-2.0, gpl-3.0), close to but not always an SPDX id. Without license=true the response has no license object.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "gitlab",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:the cell says id, which is GitLab's numeric project id, not a DOI",
+      "crosswalk_cell": "id"
+    },
+    {
+      "format": "gitlab",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:the cell says id, which is GitLab's numeric project id; the project response carries no SWHID",
+      "crosswalk_cell": "id"
+    },
+    {
+      "format": "gitlab",
+      "term": "codeRepository",
+      "path": "web_url",
+      "source": "crosswalk:crosswalks/GitLab.csv@4.0",
+      "crosswalk_cell": "web_url"
+    },
+    {
+      "format": "gitlab",
+      "term": "description",
+      "path": "description",
+      "source": "crosswalk:crosswalks/GitLab.csv@4.0",
+      "crosswalk_cell": "description"
+    },
+    {
+      "format": "gitlab",
+      "term": "keywords",
+      "path": "topics",
+      "source": "curated:the cell names two fields; tag_list is deprecated in favour of topics, which holds the same list",
+      "crosswalk_cell": "topics / tag_list"
+    },
+    {
+      "format": "gitlab",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:the cell is empty; created_at and last_activity_at are dateCreated and dateModified, and a project has no publication date",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "gitlab",
+      "term": "publisher",
+      "path": null,
+      "source": "curated:the cell is empty; gitlab has no publisher field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "gitlab",
+      "term": "resourceType",
+      "path": null,
+      "source": "curated:CodeMeta has no term for the resource type; gitlab has no field for it",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "name",
+      "path": "name",
+      "source": "crosswalk:crosswalks/code-json.csv@4.0",
+      "crosswalk_cell": "name"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "version",
+      "path": "version",
+      "source": "crosswalk:crosswalks/code-json.csv@4.0",
+      "crosswalk_cell": "version"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "author",
+      "path": "contact",
+      "source": "crosswalk:crosswalks/code-json.csv@4.0",
+      "comment": "contact is one object (name, email), the release's point of contact; the consumer reads its name.",
+      "crosswalk_cell": "contact"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "author.givenName",
+      "path": null,
+      "source": "curated:the cell is empty; contact.name is one full name string",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "author.familyName",
+      "path": null,
+      "source": "curated:the cell is empty; contact.name is one full name string",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:the cell is empty; contact has only name and email",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:the cell is empty; code.json has no contributor field, and partners lists partner agencies",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no contributor field in code.json",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no contributor field in code.json",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:no contributor field in code.json",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "license",
+      "path": "permissions.licenses[].name",
+      "source": "curated:the cell says permissions.licenses, a list of objects (name, URL); the licence id is each one's name",
+      "comment": "name is an SPDX id from a short list (MIT, Apache-2.0, GPL-3.0-only and others), or Other or None.",
+      "crosswalk_cell": "permissions.licenses"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:the cell is empty; code.json has no DOI field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:the cell is empty; code.json has no SWHID field",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "codeRepository",
+      "path": "repositoryURL",
+      "source": "crosswalk:crosswalks/code-json.csv@4.0",
+      "crosswalk_cell": "repositoryURL"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "description",
+      "path": "description",
+      "source": "crosswalk:crosswalks/code-json.csv@4.0",
+      "crosswalk_cell": "description"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "keywords",
+      "path": "tags",
+      "source": "crosswalk:crosswalks/code-json.csv@4.0",
+      "crosswalk_cell": "tags"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "datePublished",
+      "path": null,
+      "source": "curated:the cell is empty; date.created and date.lastModified are dateCreated and dateModified, and code.json has no release date",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "publisher",
+      "path": "organization",
+      "source": "crosswalk:crosswalks/code-json.csv@4.0",
+      "crosswalk_cell": "organization"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "resourceType",
+      "path": null,
+      "source": "curated:CodeMeta has no term for the resource type; code.json has no field for it",
+      "crosswalk_cell": null
     }
   ]
 }

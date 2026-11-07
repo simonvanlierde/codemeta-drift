@@ -3682,6 +3682,203 @@
       "path": "_0",
       "reason": "no EndNote crosswalk upstream; tags from EndNote's tagged import format, https://docs.endnote.com/docs/endnote/2025/v1/windows/en/content/08import/creating_a_taggedenimprtfl.htm; %0 is the reference type, and Computer Program is software",
       "comment": "Software is 'Computer Program'. The key is _0 because a path key cannot start with a digit, as with _7 (edition)."
+    },
+    {
+      "format": "gitlab",
+      "term": "version",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; the project object has no version, releases are the separate /projects/:id/releases endpoint"
+    },
+    {
+      "format": "gitlab",
+      "term": "author",
+      "path": "owner.name",
+      "cell": "creator_id",
+      "reason": "the cell says creator_id, the numeric id of the user who created the project; the project response names its owner in owner.name",
+      "comment": "owner is the user who owns a personal project. A project in a group namespace (namespace.kind is group) may have no owner; the group in namespace.name is then a producer, not an author."
+    },
+    {
+      "format": "gitlab",
+      "term": "author.givenName",
+      "path": null,
+      "cell": "/projects/:id/members/all/:id/name",
+      "reason": "the cell names the members endpoint, a second call; the project response holds the owner's name as one string"
+    },
+    {
+      "format": "gitlab",
+      "term": "author.familyName",
+      "path": null,
+      "cell": "/projects/:id/members/all/:id/name",
+      "reason": "the cell names the members endpoint, a second call; the project response holds the owner's name as one string"
+    },
+    {
+      "format": "gitlab",
+      "term": "author.@id",
+      "path": null,
+      "cell": "/projects/:id/members/all/:id",
+      "reason": "the cell names the members endpoint, whose id is GitLab's numeric user id, not an ORCID"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor",
+      "path": null,
+      "cell": "/projects/:id/members/:id",
+      "reason": "the cell names the members endpoint, a second call, not the project object"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "/projects/:id/members/all/:id/name",
+      "reason": "no contributor in the project response"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "/projects/:id/members/all/:id/name",
+      "reason": "no contributor in the project response"
+    },
+    {
+      "format": "gitlab",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "/projects/:id/members/all/:id",
+      "reason": "no contributor in the project response"
+    },
+    {
+      "format": "gitlab",
+      "term": "license",
+      "path": "license.key",
+      "cell": "",
+      "reason": "the cell is empty; with license=true in the request, the project response has a license object (key, name, nickname, html_url, source_url), and key is the licence id",
+      "comment": "key is a lowercase licensee id (mit, apache-2.0, gpl-3.0), close to but not always an SPDX id. Without license=true the response has no license object."
+    },
+    {
+      "format": "gitlab",
+      "term": "identifier",
+      "path": null,
+      "cell": "id",
+      "reason": "the cell says id, which is GitLab's numeric project id, not a DOI"
+    },
+    {
+      "format": "gitlab",
+      "term": "swhid",
+      "path": null,
+      "cell": "id",
+      "reason": "the cell says id, which is GitLab's numeric project id; the project response carries no SWHID"
+    },
+    {
+      "format": "gitlab",
+      "term": "keywords",
+      "path": "topics",
+      "cell": "topics / tag_list",
+      "reason": "the cell names two fields; tag_list is deprecated in favour of topics, which holds the same list"
+    },
+    {
+      "format": "gitlab",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; created_at and last_activity_at are dateCreated and dateModified, and a project has no publication date"
+    },
+    {
+      "format": "gitlab",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; gitlab has no publisher field"
+    },
+    {
+      "format": "gitlab",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; gitlab has no field for it"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "author.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; contact.name is one full name string"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "author.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; contact.name is one full name string"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "author.@id",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; contact has only name and email"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; code.json has no contributor field, and partners lists partner agencies"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "no contributor field in code.json"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "no contributor field in code.json"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no contributor field in code.json"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "license",
+      "path": "permissions.licenses[].name",
+      "cell": "permissions.licenses",
+      "reason": "the cell says permissions.licenses, a list of objects (name, URL); the licence id is each one's name",
+      "comment": "name is an SPDX id from a short list (MIT, Apache-2.0, GPL-3.0-only and others), or Other or None."
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "identifier",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; code.json has no DOI field"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "swhid",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; code.json has no SWHID field"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; date.created and date.lastModified are dateCreated and dateModified, and code.json has no release date"
+    },
+    {
+      "format": "code-json-2.0",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; code.json has no field for it"
     }
   ]
 }

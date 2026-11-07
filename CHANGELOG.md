@@ -11,7 +11,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
   [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
-  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. See the
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. The 4.0 export adds two formats whose
+  crosswalks came with 4.0: `gitlab` (the GitLab API's project JSON) and `code-json-2.0` (the US federal code.json). See the
   [mapping export](docs/mapping-export.md).
 - The mapping export (schema 1.7) has rows for two more terms in all 33 formats: `publisher`, and `resourceType`,
   the kind of resource, which DataCite requires as `types.resourceTypeGeneral`. The DataCite publisher row reads

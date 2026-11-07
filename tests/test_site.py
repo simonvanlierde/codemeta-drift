@@ -31,7 +31,7 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert len(data["upstream"]["commit"]) == 40
     # The crosswalks nobody reviewed are read at the export's tag.
     assert data["unreviewed"]["codemeta_tag"] == "4.0"
-    assert len(data["unreviewed"]["formats"]) == 18
+    assert len(data["unreviewed"]["formats"]) == 16
     # The SSSOM file the page publishes is the one its own mapping_set_id names.
     tsv = (out / "spokes-4.0.sssom.tsv").read_text("utf-8")
     assert tsv.startswith("# mapping_set_id: https://simonvanlierde.com/codemeta-drift/spokes-4.0.sssom.tsv\n")
