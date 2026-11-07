@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from codemeta_drift.checks import TABLE, crosswalk_paths, format_name
-from codemeta_drift.export import FORMATS, PEOPLE, TERMS, classify, crosswalk_cells, derive
+from codemeta_drift.export import FORMATS, NO_PROPERTY, PEOPLE, TERMS, classify, crosswalk_cells, derive
 from codemeta_drift.hub import validate_mapping
 
 STATUSES = {
@@ -20,6 +20,7 @@ SHAPES = {
     "path": ("•", "the cell reads as a path, but nobody has checked that it is right"),
     "prose": ("¶", "the cell is prose or a list, not one path"),
     "empty": ("○", "the cell is empty: the format may have no field, or the crosswalk leaves it out"),
+    "no-term": ("∅", "CodeMeta's property table has no row for this term, so no crosswalk has a cell"),
     "unmatched": ("?", "the crosswalk and the property table list this property a different number of times"),
 }
 """What a cell of a crosswalk with no reviewed mapping shows: only its shape, from ``classify``."""
@@ -105,7 +106,7 @@ def unreviewed(files: Mapping[str, str], mapping: dict[str, Any]) -> dict[str, A
         joined = crosswalk_cells(files, path)
         for term, key in TERMS.items():
             cell = joined.get(key)
-            status = "unmatched" if cell is None else classify(cell)
+            status = "no-term" if term in NO_PROPERTY else "unmatched" if cell is None else classify(cell)
             cells.append(
                 {
                     "format": fmt,

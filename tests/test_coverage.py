@@ -1,11 +1,12 @@
 import json
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.coverage import coverage, markdown, unreviewed, upstream
-from codemeta_drift.export import FORMATS
+from codemeta_drift.export import FORMATS, TERMS
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/mapping-3.1.json"
@@ -32,11 +33,12 @@ def test_unreviewed_lists_every_other_crosswalk_by_shape():
     assert "Zenodo" not in names
     assert "NodeJS" not in names
     found = {(c["format"], c["term"]): c["status"] for c in data["cells"]}
-    assert len(found) == 16 * 17
+    assert len(found) == 16 * 19
     assert found["ASCL", "name"] == "path"
     assert found["DCAT", "name"] == "path"  # dcterms:title, a prefixed key since schema 1.6
     assert found["MODS", "name"] == "prose"
     assert found["ASCL", "version"] == "empty"
+    assert {s for (_, term), s in found.items() if term == "resourceType"} == {"no-term"}
     assert {f["label"] for f in data["formats"] if f["format"] == "DCAT"} == {"DCAT-2"}
 
 
@@ -84,14 +86,28 @@ def test_known_cells_get_their_status():
 
 def test_counts_for_the_crosswalks():
     found = [s for (fmt, _), s in statuses().items() if FORMATS[fmt].crosswalk]
-    assert {s: found.count(s) for s in set(found)} == {"as-is": 111, "corrected": 124, "added": 90, "no field": 151}
+    assert {s: found.count(s) for s in set(found)} == {"as-is": 112, "corrected": 129, "added": 97, "no field": 194}
+
+
+def test_readme_figures_match_the_counts():
+    cells = [c for c in coverage(mapping())["cells"] if c["crosswalk"]]
+    count = Counter(c["status"] for c in cells)
+    null_corrected = sum(c["status"] == "corrected" and c["path"] is None for c in cells)
+    text = " ".join((ROOT / "README.md").read_text("utf-8").split())
+    other = len(cells) - count["no field"]
+    assert (
+        f"have {len(cells)} cells for the {len(TERMS)} terms citation tools need. {count['no field']} are for terms"
+        f" the format has no field for. Of the other {other}, only {count['as-is']} can be used as written:"
+        f" {count['corrected']} are wrong, ambiguous or prose ({null_corrected} of them fill a term the format has"
+        f" no field for), and {count['added']} are blank"
+    ) in text
 
 
 def test_cli_writes_json(capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(EXAMPLE), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == "3.1"
-    assert len(data["cells"]) == 33 * 17
+    assert len(data["cells"]) == 33 * 19
     assert "unreviewed" not in data  # only with --codemeta
 
 

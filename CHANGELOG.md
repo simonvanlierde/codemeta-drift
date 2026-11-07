@@ -9,6 +9,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- The mapping export (schema 1.7) has rows for two more terms in all 33 formats: `publisher`, and `resourceType`,
+  the kind of resource, which DataCite requires as `types.resourceTypeGeneral`. The DataCite publisher row reads
+  `publisher.name | publisher`, for the object of schema 4.5 and later and the string before it. A format with no
+  field for either has a `null` row. See the [mapping export](docs/mapping-export.md).
 - The mapping export covers RIS and EndNote's tagged format, with a row for each term. Neither has a CodeMeta
   crosswalk, so each row cites the tag list it was read from (Zotero's RIS translator and EndNote's import format docs), and `schema_version` is 1.7. See the
   [mapping export](docs/mapping-export.md).

@@ -7,8 +7,18 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from codemeta_drift import export as export_module
+from codemeta_drift.checks import table_rows
 from codemeta_drift.cli import main, read_dir
-from codemeta_drift.export import build_rows, classify, crosswalk_cells, export, read_curated, shared_paths
+from codemeta_drift.export import (
+    NO_PROPERTY,
+    TERMS,
+    build_rows,
+    classify,
+    crosswalk_cells,
+    export,
+    read_curated,
+    shared_paths,
+)
 
 ROOT = Path(__file__).parent.parent
 FIXTURE = ROOT / "tests/fixtures/3.1"
@@ -153,7 +163,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == 576
+    assert len(rows) == 644
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():
@@ -388,3 +398,10 @@ def test_help_names_the_export_subcommand(capsys: pytest.CaptureFixture[str]):
     with pytest.raises(SystemExit):
         main(["--help"])
     assert "codemeta-drift export" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_placeholder_keys_are_not_property_names(tag: str):
+    """A term in NO_PROPERTY has a key no crosswalk cell may join to, so the property table must never list it."""
+    properties = {row[1] for _, row in table_rows(read_dir(ROOT / "tests/fixtures" / tag))}
+    assert not {key for term in NO_PROPERTY for _, key in [TERMS[term]]} & properties

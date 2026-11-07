@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
+from codemeta_drift.export import FORMATS as ALL_FORMATS
 from codemeta_drift.export import generator
 
 ROOT = Path(__file__).parent.parent
@@ -93,6 +94,22 @@ def test_person_sub_terms_line_up_with_their_term():
         subs, terms = path.split(" | "), parent.split(" | ")
         assert len(subs) == len(terms), (fmt, term)
         assert all(sub.startswith(alt) for sub, alt in zip(subs, terms, strict=True)), (fmt, term)
+
+
+# Formats with a place for the publisher and the resource type; every other format has a null row.
+PUBLISHER = {"codemeta", "codemeta-2", "bibtex", "datacite", "dcat-3", "doap", "wikidata", "ris", "endnote"}
+RESOURCE_TYPE = {
+    "codemeta",
+    "codemeta-2",
+    "cff-1.2.0",
+    "zenodo",
+    "figshare",
+    "datacite",
+    "dcat-3",
+    "wikidata",
+    "ris",
+    "endnote",
+}
 
 
 def test_example_null_rows():
@@ -332,6 +349,8 @@ def test_example_null_rows():
                 "contributor.@id",
             )
         }
+        | {(f, "publisher") for f in ALL_FORMATS if f not in PUBLISHER}
+        | {(f, "resourceType") for f in ALL_FORMATS if f not in RESOURCE_TYPE}
         | {
             (fmt, t)
             for fmt in ("ris", "endnote")
