@@ -356,7 +356,8 @@ table {
 #matrix td:has(.s-added) {
   background: var(--ochre-light);
 }
-.s-no-field {
+.s-no-field,
+.s-no-term {
   color: var(--faint);
 }
 /* A crosswalk nobody reviewed gets no wash: its marks say only the cell's shape. Prose and unjoinable cells are ochre. */
@@ -396,7 +397,8 @@ table {
 table[data-only="as-is"] td:has(.cell:not(.s-as-is)),
 table[data-only="corrected"] td:has(.cell:not(.s-corrected)),
 table[data-only="added"] td:has(.cell:not(.s-added)),
-table[data-only="no-field"] td:has(.cell:not(.s-no-field)) {
+table[data-only="no-field"] td:has(.cell:not(.s-no-field)),
+table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
   opacity: 0.4;
 }
 .detail {

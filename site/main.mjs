@@ -86,8 +86,8 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
   return body;
 }
 
-// The crosswalk cells a person had to judge: every cell except a 'no field' one. The tally and the headline count these.
-const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no field");
+// The crosswalk cells a person had to judge: not 'no field', and not 'no term', which no crosswalk can have. The tally and the headline count these.
+const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no field" && c.status !== "no term");
 
 const usableTally = (cells) => {
   if (!cells[0]?.crosswalk) return ["–", el("span", { class: "vh" }, " no CodeMeta crosswalk")];
@@ -291,7 +291,7 @@ function score(data) {
     bar,
     el("figcaption", {}, `cells in these ${formats} CodeMeta crosswalks can be used as written. `
       + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank although the format has the field. `
-      + `The other ${crosswalk.length - fields.length} are for terms the format has no field for.`),
+      + `${crosswalk.filter((c) => c.status === "no field").length} more are for terms the format has no field for.`),
   );
 }
 
