@@ -10,14 +10,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Upgrade step: the `hub` commands of 0.6.0 and older refuse an export with the new formats and terms, so upgrade
 codemeta-drift with the file. A PKG-INFO parser must keep `Author` and `Author-email` as lists, even for one name,
 or the author rows read no one from them: it splits `Author` at commas outside double quotes, keeps a company
-suffix such as `Inc.` with the name before it and drops `et al.`, and splits `Author-email` at commas outside
-quotes and angle brackets.
+suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) with the name before it and drops
+`et al.`, and splits `Author-email` at commas outside quotes and angle brackets. See the
+[mapping export](docs/mapping-export.md).
 
 ### Added
 
 - The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
   [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
-  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. The 4.0 export adds two formats whose
+  [coverage page](docs/coverage-3.1.md). The 4.0 export adds two formats whose
   crosswalks came with 4.0: `gitlab` (the GitLab API's project JSON) and `code-json-2.0` (the US federal code.json). See the
   [mapping export](docs/mapping-export.md).
 - The mapping export (schema 1.7) has rows for two more terms in every format: `publisher`, and `resourceType`,
@@ -29,15 +30,16 @@ quotes and angle brackets.
   crosswalk, so each row cites the tag list it was read from (Zotero's RIS translator and EndNote's import format docs), and `schema_version` is 1.7. See the
   [mapping export](docs/mapping-export.md).
 - The coverage page and `hub coverage` mark a curated row for `resourceType` as `no term` (`∅`), since CodeMeta has
-  no property for it, and leave it out of the counts. See [coverage](docs/coverage-3.1.md).
+  no property for it, and count it in its own `no term` column, outside the as-is, corrected and added counts. See
+  [coverage](docs/coverage.md).
 - The PyPI page has keywords, classifiers and links to the docs, changelog and DOI.
 
 ### Changed
 
-- The PKG-INFO author rows read `Author[] + Author-email[]`. A consumer splits `Author` at commas outside double
-  quotes, as the pyproject.toml spec writes several names (`Author: A, B`), keeps a company suffix such as `Inc.`
-  with its name and drops `et al.`; a `Last, First` name reads as two unless it is quoted. `Author-email` is a list
-  of RFC 822 addresses, split outside quotes and angle brackets. See the [mapping export](docs/mapping-export.md).
+- The PKG-INFO author rows read `Author[] + Author-email[]`, split as the upgrade step says. `Author` is split
+  because the pyproject.toml spec writes several names as `Author: A, B`; a `Last, First` name reads as two unless
+  it is quoted.
+- In both exports, the `github` `name` row reads `name`, not the crosswalk's `full_name` (`owner/repo`).
 - Update the project template to v0.13.0: new git hooks (`reuse`, `citesync`, `dco-signoff`), `just release`, `just py-matrix`, and a REUSE.toml with `LICENSES/`. `.zenodo.json` is gone, since Zenodo reads `CITATION.cff`.
 
 ### Removed
