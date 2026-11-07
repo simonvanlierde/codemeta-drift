@@ -58,11 +58,14 @@ class Spoke:
         person_prefix: How a person sub-term cell starts when it is relative to one author
             (``person.`` in CFF, nothing in Zenodo); it is replaced by author's path. None means
             the cell is already absolute.
+        since: The first CodeMeta tag whose export has the format, the tag its crosswalk arrived
+            in; None means every tag.
     """
 
     crosswalk: str | None
     person_list: bool = False
     person_prefix: str | None = None
+    since: str | None = None
 
 
 FORMATS = {
@@ -100,6 +103,8 @@ FORMATS = {
     "wikidata": Spoke("crosswalks/Wikidata.csv", person_list=True),
     "ris": Spoke(None),
     "endnote": Spoke(None),
+    "gitlab": Spoke("crosswalks/GitLab.csv", since="4.0"),
+    "code-json-2.0": Spoke("crosswalks/code-json.csv", since="4.0"),
 }
 
 PATH = re.compile(
@@ -153,6 +158,21 @@ def curated_tags() -> list[str]:
     return sorted(n.removeprefix("curated-").removesuffix(".json") for n in names if n.startswith("curated-"))
 
 
+def tag_key(tag: str) -> tuple[int, ...]:
+    """A CodeMeta tag as a version number that sorts: ``4.0`` after ``3.1``."""
+    return tuple(map(int, tag.split(".")))
+
+
+def formats(tag: str) -> dict[str, Spoke]:
+    """The formats an export for ``tag`` has rows for: those whose ``since`` is not after it."""
+    return {fmt: spoke for fmt, spoke in FORMATS.items() if not spoke.since or tag_key(spoke.since) <= tag_key(tag)}
+
+
+def latest_tag() -> str:
+    """The newest CodeMeta tag with a curated file, by version number."""
+    return max(curated_tags(), key=tag_key)
+
+
 def read_curated(tag: str) -> list[dict[str, Any]]:
     """The curated rows for a CodeMeta tag. Raises KeyError for a tag with no file."""
     if tag not in curated_tags():
@@ -181,9 +201,9 @@ def build_rows(
     findings += [
         Finding("CURATED_UNUSED", name, term, f"no {fmt} row has this term")
         for fmt, term in overrides
-        if fmt not in FORMATS or term not in TERMS
+        if fmt not in formats(tag) or term not in TERMS
     ]
-    for fmt, spoke in FORMATS.items():
+    for fmt, spoke in formats(tag).items():
         cells = crosswalk_cells(files, spoke.crosswalk) if spoke.crosswalk and spoke.crosswalk in files else {}
         made: dict[str, str | None] = {}
         for term, key in TERMS.items():
@@ -276,6 +296,9 @@ CROSSWALK_COMMENTS = {
     ("datacite", "author.familyName"): DATACITE_NAME,
     ("datacite", "contributor.givenName"): DATACITE_NAME,
     ("datacite", "contributor.familyName"): DATACITE_NAME,
+    ("code-json-2.0", "author"): (
+        "contact is one object (name, email), the release's point of contact; the consumer reads its name."
+    ),
     ("cpan-meta-2", "license"): (
         "license is a list of CPAN::Meta licence strings (perl_5, mit, apache_2_0), not SPDX ids; the"
         " consumer maps them with the spec's table. A single string is a list of one."

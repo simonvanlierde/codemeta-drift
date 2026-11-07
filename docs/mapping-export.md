@@ -6,8 +6,9 @@ term sits in each metadata format. Tools that keep `CITATION.cff`, `codemeta.jso
 tables, whose cells are prose and sometimes wrong.
 
 The schema is [`src/codemeta_drift/mapping.schema.json`](../src/codemeta_drift/mapping.schema.json)
-(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) is the
-export for CodeMeta 3.1, written by `codemeta-drift export`.
+(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) and
+[`examples/mapping-4.0.json`](../examples/mapping-4.0.json) are the exports for CodeMeta 3.1 and 4.0,
+written by `codemeta-drift export`.
 
 ## Export a mapping
 
@@ -16,16 +17,16 @@ checkout at `codemeta`, as in the [quick start](../README.md#try-it). It must co
 the selected tag:
 
 ```sh
-codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
+codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
 The exporter reads the tag's commit, not the working tree. Only tags with a bundled
-curated file can be exported; currently that is `3.1`. To check a directory named
+curated file can be exported; currently those are `3.1` and `4.0`. To check a directory named
 `export`, write `./export` so the CLI does not treat it as the subcommand.
 
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
-Other rows use [`curated-3.1.json`](../src/codemeta_drift/curated-3.1.json), which records
-the replacement path and reason. The exporter refuses an unresolved cell, prints the
+Other rows use `curated-<tag>.json` ([3.1](../src/codemeta_drift/curated-3.1.json),
+[4.0](../src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell, prints the
 findings on standard error and exits 1 without writing output. A successful export exits 0;
 invalid arguments or unreadable inputs exit 2. Without `--out`, JSON goes to standard output.
 
@@ -50,8 +51,8 @@ The bundled schema snapshots are in a codemeta-drift source checkout. From its r
 use `../codemeta` for a CodeMeta checkout beside it:
 
 ```sh
-uv run codemeta-drift export ../codemeta --tag 3.1 \
-  --schemas tests/fixtures/schemas --out mapping-3.1.json
+uv run codemeta-drift export ../codemeta --tag 4.0 \
+  --schemas tests/fixtures/schemas --out mapping-4.0.json
 ```
 
 `--schemas DIR` adds `PATH_NOT_IN_SCHEMA` findings for paths absent from the format's
@@ -110,9 +111,12 @@ Each row:
   DESCRIPTION), `publiccode-0.8` (publiccode.yml), `swmath` (a zbMATH Open software record),
   `spdx-2.3` (an SPDX 2.3 package in JSON), `codemeta-2` (a codemeta.json written to the 2.0
   context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project), `wikidata` (a Wikidata
-  item), `ris` (a RIS record with `TY  - COMP`) or `endnote` (an EndNote tagged record with
-  `%0 Computer Program`). A format whose versions differ puts the version in the id. `pkg-info` to
-  `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, and `ris` and `endnote` in 1.7.
+  item), `ris` (a RIS record with `TY  - COMP`), `endnote` (an EndNote tagged record with
+  `%0 Computer Program`), `gitlab` (the GitLab REST API's project JSON) or `code-json-2.0` (a
+  code.json 2.0 file, the US federal source code metadata). A format whose versions differ puts the
+  version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to `wikidata` in
+  1.5, and `ris` to `code-json-2.0` in 1.7. `gitlab` and `code-json-2.0` have rows from the 4.0
+  export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
   `resourceType`, or a person sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
@@ -217,7 +221,7 @@ A (format, term) pair appears at most once. The schema cannot enforce uniqueness
 those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, and within a format in the order `name`, `version`, `author`,
+`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
 `contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer
@@ -283,7 +287,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
    path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas.
-   Schema 1.7 only adds the `ris` and `endnote` format ids and the `publisher` and `resourceType` terms, so a 1.7 file passes the 1.6 schema. Update the
+   Schema 1.7 only adds the `ris`, `endnote`, `gitlab` and `code-json-2.0` format ids and the `publisher` and `resourceType` terms, so a 1.7 file passes the 1.6 schema. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.

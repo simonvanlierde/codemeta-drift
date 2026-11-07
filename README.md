@@ -30,7 +30,7 @@ At CodeMeta 3.1, the 28 crosswalks reviewed here, from CFF, Zenodo and DataCite 
 and Wikidata, have 532 cells for the 19 terms citation tools need. 194 are for terms the format has
 no field for. Of the other 338, only 112 can be used as written: 129 are wrong, ambiguous or prose
 (23 of them fill a term the format has no field for), and 97 are blank although the format has the field.
-CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml` or Quarto extensions at all. The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md)
+CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml` or Quarto extensions at all. The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-3.1.md)
 shows every cell and the reason for each correction, lists the other 16 crosswalks by the shape
 of their cells, and the
 [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.
@@ -61,25 +61,25 @@ See [finding codes, compared files and JSON output](https://github.com/simonvanl
 
 ## Mapping export
 
-Export the reviewed mappings for CodeMeta 3.1:
+Export the reviewed mappings for CodeMeta 4.0 (or `3.1`):
 
 ```sh
-uvx codemeta-drift export codemeta --tag 3.1 --out mapping-3.1.json
+uvx codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
-The export covers 34 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3 and Wikidata; the
+The 4.0 export covers 36 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata and GitLab; the
 [mapping export](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md) lists them.
 It records the field path for each term, with a reason for each curated correction.
 It does not convert field values.
 The exporter reads the tag's commit and refuses rows it cannot resolve.
 
 Read the [export guide and contract](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md), or inspect the
-[committed example](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-3.1.json). Only tags with curated mappings can be
-exported; currently that is `3.1`.
+[committed example](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-4.0.json). Only tags with curated mappings can be
+exported; currently those are `3.1` and `4.0`.
 
 ## Documentation
 
-- [Crosswalk coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md): every term and format, with the reason for each correction.
+- [Crosswalk coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md) (also [3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-3.1.md)): every term and format, with the reason for each correction.
 - [Offline schema recovery](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-recovery.md): preview a synthetic rename and apply an explicit approval.
 - [Zenodo path coverage](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/zenodo-schema.md): verified paths, upstream source checks and validation limits.
 - [Understand findings and use the JSON interface](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md).

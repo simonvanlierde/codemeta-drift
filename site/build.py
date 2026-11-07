@@ -20,6 +20,7 @@ from typing import Any
 from codemeta_drift.checks import check
 from codemeta_drift.cli import read_ref
 from codemeta_drift.coverage import coverage, unreviewed, upstream
+from codemeta_drift.export import latest_tag
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -49,7 +50,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True, help="output directory, replaced if it exists")
     parser.add_argument("--codemeta", type=Path, help="a CodeMeta clone whose HEAD to compare")
     args = parser.parse_args()
-    mapping = json.loads((ROOT / "examples/mapping-3.1.json").read_text("utf-8"))
+    mapping = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
     data = {
         "coverage": coverage(mapping),
         "unreviewed": unreviewed(read_ref(args.codemeta, mapping["codemeta_tag"]), mapping) if args.codemeta else None,

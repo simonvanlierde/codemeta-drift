@@ -9,6 +9,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
+  [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. The 4.0 export adds two formats whose
+  crosswalks came with 4.0: `gitlab` (the GitLab API's project JSON) and `code-json-2.0` (the US federal code.json). See the
+  [mapping export](docs/mapping-export.md).
 - The mapping export (schema 1.7) has rows for two more terms in all 33 formats: `publisher`, and `resourceType`,
   the kind of resource, which DataCite requires as `types.resourceTypeGeneral`. The DataCite publisher row reads
   `publisher.name | publisher`, for the object of schema 4.5 and later and the string before it. A format with no
@@ -42,6 +47,10 @@ codemeta-drift with the file. A consumer that vendors the mapping schema vendors
 
 ### Added
 
+- The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
+  [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. See the
+  [mapping export](docs/mapping-export.md).
 - The mapping export covers 22 more formats: DataCite, setup.py, Ruby gemspecs, Maven's pom.xml, CPAN's
   META.json, NuGet's .nuspec, Dart's pubspec.yaml, Cabal, `typst.toml`, Quarto's `_extension.yml`, the GitHub
   API, Figshare, bio.tools, Leiningen's project.clj, Octave's DESCRIPTION, publiccode.yml 0.8, swMATH, SPDX 2.3,
@@ -53,7 +62,7 @@ codemeta-drift with the file. A consumer that vendors the mapping schema vendors
 ### Changed
 
 - The BibTeX `codeRepository` row reads `repository | url`, since plain BibTeX styles print only `url`.
-  See the [coverage page](docs/coverage.md).
+  See the [coverage page](docs/coverage-3.1.md).
 - Schema 1.6 extends the path grammar: `a + b` reads both parts, `[k=v]` also matches a list that holds `v`, and
   a key may carry a prefix. The PKG-INFO author rows use `+`, the Project-URL rows end in `.url`, and the DCAT 3
   and DOAP rows use prefixed names such as `dcterms:title`. See the
@@ -76,8 +85,12 @@ The `hub` commands of 0.4.0 and older refuse a 1.4 export, so upgrade codemeta-d
 
 ### Added
 
+- The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
+  [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. See the
+  [mapping export](docs/mapping-export.md).
 - See every crosswalk cell for nine citation and package formats, and why a reviewed mapping changed it, in the
-  [coverage matrix](docs/coverage.md) and on the [coverage page](https://simonvanlierde.com/codemeta-drift/).
+  [coverage matrix](docs/coverage-3.1.md) and on the [coverage page](https://simonvanlierde.com/codemeta-drift/).
   `codemeta-drift hub coverage` writes the matrix as Markdown or JSON. It also lists the CodeMeta crosswalks
   nobody has reviewed, each cell marked as a path, prose, empty or unmatched; `--codemeta <checkout>` adds them.
 - The coverage page checks CodeMeta's main branch every Monday and lists the cells that changed since the pinned tag.
@@ -98,6 +111,10 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
 
 ### Added
 
+- The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
+  [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. See the
+  [mapping export](docs/mapping-export.md).
 - Run an [offline schema recovery example](docs/schema-recovery.md) with an explicit synthetic approval and reproducible mapping hashes.
 - Check Zenodo mapping paths against a [verified structural subset](docs/zenodo-schema.md); importer source changes produce review drafts. This does not validate complete deposits.
 - Find corresponding fields in two formats and export seven SSSOM spokes with the
@@ -130,6 +147,10 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
 
 ### Added
 
+- The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
+  [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. See the
+  [mapping export](docs/mapping-export.md).
 - The export maps `swhid`, the Software Heritage identifier: CFF `identifiers` of type `swh`,
   Zenodo `related_identifiers` with scheme `swh` (or no scheme and a `swh:1:` value), and
   codemeta.json `identifier`, which holds the DOI too. See [the term list](docs/mapping-export.md#the-file).
@@ -144,6 +165,10 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
 
 ### Added
 
+- The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
+  [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. See the
+  [mapping export](docs/mapping-export.md).
 - The export maps `datePublished` and `contributor`, with the same person sub-terms as
   `author`. CFF 1.2.0, Cargo.toml and pyproject.toml have no contributor list, so their rows are
   `null`; Zenodo's need a curated row, because its crosswalk cells are empty.
@@ -157,6 +182,10 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
 
 ### Added
 
+- The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a
+  [4.0 coverage page](docs/coverage-4.0.md). The coverage web page now shows the newest curated tag. 3.1 keeps its export and
+  [coverage page](docs/coverage-3.1.md). `github` `name` reads `name`, not the crosswalk's `full_name`. See the
+  [mapping export](docs/mapping-export.md).
 - `codemeta-drift <checkout> [--ref REF] [--json]` lists where CodeMeta's context,
   definitions, property table, examples, crosswalks and `crosswalk.csv` disagree. Each check
   has a stable code. A malformed input file exits 2, so CI doesn't mistake it for drift.

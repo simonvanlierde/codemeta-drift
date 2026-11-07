@@ -6,11 +6,11 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from codemeta_drift.export import FORMATS as ALL_FORMATS
-from codemeta_drift.export import generator
+from codemeta_drift.export import generator, latest_tag
 
 ROOT = Path(__file__).parent.parent
 SCHEMA = json.loads((ROOT / "src/codemeta_drift/mapping.schema.json").read_text())
-EXAMPLE = json.loads((ROOT / "examples/mapping-3.1.json").read_text())
+EXAMPLE = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text())
 PATH = re.compile(SCHEMA["$defs"]["row"]["properties"]["path"]["pattern"])
 
 FORMATS = ("cff-1.2.0", "codemeta", "zenodo", "pep621", "cargo", "npm")
@@ -96,8 +96,25 @@ def test_person_sub_terms_line_up_with_their_term():
         assert all(sub.startswith(alt) for sub, alt in zip(subs, terms, strict=True)), (fmt, term)
 
 
+def test_pkg_info_author_email_is_a_list():
+    """Core metadata's Author-email is a list of RFC 822 addresses; Author is one free-text string."""
+    paths = {row["path"] for row in EXAMPLE["rows"] if row["format"] == "pkg-info" and row["term"].startswith("author")}
+    assert paths == {"Author + Author-email[]", None}
+
+
 # Formats with a place for the publisher and the resource type; every other format has a null row.
-PUBLISHER = {"codemeta", "codemeta-2", "bibtex", "datacite", "dcat-3", "doap", "wikidata", "ris", "endnote"}
+PUBLISHER = {
+    "codemeta",
+    "codemeta-2",
+    "bibtex",
+    "datacite",
+    "dcat-3",
+    "doap",
+    "wikidata",
+    "ris",
+    "endnote",
+    "code-json-2.0",
+}
 RESOURCE_TYPE = {
     "codemeta",
     "codemeta-2",
@@ -364,6 +381,9 @@ def test_example_null_rows():
                 "swhid",
             )
         }
+        | {(f, t) for f in ("gitlab", "code-json-2.0") for t in ("author.givenName", "author.familyName", "author.@id")}
+        | {(f, t) for f in ("gitlab", "code-json-2.0") for t in ("identifier", "swhid", "datePublished", *contributor)}
+        | {("gitlab", "version")}
     )
 
 

@@ -22,26 +22,26 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     out = tmp_path / "site"
     assert build(out, "--codemeta", str(repo)).returncode == 0
     data = json.loads((out / "data.json").read_text("utf-8"))
-    assert data["coverage"]["codemeta_tag"] == "3.1"
-    # The repo fixture's HEAD is the 4.0 snapshot: its exported cells read as at 3.1, but its files drift.
+    assert data["coverage"]["codemeta_tag"] == "4.0"
+    # The repo fixture's HEAD is the 4.0 snapshot, the exported tag: its cells read the same.
     codes = [f["code"] for f in data["upstream"]["drift"]]
     assert codes.count("CROSSWALK_ROWS") == 10
     assert "SKIPPED" not in codes
     assert data["upstream"]["cells"] == []
     assert len(data["upstream"]["commit"]) == 40
-    # The crosswalks nobody reviewed are read at the export's tag, not at HEAD.
-    assert data["unreviewed"]["codemeta_tag"] == "3.1"
+    # The crosswalks nobody reviewed are read at the export's tag.
+    assert data["unreviewed"]["codemeta_tag"] == "4.0"
     assert len(data["unreviewed"]["formats"]) == 16
     # The SSSOM file the page publishes is the one its own mapping_set_id names.
-    tsv = (out / "spokes-3.1.sssom.tsv").read_text("utf-8")
-    assert tsv.startswith("# mapping_set_id: https://simonvanlierde.com/codemeta-drift/spokes-3.1.sssom.tsv\n")
+    tsv = (out / "spokes-4.0.sssom.tsv").read_text("utf-8")
+    assert tsv.startswith("# mapping_set_id: https://simonvanlierde.com/codemeta-drift/spokes-4.0.sssom.tsv\n")
     assert sorted(p.name for p in out.iterdir()) == [
         "data.json",
         "favicon.svg",
         "fragment.mjs",
         "index.html",
         "main.mjs",
-        "spokes-3.1.sssom.tsv",
+        "spokes-4.0.sssom.tsv",
         "style.css",
     ]
 

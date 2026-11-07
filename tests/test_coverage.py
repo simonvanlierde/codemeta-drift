@@ -21,9 +21,12 @@ def statuses():
     return {(c["format"], c["term"]): c["status"] for c in coverage(mapping())["cells"]}
 
 
-def test_docs_page_is_generated_from_the_example():
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_docs_page_is_generated_from_the_example(tag: str):
     # Regenerate as docs/development.md says, with a CodeMeta clone that has the tag.
-    assert (ROOT / "docs/coverage.md").read_text("utf-8") == markdown(mapping(), read_dir(TAG_FILES))
+    example = json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8"))
+    page = (ROOT / f"docs/coverage-{tag}.md").read_text("utf-8")
+    assert page == markdown(example, read_dir(ROOT / "tests/fixtures" / tag))
 
 
 def test_unreviewed_lists_every_other_crosswalk_by_shape():
