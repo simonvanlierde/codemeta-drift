@@ -14,7 +14,8 @@ Each directory needs the five files named in
 [`SCHEMA_FILES`](../src/codemeta_drift/conformance.py): CFF, pyproject, package.json and
 Cargo, plus the [verified Zenodo structural subset](../tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the curated
 mapping from the selected CodeMeta tag, then checks its paths against the new schemas.
-It lists broken mapped paths and new declared properties that have no row. Local refs (including numeric array indices),
+It lists broken mapped paths and new declared properties that have no row. New tables under pyproject's `tool`
+need no row: they configure tools and hold no metadata. Local refs (including numeric array indices),
 combined schemas and array item properties are followed; recursive schemas stop at the
 first repeated node. Tuple arrays use both draft-07 `items` and modern `prefixItems`.
 Mapped array containers and filter keys count as covered fields. Pattern properties and arbitrary external refs do not yield a

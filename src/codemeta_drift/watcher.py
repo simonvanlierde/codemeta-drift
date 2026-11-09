@@ -34,6 +34,11 @@ def schema_paths(root: dict[str, Any]) -> set[str]:
     return walk(root, "", frozenset())
 
 
+# Subtrees that hold no metadata, so a new field there needs no mapping row: pyproject's [tool] tables
+# configure tools, and SchemaStore adds one for each new tool.
+NOT_METADATA = {"pep621": ("tool",)}
+
+
 def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: dict[str, Any]) -> list[dict[str, str]]:
     """List broken mapped paths and newly declared paths without any mapping, in stable order."""
     if before.keys() != after.keys():
@@ -71,6 +76,7 @@ def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: di
         changes.extend(
             {"format": fmt, "kind": "unmapped", "path": path, "detail": "new field has no mapping row"}
             for path in sorted(schema_paths(schema) - schema_paths(before[fmt]) - covered)
+            if path.split(".")[0].removesuffix("[]") not in NOT_METADATA.get(fmt, ())
         )
     return changes
 

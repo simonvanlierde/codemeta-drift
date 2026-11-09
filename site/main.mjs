@@ -203,9 +203,22 @@ function upstreamSection(upstream, tag) {
     upstream.cells.length ? `${upstream.cells.length} of the matrix's cells read differently there than at ${tag}:`
       : `Every cell in the matrix reads the same there as at ${tag}.`);
   const list = document.getElementById("upstream-cells");
+  // A cell with no new text has one cause per term and state, such as a property CodeMeta added to the
+  // table but not to the crosswalks, so those cells share a line.
+  const groups = new Map();
   for (const c of upstream.cells) {
-    list.append(el("li", {}, code(c.term), ` in ${label(c.format)} ${STATES[c.state]}`,
-      c.now !== null ? el("span", {}, ": ", code(c.now)) : null));
+    if (c.now !== null) {
+      list.append(el("li", {}, code(c.term), ` in ${label(c.format)} ${STATES[c.state]}: `, code(c.now)));
+      continue;
+    }
+    const key = `${c.state} ${c.term}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(c);
+  }
+  for (const cells of groups.values()) {
+    const names = cells.map((c) => label(c.format));
+    const where = names.length === 1 ? names[0] : `${names.length} formats (${names.join(", ")})`;
+    list.append(el("li", {}, code(cells[0].term), ` in ${where} ${STATES[cells[0].state]}`));
   }
   const counts = new Map();
   for (const f of upstream.drift) counts.set(f.code, (counts.get(f.code) ?? 0) + 1);
