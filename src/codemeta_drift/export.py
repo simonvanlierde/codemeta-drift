@@ -382,7 +382,11 @@ def curated_finding(
 
 
 def derive(spoke: Spoke, term: str, cell: str, made: Mapping[str, str | None]) -> str | None:
-    """The path a cell means for a term, or None when it depends on an author or contributor path that is missing."""
+    """The path a cell means for a term, or None when it depends on an author or contributor path that is missing.
+
+    A relative person sub-term is appended to the whole author or contributor path, so that path must be one
+    chain: with `` | `` or `` + `` in it, the sub-key lands on the last piece only.
+    """
     parent = term.partition(".")[0]
     if term in PEOPLE:
         return f"{cell}[]" if spoke.person_list else cell
