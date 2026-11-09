@@ -799,6 +799,34 @@
    "expected": [
     "https://example.org/carberry.git"
    ]
+  },
+  {
+   "name": "RIS authors: AU names, then the older A1 names",
+   "path": "AU[] + A1[]",
+   "document": {
+    "TY": "COMP",
+    "A1": [
+     "Lovelace, Ada"
+    ],
+    "AU": [
+     "Hopper, Grace"
+    ]
+   },
+   "expected": [
+    "Hopper, Grace",
+    "Lovelace, Ada"
+   ]
+  },
+  {
+   "name": "RIS date: the older Y1 when there is no PY",
+   "path": "PY | Y1",
+   "document": {
+    "TY": "COMP",
+    "Y1": "1843/10/01/"
+   },
+   "expected": [
+    "1843/10/01/"
+   ]
   }
  ]
 }
