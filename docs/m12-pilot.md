@@ -9,8 +9,8 @@ It does not test a full CodeMeta vocabulary, embeddings or language models.
 - Type: code experiment rehearsal, run on 2026-11-07.
 - Inputs: ten handpicked, non-null paths from the CodeMeta 4.0 mapping export and two controls.
 - Output: [saved run](../examples/m12-pilot-run/manifest.json), with input hashes and Python version.
-- Verification: repeated runs in the same environment produce identical files.
-- Human review: pending for all twelve cases; the existing curated mappings are comparison references.
+- Verification: repeated runs in the same environment produce identical files before review.
+- Human review: complete on 2026-11-09; ten acceptances, one abstention and one rejection.
 
 ## Run it
 
@@ -43,11 +43,20 @@ An empty result means no lexical support. A positive score is not a confidence e
 Open [review.tsv](../examples/m12-pilot-run/review.tsv), which has one row per case and each ranker's
 candidate list. Fill `decision` with `accept`, `reject` or `abstain`, put the chosen term in
 `accepted_term` for an acceptance, and fill `reviewer`. A reviewer can choose a term outside the proposed
-lists. Every saved decision is blank.
+lists. Fresh runs leave every decision blank. The saved sheet contains the completed review.
+
+The optional `review_mode` column records how each decision was confirmed: `individual` for cases 1–2
+and `batch` for cases 3–12. The reviewer confirmed the remaining recommendations together after inspecting
+the full decision table. This was a guided review with access to existing reference mappings, not a blinded
+assessment of accuracy.
+
+The review accepts the ten field mappings, abstains on the uninterpretable `qxz` control, and rejects
+`funding` because it has no target in the candidate subset. Two value-conversion limits remain:
+`publisher.name | publisher` can yield an object, and RIS `PY` supplies only a year.
 
 [candidates.tsv](../examples/m12-pilot-run/candidates.tsv) holds the individual ranks and scores.
 [reference.tsv](../examples/m12-pilot-run/reference.tsv) keeps the existing curated terms separate;
-compare it only after reviewing. The controls have no expected term in this candidate subset.
+keep it separate when collecting a blind review. The controls have no expected term in this candidate subset.
 
 The run exposes limits that a later comparison must handle: `title` and RIS `PY` have no token overlap
 with their curated targets, and character similarity still proposes unrelated terms for `funding`.
