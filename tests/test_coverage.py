@@ -202,3 +202,10 @@ def test_a_url_in_a_reason_is_shown_as_code(mapping: dict, reason: str, shown: s
     row = next(r for r in data["rows"] if r["format"] == "cargo" and r["source"].startswith("curated:"))
     row["source"] = f"curated:{reason}"
     assert shown in markdown(data)
+
+
+def test_no_crosswalk_sentence_needs_a_format_without_one(mapping: dict):
+    mapping["rows"] = [r for r in mapping["rows"] if FORMATS[r["format"]].crosswalk]
+    page = markdown(mapping)
+    assert "have no CodeMeta crosswalk" not in page
+    assert "(mapping-export.md). This page shows the pinned tag" in page

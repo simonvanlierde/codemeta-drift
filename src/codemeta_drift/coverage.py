@@ -146,8 +146,12 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
         (
             f"How CodeMeta's {tag} crosswalks map {len(data['terms'])} CodeMeta terms in {len(formats)} formats, "
             "read from the reviewed [mapping export](mapping-export.md). "
-            f"{', '.join(f'`{f}`' for f in formats if not FORMATS[f].crosswalk)} have no CodeMeta crosswalk, "
-            "so each of their paths is added here. This page shows the pinned tag; the "
+            + (
+                f"{', '.join(f'`{f}`' for f in own)} have no CodeMeta crosswalk, so each of their paths is added here. "
+                if (own := [f for f in formats if not FORMATS[f].crosswalk])
+                else ""
+            )
+            + "This page shows the pinned tag; the "
             "[web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch "
             "each week."
         ),
