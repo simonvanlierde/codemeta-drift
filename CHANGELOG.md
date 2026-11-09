@@ -35,6 +35,8 @@ suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) wit
   no property for it, and count it in its own `no term` column, outside the as-is, corrected and added counts. See
   [coverage](docs/coverage.md).
 - The PyPI page has keywords, classifiers and links to the docs, changelog and DOI.
+- `mapping-vectors.json` has `raw_input` cases with the source text for the PKG-INFO parser rules: comma separation,
+  quoted names, company suffixes and `et al.`. See the [mapping export](docs/mapping-export.md).
 
 ### Changed
 
@@ -42,6 +44,9 @@ suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) wit
   because the pyproject.toml spec writes several names as `Author: A, B`; a `Last, First` name reads as two unless
   it is quoted.
 - In both exports, the `github` `name` row reads `name`, not the crosswalk's `full_name` (`owner/repo`).
+- The `hub` commands refuse an export whose `codemeta_tag` is not a numeric version, and one with rows for a format
+  added in a later tag, such as `gitlab` or `code-json-2.0` rows in a 3.1 export. See the
+  [crosswalk hub](docs/crosswalk-hub.md).
 - Update the project template to v0.13.0: new git hooks (`reuse`, `citesync`, `dco-signoff`), `just release`, `just py-matrix`, and a REUSE.toml with `LICENSES/`. `.zenodo.json` is gone, since Zenodo reads `CITATION.cff`.
 
 ### Removed
