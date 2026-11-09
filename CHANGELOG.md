@@ -41,6 +41,8 @@ suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) wit
 
 ### Changed
 
+- `watch` no longer asks for a mapping row for a new table under pyproject's `tool`: those tables configure
+  tools and hold no metadata.
 - The PKG-INFO author rows read `Author[] + Author-email[]`, split as the upgrade step says. `Author` is split
   because the pyproject.toml spec writes several names as `Author: A, B`; a `Last, First` name reads as two unless
   it is quoted.
