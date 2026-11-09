@@ -277,6 +277,8 @@ function follow() {
 // The headline: of the crosswalk cells for a field the format has, how many work as written, as a figure and a bar.
 function score(data) {
   const crosswalk = data.cells.filter((c) => c.crosswalk);
+  // A term CodeMeta has no property for (resourceType) is left out of every count, as in the README.
+  const noTerm = new Set(data.cells.filter((c) => c.status === "no term").map((c) => c.term));
   const fields = needed(data.cells);
   const count = (status) => fields.filter((c) => c.status === status).length;
   const formats = new Set(crosswalk.map((c) => c.format)).size;
@@ -291,7 +293,7 @@ function score(data) {
     bar,
     el("figcaption", {}, `cells in these ${formats} CodeMeta crosswalks can be used as written. `
       + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank although the format has the field. `
-      + `${crosswalk.filter((c) => c.status === "no field").length} more are for terms the format has no field for.`),
+      + `${crosswalk.filter((c) => c.status === "no field" && !noTerm.has(c.term)).length} more are for terms the format has no field for.`),
   );
 }
 
