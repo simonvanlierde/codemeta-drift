@@ -3088,7 +3088,7 @@
       "path": "publisher.name | publisher",
       "cell": "publisher",
       "reason": "the cell says publisher, the XML element; the REST API returns the name as a string by default, and an object with a name key (since schema 4.5) only when the request has publisher=true",
-      "comment": "Read a string as the name and an object's name key as the name. An object may also carry publisherIdentifier (a ROR, say), publisherIdentifierScheme, schemeUri and lang. Schema 4.7 is current; publisher is mandatory."
+      "comment": "Read a string as the name and an object's name key as the name. An object may also carry publisherIdentifier (a ROR, say), publisherIdentifierScheme, schemeUri and lang. Schema 4.7 is current; publisher is mandatory. A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
     },
     {
       "format": "setup-py",
@@ -3212,7 +3212,8 @@
       "term": "publisher",
       "path": "doap:vendor.foaf:name | doap:vendor",
       "cell": "vendor",
-      "reason": "the cell says vendor, DOAP's doap:vendor, whose value is an organisation node; its name is foaf:name, and the path names both keys with their prefix"
+      "reason": "the cell says vendor, DOAP's doap:vendor, whose value is an organisation node; its name is foaf:name, and the path names both keys with their prefix",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
     },
     {
       "format": "wikidata",
@@ -3426,21 +3427,24 @@
       "format": "codemeta",
       "term": "publisher",
       "path": "publisher.name | publisher",
-      "reason": "CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name"
+      "reason": "CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
     },
     {
       "format": "codemeta-2",
       "term": "publisher",
       "path": "publisher.name | publisher",
       "cell": "publisher",
-      "reason": "CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name"
+      "reason": "CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
     },
     {
       "format": "dcat-3",
       "term": "publisher",
       "path": "dcterms:publisher.foaf:name | dcterms:publisher",
       "cell": "dcterms:publisher",
-      "reason": "the cell says dcterms:publisher, whose value is an agent (usually a foaf:Agent), so its name is foaf:name; an IRI value has no name sub-field"
+      "reason": "the cell says dcterms:publisher, whose value is an agent (usually a foaf:Agent), so its name is foaf:name; an IRI value has no name sub-field",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
     },
     {
       "format": "ris",
@@ -3458,22 +3462,23 @@
     {
       "format": "ris",
       "term": "author",
-      "path": "AU[]",
-      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; AU is the author, repeated once per person"
+      "path": "AU[] + A1[]",
+      "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; AU is the author, repeated once per person",
+      "comment": "A1 is the older spec's primary author tag, and Zotero's RIS translator reads it as author too. The path gives the AU names, then the A1 names; Zotero keeps their order in the record."
     },
     {
       "format": "ris",
       "term": "author.givenName",
-      "path": "AU[]",
+      "path": "AU[] + A1[]",
       "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; each AU is 'Last, First' with an optional suffix",
-      "comment": "The consumer splits at the first comma."
+      "comment": "A1 is the older spec's primary author tag, and Zotero's RIS translator reads it as author too. The path gives the AU names, then the A1 names; Zotero keeps their order in the record. The consumer splits at the first comma."
     },
     {
       "format": "ris",
       "term": "author.familyName",
-      "path": "AU[]",
+      "path": "AU[] + A1[]",
       "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; each AU is 'Last, First' with an optional suffix",
-      "comment": "The consumer splits at the first comma."
+      "comment": "A1 is the older spec's primary author tag, and Zotero's RIS translator reads it as author too. The path gives the AU names, then the A1 names; Zotero keeps their order in the record. The consumer splits at the first comma."
     },
     {
       "format": "ris",
@@ -3545,9 +3550,9 @@
     {
       "format": "ris",
       "term": "datePublished",
-      "path": "PY",
+      "path": "PY | Y1",
       "reason": "no RIS crosswalk upstream; tags from Zotero's RIS translator, https://github.com/zotero/translators/blob/master/RIS.js, with TY COMP; PY is the publication year in four digits",
-      "comment": "PY is a year, so the consumer cuts an ISO date to its first four digits. DA (YYYY/MM/DD/other) holds a full date, but its meaning varies (accessed, updated, released)."
+      "comment": "PY is a year, so the consumer cuts an ISO date to its first four digits. Y1 is the older spec's primary date (YYYY/MM/DD/other), which Zotero reads as DA; the consumer cuts it to the year too. DA (YYYY/MM/DD/other) holds a full date, but its meaning varies (accessed, updated, released)."
     },
     {
       "format": "endnote",

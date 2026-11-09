@@ -23,11 +23,12 @@ quotes and angle brackets.
 - The mapping export (schema 1.7) has rows for two more terms in every format: `publisher`, and `resourceType`,
   the kind of resource, which DataCite requires as `types.resourceTypeGeneral`. The DataCite publisher row reads
   `publisher.name | publisher`: the REST API returns a string, or an object with a `name` when asked with
-  `publisher=true`. A format with no
+  `publisher=true`. A publisher given only by `@id` resolves to that object, which is not a name. A format with no
   field for either has a `null` row. See the [mapping export](docs/mapping-export.md).
 - The mapping export covers RIS and EndNote's tagged format, with a row for each term. Neither has a CodeMeta
-  crosswalk, so each row cites the tag list it was read from (Zotero's RIS translator and EndNote's import format docs), and `schema_version` is 1.7. See the
-  [mapping export](docs/mapping-export.md).
+  crosswalk, so each row cites the tag list it was read from (Zotero's RIS translator and EndNote's import format docs), and `schema_version` is 1.7.
+  The RIS rows also read the older `A1` author and `Y1` date tags, as `AU[] + A1[]` and `PY | Y1`, so a RIS parser keeps
+  `A1` as a list. See the [mapping export](docs/mapping-export.md).
 - The coverage page and `hub coverage` mark a curated row for `resourceType` as `no term` (`∅`), since CodeMeta has
   no property for it, and leave it out of the counts. See [coverage](docs/coverage-3.1.md).
 - The PyPI page has keywords, classifiers and links to the docs, changelog and DOI.
