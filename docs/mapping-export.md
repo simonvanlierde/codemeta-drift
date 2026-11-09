@@ -130,6 +130,9 @@ Each row:
   has no term for in its property table, so its rows are all curated. A row says where the kind sits, never
   its value: for software a consumer writes `Software` into DataCite's `types.resourceTypeGeneral`,
   `software` into Zenodo's `upload_type` and CFF's `type`. `publisher` and `resourceType` were added in schema 1.7.
+  A `publisher` path such as `publisher.name | publisher` falls through to the whole object when the
+  publisher is given only by reference (`{"@id": "https://ror.org/..."}`); that object is not a name, so the
+  consumer takes its `@id` or leaves the name empty.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
@@ -168,7 +171,9 @@ them into one first. These cases need more than the grammar below says:
   splits it at commas that are outside double quotes and angle brackets, so
   `"Smith, Jane" <j@example.org>, Ada Lovelace <ada@example.org>` is two addresses. Both fields are
   always lists, even for one. The author rows read `Author[] + Author-email[]`: a consumer takes each
-  `Author` name, then the display name of each address. `Project-URL` becomes
+  `Author` name, then the display name of each address. An address whose display name repeats an
+  `Author` name is the same person, not a second author. An address with no display name
+  (`ada@example.org`) gives no name, so it adds no author. `Project-URL` becomes
   elements with `label` and `url`, the label normalised as the
   [well-known project URLs spec](https://packaging.python.org/en/latest/specifications/well-known-project-urls/)
   says: lower case, no punctuation or whitespace, so `Source Code` matches `sourcecode`.
@@ -208,13 +213,15 @@ them into one first. These cases need more than the grammar below says:
   a list, a link is an object with `@id`, and a typed date may be an object with `@value`.
 - RIS and EndNote tagged are line formats. A consumer reads one record into a tree: each tag is a
   key (RIS `TI`, EndNote `%T` as `T`, and `%7` as `_7`, since a key cannot start with a digit), the
-  value is the text after the tag. `AU`, `KW` and `UR` in RIS, and `%A` and `%K` in EndNote, are always lists,
+  value is the text after the tag. `AU`, `A1`, `KW` and `UR` in RIS, and `%A` and `%K` in EndNote, are always lists,
   even when the tag appears once. Any other tag that repeats counts once, by its first occurrence.
   A `%K` tag may also hold continuation lines, one keyword per line, as Zotero writes it: the parser
   splits them, so `K[]` holds one keyword each. Neither format has a tag for a software version, so
   `ET` and `%7` (edition) carry it by convention; Zotero's RIS translator reads `ET` as `versionNumber` for
-  a computer program. RIS `PY` is a year and `DA` is `YYYY/MM/DD/other`, so for `datePublished` the
-  consumer cuts an ISO date to its first four digits; Zotero writes the full date to EndNote `%D`.
+  a computer program. Older RIS exporters write `A1` for authors and `Y1` for the date, so the author
+  rows read `AU[] + A1[]` and `datePublished` reads `PY | Y1`. RIS `PY` is a year and `Y1` and `DA` are
+  `YYYY/MM/DD/other`, so for `datePublished` the consumer cuts an ISO date to its first four digits;
+  Zotero writes the full date to EndNote `%D`.
   EndNote's tag table calls `%R` the DOI; Zotero's reader takes it as `type`.
   Neither format has a CodeMeta crosswalk; the rows cite the tag lists they were read from.
 - Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
