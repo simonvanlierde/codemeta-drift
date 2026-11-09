@@ -11,7 +11,8 @@ from codemeta_drift.checks import table_rows
 from codemeta_drift.export import PATH, TERMS, formats
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
-SITE = "https://simonvanlierde.com/codemeta-drift/"
+# w3id.org redirects this base to the coverage page, so the identifiers outlive its hosting.
+BASE = "https://w3id.org/codemeta-drift/"
 """The coverage page, which resolves the hub's term, field and format identifiers to matrix cells."""
 CREATOR = "orcid:0009-0006-6953-909X"
 """The curator of the mapping set, as in CITATION.cff."""
@@ -113,7 +114,7 @@ def sssom(mapping: dict[str, Any]) -> str:
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
     formats = len({row["format"] for row in rows})
     metadata = (
-        f"# mapping_set_id: {SITE}spokes-{tag}.sssom.tsv\n"
+        f"# mapping_set_id: {BASE}spokes-{tag}.sssom.tsv\n"
         f"# mapping_set_version: '{version}'\n"
         f"# mapping_set_title: codemeta-drift crosswalk hub spokes for CodeMeta {tag}\n"
         f"# mapping_set_description: Field correspondences between CodeMeta terms and {formats} metadata formats,"
@@ -126,9 +127,9 @@ def sssom(mapping: dict[str, Any]) -> str:
         "# license: https://spdx.org/licenses/Apache-2.0.html\n"
         "# sssom_version: '1.0'\n"
         "# curie_map:\n"
-        f"#   term: {SITE}#term/\n"
-        f"#   field: {SITE}#field/\n"
-        f"#   format: {SITE}#format/\n"
+        f"#   term: {BASE}#term/\n"
+        f"#   field: {BASE}#field/\n"
+        f"#   format: {BASE}#format/\n"
         "#   orcid: https://orcid.org/\n"
         "#   skos: http://www.w3.org/2004/02/skos/core#\n"
         "#   semapv: https://w3id.org/semapv/vocab/\n"

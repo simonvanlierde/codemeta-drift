@@ -41,6 +41,10 @@ suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) wit
 
 ### Changed
 
+- **Breaking:** the SSSOM spokes' `term:`, `field:` and `format:` prefixes and `mapping_set_id` use
+  `https://w3id.org/codemeta-drift/`, which redirects to the coverage page, instead of the page's own address.
+  A consumer that stored 0.6.0 identifiers replaces `https://simonvanlierde.com/codemeta-drift/` with the w3id base.
+  See the [crosswalk hub](docs/crosswalk-hub.md).
 - `watch` no longer asks for a mapping row for a new table under pyproject's `tool`: those tables configure
   tools and hold no metadata.
 - The PKG-INFO author rows read `Author[] + Author-email[]`, split as the upgrade step says. `Author` is split
