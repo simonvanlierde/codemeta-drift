@@ -33,7 +33,7 @@ invalid arguments or unreadable inputs exit 2. Without `--out`, JSON goes to sta
 | Finding | What to check |
 | --- | --- |
 | `CELL_PROSE`, `CELL_EMPTY`, `CELL_MISSING` | The cell cannot supply a path and has no usable curated row |
-| `CELL_NO_AUTHOR` | A person sub-term has no author or contributor path to extend |
+| `CELL_NO_AUTHOR` | A person sub-term has no author or contributor path to extend, or that path has alternatives (`|` or `+`) |
 | `CURATED_STALE` | The cell changed since its curated correction was written |
 | `CURATED_DUPLICATE`, `CURATED_UNUSED` | A curated row is repeated or matches no exported format/term pair |
 | `CURATED_PATH`, `CURATED_REPEATS` | A curated path is invalid or repeats a cell that already supplies it |
