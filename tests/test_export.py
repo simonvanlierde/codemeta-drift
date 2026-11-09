@@ -10,12 +10,14 @@ from codemeta_drift import export as export_module
 from codemeta_drift.checks import table_rows
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.export import (
+    FORMATS,
     NO_PROPERTY,
     TERMS,
     build_rows,
     classify,
     crosswalk_cells,
     curated_tags,
+    derive,
     export,
     read_curated,
     shared_paths,
@@ -28,6 +30,7 @@ SCHEMA = json.loads((ROOT / "src/codemeta_drift/mapping.schema.json").read_text(
 EXAMPLE_FILE = ROOT / "examples/mapping-3.1.json"
 EXAMPLE = json.loads(EXAMPLE_FILE.read_text())
 CFF = "crosswalks/Citation File Format 1.2.0.csv"
+NO_CHAIN = "which has no single-chain path"
 
 
 def without(*pairs: tuple[str, str]) -> list[dict]:
@@ -155,8 +158,16 @@ def test_contributor_cells_derive_like_author_cells():
     )
     path = {(r["format"], r["term"]): r["path"] for r in rows}
     assert path["npm", "contributor"] == "contributors"
-    detail = "cell 'person.given-names' is relative to contributor, which has no path"
+    detail = "cell 'person.given-names' is relative to contributor, which has no single-chain path"
     assert [str(f) for f in findings] == [f"CELL_NO_AUTHOR {CFF}: contributor.givenName: {detail}"]
+
+
+@pytest.mark.parametrize("people", ["creators[] | contributors[]", "authors[] + maintainers[]"])
+def test_a_person_sub_term_needs_a_single_chain_person_path(people: str):
+    assert derive(FORMATS["cff-1.2.0"], "author.givenName", "person.given-names", {"author": people}) is None
+    assert derive(FORMATS["cff-1.2.0"], "author.givenName", "person.given-names", {"author": "authors[]"}) == (
+        "authors[].given-names"
+    )
 
 
 def test_prose_and_empty_cells_without_a_curated_row_are_refused():
@@ -284,8 +295,8 @@ def test_sub_term_without_an_author_row_says_so():
     _, findings = build_rows(files, "3.1", read_curated("3.1"))
     assert [str(f) for f in findings] == [
         f"CELL_MISSING {CFF}: author: no cell joined to the property table, and no curated row",
-        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, which has no path",
-        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, which has no path",
+        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, {NO_CHAIN}",
+        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, {NO_CHAIN}",
     ]
 
 
@@ -295,8 +306,8 @@ def test_a_cell_that_already_reads_as_a_list_is_refused():
     rows, findings = build_rows(files, "3.1", read_curated("3.1"))
     assert [str(f) for f in findings] == [
         f"CELL_PATH {CFF}: author: cell 'authors[]' gives 'authors[][]', which is not a path",
-        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, which has no path",
-        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, which has no path",
+        f"CELL_NO_AUTHOR {CFF}: author.givenName: cell 'person.given-names' is relative to author, {NO_CHAIN}",
+        f"CELL_NO_AUTHOR {CFF}: author.familyName: cell 'person.family-names' is relative to author, {NO_CHAIN}",
     ]
     assert not [r for r in rows if r["path"] and "[][]" in r["path"]]
 

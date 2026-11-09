@@ -355,7 +355,7 @@ def cell_finding(spoke: Spoke, label: str, term: str, cell: str | None, derived:
     if derived is None:
         kind = classify(cell)
         if kind == "path":
-            detail = f"cell {cell.strip()!r} is relative to {term.partition('.')[0]}, which has no path"
+            detail = f"cell {cell.strip()!r} is relative to {term.partition('.')[0]}, which has no single-chain path"
             return Finding("CELL_NO_AUTHOR", label, term, detail)
         detail = (
             f"{kind} cell {cell.strip()!r}, and no curated row" if kind == "prose" else "empty cell, no curated row"
@@ -382,13 +382,19 @@ def curated_finding(
 
 
 def derive(spoke: Spoke, term: str, cell: str, made: Mapping[str, str | None]) -> str | None:
-    """The path a cell means for a term, or None when it depends on an author or contributor path that is missing."""
+    """The path a cell means for a term, or None when it depends on an author or contributor path that is missing.
+
+    A relative person sub-term is appended to the author or contributor path, so that path must be one chain:
+    with `` | `` or `` + `` in it, the sub-key would land on the last piece only, so this gives None.
+    """
     parent = term.partition(".")[0]
     if term in PEOPLE:
         return f"{cell}[]" if spoke.person_list else cell
     if parent in PEOPLE and spoke.person_prefix is not None and cell.startswith(spoke.person_prefix):
         people = made.get(parent)
-        return f"{people}.{cell.removeprefix(spoke.person_prefix)}" if people else None
+        if not people or PIECES.search(people):
+            return None
+        return f"{people}.{cell.removeprefix(spoke.person_prefix)}"
     return cell
 
 
