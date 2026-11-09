@@ -51,6 +51,8 @@ The hub rejects unsupported schema versions, malformed headers and rows, duplica
 (format, term) rows, and unknown terms or formats before writing output. It supports the
 36 formats and terms in the bundled mapping contract; it does not silently interpret new
 terms added by a later producer. Optional fields it does not use are ignored.
+`codemeta_tag` must be a numeric version, such as `3.1` or `4.0`. A format added in a later
+tag is rejected in an older export: `gitlab` and `code-json-2.0` require 4.0 or later.
 
 `crosswalk` writes CodeMeta's two-column CSV layout, `Property,<format>`. It reads the
 selected checkout's `properties_description.csv` to preserve its row order and duplicate
