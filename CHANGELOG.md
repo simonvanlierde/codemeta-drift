@@ -14,7 +14,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   start at the root data entity, `@graph[@id=./]`, so a filter value may now hold `/`, and a 1.8 file fails the 1.7
   schema. A consumer first replaces references in the root with their `@graph` entities and reads a bare author,
   identifier, licence or publisher as a list; the [export guide](docs/mapping-export.md) gives the rules, and
-  `mapping-vectors.json` has `raw_input` cases for both formats.
+  `mapping-vectors.json` has `raw_input` cases for both formats. An RO-Crate identifier reads each PropertyValue's
+  `url`, `value` and `@id`, so a DOI is found however the crate states it.
 
 ### Fixed
 

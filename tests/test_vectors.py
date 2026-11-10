@@ -81,7 +81,6 @@ EXPECTED = {
     "author.familyName": ["Carberry"],
     "author.@id": ["https://orcid.org/0000-0002-1825-0097"],
     "license": ["https://spdx.org/licenses/MIT"],
-    "identifier": ["https://doi.org/10.5555/carberry.notes"],
     "description": ["Readings from the psychoceramics lab."],
     "datePublished": ["2026-11-10"],
     "publisher": ["Psychoceramics Society"],
@@ -96,6 +95,9 @@ def test_curated_json_ld_rows_read_the_vector_documents(fmt: str) -> None:
     for term, values in EXPECTED.items():
         assert resolve(document, paths[term]) == values, term
     assert [a["name"] for a in resolve(document, paths["author"])] == ["Josiah Carberry"]
+    doi = "https://doi.org/10.5555/carberry.notes"
+    identifier = {"ro-crate": [doi, "doi:10.5555/carberry.notes", doi], "croissant": [doi]}
+    assert resolve(document, paths["identifier"]) == identifier[fmt]
     keywords = {"ro-crate": ["ceramics, cracks"], "croissant": [["ceramics", "cracks"]]}
     assert resolve(document, paths["keywords"]) == keywords[fmt]
     assert resolve(document, paths["resourceType"]) in (["Dataset"], ["sc:Dataset"])

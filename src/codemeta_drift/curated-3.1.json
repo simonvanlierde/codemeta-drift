@@ -3771,9 +3771,9 @@
     {
       "format": "ro-crate",
       "term": "identifier",
-      "path": "@graph[@id=./].identifier[].url | @graph[@id=./].identifier[].@id | @graph[@id=./].identifier[]",
+      "path": "@graph[@id=./].identifier[].url + @graph[@id=./].identifier[].value + @graph[@id=./].identifier[].@id | @graph[@id=./].identifier[]",
       "reason": "no RO-Crate crosswalk upstream; RO-Crate 1.3, https://w3id.org/ro/crate/1.3, describes the crate in its root data entity, the @graph entity with @id ./; identifier is schema.org's: a DOI is a string URI (RO-Crate 1.1) or a reference to a PropertyValue (1.2 and later), whose url the spec recommends and whose @id its example makes the DOI URL",
-      "comment": "identifier may repeat; a DOI is told from other identifiers by its spelling. A PropertyValue with neither url nor a DOI URL as @id gives its local @id. On a list that holds both strings and objects, the first alternative reads only the objects."
+      "comment": "identifier may repeat. The first alternative gives the url, value and @id of every identifier object, so a DOI may come back more than once, as a URL or a doi: value, beside local ids; the consumer picks the DOI by its spelling. On a list that also holds strings, the strings are read only when no element is an object."
     },
     {
       "format": "ro-crate",
