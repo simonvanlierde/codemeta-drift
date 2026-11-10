@@ -228,6 +228,16 @@ def test_cli_coverage_prints_markdown_and_json_on_request(
     assert json.loads(capsys.readouterr().out)["codemeta_tag"] == mapping["codemeta_tag"]
 
 
+def test_a_row_from_a_newer_minor_says_to_upgrade(mapping: dict):
+    mapping["schema_version"] = "1.99"
+    mapping["rows"][0]["format"] = "future-format"
+    with pytest.raises(ValueError, match=r"row 1 \(schema_version 1\.99 is newer than this build's 1\.\d+; upgrade"):
+        validate_mapping(mapping)
+    mapping["schema_version"] = "1.0"
+    with pytest.raises(ValueError, match=r"row 1$"):
+        validate_mapping(mapping)
+
+
 @pytest.mark.parametrize("data", [[], {"schema_version": 1.0}])
 def test_mapping_must_be_an_object_with_a_version_string(data: object):
     with pytest.raises(ValueError, match="schema_version string"):

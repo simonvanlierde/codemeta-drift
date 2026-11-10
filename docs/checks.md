@@ -81,7 +81,7 @@ The output is one document with these keys:
 ```json
 {
   "schema_version": 1,
-  "tool": {"name": "codemeta-drift", "version": "0.7.2"},
+  "tool": {"name": "codemeta-drift", "version": "0.8.0"},
   "findings": [
     {
       "code": "EXAMPLE_NO_TERM",

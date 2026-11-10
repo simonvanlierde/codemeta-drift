@@ -7,12 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-10
+
 ### Added
 
 - Mapping schema 1.8: `ro-crate` (RO-Crate 1.1 to 1.3) and `croissant` (Croissant 1.0 and 1.1) rows in the 3.1
   and 4.0 exports and the hub. RO-Crate paths start at `@graph[@id=./]`, so a filter value may now hold `/`, and a
   1.8 file fails the 1.7 schema. The [export guide](docs/mapping-export.md) gives the reading rules both formats
-  need, and `mapping-vectors.json` has `raw_input` cases for them.
+  need, and `mapping-vectors.json` (now schema 1.8) has `raw_input` cases for them.
 
 ### Fixed
 
@@ -23,6 +25,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - An issue body shows an empty value as one space in a code span instead of two stray backticks, and an all-space
   value with its own number of spaces.
 - `site/build.py --out` refuses a symbolic link instead of ending in a traceback.
+- `hub` says to upgrade codemeta-drift when a mapping row it cannot read comes from a newer schema minor.
+- The coverage page loads its modules by content hash, so a browser never pairs a new page with a module cached
+  from the previous deploy.
 
 ## [0.7.2] - 2026-11-10
 
@@ -281,7 +286,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.6.0...v0.7.0

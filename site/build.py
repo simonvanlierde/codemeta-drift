@@ -11,6 +11,7 @@ matrix also holds the crosswalks nobody has reviewed, read at its tag, so the cl
 # ruff: noqa: INP001
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -95,6 +96,12 @@ def main() -> None:
         (args.out / name).write_text(text, encoding="utf-8")
     for name in STATIC:
         shutil.copy(ROOT / "site" / name, args.out / name)
+    # Pages caches each file for 10 minutes: a module URL that carries its content hash never pairs a fresh page
+    # with a stale module.
+    for page, ref, module in (("main.mjs", '"./{}"', "fragment.mjs"), ("index.html", 'src="{}"', "main.mjs")):
+        stamp = hashlib.sha256((args.out / module).read_bytes()).hexdigest()[:12]
+        text = (args.out / page).read_text("utf-8")
+        (args.out / page).write_text(text.replace(ref.format(module), ref.format(f"{module}?v={stamp}")), "utf-8")
 
 
 if __name__ == "__main__":
