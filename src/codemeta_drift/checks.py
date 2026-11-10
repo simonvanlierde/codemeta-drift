@@ -32,10 +32,10 @@ NOT_PROPERTIES = frozenset({"type", "id", "schema", "codemeta"})
 
 def code_span(text: str) -> str:
     """``text`` as one Markdown code span that no backtick in it can close early."""
-    text = text.replace("\n", " ")
+    text = re.sub(r"\r\n?|\n", " ", text)  # every CommonMark line ending: a blank line would end the span's block
     fence = "`" * (max(map(len, re.findall("`+", text)), default=0) + 1)
-    # CommonMark strips one space each side, so an edge backtick stays apart from the fence.
-    pad = " " if text.startswith("`") or text.endswith("`") else ""
+    # CommonMark strips one space each side: the pad keeps an edge backtick apart from the fence, and edge spaces.
+    pad = " " if text[:1] == "`" or text[-1:] == "`" or (text[:1] == text[-1:] == " ") else ""
     return f"{fence}{pad}{text}{pad}{fence}"
 
 

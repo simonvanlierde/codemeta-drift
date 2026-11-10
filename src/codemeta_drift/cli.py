@@ -63,11 +63,16 @@ def is_input(path: str) -> bool:
 
 def read_dir(root: Path) -> dict[str, str]:
     """The input files of a working tree, as path -> text."""
+
+    def linked(path: Path) -> bool:  # the file or a folder on its way: read_ref reads no link, so neither does this
+        relative = path.relative_to(root)
+        return any((root / part).is_symlink() for part in [relative, *relative.parents[:-1]])
+
     return {
         p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
         for g in INPUTS
         for p in root.glob(g)
-        if p.is_file() and not p.is_symlink()  # as read_ref, which skips links: never read outside the tree
+        if p.is_file() and not linked(p)
     }
 
 
@@ -135,15 +140,15 @@ def export_main(argv: list[str]) -> int:
         if args.out:
             target = args.out
             args.out.write_text(text, encoding="utf-8")
-        else:
-            target = "standard output"
-            print(text, end="")
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: cannot read {target}: {err.stderr.decode().strip()}", file=sys.stderr)
         return EXIT_CANNOT_RUN
     except READ_ERRORS as err:
         print(f"codemeta-drift: cannot read or write {target}: {type(err).__name__}: {err}", file=sys.stderr)
         return EXIT_CANNOT_RUN
+    # Outside the try, as in every subcommand: a stdout that fails is entry()'s to report, quietly for a closed pipe.
+    if not args.out:
+        print(text, end="")
     return 0
 
 
@@ -203,8 +208,7 @@ def hub_main(argv: list[str]) -> int:
             text = table(pair_rows(mapping, args.source, args.target), ["term", "source", "target"])
         if args.out:
             args.out.write_text(text, encoding="utf-8")
-        else:
-            print(text, end="")
+            return 0
     except UsageError as err:
         print(f"codemeta-drift: {err}", file=sys.stderr)
         return EXIT_USAGE
@@ -220,6 +224,7 @@ def hub_main(argv: list[str]) -> int:
         else:
             print(f"codemeta-drift: {err}", file=sys.stderr)
         return EXIT_CANNOT_RUN
+    print(text, end="")  # outside the try, as in export_main
     return 0
 
 
@@ -255,14 +260,14 @@ def watch_main(argv: list[str]) -> int:
         if not isinstance(existing, list) or any(not isinstance(title, str) for title in existing):
             msg = "existing issues must be a JSON list of titles"
             raise ValueError(msg)
-        changes = schema_changes(mapping["rows"], *snapshots)
-        print(json.dumps(issue_plans(changes, pin, args.latest, set(existing)), indent=2))
+        plans = issue_plans(schema_changes(mapping["rows"], *snapshots), pin, args.latest, set(existing))
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: {err.stderr.decode().strip()}", file=sys.stderr)
         return EXIT_CANNOT_RUN
     except READ_ERRORS as err:
         print(f"codemeta-drift: {type(err).__name__}: {err}", file=sys.stderr)
         return EXIT_CANNOT_RUN
+    print(json.dumps(plans, indent=2))  # outside the try, as in export_main
     return 0
 
 
@@ -275,7 +280,8 @@ def main(argv: list[str] | None = None) -> int:
             return commands[argv[0]](argv[1:])
         return check_main(argv)
     except KeyboardInterrupt:
-        print("codemeta-drift: interrupted", file=sys.stderr)
+        with contextlib.suppress(OSError):  # an unwritable stderr must not turn Ctrl-C into exit 3
+            print("codemeta-drift: interrupted", file=sys.stderr)
         return EXIT_INTERRUPTED
 
 
@@ -344,6 +350,9 @@ def entry() -> NoReturn:
     A shell loop stops on Ctrl-C only when the command was killed by the signal; exit code 130 alone
     does not stop it. ``main`` itself returns 130, for callers that run it in-process.
     """
+    # A closed fd 2 makes sys.stderr None, and print(file=None) writes to stdout: messages would land in the output.
+    if sys.stderr is None:
+        sys.stderr = Path(os.devnull).open("w", encoding="utf-8")  # noqa: SIM115 - lives until exit
     code = EXIT_CANNOT_RUN
     try:
         try:
@@ -354,18 +363,21 @@ def entry() -> NoReturn:
             code = done.code or 0
         if sys.stdout is not None:  # None when the caller closed fd 1
             sys.stdout.flush()
+        sys.stderr.flush()  # a usage error's message is output too
     except OSError as err:  # a full disk or a closed pipe; Python itself would exit 120 or 1
         if not isinstance(err, BrokenPipeError):  # a reader that stops early, as head does, is no news
             with contextlib.suppress(OSError):
                 print(f"codemeta-drift: cannot write the output: {err}", file=sys.stderr)
         # Point the streams at devnull, or the interpreter's exit flush fails again and exits 120.
+        devnull = os.open(os.devnull, os.O_WRONLY)
         for stream in (sys.stdout, sys.stderr):
             with contextlib.suppress(OSError, ValueError, AttributeError):
-                os.dup2(os.open(os.devnull, os.O_WRONLY), stream.fileno())
+                os.dup2(devnull, stream.fileno())
         if code != EXIT_INTERRUPTED:
             sys.exit(EXIT_CANNOT_RUN)
     if code == EXIT_INTERRUPTED and sys.platform != "win32":
-        sys.stderr.flush()
+        with contextlib.suppress(OSError):
+            sys.stderr.flush()
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         os.kill(os.getpid(), signal.SIGINT)
     sys.exit(code)

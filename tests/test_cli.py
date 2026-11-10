@@ -1,4 +1,4 @@
-import contextlib
+import io
 import json
 import shutil
 import subprocess
@@ -109,12 +109,28 @@ def test_an_input_that_is_a_symlink_is_skipped_in_both_readers(repo: Path, tmp_p
     assert "examples/linked.json" not in read_ref(repo, "HEAD")
 
 
-def test_export_names_the_output_when_writing_it_fails(repo: Path, capsys: pytest.CaptureFixture[str]):
-    with Path("/dev/full").open("w") as full, contextlib.redirect_stdout(full):
-        assert main(["export", str(repo), "--tag", "3.1"]) == 3
-    err = capsys.readouterr().err
-    assert "standard output" in err
-    assert str(repo) not in err
+@pytest.mark.parametrize("folder", ["examples", "crosswalks"])
+def test_a_symlinked_input_folder_is_not_followed(folder: str, repo: Path, tmp_path: Path):
+    outside = tmp_path.parent / f"outside-{folder}"
+    outside.mkdir(exist_ok=True)
+    (outside / "leak.json").write_text('{"secret": true}')
+    (outside / "leak.csv").write_text("secret\n")
+    shutil.rmtree(repo / folder, ignore_errors=True)
+    (repo / folder).symlink_to(outside, target_is_directory=True)
+    assert not [path for path in read_dir(repo) if path.startswith(f"{folder}/")]
+
+
+@pytest.mark.skipif(not Path("/dev/full").exists(), reason="needs /dev/full")
+@pytest.mark.parametrize("command", ["export", "hub"])
+def test_a_subcommand_whose_output_cannot_be_written_blames_the_output(command: str, repo: Path):
+    args = {
+        "export": f"export {repo} --tag 3.1",
+        "hub": f"hub sssom {FIXTURES.parent.parent / 'examples/mapping-4.0.json'}",
+    }
+    result = _shell("from codemeta_drift import cli; cli.entry()", f"{args[command]} >/dev/full")
+    assert result.returncode == 3
+    assert result.stderr.startswith("codemeta-drift: cannot write the output:")
+    assert str(repo) not in result.stderr
 
 
 def test_no_drift_exits_0(tmp_path: Path):
@@ -275,13 +291,21 @@ def test_output_that_cannot_be_written_exits_3(lines: int):
 
 
 def _shell(code: str, redirect: str) -> subprocess.CompletedProcess[str]:
-    """Run ``code`` in a fresh interpreter under a shell redirection such as ``>&-``."""
+    """Run ``code`` in a fresh interpreter under a shell redirection such as ``>&-``.
+
+    exec makes the interpreter the shell's own process, so a death by SIGINT shows as -2, not as sh's 130.
+    """
     return subprocess.run(
-        ["/bin/sh", "-c", f'"$0" -c "$1" {redirect}', sys.executable, code],
+        ["/bin/sh", "-c", f'exec "$0" -c "$1" {redirect}', sys.executable, code],
         check=False,
-        capture_output="2>" not in redirect,
+        capture_output=True,
         text=True,
     )
+
+
+INTERRUPT = (
+    "from codemeta_drift import cli\ndef stop(argv): raise KeyboardInterrupt\ncli.check_main = stop\ncli.entry()"
+)
 
 
 @pytest.mark.skipif(not Path("/dev/full").exists(), reason="needs /dev/full")
@@ -299,14 +323,32 @@ def _shell(code: str, redirect: str) -> subprocess.CompletedProcess[str]:
         ("from codemeta_drift import cli; cli.entry()", "--help >/dev/full", 3),
         # Ctrl-C still ends by SIGINT when the output cannot be flushed.
         ("from codemeta_drift import cli; cli.main = lambda: print('x') or 130; cli.entry()", ">/dev/full", -2),
+        (INTERRUPT, "2>/dev/full", -2),
+        (INTERRUPT, "2>&-", -2),
+        # A usage error whose message cannot be written is output that cannot be written.
+        ("from codemeta_drift import cli; cli.entry()", "--bogus 2>/dev/full", 3),
+        ("from codemeta_drift import cli; cli.entry()", "export x 2>/dev/full", 3),
+        # With standard error closed, its messages must not land in standard output.
+        ("from codemeta_drift import cli; cli.entry()", "/nonexistent 2>&-", 3),
     ],
-    ids=["closed-stdout", "stderr-full-too", "version", "help", "interrupted"],
+    ids=[
+        "closed-stdout",
+        "stderr-full-too",
+        "version",
+        "help",
+        "interrupted",
+        "interrupted-stderr-full",
+        "interrupted-stderr-closed",
+        "usage-stderr-full",
+        "export-usage-stderr-full",
+        "error-stderr-closed",
+    ],
 )
 def test_unwritable_output_edge_cases(code: str, redirect: str, expected: int):
     result = _shell(code, redirect)
-    # sh reports a death by signal n as 128 + n, and Python as -n.
-    assert result.returncode in ({expected, 128 - expected} if expected < 0 else {expected})
-    assert "Traceback" not in (result.stderr or "")
+    assert result.returncode == expected
+    assert "Traceback" not in result.stderr
+    assert "codemeta-drift:" not in result.stdout
 
 
 def test_a_reader_that_closes_the_pipe_early_gets_exit_3_and_no_noise():
@@ -320,13 +362,33 @@ def test_a_reader_that_closes_the_pipe_early_gets_exit_3_and_no_noise():
     assert reader.stderr.read() == ""
 
 
+@pytest.mark.parametrize("command", ["export", "hub", "watch"])
+def test_a_closed_pipe_mid_command_is_left_to_entry(
+    command: str, repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """A subcommand's own error handler must not report a reader that stopped early: entry() keeps that quiet."""
+
+    class Closed(io.StringIO):
+        def write(self, _: str) -> int:
+            raise BrokenPipeError(32, "Broken pipe")
+
+    argv = {
+        "export": ["export", str(repo), "--tag", "4.0"],
+        "hub": ["hub", "sssom", str(FIXTURES.parent.parent / "examples/mapping-4.0.json")],
+        "watch": _watch_args(tmp_path, repo),
+    }[command]
+    monkeypatch.setattr(sys, "stdout", Closed())
+    with pytest.raises(BrokenPipeError):
+        main(argv)
+
+
 def test_the_command_exits_with_mains_code():
     code = "from codemeta_drift import cli; cli.main = lambda: 3; cli.entry()"
     assert subprocess.run([sys.executable, "-c", code], check=False).returncode == 3
 
 
 def test_startup_loads_neither_importlib_metadata_nor_resources():
-    """About 15 ms of a 60 ms check run; only --version and the reports that name the version need them."""
+    """About 10 ms on every run; only --version and the reports that name the version need them."""
     code = "import sys, codemeta_drift.cli; print(sorted(m for m in sys.modules if m.startswith('importlib.')))"
     loaded = subprocess.run([sys.executable, "-c", code], check=True, capture_output=True, text=True).stdout
     assert "importlib.metadata" not in loaded

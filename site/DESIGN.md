@@ -11,7 +11,7 @@ the source of truth for values.
   the CSP allows nothing but the page's own files.
 - **Flat.** Hairlines and one dashed rule under the slug. No shadows, rounded corners or boxes beyond the
   table's own border. The selected cell gets a 2px ink inset.
-- **Releases.** The slug ends in one link per CodeMeta release with a reviewed export, styled like the
+- **Releases.** Beside the slug's title sits one link per CodeMeta release with a reviewed export, styled like the
   filters, the shown one tinted with an ink bar. The newest is the bare page; an older one is `?tag=<tag>`, and a
   link keeps the open view's fragment. Upstream is shown with the newest release only.
 - **Tabs.** Three views under the headline: Matrix (the default), Follow a field, and Upstream (CodeMeta's main branch)

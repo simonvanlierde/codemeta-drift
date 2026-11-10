@@ -18,21 +18,26 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The `codemeta` `version` row reads `version | softwareVersion`, so a codemeta.json that holds its version only as
   `softwareVersion` still has one. A writer keeps the alternative the file already has, so it writes `version` into a
-  new file and leaves an existing `softwareVersion` where it is. See the [mapping export](docs/mapping-export.md).
-- Startup no longer loads `importlib.metadata` and `importlib.resources` unless needed. A check run takes about 15 ms
-  less of its 60 ms.
+  new file and leaves an existing `softwareVersion` where it is. Its SSSOM subject id becomes
+  `field:codemeta/version%20%7C%20softwareVersion`, which the coverage page opens at `version`. See the
+  [mapping export](docs/mapping-export.md).
+- Startup no longer loads `importlib.metadata` and `importlib.resources` unless needed, which saves about 10 ms on
+  every run.
 
 ### Fixed
 
-- Output the command cannot write exits 3, as [documented](docs/checks.md): a full disk, a closed pipe, and `--help` or
-  `--version` to a full disk too. A full disk prints "codemeta-drift: cannot write the output: ...". A reader that
-  closes the pipe early, as `head` does, gets no message. A closed stdout (`>&-`) keeps the command's own exit code.
-  Ctrl-C still ends by SIGINT. Before this the command exited 120 or 1 with a Python traceback.
+- Output the command cannot write exits 3, as [documented](docs/checks.md): a full disk, a closed pipe, `--help` or
+  `--version` to a full disk, and a usage error whose message cannot be written. A full disk prints
+  "codemeta-drift: cannot write the output: ...", in every subcommand. A reader that closes the pipe early, as `head`
+  does, gets no message. A closed stdout (`>&-`) keeps the command's own exit code, and with a closed stderr (`2>&-`)
+  no message lands in the output. Ctrl-C still ends by SIGINT, also when stderr cannot be written. Before this the
+  command exited 120 or 1 with a Python traceback.
 - Deeply nested JSON input exits 3 instead of crashing.
-- A symlinked input in the checkout is skipped, in a working tree and with `--ref` alike, so a clone cannot make the
-  command read a file outside it. `export` names standard output, not the checkout, when writing its output fails.
-- The schema watcher's issue bodies fence fetched text safely, so a backtick in an upstream schema key no longer breaks
-  out of the code span. A redirect to plain http is refused.
+- A symlinked input in the checkout, or one in a symlinked folder, is skipped, in a working tree and with `--ref` alike,
+  so a clone cannot make the command read a file outside it.
+- The schema watcher's issue bodies fence fetched text safely, so a backtick or a line break in an upstream schema key
+  no longer breaks out of the code span. A redirect to plain http is refused before it is followed. A `tag` line with
+  no value in citesync's pin is reported as malformed instead of crashing the poll.
 - When publishing fails, gh's reason now reaches the job log. The watcher polls once per run, so the issues match the
   uploaded drafts.
 

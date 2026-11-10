@@ -156,10 +156,8 @@ def identity(term: str) -> str:
 
 def curated_tags() -> list[str]:
     """CodeMeta tags with a curated-<tag>.json in this package, oldest first by version number."""
-    names = (p.name for p in PACKAGE.iterdir())
-    return sorted(
-        (n.removeprefix("curated-").removesuffix(".json") for n in names if n.startswith("curated-")), key=tag_key
-    )
+    found = (re.fullmatch(r"curated-(\d+(?:\.\d+)*)\.json", p.name) for p in PACKAGE.iterdir())
+    return sorted((m[1] for m in found if m), key=tag_key)
 
 
 def tag_key(tag: str) -> tuple[int, ...]:
@@ -174,7 +172,7 @@ def formats(tag: str) -> dict[str, Spoke]:
 
 def latest_tag() -> str:
     """The newest CodeMeta tag with a curated file, by version number."""
-    return max(curated_tags(), key=tag_key)
+    return curated_tags()[-1]
 
 
 def read_curated(tag: str) -> list[dict[str, Any]]:
