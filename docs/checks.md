@@ -16,7 +16,8 @@ and one missing term. When several crosswalks share a problem, the report groups
 | `crosswalk.csv` | All crosswalks combined into one table, which the website shows |
 
 Other example files use a different context or are intentionally invalid, so their terms
-are not checked. The vocabulary and property list are required; a missing file exits 3.
+are not checked. The vocabulary and property list are required; a missing file exits 3. A symbolic link, to
+a file or to a folder such as `crosswalks/`, is never followed: the file counts as missing.
 
 ## Every check
 

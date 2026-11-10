@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from codemeta_drift.checks import check
-from codemeta_drift.cli import read_ref
+from codemeta_drift.cli import READ_ERRORS, read_ref
 from codemeta_drift.coverage import coverage, unreviewed, upstream
 from codemeta_drift.export import curated_tags
 from codemeta_drift.hub import sssom
@@ -64,27 +64,32 @@ def main() -> None:
         }
 
     newest = tags[-1]
-    # Every file is computed before --out is touched, so a clone without a tag leaves the last build in place.
+    # Every file is computed before --out is touched, so a failure leaves the last build in place.
     try:
         head = upstream_data(args.codemeta, mappings[newest]) if args.codemeta else None
         data = {"data.json": {"tags": tags, **matrix(newest), "upstream": head}}
         data |= {f"data-{tag}.json": matrix(tag) for tag in tags[:-1]}
+        files = {name: json.dumps(value, indent=1, ensure_ascii=False) + "\n" for name, value in data.items()}
+        # The SSSOM export's mapping_set_id points here, for every tag with an export, so an older set's id resolves.
+        files |= {f"spokes-{tag}.sssom.tsv": sssom(mappings[tag]) for tag in tags}
     except subprocess.CalledProcessError as err:
         parser.error(
             f"cannot read {args.codemeta}, which needs the tags {', '.join(tags)}: {err.stderr.decode().strip()}"
         )
+    except READ_ERRORS as err:
+        parser.error(f"cannot read {args.codemeta}: {type(err).__name__}: {err}")
     # Only a directory this script made, or an empty one, is replaced.
+    if args.out.exists() and not args.out.is_dir():
+        parser.error(f"{args.out} is a file, not a directory")
     if args.out.exists() and any(args.out.iterdir()) and not (args.out / "data.json").exists():
         parser.error(f"{args.out} is not empty and has no data.json; refusing to replace it")
     shutil.rmtree(args.out, ignore_errors=True)
     args.out.mkdir(parents=True)
+    # data.json first: a write that fails later (a full disk) leaves a directory the next build may replace.
+    for name, text in files.items():
+        (args.out / name).write_text(text, encoding="utf-8")
     for name in STATIC:
         shutil.copy(ROOT / "site" / name, args.out / name)
-    # The SSSOM export's mapping_set_id points here, for every tag with an export, so an older set's id still resolves.
-    for tag in tags:
-        (args.out / f"spokes-{tag}.sssom.tsv").write_text(sssom(mappings[tag]), encoding="utf-8")
-    for name, value in data.items():
-        (args.out / name).write_text(json.dumps(value, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

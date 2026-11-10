@@ -2,7 +2,7 @@
 // or an older release's matrix from data-<tag>.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { chosenTag, parseFragment, releaseHref } from "./fragment.mjs";
+import { chosenTag, pageTitle, parseFragment, releaseLinks } from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -251,7 +251,7 @@ function tabs() {
   const choose = (name, focus) => {
     showTab(name, focus);
     history.replaceState(null, "", name === "matrix" ? location.search || "." : `#${name}`);
-    relink();
+    drawReleases();
   };
   for (const name of TABS) document.getElementById(`tab-${name}`).addEventListener("click", () => choose(name, false));
   list.addEventListener("keydown", (event) => {
@@ -313,18 +313,17 @@ function score(data) {
 }
 
 // One link per CodeMeta release with a reviewed export. A link reloads the page, which draws everything once.
+// Redraws the release links from the current fragment: called on every tab choice and fragment change.
+let drawReleases = () => {};
+
 function releases(tags, shown) {
   const nav = document.getElementById("tags");
-  for (const tag of tags) nav.append(el("a", { href: releaseHref(tag, tags), ...(tag === shown && { "aria-current": "page" }) }, tag));
+  drawReleases = () => nav.replaceChildren(...releaseLinks(tags, shown, location.hash)
+    .map(({ tag, href, current }) => el("a", { href, ...(current && { "aria-current": "page" }) }, tag)));
   nav.hidden = tags.length < 2;
   // The chosen link shows the tag; the slug's own copy stays for screen readers, so its sentence ends.
   document.getElementById("tag").classList.toggle("vh", !nav.hidden);
-  relink();
-}
-
-// Each release link carries the open view's fragment, so switching keeps the view. Called whenever the fragment changes.
-function relink() {
-  for (const a of document.querySelectorAll("#tags a")) a.hash = location.hash;
+  drawReleases();
 }
 
 async function load(file) {
@@ -343,7 +342,7 @@ async function start() {
   const { coverage, unreviewed, upstream } = tag === newest ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
   if (!upstream && latest.upstream) document.getElementById("checked").textContent = `upstream main is compared with ${newest} only`;
   document.getElementById("tag").textContent = coverage.codemeta_tag;
-  document.title = `${document.title} (CodeMeta ${coverage.codemeta_tag})`;
+  document.title = pageTitle(document.title, coverage.codemeta_tag);
   const matrixLink = document.getElementById("matrix-md");
   matrixLink.href = matrixLink.href.replace(/coverage\.md$/, `coverage-${coverage.codemeta_tag}.md`);
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
@@ -358,10 +357,11 @@ async function start() {
   follow();
   window.addEventListener("hashchange", () => {
     follow();
-    relink();
+    drawReleases();
   });
 }
 
 start().catch((err) => {
+  document.getElementById("checked").textContent = "";
   document.getElementById("detail").replaceChildren(el("p", { class: "note" }, `Could not load the coverage data: ${err.message}`));
 });

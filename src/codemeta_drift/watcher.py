@@ -84,7 +84,7 @@ def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: di
 
 def pin_tag(source: str) -> str:
     """The release tag on citesync's one `tag <x>` MAPPING_SOURCE line."""
-    tags = [line.split()[1] for line in source.splitlines() if line.startswith("tag ")]
+    tags = [parts[1] for line in source.splitlines() if len(parts := line.split()) > 1 and parts[0] == "tag"]
     if len(tags) != 1:
         msg = "MAPPING_SOURCE must contain exactly one tag line"
         raise ValueError(msg)

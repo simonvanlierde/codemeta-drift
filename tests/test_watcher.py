@@ -5,7 +5,7 @@ import pytest
 
 from codemeta_drift.cli import main
 from codemeta_drift.conformance import SCHEMA_FILES
-from codemeta_drift.watcher import issue_plans, schema_changes, schema_paths
+from codemeta_drift.watcher import issue_plans, pin_tag, schema_changes, schema_paths
 
 
 @pytest.fixture
@@ -161,3 +161,9 @@ def test_a_backtick_in_a_schema_path_keeps_the_code_span_closed():
     changes = [{"format": "npm", "kind": "unmapped", "path": "a`@x", "detail": "new field has no mapping row"}]
     [plan] = issue_plans(changes, "v1.0.0", "v1.0.0", set())
     assert "- npm: unmapped ``a`@x`` (new" in plan["body"]
+
+
+@pytest.mark.parametrize("source", ["tag \n", "tag\n", "tag v1\ntag v2\n", ""])
+def test_pin_tag_needs_exactly_one_tag_line_with_a_value(source: str):
+    with pytest.raises(ValueError, match="exactly one tag line"):
+        pin_tag(source)

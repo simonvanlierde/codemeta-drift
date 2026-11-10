@@ -430,8 +430,10 @@ def test_placeholder_keys_are_not_property_names(tag: str):
     assert not {key for term in NO_PROPERTY for _, key in [TERMS[term]]} & properties
 
 
-def test_latest_tag_compares_version_numbers(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(export_module, "curated_tags", lambda: ["10.0", "3.1", "4.0"])
+def test_latest_tag_compares_version_numbers(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    for tag in ("10.0", "3.1", "4.0"):
+        (tmp_path / f"curated-{tag}.json").write_text("{}")
+    monkeypatch.setattr(export_module, "PACKAGE", tmp_path)
     assert export_module.latest_tag() == "10.0"
 
 
@@ -446,3 +448,10 @@ def test_a_format_starts_at_its_since_tag():
     assert {"gitlab", "code-json-2.0"}.isdisjoint(export_module.formats("3.1"))
     assert {"gitlab", "code-json-2.0"} <= export_module.formats("4.0").keys()
     assert {"gitlab", "code-json-2.0"} <= export_module.formats("10.0").keys()
+
+
+def test_curated_tags_ignore_a_stray_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    for name in ("curated-4.0.json", "curated-4.0.json.bak", "curated-notes.json"):
+        (tmp_path / name).write_text("{}")
+    monkeypatch.setattr(export_module, "PACKAGE", tmp_path)
+    assert export_module.curated_tags() == ["4.0"]

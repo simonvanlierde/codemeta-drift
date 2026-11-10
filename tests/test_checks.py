@@ -361,7 +361,13 @@ def test_seeded_drift_in_the_4_0_release_is_found(
         ("x``y`z", "```x``y`z```"),
         ("`a", "`` `a ``"),
         ("a`", "`` a` ``"),
+        ("ab`", "`` ab` ``"),
         ("a\nb", "`a b`"),
+        # A lone CR ends a line in CommonMark too, which would end the list item before the span closes.
+        ("a\r\r# b", "`a  # b`"),
+        ("a\r\nb", "`a b`"),
+        # CommonMark strips one space each side when both are there; the pad puts them back.
+        (" a ", "`  a  `"),
     ],
 )
 def test_code_span_fences_past_every_backtick_run(text: str, span: str):

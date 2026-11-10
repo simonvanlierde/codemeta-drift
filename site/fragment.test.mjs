@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, parseFragment, releaseHref } from "./fragment.mjs";
+import { chosenTag, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -50,4 +50,20 @@ test("the newest release links to the page itself, an older one to its ?tag, and
   // Pages also serves the page at //codemeta-drift/, where a pathname href would leave the origin.
   const base = "https://simonvanlierde.com//codemeta-drift/";
   for (const tag of tags) assert.equal(new URL(releaseHref(tag, tags), base).origin, "https://simonvanlierde.com");
+});
+
+test("release links carry the fragment and mark the shown release", () => {
+  assert.deepEqual(releaseLinks(["3.1", "4.0"], "3.1", "#route"), [
+    { tag: "3.1", href: "?tag=3.1#route", current: true },
+    { tag: "4.0", href: ".#route", current: false },
+  ]);
+  assert.deepEqual(releaseLinks(["3.1", "4.0"], "4.0", ""), [
+    { tag: "3.1", href: "?tag=3.1", current: false },
+    { tag: "4.0", href: ".", current: true },
+  ]);
+  assert.equal(pageTitle("codemeta-drift", "3.1"), "codemeta-drift (CodeMeta 3.1)");
+});
+
+test("a codemeta field id with alternatives opens its first term", () => {
+  assert.equal(parseFragment("#field/codemeta/version%20%7C%20softwareVersion").hubTerm, "version");
 });

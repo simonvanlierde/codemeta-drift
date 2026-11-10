@@ -5,9 +5,11 @@ import json
 import subprocess
 from collections.abc import Callable
 from email.message import Message
+from http.client import HTTPMessage
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
+from urllib.request import Request
 
 import pytest
 
@@ -92,8 +94,9 @@ def test_poll_flags_stale_pinned_hash_at_the_right_tag():
         **dict.fromkeys(SCHEMA_URLS.values(), schema),
         "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": schema,
         **{
+            # GitHub sends content as newline-wrapped base64.
             API + f"simonvanlierde/codemeta-drift/contents/{path}?ref=v0.4.0": {
-                "content": base64.b64encode(data).decode()
+                "content": base64.encodebytes(data).decode()
             }
             for path, data in pinned.items()
         },
@@ -340,14 +343,13 @@ def test_the_pin_path_is_quoted_in_the_contents_url():
     assert seen == [API + "simonvanlierde/codemeta-drift/contents/src/a%3Fref%3Dmain.json?ref=v0.5.0"]
 
 
-def test_fetch_json_refuses_a_redirect_to_plain_http(monkeypatch: pytest.MonkeyPatch):
-    class Response(io.BytesIO):
-        def geturl(self) -> str:
-            return "http://example.org/x"
-
-    monkeypatch.setattr(runner, "urlopen", lambda *_a, **_k: Response(b"{}"))
+def test_a_redirect_to_plain_http_is_refused_before_it_is_followed():
+    """The plain request must never be sent: a 404 on it would draft a false "missing" issue."""
+    handler = runner.HTTPSOnlyRedirects()
+    request = Request("https://example.org/x")
     with pytest.raises(ValueError, match="HTTPS"):
-        fetch_json("https://example.org/x")
+        handler.redirect_request(request, io.BytesIO(), 302, "Found", HTTPMessage(), "http://example.org/x")
+    assert handler.redirect_request(request, io.BytesIO(), 302, "Found", HTTPMessage(), "https://example.org/y")
 
 
 def test_a_backtick_in_a_pin_line_keeps_the_code_span_closed():
@@ -357,3 +359,8 @@ def test_a_backtick_in_a_pin_line_keeps_the_code_span_closed():
     plans = runner.stale_pin_hashes("sha256 abc a`@x b`@y\nsha256 `@z\n", "v0.5.0", fetch)
     assert "MAPPING_SOURCE pins ``a`@x`` from ``b`@y``," in plans[0]["body"]
     assert plans[1]["body"].startswith("``sha256 `@z`` is not")
+
+
+def test_a_backtick_in_a_stale_pin_keeps_every_code_span_closed():
+    plans = runner.stale_pin_hashes("sha256 d`@x a`@y b`@z\n", "v0.5.0", lambda _: {"content": "eA=="})
+    assert plans[0]["body"].startswith("The sha256 of ``a`@y`` in MAPPING_SOURCE is ``d`@x``, but ``b`@z`` at v0.5.0")

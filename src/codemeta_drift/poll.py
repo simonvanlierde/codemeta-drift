@@ -8,11 +8,12 @@ import re
 import subprocess
 import time
 from collections.abc import Callable
+from http.client import HTTPMessage
 from pathlib import Path
-from typing import Any
+from typing import IO, Any
 from urllib.error import HTTPError
 from urllib.parse import quote
-from urllib.request import urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from codemeta_drift.checks import code_span
 from codemeta_drift.conformance import SCHEMA_FILES
@@ -27,16 +28,28 @@ SCHEMA_URLS = {
 }
 
 
+class HTTPSOnlyRedirects(HTTPRedirectHandler):
+    """Follow a redirect only to HTTPS, refusing before the plain request goes out."""
+
+    def redirect_request(
+        self, req: Request, fp: IO[bytes], code: int, msg: str, headers: HTTPMessage, newurl: str
+    ) -> Request | None:
+        """Refuse a non-HTTPS target, else redirect as urllib does."""
+        if not newurl.startswith("https://"):
+            error = "schema and API sources must use HTTPS, also after a redirect"
+            raise ValueError(error)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+urlopen = build_opener(HTTPSOnlyRedirects()).open
+
+
 def fetch_json(url: str) -> Any:  # noqa: ANN401
     """Read a public HTTPS document with a timeout; never attach credentials."""
     if not url.startswith("https://"):
         msg = "schema and API sources must use HTTPS"
         raise ValueError(msg)
-    with urlopen(url, timeout=30) as response:  # noqa: S310 - HTTPS checked above
-        # urlopen follows redirects, so the final URL needs the same check.
-        if not response.geturl().startswith("https://"):
-            msg = "schema and API sources must use HTTPS, also after a redirect"
-            raise ValueError(msg)
+    with urlopen(url, timeout=30) as response:
         return json.load(response)
 
 
@@ -120,7 +133,7 @@ def poll(
                 {
                     "repo": "simonvanlierde/codemeta-drift",
                     "title": f"Review Zenodo importer {path} {current_sha}",
-                    "body": f"`{path}` changed from blob `{digest}` to `{current_sha}`. "
+                    "body": f"{code_span(path)} changed from blob {code_span(digest)} to {code_span(current_sha)}. "
                     "Review the Zenodo structural subset before refreshing its source hashes. "
                     "A source change does not automatically change the mapping.",
                 }

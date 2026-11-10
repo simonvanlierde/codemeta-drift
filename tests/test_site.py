@@ -1,9 +1,13 @@
+import contextlib
+import importlib.util
 import json
 import re
 import subprocess
 import sys
 from collections.abc import Callable
 from pathlib import Path
+
+import pytest
 
 from codemeta_drift.export import FORMATS
 
@@ -93,6 +97,41 @@ def test_a_clone_without_an_older_tag_fails_cleanly(tmp_path: Path, repo: Path, 
     assert "3.1" in result.stderr
     assert "Traceback" not in result.stderr
     assert sorted(p.name for p in out.iterdir()) == before
+
+
+def test_a_malformed_upstream_file_fails_cleanly(tmp_path: Path, repo: Path, git: Callable[..., None]):
+    (repo / "properties_description.csv").write_bytes(b"Parent Type,Property\nschema:Thing,n\xefme\n")
+    git(repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qam", "broken")
+    result = build(tmp_path / "site", "--codemeta", str(repo))
+    assert result.returncode == 2
+    assert "Traceback" not in result.stderr
+
+
+def test_out_that_is_a_file_is_a_usage_error(tmp_path: Path):
+    (tmp_path / "afile").write_text("keep me")
+    result = build(tmp_path / "afile")
+    assert result.returncode == 2
+    assert (tmp_path / "afile").read_text() == "keep me"
+
+
+def test_a_failure_after_the_data_leaves_out_replaceable(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Whatever fails mid-build, the next build can replace what it left: data.json goes in first."""
+    spec = importlib.util.spec_from_file_location("site_build", ROOT / "site/build.py")
+    assert spec
+    assert spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    out = tmp_path / "site"
+
+    def full(*_: object, **__: object) -> None:
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(sys, "argv", ["build.py", "--out", str(out)])
+    monkeypatch.setattr(module, "sssom", full)
+    with contextlib.suppress(OSError, SystemExit):
+        module.main()
+    monkeypatch.undo()
+    assert build(out).returncode == 0
 
 
 def test_every_id_main_mjs_looks_up_is_in_the_page():

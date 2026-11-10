@@ -12,7 +12,13 @@ export function releaseHref(tag, tags) {
   return tag === tags.at(-1) ? "." : `?tag=${encodeURIComponent(tag)}`;
 }
 
-//
+// The header's release links, each carrying the open view's fragment so that switching keeps the view.
+export function releaseLinks(tags, shown, hash) {
+  return tags.map((tag) => ({ tag, href: `${releaseHref(tag, tags)}${hash}`, current: tag === shown }));
+}
+
+export const pageTitle = (title, tag) => `${title} (CodeMeta ${tag})`;
+
 // The SSSOM export's identifiers resolve here: #term/<term>, #field/<format>/<path> and #format/<format>,
 // each percent-encoded as the export writes it. #route and #upstream open their tabs.
 // Returns null for a fragment that selects nothing, including a malformed escape.
@@ -30,5 +36,7 @@ export function parseFragment(hash) {
   if (kind !== "field") return null;
   const path = parts.slice(1).join("/");
   // codemeta.json is the hub and has no row: its field ids open the term's first cell instead.
-  return { kind, format: parts[0], path, hubTerm: parts[0] === "codemeta" ? path.replaceAll("[]", "") : undefined };
+  // A path with alternatives (version | softwareVersion) belongs to its first one's term.
+  const hubTerm = parts[0] === "codemeta" ? path.replaceAll("[]", "").split(" | ")[0] : undefined;
+  return { kind, format: parts[0], path, hubTerm };
 }
