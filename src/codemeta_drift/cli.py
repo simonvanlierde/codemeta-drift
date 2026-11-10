@@ -34,7 +34,7 @@ JSON_VERSION = 1
 
 EXIT_FINDINGS, EXIT_USAGE, EXIT_CANNOT_RUN, EXIT_INTERRUPTED = 1, 2, 3, 130
 
-READ_ERRORS = (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError)
+READ_ERRORS = (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError, RecursionError)
 """What a missing, unreadable or malformed input raises: the command could not run (exit 3), never exit 1."""
 
 INPUTS = (
@@ -68,7 +68,7 @@ def read_dir(root: Path) -> dict[str, str]:
         p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
         for g in INPUTS
         for p in root.glob(g)
-        if p.is_file()  # as read_ref, which reads only blobs
+        if p.is_file() and not p.is_symlink()  # as read_ref, which skips links: never read outside the tree
     }
 
 
@@ -86,8 +86,8 @@ def read_ref(root: Path, ref: str) -> dict[str, str]:
     for entry in git("ls-tree", "-r", "-z", commit).decode("utf-8").split("\0"):
         if entry:
             meta, path = entry.split("\t", 1)
-            _, kind, oid = meta.split()
-            if kind == "blob" and is_input(path):
+            mode, kind, oid = meta.split()
+            if kind == "blob" and mode != "120000" and is_input(path):  # 120000: a symlink's target text
                 blobs[path] = oid
 
     # One cat-file process reads every file; one git process per file doubles the run time.
@@ -137,6 +137,7 @@ def export_main(argv: list[str]) -> int:
             target = args.out
             args.out.write_text(text, encoding="utf-8")
         else:
+            target = "standard output"
             print(text, end="")
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: cannot read {target}: {err.stderr.decode().strip()}", file=sys.stderr)
@@ -208,7 +209,7 @@ def hub_main(argv: list[str]) -> int:
     except UsageError as err:
         print(f"codemeta-drift: {err}", file=sys.stderr)
         return EXIT_USAGE
-    except (OSError, ValueError) as err:
+    except (OSError, ValueError, RecursionError) as err:
         if getattr(args, "json", False):
             report = json_report({}, [{"message": str(err), "help": None}])
             written = False

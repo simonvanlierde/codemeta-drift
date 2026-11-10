@@ -1,3 +1,4 @@
+import contextlib
 import json
 import shutil
 import subprocess
@@ -8,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from codemeta_drift.checks import Finding
-from codemeta_drift.cli import is_input, main
+from codemeta_drift.cli import is_input, main, read_dir, read_ref
 from codemeta_drift.conformance import SCHEMA_FILES
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -84,6 +85,36 @@ def test_project_with_only_a_codemeta_json_exits_3(tmp_path: Path):
 def test_malformed_file_exits_3_not_1(repo: Path, path: str, content: bytes):
     (repo / path).write_bytes(content)
     assert main([str(repo)]) == 3
+
+
+DEEP = "[" * 200_000 + "]" * 200_000
+
+
+def test_deeply_nested_json_exits_3_not_a_traceback(repo: Path, tmp_path: Path):
+    (repo / "codemeta.jsonld").write_text(DEEP)
+    assert main([str(repo)]) == 3
+    (tmp_path / "deep.json").write_text(DEEP)
+    assert main(["hub", "sssom", str(tmp_path / "deep.json")]) == 3
+
+
+def test_an_input_that_is_a_symlink_is_skipped_in_both_readers(repo: Path, tmp_path: Path, git: Callable[..., None]):
+    """A hostile checkout cannot make the tool read a file outside it, and both readers agree."""
+    outside = tmp_path.parent / "outside.json"
+    outside.write_text('{"secret": true}')
+    (repo / "examples").mkdir(exist_ok=True)
+    (repo / "examples" / "linked.json").symlink_to(outside)
+    git(repo, "add", "-A")
+    git(repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "link")
+    assert "examples/linked.json" not in read_dir(repo)
+    assert "examples/linked.json" not in read_ref(repo, "HEAD")
+
+
+def test_export_names_the_output_when_writing_it_fails(repo: Path, capsys: pytest.CaptureFixture[str]):
+    with Path("/dev/full").open("w") as full, contextlib.redirect_stdout(full):
+        assert main(["export", str(repo), "--tag", "3.1"]) == 3
+    err = capsys.readouterr().err
+    assert "standard output" in err
+    assert str(repo) not in err
 
 
 def test_no_drift_exits_0(tmp_path: Path):
