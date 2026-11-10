@@ -5,7 +5,7 @@
     "name": "codemeta-drift",
     "version": "0.7.0"
   },
-  "terms": [
+  "context_terms": [
     "address",
     "affiliation",
     "applicationCategory",

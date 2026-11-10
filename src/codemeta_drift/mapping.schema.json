@@ -24,7 +24,7 @@
         "version": { "type": "string", "minLength": 1 }
       }
     },
-    "terms": {
+    "context_terms": {
       "description": "Every property term of the codemeta.jsonld context at codemeta_tag, sorted: the keys a codemeta.json written to that context may use, besides keyword aliases such as type and id. Classes such as Person and prefixes such as schema are not listed. Optional; emitted since schema 1.7.",
       "type": "array",
       "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },

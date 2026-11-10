@@ -18,7 +18,7 @@ suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) wit
 
 ### Added
 
-- The mapping export lists the CodeMeta context's property terms in `terms`, so a tool can flag a codemeta.json
+- The mapping export lists the CodeMeta context's property terms in `context_terms`, so a tool can flag a codemeta.json
   key the tag does not define, such as `softwareSuggestions` against 4.0. See the
   [mapping export](docs/mapping-export.md).
 - The mapping export covers CodeMeta 4.0: `examples/mapping-4.0.json`, `curated-4.0.json` and a

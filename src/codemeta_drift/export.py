@@ -407,4 +407,4 @@ def export(files: Mapping[str, str], tag: str) -> tuple[dict[str, Any], list[Fin
     """The mapping export for one CodeMeta tag, and the findings that block it."""
     rows, findings = build_rows(files, tag, read_curated(tag))
     header = {"schema_version": SCHEMA_VERSION, "codemeta_tag": tag, "generator": generator()}
-    return header | {"terms": sorted(context_terms(files)), "rows": rows}, findings
+    return header | {"context_terms": sorted(context_terms(files)), "rows": rows}, findings
