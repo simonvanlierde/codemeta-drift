@@ -45,7 +45,7 @@ def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list
             plans.append(
                 {
                     "repo": "simonvanlierde/citesync",
-                    "title": "Malformed MAPPING_SOURCE line in citesync",
+                    "title": f"Malformed MAPPING_SOURCE line in citesync: {' '.join(fields)}",
                     "body": f"`{line}` is not `sha256 <hex> <local> <path>`, so its pin was not checked. Fix the line.",
                 }
             )

@@ -134,11 +134,13 @@ def test_a_malformed_pin_line_becomes_a_draft_and_the_other_lines_still_run():
     def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
         raise HTTPError(target, 404, "Not Found", Message(), None)
 
-    source = "sha256 abc local.json\nsha256 def ok.json src/ok.json\n"
+    source = "sha256 abc local.json\nsha256 def ok.json src/ok.json\nsha256 ghi\n"
     plans = runner.stale_pin_hashes(source, "v0.6.0", fetch)
+    # Each bad line has its own title: the publisher skips any title an issue, even a closed one, already has.
     assert [plan["title"] for plan in plans] == [
-        "Malformed MAPPING_SOURCE line in citesync",
+        "Malformed MAPPING_SOURCE line in citesync: sha256 abc local.json",
         "Pinned ok.json is not in codemeta-drift v0.6.0",
+        "Malformed MAPPING_SOURCE line in citesync: sha256 ghi",
     ]
     assert "`sha256 abc local.json`" in plans[0]["body"]
 
