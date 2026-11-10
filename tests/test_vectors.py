@@ -97,9 +97,19 @@ def test_curated_json_ld_rows_read_the_vector_documents(fmt: str) -> None:
     assert [a["name"] for a in resolve(document, paths["author"])] == ["Josiah Carberry"]
     doi = "https://doi.org/10.5555/carberry.notes"
     identifier = {"ro-crate": [doi, "doi:10.5555/carberry.notes", doi], "croissant": [doi]}
-    assert resolve(document, paths["identifier"]) == identifier[fmt]
+    # The path also returns the identifier objects themselves; the consumer skips them.
+    assert [v for v in resolve(document, paths["identifier"]) if isinstance(v, str)] == identifier[fmt]
     keywords = {"ro-crate": ["ceramics, cracks"], "croissant": [["ceramics", "cracks"]]}
     assert resolve(document, paths["keywords"]) == keywords[fmt]
     assert resolve(document, paths["resourceType"]) in (["Dataset"], ["sc:Dataset"])
     for term in ("contributor", "contributor.givenName", "contributor.familyName", "contributor.@id"):
         assert resolve(document, paths[term]) == [], term
+
+
+@pytest.mark.parametrize("fmt", ["ro-crate", "croissant"])
+def test_curated_identifier_keeps_a_string_doi_after_an_object(fmt: str) -> None:
+    rows = json.loads(PACKAGE.joinpath("curated-4.0.json").read_text("utf-8"))["rows"]
+    path = next(r["path"] for r in rows if r["format"] == fmt and r["term"] == "identifier")
+    ids = [{"@id": "#isbn", "@type": "PropertyValue", "value": "978-0-306-40615-7"}, "https://doi.org/10.5555/x"]
+    document = {"@graph": [{"@id": "./", "identifier": ids}]} if fmt == "ro-crate" else {"identifier": ids}
+    assert "https://doi.org/10.5555/x" in resolve(document, path)

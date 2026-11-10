@@ -3771,9 +3771,9 @@
     {
       "format": "ro-crate",
       "term": "identifier",
-      "path": "@graph[@id=./].identifier[].url + @graph[@id=./].identifier[].value + @graph[@id=./].identifier[].@id | @graph[@id=./].identifier[]",
+      "path": "@graph[@id=./].identifier[].url + @graph[@id=./].identifier[].value + @graph[@id=./].identifier[].@id + @graph[@id=./].identifier[]",
       "reason": "no RO-Crate crosswalk upstream; RO-Crate 1.3, https://w3id.org/ro/crate/1.3, describes the crate in its root data entity, the @graph entity with @id ./; identifier is schema.org's: a DOI is a string URI (RO-Crate 1.1) or a reference to a PropertyValue (1.2 and later), whose url the spec recommends and whose @id its example makes the DOI URL",
-      "comment": "identifier may repeat. The first alternative gives the url, value and @id of every identifier object, so a DOI may come back more than once, as a URL or a doi: value, beside local ids; the consumer picks the DOI by its spelling. On a list that also holds strings, the strings are read only when no element is an object."
+      "comment": "identifier may repeat. The path gives the url, value and @id of every identifier object, then every element itself, so a DOI may come back more than once, as a URL or a doi: value, beside local ids and whole objects; the consumer picks the DOI by its spelling and skips the objects."
     },
     {
       "format": "ro-crate",
@@ -3893,9 +3893,9 @@
     {
       "format": "croissant",
       "term": "identifier",
-      "path": "identifier[]",
-      "reason": "no Croissant crosswalk upstream; Croissant 1.1, http://mlcommons.org/croissant/1.1, describes the dataset in the document's top object, an sc:Dataset; Croissant does not define identifier, so it is schema.org's, a string or a PropertyValue",
-      "comment": "identifier may repeat; a DOI is told from other identifiers by its spelling. A PropertyValue comes back as an object: the consumer reads its url, else its value."
+      "path": "identifier[].url + identifier[].value + identifier[].@id + identifier[]",
+      "reason": "no Croissant crosswalk upstream; Croissant 1.1, http://mlcommons.org/croissant/1.1, describes the dataset in the document's top object, an sc:Dataset; Croissant does not define identifier, so it is schema.org's, a string or a PropertyValue, read as for RO-Crate",
+      "comment": "identifier may repeat. The path gives the url, value and @id of every identifier object, then every element itself, so a DOI may come back more than once, as a URL or a doi: value, beside local ids and whole objects; the consumer picks the DOI by its spelling and skips the objects."
     },
     {
       "format": "croissant",
