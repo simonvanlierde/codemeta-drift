@@ -243,14 +243,14 @@ them into one first. These cases need more than the grammar below says:
   values and list elements (an object whose only key is `@id`, such as
   `{"@id": "https://orcid.org/0000-0002-1825-0097"}`) with the `@graph` entity of that `@id`, one
   level deep; a reference with no entity stays as it is. An entity keeps its `@id`, so
-  `author[].givenName` reads the Person entity, and `author[].@id` and `license[].@id` read the
-  same URL either way. A Croissant file holds its people in place, under `creator`. In both, a
+  `author[].givenName` reads the Person entity, and `author[].@id` reads the same `@id` either way. A Croissant file holds its people in place, under `creator`. In both, a
   property with one value may be written bare, without a list: the consumer reads `author`,
   `creator`, `contributor`, `identifier`, `license` and `publisher` as lists. On a list that holds
-  both strings and objects, a path such as `license[].@id | license[]` reads only the objects. A
+  both strings and objects, a path such as `license[].url | license[].@id | license[]` reads only
+  the objects. The identifier and license paths can also return an object itself; the consumer skips it. A
   `keywords` value may be one string of keywords separated by commas: the consumer splits it after
-  resolving the path, not while reading the file. An `@id` that starts
-  with `#`, such as `#author-1`, is a local id, not an ORCID. Neither format has a CodeMeta
+  resolving the path, not while reading the file. An `@id` that is not an
+  ORCID URL, such as `#author-1` or a ROR id, is not an ORCID. Neither format has a CodeMeta
   crosswalk; the rows cite the specifications. The rows are for reading: a crate writer puts each
   object it writes into `@graph` as an entity and links it from the root by reference. The `ro-crate` and `croissant` vectors in
   `mapping-vectors.json` give a file as `raw_input` and the tree these rules make from it as
@@ -310,10 +310,11 @@ and `expected`. `expected` is the list of values the path resolves to in `docume
 from the first alternative that yields any value. A consumer vendors the file with the schema and runs
 every case through its own resolver, so the copies of the grammar stay in step.
 Its `schema_version` is the mapping schema whose grammar the cases need.
-Cases with `raw_input` also test parsing: its `format` names the parser and its `text` is the source
-file content. Parse that text and compare the resulting tree to `document` before resolving `path`.
-The PKG-INFO cases cover comma separation, quoted names, company suffixes and `et al.`.
-The resolver tests alone do not check those parser rules.
+Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate` or
+`croissant`) and its `text` is the source file content. Parse that text and compare the resulting tree
+to `document` before resolving `path`; a consumer that does not read that format skips the parse and
+still resolves `path` in `document`. The PKG-INFO cases cover comma separation, quoted names, company
+suffixes and `et al.`. The resolver tests alone do not check those parser rules.
 
 ## Compatibility
 

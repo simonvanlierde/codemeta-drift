@@ -84,12 +84,15 @@ EXPECTED = {
     "description": ["Readings from the psychoceramics lab."],
     "datePublished": ["2026-11-10"],
     "publisher": ["Psychoceramics Society"],
+    "contributor.givenName": ["Ada"],
+    "contributor.familyName": ["Lovelace"],
 }
 
 
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
 @pytest.mark.parametrize("fmt", ["ro-crate", "croissant"])
-def test_curated_json_ld_rows_read_the_vector_documents(fmt: str) -> None:
-    rows = json.loads(PACKAGE.joinpath("curated-4.0.json").read_text("utf-8"))["rows"]
+def test_curated_json_ld_rows_read_the_vector_documents(fmt: str, tag: str) -> None:
+    rows = json.loads(PACKAGE.joinpath(f"curated-{tag}.json").read_text("utf-8"))["rows"]
     paths = {r["term"]: r["path"] for r in rows if r["format"] == fmt}
     document = JSON_LD[fmt]["document"]
     for term, values in EXPECTED.items():
@@ -101,14 +104,16 @@ def test_curated_json_ld_rows_read_the_vector_documents(fmt: str) -> None:
     assert [v for v in resolve(document, paths["identifier"]) if isinstance(v, str)] == identifier[fmt]
     keywords = {"ro-crate": ["ceramics, cracks"], "croissant": [["ceramics", "cracks"]]}
     assert resolve(document, paths["keywords"]) == keywords[fmt]
-    assert resolve(document, paths["resourceType"]) in (["Dataset"], ["sc:Dataset"])
-    for term in ("contributor", "contributor.givenName", "contributor.familyName", "contributor.@id"):
-        assert resolve(document, paths[term]) == [], term
+    resource_type = {"ro-crate": ["Dataset"], "croissant": ["sc:Dataset"]}
+    assert resolve(document, paths["resourceType"]) == resource_type[fmt]
+    assert [c["name"] for c in resolve(document, paths["contributor"])] == ["Ada Lovelace"]
+    assert resolve(document, paths["contributor.@id"]) == {"ro-crate": ["#contributor-1"], "croissant": []}[fmt]
 
 
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
 @pytest.mark.parametrize("fmt", ["ro-crate", "croissant"])
-def test_curated_identifier_keeps_a_string_doi_after_an_object(fmt: str) -> None:
-    rows = json.loads(PACKAGE.joinpath("curated-4.0.json").read_text("utf-8"))["rows"]
+def test_curated_identifier_keeps_a_string_doi_after_an_object(fmt: str, tag: str) -> None:
+    rows = json.loads(PACKAGE.joinpath(f"curated-{tag}.json").read_text("utf-8"))["rows"]
     path = next(r["path"] for r in rows if r["format"] == fmt and r["term"] == "identifier")
     ids = [{"@id": "#isbn", "@type": "PropertyValue", "value": "978-0-306-40615-7"}, "https://doi.org/10.5555/x"]
     document = {"@graph": [{"@id": "./", "identifier": ids}]} if fmt == "ro-crate" else {"identifier": ids}
