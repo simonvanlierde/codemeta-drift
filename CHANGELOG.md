@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-10
+
 ### Changed
 
 - The `codemeta` `version` row reads `version | softwareVersion`, so a codemeta.json that holds its version only as
@@ -22,6 +24,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   closes the pipe early, as `head` does, gets no message. A closed stdout (`>&-`) keeps the command's own exit code.
   Ctrl-C still ends by SIGINT. Before this the command exited 120 or 1 with a Python traceback.
 - Deeply nested JSON input exits 3 instead of crashing.
+- A symlinked input in the checkout is skipped, in a working tree and with `--ref` alike, so a clone cannot make the
+  command read a file outside it. `export` names standard output, not the checkout, when writing its output fails.
 - The schema watcher's issue bodies fence fetched text safely, so a backtick in an upstream schema key no longer breaks
   out of the code span. A redirect to plain http is refused.
 - When publishing fails, gh's reason now reaches the job log. The watcher polls once per run, so the issues match the
@@ -244,7 +248,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.5.0...v0.6.0
