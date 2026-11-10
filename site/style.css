@@ -109,6 +109,7 @@ a:hover {
 .slug {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 4px 24px;
   font-size: 12px;
@@ -121,6 +122,29 @@ a:hover {
 }
 .slug b {
   color: var(--ink);
+}
+.lead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.tags {
+  display: flex;
+}
+.tags a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  margin-right: -1px;
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  text-decoration: none;
+}
+.tags a[aria-current="page"] {
+  background: var(--tint);
+  box-shadow: inset 0 -2px 0 var(--ink);
 }
 h1 {
   font-size: clamp(1.6rem, 3vw, 2.2rem);
@@ -571,7 +595,8 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
   }
   /* Forced colours drop box-shadow, which marks the chosen cell and filter otherwise. */
   .cell[aria-current="true"],
-  #filters [aria-pressed="true"] {
+  #filters [aria-pressed="true"],
+  .tags [aria-current="page"] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }

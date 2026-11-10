@@ -1,7 +1,7 @@
 // Draws the coverage matrix, the route between two formats and the upstream check from data.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { parseFragment } from "./fragment.mjs";
+import { chosenTag, parseFragment } from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -310,9 +310,31 @@ function score(data) {
   );
 }
 
+// One link per CodeMeta release with a reviewed export. A link reloads the page, which draws everything once.
+function releases(tags, shown) {
+  const nav = document.getElementById("tags");
+  for (const tag of tags) {
+    const href = tag === tags.at(-1) ? location.pathname : `?tag=${encodeURIComponent(tag)}`;
+    nav.append(el("a", tag === shown ? { href: `${href}${location.hash}`, "aria-current": "page" } : { href: `${href}${location.hash}` }, tag));
+  }
+  nav.hidden = tags.length < 2;
+  // The chosen link names the tag, so the slug's own copy would say it twice.
+  document.getElementById("tag").hidden = !nav.hidden;
+}
+
+async function load(file) {
+  const response = await fetch(file, { cache: "no-cache" });
+  if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+  return response.json();
+}
+
 async function start() {
-  const response = await fetch("data.json", { cache: "no-cache" });
-  const { coverage, unreviewed, upstream } = await response.json();
+  const latest = await load("data.json");
+  const tag = chosenTag(location.search, latest.tags);
+  // Only the newest release is compared with CodeMeta's main branch.
+  const { coverage, unreviewed, upstream } = tag === latest.tags.at(-1) ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
+  releases(latest.tags, tag);
+  if (!upstream && latest.upstream) document.getElementById("checked").textContent = `upstream main is compared with ${latest.tags.at(-1)} only`;
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   const matrixLink = document.getElementById("matrix-md");
   matrixLink.href = matrixLink.href.replace(/coverage\.md$/, `coverage-${coverage.codemeta_tag}.md`);
@@ -330,5 +352,5 @@ async function start() {
 }
 
 start().catch((err) => {
-  document.getElementById("detail").replaceChildren(el("p", { class: "note" }, `Could not load data.json: ${err.message}`));
+  document.getElementById("detail").replaceChildren(el("p", { class: "note" }, `Could not load the coverage data: ${err.message}`));
 });
