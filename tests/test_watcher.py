@@ -30,7 +30,9 @@ def test_a_row_outside_the_grammar_is_reported_not_raised(schemas: dict):
 def test_a_new_pyproject_tool_table_needs_no_row(schemas: dict):
     after = json.loads(json.dumps(schemas))
     after["pep621"]["properties"]["tool"] = {"properties": {"simplint": {"type": "object"}}}
-    assert schema_changes([{"format": "pep621", "term": "name", "path": "project.name"}], schemas, after) == []
+    after["pep621"]["properties"]["toolkit"] = {"type": "string"}
+    changes = schema_changes([{"format": "pep621", "term": "name", "path": "project.name"}], schemas, after)
+    assert [c["path"] for c in changes] == ["toolkit"]
 
 
 def test_unchanged_schema_does_not_report_existing_unmapped_fields(schemas: dict):

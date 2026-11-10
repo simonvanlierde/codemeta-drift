@@ -50,7 +50,8 @@ suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) wit
 - The PKG-INFO author rows read `Author[] + Author-email[]`, split as the upgrade step says. `Author` is split
   because the pyproject.toml spec writes several names as `Author: A, B`; a `Last, First` name reads as two unless
   it is quoted.
-- In both exports, the `github` `name` row reads `name`, not the crosswalk's `full_name` (`owner/repo`).
+- In both exports, the `github` `name` row reads `name`, not the crosswalk's `full_name` (`owner/repo`), so a
+  consumer that resolves it now gets the bare repository name.
 - The `hub` commands refuse an export whose `codemeta_tag` is not a numeric version, and one with rows for a format
   added in a later tag, such as `gitlab` or `code-json-2.0` rows in a 3.1 export. See the
   [crosswalk hub](docs/crosswalk-hub.md).

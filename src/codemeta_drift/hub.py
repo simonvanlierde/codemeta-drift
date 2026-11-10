@@ -83,9 +83,9 @@ def spokes(mapping: dict[str, Any]) -> list[dict[str, Any]]:
 def pair_rows(mapping: dict[str, Any], source: str, target: str) -> list[dict[str, str]]:
     """Join non-null rows by term; the paths correspond but their values may need conversion."""
     rows = spokes(mapping)
-    formats = {row["format"] for row in rows}
-    if source not in formats or target not in formats:
-        msg = f"source and target must be present formats: {', '.join(sorted(formats))}"
+    present = {row["format"] for row in rows}
+    if source not in present or target not in present:
+        msg = f"source and target must be present formats: {', '.join(sorted(present))}"
         raise ValueError(msg)
     targets = {row["term"]: row["path"] for row in rows if row["format"] == target and row["path"] is not None}
     return [
@@ -112,12 +112,12 @@ def sssom(mapping: dict[str, Any]) -> str:
     """
     rows = spokes(mapping)
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
-    formats = len({row["format"] for row in rows})
+    count = len({row["format"] for row in rows})
     metadata = (
         f"# mapping_set_id: {BASE}spokes-{tag}.sssom.tsv\n"
         f"# mapping_set_version: '{version}'\n"
         f"# mapping_set_title: codemeta-drift crosswalk hub spokes for CodeMeta {tag}\n"
-        f"# mapping_set_description: Field correspondences between CodeMeta terms and {formats} metadata formats,"
+        f"# mapping_set_description: Field correspondences between CodeMeta terms and {count} metadata formats,"
         " from the reviewed mapping export. The paths correspond; their values may need conversion.\n"
         f"# mapping_provider: {REPO}\n"
         "# creator_id:\n"

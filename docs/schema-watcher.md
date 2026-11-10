@@ -7,7 +7,7 @@ sends no requests and opens no issues.
 codemeta-drift watch ../codemeta --tag 4.0 \
   --before previous-schemas --after new-schemas \
   --citesync-source ../citesync/src/citesync/MAPPING_SOURCE \
-  --latest v0.6.0 --existing issue-titles.json
+  --latest v0.7.0 --existing issue-titles.json
 ```
 
 Each directory needs the five files named in

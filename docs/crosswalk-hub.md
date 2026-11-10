@@ -61,7 +61,7 @@ Person rows use the author's paths; CodeMeta has no separate contributor person 
 Unmapped properties have empty cells. Paths retain this export's absolute selectors and
 alternatives rather than CodeMeta's original prose.
 
-The hub does not register persistent w3id identifiers per crosswalk. It does not infer
+The w3id base is one redirect to the coverage page; no crosswalk, term or field has a registration of its own. It does not infer
 additional direct mappings where CodeMeta has no term, such as Cargo categories versus
 Python classifiers.
 
