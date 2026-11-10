@@ -49,8 +49,9 @@ run the same read-only poll locally:
 uv run python -m codemeta_drift.poll --out schema-watch.json
 ```
 
-Publishing is opt-in. The workflow publishes only when the `MAPPING_WATCH_TOKEN` repository
-secret is configured. Without it the run prints a notice that publishing was skipped. Use a
+Publishing is opt-in. The workflow publishes only when the `MAPPING_WATCH_TOKEN` secret is set
+in the `schema-watch` environment, which allows deployments from `main` only. Without it the run
+prints a notice that publishing was skipped. Use a
 fine-grained token limited to simonvanlierde/codemeta-drift and simonvanlierde/citesync with
 only Issues: read and write. Both repositories are public, so reading the schema sources and
 citesync's `MAPPING_SOURCE` needs no Contents permission. It reads all

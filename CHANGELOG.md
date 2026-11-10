@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Security
+
+- The schema watcher reads its issue token from a `schema-watch` environment that only `main` can use, so a
+  workflow run from another branch can't read it. See the [schema watcher](docs/schema-watcher.md).
+
 ## [0.7.2] - 2026-11-10
 
 ### Changed
