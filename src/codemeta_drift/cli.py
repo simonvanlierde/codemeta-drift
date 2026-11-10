@@ -14,12 +14,15 @@ error so standard output is never a partial file. A TAG with no curated rows is 
 import argparse
 import fnmatch
 import json
+import os
+import signal
 import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from importlib import metadata
 from pathlib import Path
+from typing import NoReturn
 
 from codemeta_drift.checks import CONTEXT, TABLE, check
 from codemeta_drift.conformance import SCHEMA_FILES, conform
@@ -316,5 +319,20 @@ def check_main(argv: list[str]) -> int:
     return EXIT_FINDINGS if any(f.code != "SKIPPED" for f in findings) else 0
 
 
+def entry() -> NoReturn:
+    """The ``codemeta-drift`` command: run ``main``, and after Ctrl-C die of SIGINT, as the shell expects.
+
+    A shell loop stops on Ctrl-C only when the command was killed by the signal; exit code 130 alone
+    does not stop it. ``main`` itself returns 130, for callers that run it in-process.
+    """
+    code = main()
+    if code == EXIT_INTERRUPTED and sys.platform != "win32":
+        sys.stdout.flush()
+        sys.stderr.flush()
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+        os.kill(os.getpid(), signal.SIGINT)
+    sys.exit(code)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    entry()
