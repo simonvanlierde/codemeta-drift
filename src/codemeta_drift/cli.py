@@ -21,13 +21,12 @@ import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict
-from importlib import metadata
 from pathlib import Path
-from typing import NoReturn
+from typing import Any, NoReturn
 
 from codemeta_drift.checks import CONTEXT, TABLE, check
 from codemeta_drift.conformance import SCHEMA_FILES, conform
-from codemeta_drift.export import curated_tags, export
+from codemeta_drift.export import curated_tags, export, generator
 
 JSON_VERSION = 1
 """Every ``--json`` report's ``schema_version``: a release may add keys; removing or retyping one bumps it."""
@@ -285,6 +284,24 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_INTERRUPTED
 
 
+class VersionAction(argparse.Action):
+    """``--version``, reading the installed version only when asked: importlib.metadata costs about 10 ms."""
+
+    def __init__(self, option_strings: Sequence[str], dest: str, **kwargs: Any) -> None:  # noqa: ANN401 - argparse's own
+        super().__init__(option_strings, dest, nargs=0, help="show the version and exit", **kwargs)
+
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,  # noqa: ARG002 - argparse's signature
+        values: str | Sequence[Any] | None,  # noqa: ARG002
+        option_string: str | None = None,  # noqa: ARG002
+    ) -> None:
+        """Print ``codemeta-drift <version>`` and exit 0."""
+        print(f"{parser.prog} {generator()['version']}")
+        parser.exit()
+
+
 def check_main(argv: list[str]) -> int:
     """Run every check on one snapshot and print the findings."""
     parser = argparse.ArgumentParser(
@@ -296,17 +313,16 @@ def check_main(argv: list[str]) -> int:
             "codemeta-drift watch --help for schema comparison."
         ),
     )
-    parser.add_argument("--version", action="version", version=f"%(prog)s {metadata.version('codemeta-drift')}")
+    parser.add_argument("--version", action=VersionAction)
     parser.add_argument("checkout", type=Path, help="root of a codemeta clone")
     parser.add_argument("--ref", help="read this commit, tag or branch instead of the working tree")
     parser.add_argument("--json", action="store_true", help="print the findings as one JSON document")
     args = parser.parse_args(argv)
-    tool = {"name": "codemeta-drift", "version": metadata.version("codemeta-drift")}
 
     def cannot_run(message: str, help_: str | None) -> int:
         # A malformed file must not exit 1, which means drift.
         if args.json:
-            print(json_report({"tool": tool, "findings": []}, [{"message": message, "help": help_}]), end="")
+            print(json_report({"tool": generator(), "findings": []}, [{"message": message, "help": help_}]), end="")
         else:
             print(f"codemeta-drift: {message}", file=sys.stderr)
         return EXIT_CANNOT_RUN
@@ -321,7 +337,7 @@ def check_main(argv: list[str]) -> int:
     except READ_ERRORS as err:
         return cannot_run(f"cannot read {args.checkout}: {type(err).__name__}: {err}", None)
     if args.json:
-        print(json_report({"tool": tool, "findings": [asdict(f) for f in findings]}), end="")
+        print(json_report({"tool": generator(), "findings": [asdict(f) for f in findings]}), end="")
     elif findings:
         print("\n".join(map(str, findings)))
     return EXIT_FINDINGS if any(f.code != "SKIPPED" for f in findings) else 0

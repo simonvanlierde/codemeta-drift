@@ -323,3 +323,11 @@ def test_a_reader_that_closes_the_pipe_early_gets_exit_3_and_no_noise():
 def test_the_command_exits_with_mains_code():
     code = "from codemeta_drift import cli; cli.main = lambda: 3; cli.entry()"
     assert subprocess.run([sys.executable, "-c", code], check=False).returncode == 3
+
+
+def test_startup_loads_neither_importlib_metadata_nor_resources():
+    """About 15 ms of a 60 ms check run; only --version and the reports that name the version need them."""
+    code = "import sys, codemeta_drift.cli; print(sorted(m for m in sys.modules if m.startswith('importlib.')))"
+    loaded = subprocess.run([sys.executable, "-c", code], check=True, capture_output=True, text=True).stdout
+    assert "importlib.metadata" not in loaded
+    assert "importlib.resources" not in loaded
