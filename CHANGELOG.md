@@ -7,7 +7,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.7.0] - 2026-11-09
+## [0.7.0] - 2026-11-10
 
 Upgrade step: the `hub` commands of 0.6.0 and older refuse an export with the new formats and terms, so upgrade
 codemeta-drift with the file. A PKG-INFO parser must keep `Author` and `Author-email` as lists, even for one name,
