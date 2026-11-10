@@ -416,3 +416,12 @@ def test_original_cell_is_optional_for_older_exports():
         "rows": [{k: v for k, v in row.items() if k != "crosswalk_cell"} for row in EXAMPLE["rows"]],
     }
     Draft202012Validator(SCHEMA).validate(older)
+
+
+def test_each_export_lists_its_tags_context_terms():
+    """The terms a consumer checks codemeta.json keys against are those of the tag's codemeta.jsonld."""
+    assert "softwareSuggestions" in EXAMPLES["3.1"]["terms"]
+    assert "softwareSuggestions" not in EXAMPLES["4.0"]["terms"]
+    for mapping in EXAMPLES.values():
+        assert mapping["terms"] == sorted(mapping["terms"])
+        assert {"name", "author", "codeRepository"} <= set(mapping["terms"])

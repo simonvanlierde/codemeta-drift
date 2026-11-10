@@ -24,6 +24,12 @@
         "version": { "type": "string", "minLength": 1 }
       }
     },
+    "terms": {
+      "description": "Every property term of the codemeta.jsonld context at codemeta_tag, sorted: the keys a codemeta.json written to that context may use, besides keyword aliases such as type and id. Classes such as Person and prefixes such as schema are not listed. Optional; emitted since schema 1.7.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+      "uniqueItems": true
+    },
     "rows": {
       "description": "One row per (format, term). A pair appears at most once; JSON Schema cannot say that, so consumers check it.",
       "type": "array",
