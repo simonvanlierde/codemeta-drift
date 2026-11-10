@@ -7,7 +7,7 @@ sends no requests and opens no issues.
 codemeta-drift watch ../codemeta --tag 4.0 \
   --before previous-schemas --after new-schemas \
   --citesync-source ../citesync/src/citesync/MAPPING_SOURCE \
-  --latest v0.7.1 --existing issue-titles.json
+  --latest v0.7.2 --existing issue-titles.json
 ```
 
 Each directory needs the five files named in
@@ -34,11 +34,15 @@ and prereleases are errors because this preview cannot infer their release order
 
 The poll also compares each `sha256` line of `MAPPING_SOURCE` with the hash of that file as
 published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issue titled
-"Update mapping pin hash for <file> at <tag>" that names the file.
+"Update mapping pin hash for <file> at <tag>" that names the file. A malformed line drafts
+"Malformed MAPPING_SOURCE line in citesync: <line>", and a pinned file that the tag does not contain drafts
+"Pinned <file> is not in codemeta-drift <tag>". The poll's `--root` option names a codemeta-drift checkout
+(default `.`).
 
 The weekly [schema watcher workflow](../.github/workflows/schema-watch.yml) polls the
 existing public schema sources, CFF's latest release, CodeMeta's tags, the latest stable
-codemeta-drift release and citesync's pin. It uploads the draft JSON as an artifact. To
+codemeta-drift release and citesync's pin. One poll both uploads the draft JSON as an artifact and publishes the drafts. The artifact is uploaded even when
+publishing fails. The live tests run first and can fail the run. To
 run the same read-only poll locally:
 
 ```sh
@@ -50,7 +54,7 @@ secret is configured. Without it the run prints a notice that publishing was ski
 fine-grained token limited to simonvanlierde/codemeta-drift and simonvanlierde/citesync with
 only Issues: read and write. Both repositories are public, so reading the schema sources and
 citesync's `MAPPING_SOURCE` needs no Contents permission. It reads all
-issue pages, including closed issues, before creating any missing drafts. Calls are spaced
+issue pages, including closed issues, before creating any missing drafts. Issue creations are spaced
 one second apart. The workflow's concurrency group serializes runs. A local
 `--publish` run uses `gh` credentials and must not run beside another publisher.
 

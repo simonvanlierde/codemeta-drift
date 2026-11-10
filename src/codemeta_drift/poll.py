@@ -14,8 +14,10 @@ from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import urlopen
 
+from codemeta_drift.checks import code_span
+from codemeta_drift.conformance import SCHEMA_FILES
 from codemeta_drift.export import curated_tags, latest_tag
-from codemeta_drift.watcher import issue_plans, schema_changes
+from codemeta_drift.watcher import issue_plans, pin_tag, schema_changes
 
 API = "https://api.github.com/repos/"
 SCHEMA_URLS = {
@@ -31,6 +33,10 @@ def fetch_json(url: str) -> Any:  # noqa: ANN401
         msg = "schema and API sources must use HTTPS"
         raise ValueError(msg)
     with urlopen(url, timeout=30) as response:  # noqa: S310 - HTTPS checked above
+        # urlopen follows redirects, so the final URL needs the same check.
+        if not response.geturl().startswith("https://"):
+            msg = "schema and API sources must use HTTPS, also after a redirect"
+            raise ValueError(msg)
         return json.load(response)
 
 
@@ -46,13 +52,16 @@ def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list
                 {
                     "repo": "simonvanlierde/citesync",
                     "title": f"Malformed MAPPING_SOURCE line in citesync: {' '.join(fields)}",
-                    "body": f"`{line}` is not `sha256 <hex> <local> <path>`, so its pin was not checked. Fix the line.",
+                    "body": f"{code_span(line)} is not `sha256 <hex> <local> <path>`, so its pin was not checked. "
+                    "Fix the line.",
                 }
             )
             continue
         _, digest, local, path = fields
         try:
-            published = fetch(API + f"simonvanlierde/codemeta-drift/contents/{path}?ref={quote(tag, safe='')}")
+            published = fetch(
+                API + f"simonvanlierde/codemeta-drift/contents/{quote(path, safe='/')}?ref={quote(tag, safe='')}"
+            )
         except HTTPError as err:
             if err.code != 404:
                 raise
@@ -61,8 +70,8 @@ def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list
                 {
                     "repo": "simonvanlierde/citesync",
                     "title": f"Pinned {local} is not in codemeta-drift {tag}",
-                    "body": f"MAPPING_SOURCE pins `{local}` from `{path}`, but codemeta-drift {tag} has no such "
-                    "file. Pin a release that ships it.",
+                    "body": f"MAPPING_SOURCE pins {code_span(local)} from {code_span(path)}, but codemeta-drift {tag} "
+                    "has no such file. Pin a release that ships it.",
                 }
             )
             continue
@@ -72,8 +81,8 @@ def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list
                 {
                     "repo": "simonvanlierde/citesync",
                     "title": f"Update mapping pin hash for {local} at {tag}",
-                    "body": f"The sha256 of `{local}` in MAPPING_SOURCE is `{digest}`, but `{path}` at "
-                    f"{tag} hashes to `{current}`. Re-vendor the file and fix that line.",
+                    "body": f"The sha256 of {code_span(local)} in MAPPING_SOURCE is {code_span(digest)}, but "
+                    f"{code_span(path)} at {tag} hashes to {code_span(current)}. Re-vendor the file and fix that line.",
                 }
             )
     return plans
@@ -93,18 +102,15 @@ def poll(
     latest = fetch(API + "simonvanlierde/codemeta-drift/releases/latest")["tag_name"]
     pin = fetch(API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE")
     # The contents endpoint returns base64 so every source still uses the same JSON fetch contract.
-    source = base64.b64decode(pin["content"], validate=False).decode("utf-8")
-    pin_tags = [line.split()[1] for line in source.splitlines() if line.startswith("tag ")]
-    if len(pin_tags) != 1:
-        msg = "citesync MAPPING_SOURCE must have exactly one tag"
-        raise ValueError(msg)
-    plans = issue_plans(schema_changes(mapping["rows"], before, after), pin_tags[0], latest, set())
-    plans += stale_pin_hashes(source, pin_tags[0], fetch)
+    source = base64.b64decode(pin["content"]).decode("utf-8")
+    pinned = pin_tag(source)
+    plans = issue_plans(schema_changes(mapping["rows"], before, after), pinned, latest, set())
+    plans += stale_pin_hashes(source, pinned, fetch)
     # Zenodo has no current public JSON Schema: source changes need a fresh manual path review.
-    source = before["zenodo"]["x-source"]
-    for path, digest in sorted(source["files"].items()):
+    zenodo_source = before["zenodo"]["x-source"]
+    for path, digest in sorted(zenodo_source["files"].items()):
         try:
-            current_sha = fetch(API + source["repo"] + "/contents/" + path)["sha"]
+            current_sha = fetch(API + zenodo_source["repo"] + "/contents/" + path)["sha"]
         except HTTPError as err:
             if err.code != 404:
                 raise
@@ -152,7 +158,6 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True, help="JSON draft artifact")
     parser.add_argument("--publish", action="store_true", help="open missing issues using gh's credentials")
     args = parser.parse_args()
-    from codemeta_drift.conformance import SCHEMA_FILES  # noqa: PLC0415 - CLI snapshot loading
 
     mapping = json.loads((args.root / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
     before = {

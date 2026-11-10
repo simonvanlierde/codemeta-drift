@@ -21,20 +21,19 @@ import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict
-from importlib import metadata
 from pathlib import Path
-from typing import NoReturn
+from typing import Any, NoReturn
 
 from codemeta_drift.checks import CONTEXT, TABLE, check
 from codemeta_drift.conformance import SCHEMA_FILES, conform
-from codemeta_drift.export import curated_tags, export
+from codemeta_drift.export import curated_tags, export, generator
 
 JSON_VERSION = 1
 """Every ``--json`` report's ``schema_version``: a release may add keys; removing or retyping one bumps it."""
 
 EXIT_FINDINGS, EXIT_USAGE, EXIT_CANNOT_RUN, EXIT_INTERRUPTED = 1, 2, 3, 130
 
-READ_ERRORS = (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError)
+READ_ERRORS = (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError, RecursionError)
 """What a missing, unreadable or malformed input raises: the command could not run (exit 3), never exit 1."""
 
 INPUTS = (
@@ -68,7 +67,7 @@ def read_dir(root: Path) -> dict[str, str]:
         p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
         for g in INPUTS
         for p in root.glob(g)
-        if p.is_file()  # as read_ref, which reads only blobs
+        if p.is_file() and not p.is_symlink()  # as read_ref, which skips links: never read outside the tree
     }
 
 
@@ -86,8 +85,8 @@ def read_ref(root: Path, ref: str) -> dict[str, str]:
     for entry in git("ls-tree", "-r", "-z", commit).decode("utf-8").split("\0"):
         if entry:
             meta, path = entry.split("\t", 1)
-            _, kind, oid = meta.split()
-            if kind == "blob" and is_input(path):
+            mode, kind, oid = meta.split()
+            if kind == "blob" and mode != "120000" and is_input(path):  # 120000: a symlink's target text
                 blobs[path] = oid
 
     # One cat-file process reads every file; one git process per file doubles the run time.
@@ -137,6 +136,7 @@ def export_main(argv: list[str]) -> int:
             target = args.out
             args.out.write_text(text, encoding="utf-8")
         else:
+            target = "standard output"
             print(text, end="")
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: cannot read {target}: {err.stderr.decode().strip()}", file=sys.stderr)
@@ -208,7 +208,7 @@ def hub_main(argv: list[str]) -> int:
     except UsageError as err:
         print(f"codemeta-drift: {err}", file=sys.stderr)
         return EXIT_USAGE
-    except (OSError, ValueError) as err:
+    except (OSError, ValueError, RecursionError) as err:
         if getattr(args, "json", False):
             report = json_report({}, [{"message": str(err), "help": None}])
             written = False
@@ -225,7 +225,7 @@ def hub_main(argv: list[str]) -> int:
 
 def watch_main(argv: list[str]) -> int:
     """Compare downloaded schemas and print issue drafts, without opening issues."""
-    from codemeta_drift.watcher import issue_plans, schema_changes  # noqa: PLC0415 - only watch needs this
+    from codemeta_drift.watcher import issue_plans, pin_tag, schema_changes  # noqa: PLC0415 - only watch needs this
 
     parser = argparse.ArgumentParser(prog="codemeta-drift watch", description="Preview schema and pin issues offline.")
     parser.add_argument("checkout", type=Path)
@@ -250,18 +250,13 @@ def watch_main(argv: list[str]) -> int:
             {fmt: json.loads((directory / name).read_text("utf-8")) for fmt, name in SCHEMA_FILES.items()}
             for directory in (args.before, args.after)
         ]
-        pins = [
-            line.split()[1] for line in args.citesync_source.read_text("utf-8").splitlines() if line.startswith("tag ")
-        ]
-        if len(pins) != 1:
-            msg = "MAPPING_SOURCE must contain exactly one tag line"
-            raise ValueError(msg)
+        pin = pin_tag(args.citesync_source.read_text("utf-8"))
         existing = json.loads(args.existing.read_text("utf-8"))
         if not isinstance(existing, list) or any(not isinstance(title, str) for title in existing):
             msg = "existing issues must be a JSON list of titles"
             raise ValueError(msg)
         changes = schema_changes(mapping["rows"], *snapshots)
-        print(json.dumps(issue_plans(changes, pins[0], args.latest, set(existing)), indent=2))
+        print(json.dumps(issue_plans(changes, pin, args.latest, set(existing)), indent=2))
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: {err.stderr.decode().strip()}", file=sys.stderr)
         return EXIT_CANNOT_RUN
@@ -284,6 +279,24 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_INTERRUPTED
 
 
+class VersionAction(argparse.Action):
+    """``--version``, reading the installed version only when asked: importlib.metadata costs about 10 ms."""
+
+    def __init__(self, option_strings: Sequence[str], dest: str, **kwargs: Any) -> None:  # noqa: ANN401 - argparse's own
+        super().__init__(option_strings, dest, nargs=0, help="show the version and exit", **kwargs)
+
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,  # noqa: ARG002 - argparse's signature
+        values: str | Sequence[Any] | None,  # noqa: ARG002
+        option_string: str | None = None,  # noqa: ARG002
+    ) -> None:
+        """Print ``codemeta-drift <version>`` and exit 0."""
+        print(f"{parser.prog} {generator()['version']}")
+        parser.exit()
+
+
 def check_main(argv: list[str]) -> int:
     """Run every check on one snapshot and print the findings."""
     parser = argparse.ArgumentParser(
@@ -295,17 +308,16 @@ def check_main(argv: list[str]) -> int:
             "codemeta-drift watch --help for schema comparison."
         ),
     )
-    parser.add_argument("--version", action="version", version=f"%(prog)s {metadata.version('codemeta-drift')}")
+    parser.add_argument("--version", action=VersionAction)
     parser.add_argument("checkout", type=Path, help="root of a codemeta clone")
     parser.add_argument("--ref", help="read this commit, tag or branch instead of the working tree")
     parser.add_argument("--json", action="store_true", help="print the findings as one JSON document")
     args = parser.parse_args(argv)
-    tool = {"name": "codemeta-drift", "version": metadata.version("codemeta-drift")}
 
     def cannot_run(message: str, help_: str | None) -> int:
         # A malformed file must not exit 1, which means drift.
         if args.json:
-            print(json_report({"tool": tool, "findings": []}, [{"message": message, "help": help_}]), end="")
+            print(json_report({"tool": generator(), "findings": []}, [{"message": message, "help": help_}]), end="")
         else:
             print(f"codemeta-drift: {message}", file=sys.stderr)
         return EXIT_CANNOT_RUN
@@ -320,7 +332,7 @@ def check_main(argv: list[str]) -> int:
     except READ_ERRORS as err:
         return cannot_run(f"cannot read {args.checkout}: {type(err).__name__}: {err}", None)
     if args.json:
-        print(json_report({"tool": tool, "findings": [asdict(f) for f in findings]}), end="")
+        print(json_report({"tool": generator(), "findings": [asdict(f) for f in findings]}), end="")
     elif findings:
         print("\n".join(map(str, findings)))
     return EXIT_FINDINGS if any(f.code != "SKIPPED" for f in findings) else 0
@@ -332,14 +344,26 @@ def entry() -> NoReturn:
     A shell loop stops on Ctrl-C only when the command was killed by the signal; exit code 130 alone
     does not stop it. ``main`` itself returns 130, for callers that run it in-process.
     """
+    code = EXIT_CANNOT_RUN
     try:
-        code = main()
-        sys.stdout.flush()
-    except OSError as err:  # writing the output failed: a full disk or a closed pipe; Python would exit 120 or 1
-        print(f"codemeta-drift: cannot write the output: {err}", file=sys.stderr)
-        # Point stdout at devnull, or the interpreter's exit flush fails again and prints a traceback.
-        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
-        sys.exit(EXIT_CANNOT_RUN)
+        try:
+            code = main()
+        except SystemExit as done:  # argparse's --help, --version and usage errors still have output to flush
+            if not isinstance(done.code, int | None):
+                raise
+            code = done.code or 0
+        if sys.stdout is not None:  # None when the caller closed fd 1
+            sys.stdout.flush()
+    except OSError as err:  # a full disk or a closed pipe; Python itself would exit 120 or 1
+        if not isinstance(err, BrokenPipeError):  # a reader that stops early, as head does, is no news
+            with contextlib.suppress(OSError):
+                print(f"codemeta-drift: cannot write the output: {err}", file=sys.stderr)
+        # Point the streams at devnull, or the interpreter's exit flush fails again and exits 120.
+        for stream in (sys.stdout, sys.stderr):
+            with contextlib.suppress(OSError, ValueError, AttributeError):
+                os.dup2(os.open(os.devnull, os.O_WRONLY), stream.fileno())
+        if code != EXIT_INTERRUPTED:
+            sys.exit(EXIT_CANNOT_RUN)
     if code == EXIT_INTERRUPTED and sys.platform != "win32":
         sys.stderr.flush()
         signal.signal(signal.SIGINT, signal.SIG_DFL)

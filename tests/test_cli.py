@@ -1,3 +1,4 @@
+import contextlib
 import json
 import shutil
 import subprocess
@@ -8,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from codemeta_drift.checks import Finding
-from codemeta_drift.cli import is_input, main
+from codemeta_drift.cli import is_input, main, read_dir, read_ref
 from codemeta_drift.conformance import SCHEMA_FILES
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -84,6 +85,36 @@ def test_project_with_only_a_codemeta_json_exits_3(tmp_path: Path):
 def test_malformed_file_exits_3_not_1(repo: Path, path: str, content: bytes):
     (repo / path).write_bytes(content)
     assert main([str(repo)]) == 3
+
+
+DEEP = "[" * 200_000 + "]" * 200_000
+
+
+def test_deeply_nested_json_exits_3_not_a_traceback(repo: Path, tmp_path: Path):
+    (repo / "codemeta.jsonld").write_text(DEEP)
+    assert main([str(repo)]) == 3
+    (tmp_path / "deep.json").write_text(DEEP)
+    assert main(["hub", "sssom", str(tmp_path / "deep.json")]) == 3
+
+
+def test_an_input_that_is_a_symlink_is_skipped_in_both_readers(repo: Path, tmp_path: Path, git: Callable[..., None]):
+    """A hostile checkout cannot make the tool read a file outside it, and both readers agree."""
+    outside = tmp_path.parent / "outside.json"
+    outside.write_text('{"secret": true}')
+    (repo / "examples").mkdir(exist_ok=True)
+    (repo / "examples" / "linked.json").symlink_to(outside)
+    git(repo, "add", "-A")
+    git(repo, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "link")
+    assert "examples/linked.json" not in read_dir(repo)
+    assert "examples/linked.json" not in read_ref(repo, "HEAD")
+
+
+def test_export_names_the_output_when_writing_it_fails(repo: Path, capsys: pytest.CaptureFixture[str]):
+    with Path("/dev/full").open("w") as full, contextlib.redirect_stdout(full):
+        assert main(["export", str(repo), "--tag", "3.1"]) == 3
+    err = capsys.readouterr().err
+    assert "standard output" in err
+    assert str(repo) not in err
 
 
 def test_no_drift_exits_0(tmp_path: Path):
@@ -243,6 +274,60 @@ def test_output_that_cannot_be_written_exits_3(lines: int):
     assert result.stderr.startswith("codemeta-drift: cannot write the output:")
 
 
+def _shell(code: str, redirect: str) -> subprocess.CompletedProcess[str]:
+    """Run ``code`` in a fresh interpreter under a shell redirection such as ``>&-``."""
+    return subprocess.run(
+        ["/bin/sh", "-c", f'"$0" -c "$1" {redirect}', sys.executable, code],
+        check=False,
+        capture_output="2>" not in redirect,
+        text=True,
+    )
+
+
+@pytest.mark.skipif(not Path("/dev/full").exists(), reason="needs /dev/full")
+@pytest.mark.parametrize(
+    ("code", "redirect", "expected"),
+    [
+        # A closed stdout makes sys.stdout None: print is a no-op, and main's code stands.
+        ("from codemeta_drift import cli; cli.main = lambda: print('x') or 0; cli.entry()", ">&-", 0),
+        (
+            "from codemeta_drift import cli; cli.main = lambda: print('x') or 1; cli.entry()",
+            ">/dev/full 2>/dev/full",
+            3,
+        ),
+        ("from codemeta_drift import cli; cli.entry()", "--version >/dev/full", 3),
+        ("from codemeta_drift import cli; cli.entry()", "--help >/dev/full", 3),
+        # Ctrl-C still ends by SIGINT when the output cannot be flushed.
+        ("from codemeta_drift import cli; cli.main = lambda: print('x') or 130; cli.entry()", ">/dev/full", -2),
+    ],
+    ids=["closed-stdout", "stderr-full-too", "version", "help", "interrupted"],
+)
+def test_unwritable_output_edge_cases(code: str, redirect: str, expected: int):
+    result = _shell(code, redirect)
+    # sh reports a death by signal n as 128 + n, and Python as -n.
+    assert result.returncode in ({expected, 128 - expected} if expected < 0 else {expected})
+    assert "Traceback" not in (result.stderr or "")
+
+
+def test_a_reader_that_closes_the_pipe_early_gets_exit_3_and_no_noise():
+    code = "from codemeta_drift import cli; cli.main = lambda: print('finding\\n' * 100_000) or 1; cli.entry()"
+    reader = subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    assert reader.stdout is not None
+    reader.stdout.read(1)
+    reader.stdout.close()
+    assert reader.wait(timeout=30) == 3
+    assert reader.stderr is not None
+    assert reader.stderr.read() == ""
+
+
 def test_the_command_exits_with_mains_code():
     code = "from codemeta_drift import cli; cli.main = lambda: 3; cli.entry()"
     assert subprocess.run([sys.executable, "-c", code], check=False).returncode == 3
+
+
+def test_startup_loads_neither_importlib_metadata_nor_resources():
+    """About 15 ms of a 60 ms check run; only --version and the reports that name the version need them."""
+    code = "import sys, codemeta_drift.cli; print(sorted(m for m in sys.modules if m.startswith('importlib.')))"
+    loaded = subprocess.run([sys.executable, "-c", code], check=True, capture_output=True, text=True).stdout
+    assert "importlib.metadata" not in loaded
+    assert "importlib.resources" not in loaded

@@ -4,7 +4,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from codemeta_drift.checks import TABLE, crosswalk_paths, format_name
+from codemeta_drift.checks import TABLE, code_span, crosswalk_paths, format_name
 from codemeta_drift.export import FORMATS, NO_PROPERTY, PEOPLE, TERMS, classify, crosswalk_cells, derive
 from codemeta_drift.hub import validate_mapping
 
@@ -178,7 +178,7 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
                 continue
             mark = STATUSES[cell["status"]][0]
             # GitHub ends a table cell at a bare |, even inside a code span.
-            path = f" `{cell['path'].replace('|', '\\|')}`" if cell["path"] else ""
+            path = f" {code_span(cell['path']).replace('|', '\\|')}" if cell["path"] else ""
             link = f"[{mark}](#{anchor(fmt)})" if cell["reason"] else mark
             marks.append(link + path)
         lines.append(f"| `{term}` | " + " | ".join(marks) + " |")
@@ -189,8 +189,12 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
             if cell["format"] != fmt or not cell["reason"]:
                 continue
             # Stripped: DataCite's name cell is "title ", and a code span can't end in a space.
-            was = f"crosswalk cell `{cell['cell'].strip()}`" if (cell["cell"] or "").strip() else "no crosswalk cell"
-            now = f"`{cell['path']}`" if cell["path"] else "no path"
+            was = (
+                f"crosswalk cell {code_span(cell['cell'].strip())}"
+                if (cell["cell"] or "").strip()
+                else "no crosswalk cell"
+            )
+            now = code_span(cell["path"]) if cell["path"] else "no path"
             reason = cell["reason"][0].upper() + cell["reason"][1:].rstrip(".")
             # A bare URL in a reason (SPDX's git+https://host/path.git) is shown as code, not a link.
             # It starts after a space or "(" and never ends in a full stop; <autolinks> and `code` are left alone.

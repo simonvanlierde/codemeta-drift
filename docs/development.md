@@ -1,7 +1,7 @@
 # Develop codemeta-drift
 
-You need Git, [uv](https://docs.astral.sh/uv/), [just](https://just.systems) and
-[prek](https://github.com/j178/prek).
+You need Git, [uv](https://docs.astral.sh/uv/), [just](https://just.systems),
+[prek](https://github.com/j178/prek) and [Node](https://nodejs.org/) (its built-in test runner, no packages).
 
 Clone the repository, then enter its directory:
 

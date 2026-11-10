@@ -8,7 +8,7 @@ need different parsers. A Go module path is not a repository URL.
 codemeta-drift hub pair examples/mapping-4.0.json --from pep621 --to cargo
 codemeta-drift hub sssom examples/mapping-4.0.json --out spokes.sssom.tsv
 codemeta-drift hub crosswalk examples/mapping-4.0.json ../codemeta --format cargo
-codemeta-drift hub coverage examples/mapping-4.0.json --out docs/coverage-4.0.md
+codemeta-drift hub coverage examples/mapping-4.0.json --codemeta ../codemeta --out docs/coverage-4.0.md
 ```
 
 `coverage` writes the [coverage matrix](coverage-4.0.md): each term and format with its status

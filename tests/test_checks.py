@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from codemeta_drift.checks import VALID_EXAMPLES, Finding, check, csv_rows
+from codemeta_drift.checks import VALID_EXAMPLES, Finding, check, code_span, csv_rows
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -351,3 +351,18 @@ def test_seeded_drift_in_the_4_0_release_is_found(
     fault(files)
     new = {(f.code, f.file, f.term) for f in set(check(files)) - before}
     assert set(expected) <= new
+
+
+@pytest.mark.parametrize(
+    ("text", "span"),
+    [
+        ("a.b", "`a.b`"),
+        ("a`@x", "``a`@x``"),
+        ("x``y`z", "```x``y`z```"),
+        ("`a", "`` `a ``"),
+        ("a`", "`` a` ``"),
+        ("a\nb", "`a b`"),
+    ],
+)
+def test_code_span_fences_past_every_backtick_run(text: str, span: str):
+    assert code_span(text) == span

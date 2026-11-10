@@ -5,6 +5,7 @@ import json
 import re
 from typing import Any
 
+from codemeta_drift.checks import code_span
 from codemeta_drift.conformance import array_items, branches, resolve
 from codemeta_drift.paths import PIECES, parse
 
@@ -81,6 +82,15 @@ def schema_changes(rows: list[dict[str, Any]], before: dict[str, Any], after: di
     return changes
 
 
+def pin_tag(source: str) -> str:
+    """The release tag on citesync's one `tag <x>` MAPPING_SOURCE line."""
+    tags = [line.split()[1] for line in source.splitlines() if line.startswith("tag ")]
+    if len(tags) != 1:
+        msg = "MAPPING_SOURCE must contain exactly one tag line"
+        raise ValueError(msg)
+    return tags[0]
+
+
 def release_version(tag: str) -> tuple[int, int, int]:
     """Numeric stable release version; reject arbitrary refs rather than guessing their order."""
     if not re.fullmatch(r"v?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", tag):
@@ -106,7 +116,7 @@ def issue_plans(
                 "repo": "simonvanlierde/codemeta-drift",
                 "title": f"Review schema changes {digest}",
                 "body": "These schema fields need review:\n\n"
-                + "\n".join(f"- {c['format']}: {c['kind']} `{c['path']}` ({c['detail']})" for c in changes),
+                + "\n".join(f"- {c['format']}: {c['kind']} {code_span(c['path'])} ({c['detail']})" for c in changes),
             }
         )
     if release_version(pin_tag) < release_version(latest_tag):

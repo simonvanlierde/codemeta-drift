@@ -77,7 +77,7 @@ and `repository`, which may be strings or objects.
 {
   "schema_version": "1.7",
   "codemeta_tag": "3.1",
-  "generator": {"name": "codemeta-drift", "version": "0.7.1"},
+  "generator": {"name": "codemeta-drift", "version": "0.7.2"},
   "context_terms": ["address", "affiliation", "applicationCategory", "..."],
   "rows": [
     {
@@ -139,6 +139,8 @@ Each row:
   A `publisher` path such as `publisher.name | publisher` falls through to the whole object when the
   publisher is given only by reference (`{"@id": "https://ror.org/..."}`); that object is not a name, so the
   consumer takes its `@id` or leaves the name empty.
+  The `codemeta` `version` path is `version | softwareVersion`: schema.org's `softwareVersion` is a CodeMeta term too,
+  so a codemeta.json that holds only it still has a version.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
   for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
@@ -268,6 +270,8 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
   one space. `+` binds tighter, so `a + b | c` reads `c` only when `a` and `b` both have no value.
 - A filter matches only an element that has the key.
 - There are no list indexes (`a[0]`) and no wildcards.
+- A writer updates the alternative the document already has a value in, else it writes the first one. So the
+  `codemeta` `version` row writes `version` into a new file and keeps an existing `softwareVersion` where it is.
 
 A person sub-term's path is absolute and starts with the path of its term. CFF `author` is
 `authors[]`, so `author.givenName` is `authors[].given-names`. When a format keeps the whole

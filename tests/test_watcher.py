@@ -155,3 +155,9 @@ def test_mapped_arrays_and_filters_are_not_new_unmapped_fields():
 def test_schema_paths_include_tuple_arrays(key: str):
     schema = {"properties": {"authors": {"type": "array", key: [{"properties": {"name": {}}}]}}}
     assert "authors[].name" in schema_paths(schema)
+
+
+def test_a_backtick_in_a_schema_path_keeps_the_code_span_closed():
+    changes = [{"format": "npm", "kind": "unmapped", "path": "a`@x", "detail": "new field has no mapping row"}]
+    [plan] = issue_plans(changes, "v1.0.0", "v1.0.0", set())
+    assert "- npm: unmapped ``a`@x`` (new" in plan["body"]

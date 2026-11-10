@@ -11,10 +11,14 @@ import re
 from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass
-from importlib import metadata, resources
+from pathlib import Path
 from typing import Any
 
 from codemeta_drift.checks import Finding, context_terms, csv_rows, table_rows
+
+PACKAGE = Path(__file__).parent
+"""The installed package directory, which holds the schema and curated files: a plain path, cheaper than
+importlib.resources, which this wheel-only package does not need."""
 
 SCHEMA_VERSION = "1.7"
 
@@ -108,9 +112,7 @@ FORMATS = {
 }
 
 PATH = re.compile(
-    json.loads(resources.files("codemeta_drift").joinpath("mapping.schema.json").read_text("utf-8"))["$defs"]["row"][
-        "properties"
-    ]["path"]["pattern"]
+    json.loads((PACKAGE / "mapping.schema.json").read_text("utf-8"))["$defs"]["row"]["properties"]["path"]["pattern"]
 )
 
 # Splits a path into its single-chain pieces, at both `` | `` and `` + ``.
@@ -154,7 +156,7 @@ def identity(term: str) -> str:
 
 def curated_tags() -> list[str]:
     """CodeMeta tags with a curated-<tag>.json in this package."""
-    names = (p.name for p in resources.files("codemeta_drift").iterdir())
+    names = (p.name for p in PACKAGE.iterdir())
     return sorted(n.removeprefix("curated-").removesuffix(".json") for n in names if n.startswith("curated-"))
 
 
@@ -177,7 +179,7 @@ def read_curated(tag: str) -> list[dict[str, Any]]:
     """The curated rows for a CodeMeta tag. Raises KeyError for a tag with no file."""
     if tag not in curated_tags():
         raise KeyError(tag)
-    return json.loads(resources.files("codemeta_drift").joinpath(f"curated-{tag}.json").read_text("utf-8"))["rows"]
+    return json.loads((PACKAGE / f"curated-{tag}.json").read_text("utf-8"))["rows"]
 
 
 def build_rows(
@@ -400,6 +402,8 @@ def derive(spoke: Spoke, term: str, cell: str, made: Mapping[str, str | None]) -
 
 def generator() -> dict[str, str]:
     """This tool's name and installed version, for the export header."""
+    from importlib import metadata  # noqa: PLC0415 - about 10 ms; only reports that name the version need it
+
     return {"name": "codemeta-drift", "version": metadata.version("codemeta-drift")}
 
 

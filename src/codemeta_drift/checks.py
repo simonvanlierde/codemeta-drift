@@ -12,6 +12,7 @@ import csv
 import difflib
 import io
 import json
+import re
 from collections import Counter
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
@@ -27,6 +28,15 @@ examples/ use the schema.org context or are invalid on purpose."""
 
 NOT_PROPERTIES = frozenset({"type", "id", "schema", "codemeta"})
 """Context keys that are keyword aliases or prefixes, not properties."""
+
+
+def code_span(text: str) -> str:
+    """``text`` as one Markdown code span that no backtick in it can close early."""
+    text = text.replace("\n", " ")
+    fence = "`" * (max(map(len, re.findall("`+", text)), default=0) + 1)
+    # CommonMark strips one space each side, so an edge backtick stays apart from the fence.
+    pad = " " if text.startswith("`") or text.endswith("`") else ""
+    return f"{fence}{pad}{text}{pad}{fence}"
 
 
 @dataclass(frozen=True)
