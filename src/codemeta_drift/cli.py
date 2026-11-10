@@ -16,6 +16,7 @@ import fnmatch
 import json
 import subprocess
 import sys
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from importlib import metadata
 from pathlib import Path
@@ -29,6 +30,9 @@ JSON_VERSION = 1
 
 EXIT_FINDINGS, EXIT_USAGE, EXIT_CANNOT_RUN, EXIT_INTERRUPTED = 1, 2, 3, 130
 
+READ_ERRORS = (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError)
+"""What a missing, unreadable or malformed input raises: the command could not run (exit 3), never exit 1."""
+
 INPUTS = (
     "codemeta.jsonld",
     "codemeta_all.jsonld",
@@ -41,9 +45,12 @@ INPUTS = (
 """Glob patterns, relative to the repository root, of every file a check reads."""
 
 
-def json_report(errors: list[dict[str, str | None]], **fields: object) -> str:
+def json_report(fields: Mapping[str, object], errors: Sequence[dict[str, str | None]] = ()) -> str:
     """A ``--json`` report: ``schema_version``, the command's fields, and ``errors`` as {message, help} objects."""
-    return json.dumps({"schema_version": JSON_VERSION, **fields, "errors": errors}, indent=2, ensure_ascii=False) + "\n"
+    return (
+        json.dumps({"schema_version": JSON_VERSION, **fields, "errors": list(errors)}, indent=2, ensure_ascii=False)
+        + "\n"
+    )
 
 
 def is_input(path: str) -> bool:
@@ -108,8 +115,8 @@ def export_main(argv: list[str]) -> int:
     target: object = f"{args.checkout} at tag {args.tag}"
     try:
         files = read_ref(args.checkout, f"refs/tags/{args.tag}")
-        if TABLE not in files:
-            print(f"codemeta-drift: {target} has no {TABLE}", file=sys.stderr)
+        if missing := [p for p in (CONTEXT, TABLE) if p not in files]:
+            print(f"codemeta-drift: {target} has no {' or '.join(missing)}", file=sys.stderr)
             return EXIT_CANNOT_RUN
         mapping, findings = export(files, args.tag)
         if args.schemas:
@@ -130,7 +137,7 @@ def export_main(argv: list[str]) -> int:
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: cannot read {target}: {err.stderr.decode().strip()}", file=sys.stderr)
         return EXIT_CANNOT_RUN
-    except (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError) as err:
+    except READ_ERRORS as err:
         print(f"codemeta-drift: cannot read or write {target}: {type(err).__name__}: {err}", file=sys.stderr)
         return EXIT_CANNOT_RUN
     return 0
@@ -150,7 +157,7 @@ def coverage_text(mapping: dict, checkout: Path | None, *, as_json: bool) -> str
     if not as_json:
         return markdown(mapping, files)
     data = coverage(mapping) | ({"unreviewed": unreviewed(files, mapping)} if files is not None else {})
-    return json_report([], **data)
+    return json_report(data)
 
 
 def hub_parser() -> argparse.ArgumentParser:
@@ -177,7 +184,7 @@ def hub_parser() -> argparse.ArgumentParser:
 
 def hub_main(argv: list[str]) -> int:
     """Write SSSOM spokes or field correspondences between two formats."""
-    from codemeta_drift.hub import crosswalk, pair_rows, sssom, table  # noqa: PLC0415 - only the hub command needs this
+    from codemeta_drift.hub import UsageError, crosswalk, pair_rows, sssom, table  # noqa: PLC0415 - only hub needs this
 
     args = hub_parser().parse_args(argv)
     try:
@@ -194,9 +201,12 @@ def hub_main(argv: list[str]) -> int:
             args.out.write_text(text, encoding="utf-8")
         else:
             print(text, end="")
+    except UsageError as err:
+        print(f"codemeta-drift: {err}", file=sys.stderr)
+        return EXIT_USAGE
     except (OSError, ValueError) as err:
         if getattr(args, "json", False):
-            print(json_report([{"message": str(err), "help": None}]), end="")
+            print(json_report({}, [{"message": str(err), "help": None}]), end="")
         else:
             print(f"codemeta-drift: {err}", file=sys.stderr)
         return EXIT_CANNOT_RUN
@@ -218,6 +228,9 @@ def watch_main(argv: list[str]) -> int:
         "--existing", required=True, type=Path, help="JSON list of all issue titles, including closed issues"
     )
     args = parser.parse_args(argv)
+    if args.tag not in curated_tags():
+        print(f"codemeta-drift: no curated rows for {args.tag}; have {', '.join(curated_tags())}", file=sys.stderr)
+        return EXIT_USAGE
     try:
         mapping, findings = export(read_ref(args.checkout, f"refs/tags/{args.tag}"), args.tag)
         if findings:
@@ -232,17 +245,17 @@ def watch_main(argv: list[str]) -> int:
         ]
         if len(pins) != 1:
             msg = "MAPPING_SOURCE must contain exactly one tag line"
-            raise ValueError(msg)  # noqa: TRY301 - report malformed input with read errors
+            raise ValueError(msg)
         existing = json.loads(args.existing.read_text("utf-8"))
         if not isinstance(existing, list) or any(not isinstance(title, str) for title in existing):
             msg = "existing issues must be a JSON list of titles"
-            raise ValueError(msg)  # noqa: TRY301 - report malformed input with read errors
+            raise ValueError(msg)
         changes = schema_changes(mapping["rows"], *snapshots)
         print(json.dumps(issue_plans(changes, pins[0], args.latest, set(existing)), indent=2))
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: {err.stderr.decode().strip()}", file=sys.stderr)
         return EXIT_CANNOT_RUN
-    except (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError) as err:
+    except READ_ERRORS as err:
         print(f"codemeta-drift: {type(err).__name__}: {err}", file=sys.stderr)
         return EXIT_CANNOT_RUN
     return 0
@@ -282,7 +295,7 @@ def check_main(argv: list[str]) -> int:
     def cannot_run(message: str, help_: str | None) -> int:
         # A malformed file must not exit 1, which means drift.
         if args.json:
-            print(json_report([{"message": message, "help": help_}], tool=tool, findings=[]), end="")
+            print(json_report({"tool": tool, "findings": []}, [{"message": message, "help": help_}]), end="")
         else:
             print(f"codemeta-drift: {message}", file=sys.stderr)
         return EXIT_CANNOT_RUN
@@ -294,10 +307,10 @@ def check_main(argv: list[str]) -> int:
         findings = check(files)
     except subprocess.CalledProcessError as err:
         return cannot_run(f"cannot read {args.checkout}: {err.stderr.decode().strip()}", None)
-    except (OSError, ValueError, KeyError, IndexError, TypeError, AttributeError) as err:
+    except READ_ERRORS as err:
         return cannot_run(f"cannot read {args.checkout}: {type(err).__name__}: {err}", None)
     if args.json:
-        print(json_report([], tool=tool, findings=[asdict(f) for f in findings]), end="")
+        print(json_report({"tool": tool, "findings": [asdict(f) for f in findings]}), end="")
     elif findings:
         print("\n".join(map(str, findings)))
     return EXIT_FINDINGS if any(f.code != "SKIPPED" for f in findings) else 0

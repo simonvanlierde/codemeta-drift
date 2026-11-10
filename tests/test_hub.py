@@ -235,7 +235,7 @@ def test_crosswalk_rejects_a_format_the_mapping_has_no_rows_for(
     example: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
     (tmp_path / "properties_description.csv").write_text("Parent Type,Property\nschema:Thing,name\n")
-    assert main(["hub", "crosswalk", str(example), str(tmp_path), "--format", "nope"]) == 3
+    assert main(["hub", "crosswalk", str(example), str(tmp_path), "--format", "nope"]) == 2
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "unknown format 'nope'" in captured.err
@@ -254,3 +254,10 @@ def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
     mapping["codemeta_tag"] = tag
     with pytest.raises(ValueError, match="codemeta_tag"):
         validate_mapping(mapping)
+
+
+def test_pair_with_a_format_the_mapping_has_no_rows_for_is_a_usage_error(
+    example: Path, capsys: pytest.CaptureFixture[str]
+):
+    assert main(["hub", "pair", str(example), "--from", "nope", "--to", "zenodo"]) == 2
+    assert "source and target must be present formats" in capsys.readouterr().err

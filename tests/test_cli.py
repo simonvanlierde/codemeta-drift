@@ -139,10 +139,16 @@ def test_watch_exits_1_and_lists_the_findings_when_the_export_is_blocked(
     assert captured.err.strip() == str(finding)
 
 
-def test_watch_with_an_unknown_tag_exits_3_with_gits_message(
-    repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+def test_watch_with_a_tag_without_curated_rows_exits_2(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(_watch_args(tmp_path, repo, tag="3.0")) == 2
+    assert capsys.readouterr().err == "codemeta-drift: no curated rows for 3.0; have 3.1, 4.0\n"
+
+
+def test_watch_on_a_checkout_without_the_tag_exits_3_with_gits_message(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
-    assert main(_watch_args(tmp_path, repo, tag="no-such-tag")) == 3
+    (tmp_path / "empty").mkdir()
+    assert main(_watch_args(tmp_path, tmp_path / "empty")) == 3
     captured = capsys.readouterr()
     assert captured.out == ""
     assert captured.err.startswith("codemeta-drift: fatal:")

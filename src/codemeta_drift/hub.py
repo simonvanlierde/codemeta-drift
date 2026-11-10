@@ -14,6 +14,12 @@ REPO = "https://github.com/simonvanlierde/codemeta-drift/"
 # w3id.org redirects this base to the coverage page, so the identifiers outlive its hosting.
 BASE = "https://w3id.org/codemeta-drift/"
 """The coverage page, which resolves the hub's term, field and format identifiers to matrix cells."""
+
+
+class UsageError(ValueError):
+    """A bad option value, such as a format the mapping has no rows for; the command line exits 2."""
+
+
 CREATOR = "orcid:0009-0006-6953-909X"
 """The curator of the mapping set, as in CITATION.cff."""
 
@@ -86,7 +92,7 @@ def pair_rows(mapping: dict[str, Any], source: str, target: str) -> list[dict[st
     present = {row["format"] for row in rows}
     if source not in present or target not in present:
         msg = f"source and target must be present formats: {', '.join(sorted(present))}"
-        raise ValueError(msg)
+        raise UsageError(msg)
     targets = {row["term"]: row["path"] for row in rows if row["format"] == target and row["path"] is not None}
     return [
         {"term": row["term"], "source": row["path"], "target": targets[row["term"]]}
@@ -171,7 +177,7 @@ def crosswalk(mapping: dict[str, Any], files: Mapping[str, str], fmt: str) -> st
     rows = spokes(mapping)
     if fmt not in {row["format"] for row in rows}:
         msg = f"unknown format {fmt!r}"
-        raise ValueError(msg)
+        raise UsageError(msg)
     paths = {
         TERMS[row["term"]]: row["path"] or ""
         for row in rows
