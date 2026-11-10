@@ -77,7 +77,7 @@ and `repository`, which may be strings or objects.
 {
   "schema_version": "1.7",
   "codemeta_tag": "3.1",
-  "generator": {"name": "codemeta-drift", "version": "0.7.0"},
+  "generator": {"name": "codemeta-drift", "version": "0.7.1"},
   "context_terms": ["address", "affiliation", "applicationCategory", "..."],
   "rows": [
     {
