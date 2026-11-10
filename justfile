@@ -15,8 +15,8 @@ default:
 
 # The stack checks CI runs. `just hooks` runs the git hooks, which CI also runs.
 check:
-    @just py-check
     @node --test site/*.test.mjs
+    @just py-check
 
 # Fix and format every stack here, as each stack's `fmt` recipe does.
 fmt:
@@ -69,7 +69,7 @@ citation:
 release version:
     #!/usr/bin/env bash
     set -euo pipefail
-    version={{ version }}
+    version={{ quote(version) }}
     [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not a version: $version" >&2; exit 1; }
     tag=v$version
     repo=https://github.com/simonvanlierde/codemeta-drift

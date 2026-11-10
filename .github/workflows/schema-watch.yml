@@ -8,6 +8,10 @@ permissions:
 concurrency:
   group: schema-watcher
   cancel-in-progress: false
+env:
+  # As in python.yml: uv checks every package against OSV's malware advisories before its code runs.
+  UV_MALWARE_CHECK: "1"
+  UV_PREVIEW_FEATURES: malware-check
 jobs:
   compare:
     runs-on: ubuntu-latest
