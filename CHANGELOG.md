@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- When its output cannot be written, for example to a full disk, the command prints "cannot write the output" and
+  exits 3, as [documented](docs/checks.md). Before this it exited 120 or 1 with a Python traceback.
+
 ## [0.7.1] - 2026-11-10
 
 ### Fixed
