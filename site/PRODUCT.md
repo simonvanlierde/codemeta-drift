@@ -14,7 +14,8 @@ mapping export, plus the HEAD of a CodeMeta clone when given one. GitHub Pages s
 
 Show CodeMeta maintainers and citation-tool authors which crosswalk cells work as written, which are
 wrong, and which are missing, for the formats citation tools read. Each cell explains itself: CodeMeta's
-text, the reviewed path and the reason. A second tab follows one field between two formats through its
+text, the reviewed path and the reason. Each CodeMeta release with a reviewed export has its own matrix, the
+newest by default. A second tab follows one field between two formats through its
 CodeMeta term, and a third, checked weekly, says what changed on CodeMeta's main branch.
 
 ## Constraints

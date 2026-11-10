@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseFragment } from "./fragment.mjs";
+import { chosenTag, parseFragment } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -31,4 +31,12 @@ test("a malformed escape or an unknown prefix selects nothing", () => {
   assert.equal(parseFragment("#field/cargo/%E0"), null);
   assert.equal(parseFragment("#nope/x"), null);
   assert.equal(parseFragment(""), null);
+});
+
+test("?tag picks a listed release, and anything else the newest", () => {
+  const tags = ["3.1", "4.0"];
+  assert.equal(chosenTag("?tag=3.1", tags), "3.1");
+  assert.equal(chosenTag("", tags), "4.0");
+  assert.equal(chosenTag("?tag=../secrets", tags), "4.0");
+  assert.equal(chosenTag("?tag=3.0", tags), "4.0");
 });

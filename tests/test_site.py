@@ -23,6 +23,7 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert build(out, "--codemeta", str(repo)).returncode == 0
     data = json.loads((out / "data.json").read_text("utf-8"))
     assert data["coverage"]["codemeta_tag"] == "4.0"
+    assert data["tags"] == ["3.1", "4.0"]
     # The repo fixture's HEAD is the 4.0 snapshot, the exported tag: its cells read the same.
     codes = [f["code"] for f in data["upstream"]["drift"]]
     assert codes.count("CROSSWALK_ROWS") == 10
@@ -54,7 +55,12 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert tsv.startswith("# mapping_set_id: https://w3id.org/codemeta-drift/spokes-4.0.sssom.tsv\n")
     old = (out / "spokes-3.1.sssom.tsv").read_text("utf-8")
     assert old.startswith("# mapping_set_id: https://w3id.org/codemeta-drift/spokes-3.1.sssom.tsv\n")
+    # An older release has its own matrix, read at its own tag, and no upstream check.
+    older = json.loads((out / "data-3.1.json").read_text("utf-8"))
+    assert sorted(older) == ["coverage", "unreviewed"]
+    assert older["coverage"]["codemeta_tag"] == older["unreviewed"]["codemeta_tag"] == "3.1"
     assert sorted(p.name for p in out.iterdir()) == [
+        "data-3.1.json",
         "data.json",
         "favicon.svg",
         "fragment.mjs",
