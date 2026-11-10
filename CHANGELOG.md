@@ -7,6 +7,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-10
+
 ### Added
 
 - Mapping schema 1.8: `ro-crate` (RO-Crate 1.1 to 1.3) and `croissant` (Croissant 1.0 and 1.1) rows in the 3.1
@@ -281,7 +283,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.6.0...v0.7.0
