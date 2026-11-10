@@ -58,7 +58,7 @@ repos:
   # .json files are read as JSON5, so comments and trailing commas in tsconfig
   # and VS Code settings pass; syntax errors and duplicate keys fail.
   - repo: https://github.com/simonvanlierde/jsonvet
-    rev: 022d320d5b971eccb28cfa6ce205152cbb382e53 # frozen: v3.2.0
+    rev: 83df66110a108e0fa4b7d2b2adcef6831f618e05 # frozen: v3.3.1
     hooks:
       - id: jsonvet
 
@@ -84,7 +84,7 @@ repos:
   # and impostor commits. Set GH_TOKEN to enable the audits that need the API;
   # without it only the offline subset runs.
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: c92afdf2c6ca336aaa8f39e2bd8d48f62dbd8e1f # frozen: v1.31.1
+    rev: 06a39750ec31860bb44f2acf67182c40016cd1e7 # frozen: v1.32.0
     hooks:
       - id: zizmor
 
@@ -106,7 +106,7 @@ repos:
   # CITATION.cff is the source: codemeta.json, any .zenodo.json and the package manifests
   # must agree with it. `just citation` runs the manual-stage writer to fix them.
   - repo: https://github.com/simonvanlierde/citesync
-    rev: 0847ad93d4db06575aa6d57b675c7b9334ed46ef # frozen: v0.2.0
+    rev: 27c649e635302721583fd9a043865bfb98116225 # frozen: v0.4.0
     hooks:
       - id: citesync
       - id: citesync-write
