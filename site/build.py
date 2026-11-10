@@ -21,7 +21,7 @@ from typing import Any
 from codemeta_drift.checks import check
 from codemeta_drift.cli import read_ref
 from codemeta_drift.coverage import coverage, unreviewed, upstream
-from codemeta_drift.export import curated_tags, tag_key
+from codemeta_drift.export import curated_tags
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -30,12 +30,15 @@ STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg")
 
 def upstream_data(checkout: Path, mapping: dict[str, Any]) -> dict[str, Any]:
     """HEAD of a CodeMeta clone: commit, date, drift findings and cells changed since the export's tag."""
-    commit, date = subprocess.run(  # noqa: S603 - fixed git call, no shell
-        ["git", "-C", str(checkout), "log", "-1", "--format=%H %cI"],  # noqa: S607
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.split()
+    commit, date = (
+        subprocess.run(  # noqa: S603 - fixed git call, no shell
+            ["git", "-C", str(checkout), "log", "-1", "--format=%H %cI"],  # noqa: S607
+            check=True,
+            capture_output=True,
+        )
+        .stdout.decode()
+        .split()
+    )
     files = read_ref(checkout, commit)
     return {
         "commit": commit,
@@ -51,7 +54,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True, help="output directory, replaced if it exists")
     parser.add_argument("--codemeta", type=Path, help="a CodeMeta clone whose HEAD to compare")
     args = parser.parse_args()
-    tags = sorted(curated_tags(), key=tag_key)
+    tags = curated_tags()
     mappings = {tag: json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8")) for tag in tags}
 
     def matrix(tag: str) -> dict[str, Any]:
@@ -60,9 +63,16 @@ def main() -> None:
             "unreviewed": unreviewed(read_ref(args.codemeta, tag), mappings[tag]) if args.codemeta else None,
         }
 
-    *older, latest = tags
-    upstream = upstream_data(args.codemeta, mappings[latest]) if args.codemeta else None
-    data = {"tags": tags, **matrix(latest), "upstream": upstream}
+    newest = tags[-1]
+    # Every file is computed before --out is touched, so a clone without a tag leaves the last build in place.
+    try:
+        head = upstream_data(args.codemeta, mappings[newest]) if args.codemeta else None
+        data = {"data.json": {"tags": tags, **matrix(newest), "upstream": head}}
+        data |= {f"data-{tag}.json": matrix(tag) for tag in tags[:-1]}
+    except subprocess.CalledProcessError as err:
+        parser.error(
+            f"cannot read {args.codemeta}, which needs the tags {', '.join(tags)}: {err.stderr.decode().strip()}"
+        )
     # Only a directory this script made, or an empty one, is replaced.
     if args.out.exists() and any(args.out.iterdir()) and not (args.out / "data.json").exists():
         parser.error(f"{args.out} is not empty and has no data.json; refusing to replace it")
@@ -73,7 +83,7 @@ def main() -> None:
     # The SSSOM export's mapping_set_id points here, for every tag with an export, so an older set's id still resolves.
     for tag in tags:
         (args.out / f"spokes-{tag}.sssom.tsv").write_text(sssom(mappings[tag]), encoding="utf-8")
-    for name, value in [("data.json", data), *((f"data-{tag}.json", matrix(tag)) for tag in older)]:
+    for name, value in data.items():
         (args.out / name).write_text(json.dumps(value, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 

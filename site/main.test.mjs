@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
@@ -9,4 +10,13 @@ test("no local variable hides a top-level function", () => {
   const functions = [...source.matchAll(/^(?:async )?function (\w+)/gm)].map((m) => m[1]);
   const hidden = functions.filter((name) => new RegExp(`\\b(?:const|let|var) ${name}\\b`).test(source));
   assert.deepEqual(hidden, []);
+});
+
+test("main.mjs parses: CI runs it in no browser", () => {
+  execFileSync(process.execPath, ["--check", new URL("./main.mjs", import.meta.url).pathname]);
+});
+
+test("choosing the Matrix tab keeps ?tag and stays on the site", () => {
+  assert.match(source, /name === "matrix" \? location\.search \|\| "\."/);
+  assert.doesNotMatch(source, /location\.pathname/);
 });

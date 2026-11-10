@@ -7,6 +7,11 @@ export function chosenTag(search, tags) {
   return tags.includes(tag) ? tag : tags.at(-1);
 }
 
+// A release's link, relative so it stays on this origin even at a doubled-slash path: the newest is the page itself.
+export function releaseHref(tag, tags) {
+  return tag === tags.at(-1) ? "." : `?tag=${encodeURIComponent(tag)}`;
+}
+
 //
 // The SSSOM export's identifiers resolve here: #term/<term>, #field/<format>/<path> and #format/<format>,
 // each percent-encoded as the export writes it. #route and #upstream open their tabs.

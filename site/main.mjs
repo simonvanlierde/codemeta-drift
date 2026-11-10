@@ -1,7 +1,8 @@
-// Draws the coverage matrix, the route between two formats and the upstream check from data.json.
+// Draws the coverage matrix, the route between two formats and the upstream check from data.json,
+// or an older release's matrix from data-<tag>.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { chosenTag, parseFragment } from "./fragment.mjs";
+import { chosenTag, parseFragment, releaseHref } from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -249,7 +250,8 @@ function tabs() {
   const visible = () => TABS.filter((name) => !document.getElementById(`tab-${name}`).hidden);
   const choose = (name, focus) => {
     showTab(name, focus);
-    history.replaceState(null, "", name === "matrix" ? location.pathname : `#${name}`);
+    history.replaceState(null, "", name === "matrix" ? location.search || "." : `#${name}`);
+    relink();
   };
   for (const name of TABS) document.getElementById(`tab-${name}`).addEventListener("click", () => choose(name, false));
   list.addEventListener("keydown", (event) => {
@@ -313,13 +315,16 @@ function score(data) {
 // One link per CodeMeta release with a reviewed export. A link reloads the page, which draws everything once.
 function releases(tags, shown) {
   const nav = document.getElementById("tags");
-  for (const tag of tags) {
-    const href = tag === tags.at(-1) ? location.pathname : `?tag=${encodeURIComponent(tag)}`;
-    nav.append(el("a", tag === shown ? { href: `${href}${location.hash}`, "aria-current": "page" } : { href: `${href}${location.hash}` }, tag));
-  }
+  for (const tag of tags) nav.append(el("a", { href: releaseHref(tag, tags), ...(tag === shown && { "aria-current": "page" }) }, tag));
   nav.hidden = tags.length < 2;
-  // The chosen link names the tag, so the slug's own copy would say it twice.
-  document.getElementById("tag").hidden = !nav.hidden;
+  // The chosen link shows the tag; the slug's own copy stays for screen readers, so its sentence ends.
+  document.getElementById("tag").classList.toggle("vh", !nav.hidden);
+  relink();
+}
+
+// Each release link carries the open view's fragment, so switching keeps the view. Called whenever the fragment changes.
+function relink() {
+  for (const a of document.querySelectorAll("#tags a")) a.hash = location.hash;
 }
 
 async function load(file) {
@@ -330,12 +335,15 @@ async function load(file) {
 
 async function start() {
   const latest = await load("data.json");
+  const newest = latest.tags.at(-1);
   const tag = chosenTag(location.search, latest.tags);
-  // Only the newest release is compared with CodeMeta's main branch.
-  const { coverage, unreviewed, upstream } = tag === latest.tags.at(-1) ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
+  // Before the older file loads, so a failed load still leaves the way back to the newest.
   releases(latest.tags, tag);
-  if (!upstream && latest.upstream) document.getElementById("checked").textContent = `upstream main is compared with ${latest.tags.at(-1)} only`;
+  // Only the newest release is compared with CodeMeta's main branch.
+  const { coverage, unreviewed, upstream } = tag === newest ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
+  if (!upstream && latest.upstream) document.getElementById("checked").textContent = `upstream main is compared with ${newest} only`;
   document.getElementById("tag").textContent = coverage.codemeta_tag;
+  document.title = `${document.title} (CodeMeta ${coverage.codemeta_tag})`;
   const matrixLink = document.getElementById("matrix-md");
   matrixLink.href = matrixLink.href.replace(/coverage\.md$/, `coverage-${coverage.codemeta_tag}.md`);
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
@@ -348,7 +356,10 @@ async function start() {
   upstreamSection(upstream, coverage.codemeta_tag);
   tabs();
   follow();
-  window.addEventListener("hashchange", follow);
+  window.addEventListener("hashchange", () => {
+    follow();
+    relink();
+  });
 }
 
 start().catch((err) => {

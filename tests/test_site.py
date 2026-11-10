@@ -2,6 +2,7 @@ import json
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from codemeta_drift.export import FORMATS
@@ -59,6 +60,8 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     older = json.loads((out / "data-3.1.json").read_text("utf-8"))
     assert sorted(older) == ["coverage", "unreviewed"]
     assert older["coverage"]["codemeta_tag"] == older["unreviewed"]["codemeta_tag"] == "3.1"
+    # Read at 3.1, not the newest tag: these two crosswalks exist only in the 4.0 fixture.
+    assert {f["format"] for f in older["unreviewed"]["formats"]}.isdisjoint({"GitLab", "code-json"})
     assert sorted(p.name for p in out.iterdir()) == [
         "data-3.1.json",
         "data.json",
@@ -70,6 +73,34 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "spokes-4.0.sssom.tsv",
         "style.css",
     ]
+
+
+def test_build_without_a_clone_has_no_upstream_or_unreviewed(tmp_path: Path):
+    out = tmp_path / "site"
+    assert build(out).returncode == 0
+    data = json.loads((out / "data.json").read_text("utf-8"))
+    older = json.loads((out / "data-3.1.json").read_text("utf-8"))
+    assert data["upstream"] is data["unreviewed"] is older["unreviewed"] is None
+
+
+def test_a_clone_without_an_older_tag_fails_cleanly(tmp_path: Path, repo: Path, git: Callable[..., None]):
+    out = tmp_path / "site"
+    assert build(out, "--codemeta", str(repo)).returncode == 0
+    before = sorted(p.name for p in out.iterdir())
+    git(repo, "tag", "-d", "3.1")
+    result = build(out, "--codemeta", str(repo))
+    assert result.returncode == 2
+    assert "3.1" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert sorted(p.name for p in out.iterdir()) == before
+
+
+def test_every_id_main_mjs_looks_up_is_in_the_page():
+    source = (ROOT / "site/main.mjs").read_text("utf-8")
+    html = (ROOT / "site/index.html").read_text("utf-8")
+    ids = set(re.findall(r'getElementById\("([\w-]+)"\)', source))
+    assert ids
+    assert {i for i in ids if f'id="{i}"' not in html} == set()
 
 
 def test_page_keeps_its_csp_and_no_inline_code():

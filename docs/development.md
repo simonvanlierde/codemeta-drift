@@ -34,7 +34,8 @@ for tag in 3.1 4.0; do
 done
 ```
 
-To preview the page, build it with a CodeMeta clone and serve the output:
+To preview the page, build it with a full CodeMeta clone, since the build reads every tag with an export, and
+serve the output:
 
 ```sh
 uv run site/build.py --out _site --codemeta ../codemeta
