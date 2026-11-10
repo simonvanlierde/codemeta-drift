@@ -101,7 +101,7 @@ also checks citesync's mapping pin. Publishing requires a configured token.
 
 ## Development
 
-From a codemeta-drift checkout, with uv and [just](https://just.systems) installed:
+From a codemeta-drift checkout, with uv, [just](https://just.systems) and Node (its built-in test runner, no packages) installed:
 
 ```sh
 uv sync

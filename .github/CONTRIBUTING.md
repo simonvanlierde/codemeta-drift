@@ -23,7 +23,7 @@ request outside what the project sets out to do is closed with a link to this se
 ## Set up and check
 
 The [development guide](../docs/development.md) covers tools, dependencies and git hooks.
-`just check` runs lint, types, tests and the dependency audit. `just hooks` runs the
+`just check` runs lint, types, tests, the site tests and the dependency audit. `just hooks` runs the
 remaining repository checks. `just fmt` formats the code and applies lint fixes.
 
 uv locks only releases at least a week old. If `just check` fails on
@@ -43,9 +43,8 @@ and remove it a week later ([how](https://github.com/simonvanlierde/project-temp
   `Revert "..."` title that GitHub's Revert button writes.
 - **The pull request body** has the shape of
   [the pull request template](pull_request_template.md): what it fixes and why, three or
-  four bullets, a `Tests:` line, and a `How I know it works:` line with the proof (the
-  command and its output, or a test that fails without the change). Add a `What to check:` line for
-  what only a person can judge.
+  four bullets, a `Tested:` line with the proof (the command and its result, or a test
+  that fails without the change), and a `Not checked:` line for what did not run and what only a person can judge.
 - **The changelog** ([CHANGELOG.md](../CHANGELOG.md)) follows
   [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/). Write each entry for
   the people who use the project, not as a commit subject. Mark breaking changes

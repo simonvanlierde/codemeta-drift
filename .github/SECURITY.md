@@ -27,8 +27,8 @@ CHANGELOG entry for that release links the advisory.
 
 ## Scope
 
-<!-- Say what this project is and what it is not: a server, stored user data, a
-     published package. Keep the lists below in line with it. -->
+This project covers the command-line tool and mapping export, the coverage site, and the weekly schema watcher.
+The watcher reads untrusted upstream files and opens issues with a token.
 
 In scope:
 

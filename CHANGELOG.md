@@ -10,12 +10,22 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - The `codemeta` `version` row reads `version | softwareVersion`, so a codemeta.json that holds its version only as
-  `softwareVersion` still has one. Writers keep writing `version`. See the [mapping export](docs/mapping-export.md).
+  `softwareVersion` still has one. A writer keeps the alternative the file already has, so it writes `version` into a
+  new file and leaves an existing `softwareVersion` where it is. See the [mapping export](docs/mapping-export.md).
+- Startup no longer loads `importlib.metadata` and `importlib.resources` unless needed. A check run takes about 15 ms
+  less of its 60 ms.
 
 ### Fixed
 
-- When its output cannot be written, for example to a full disk, the command prints "cannot write the output" and
-  exits 3, as [documented](docs/checks.md). Before this it exited 120 or 1 with a Python traceback.
+- Output the command cannot write exits 3, as [documented](docs/checks.md): a full disk, a closed pipe, and `--help` or
+  `--version` to a full disk too. A full disk prints "codemeta-drift: cannot write the output: ...". A reader that
+  closes the pipe early, as `head` does, gets no message. A closed stdout (`>&-`) keeps the command's own exit code.
+  Ctrl-C still ends by SIGINT. Before this the command exited 120 or 1 with a Python traceback.
+- Deeply nested JSON input exits 3 instead of crashing.
+- The schema watcher's issue bodies fence fetched text safely, so a backtick in an upstream schema key no longer breaks
+  out of the code span. A redirect to plain http is refused.
+- When publishing fails, gh's reason now reaches the job log. The watcher polls once per run, so the issues match the
+  uploaded drafts.
 
 ## [0.7.1] - 2026-11-10
 
