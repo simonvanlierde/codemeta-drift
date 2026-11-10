@@ -144,6 +144,13 @@ def test_swhid_rows_sit_beside_the_doi():
     assert path["zenodo", "swhid"] == "related_identifiers[scheme=swh].identifier"
 
 
+@pytest.mark.parametrize("tag", curated_tags())
+def test_the_codemeta_version_row_also_reads_software_version(tag: str):
+    """schema:softwareVersion is a CodeMeta term too: a file holding only it still has a version."""
+    rows = {(r["format"], r["term"]): r for r in read_curated(tag)}
+    assert rows["codemeta", "version"]["path"] == "version | softwareVersion"
+
+
 @pytest.mark.parametrize(("fmt", "label"), [("zenodo", "crosswalks/Zenodo.csv"), ("cff-1.2.0", CFF)])
 def test_swhid_on_the_doi_path_is_shared_outside_codemeta(fmt: str, label: str):
     """Only codemeta.json holds the SWHID and the DOI in one key; elsewhere that path is a wrong row."""
