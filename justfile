@@ -16,6 +16,7 @@ default:
 # The stack checks CI runs. `just hooks` runs the git hooks, which CI also runs.
 check:
     @just py-check
+    @node --test site/*.test.mjs
 
 # Fix and format every stack here, as each stack's `fmt` recipe does.
 fmt:
