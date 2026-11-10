@@ -9,11 +9,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Mapping schema 1.8: `ro-crate` (RO-Crate 1.3 `ro-crate-metadata.json`) and `croissant` (Croissant 1.1
-  `croissant.json`) rows in the 3.1 and 4.0 exports, all curated from the two specifications. RO-Crate paths start
-  at the root data entity, `@graph[@id=./]`, so a filter value may now hold `/`, and a 1.8 file fails the 1.7
-  schema. The [export guide](docs/mapping-export.md) says how a consumer resolves an author reference
-  (`{"@id": ...}`) to its entity in `@graph`, and `mapping-vectors.json` covers the `@graph` lookup.
+- Mapping schema 1.8: `ro-crate` (RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`) and `croissant` (Croissant 1.0
+  and 1.1 `croissant.json`) rows in the 3.1 and 4.0 exports, all curated from the two specifications. RO-Crate paths
+  start at the root data entity, `@graph[@id=./]`, so a filter value may now hold `/`, and a 1.8 file fails the 1.7
+  schema. A consumer first replaces references in the root with their `@graph` entities and reads a bare author,
+  identifier, licence or publisher as a list; the [export guide](docs/mapping-export.md) gives the rules, and
+  `mapping-vectors.json` has `raw_input` cases for both formats.
 
 ### Fixed
 

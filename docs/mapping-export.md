@@ -119,8 +119,8 @@ Each row:
   context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project), `wikidata` (a Wikidata
   item), `ris` (a RIS record with `TY  - COMP`), `endnote` (an EndNote tagged record with
   `%0 Computer Program`), `gitlab` (the GitLab REST API's project JSON), `code-json-2.0` (a
-  code.json 2.0 file, the US federal source code metadata), `ro-crate` (an RO-Crate 1.3
-  `ro-crate-metadata.json`) or `croissant` (a Croissant 1.1 `croissant.json`). A format whose versions differ puts the
+  code.json 2.0 file, the US federal source code metadata), `ro-crate` (an RO-Crate 1.1 to 1.3
+  `ro-crate-metadata.json`) or `croissant` (a Croissant 1.0 or 1.1 `croissant.json`). A format whose versions differ puts the
   version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to `wikidata` in
   1.5, `ris` to `code-json-2.0` in 1.7, and `ro-crate` and `croissant` in 1.8. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
@@ -237,16 +237,22 @@ them into one first. These cases need more than the grammar below says:
   element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object
   with `id` for an item, or an object with `time` for a date. A deprecated statement is skipped.
 - RO-Crate and Croissant are JSON-LD, read as written, not expanded or compacted. An RO-Crate keeps
-  its entities in `@graph`, so its paths start at the root data entity, `@graph[@id=./]`. A detached
-  crate, whose root `@id` is an absolute URL, is not addressed. Before resolving a path, the consumer
-  replaces each reference in the root entity (an object whose only key is `@id`, such as
+  its entities in `@graph`, so its paths start at the root data entity, `@graph[@id=./]`. A crate
+  whose root `@id` is not `./` (the descriptor's `about.@id` names it) reads no value from these rows.
+  Before resolving a path, the consumer replaces each reference among the root entity's property
+  values and list elements (an object whose only key is `@id`, such as
   `{"@id": "https://orcid.org/0000-0002-1825-0097"}`) with the `@graph` entity of that `@id`, one
-  level deep; a reference with no entity stays as it is. So `author[].givenName` reads the Person
-  entity, and `author[].@id` reads the same `@id` either way. A Croissant file holds its people in
-  place, under `creator`. In both, a property with one value may be written bare, without a list:
-  the consumer reads `author`, `creator` and `contributor` as lists. An `@id` that
-  starts with `#`, such as `#author-1`, is a local id, not an ORCID. Neither format has a CodeMeta
-  crosswalk; the rows cite the specifications.
+  level deep; a reference with no entity stays as it is. An entity keeps its `@id`, so
+  `author[].givenName` reads the Person entity, and `author[].@id` and `license[].@id` read the
+  same URL either way. A Croissant file holds its people in place, under `creator`. In both, a
+  property with one value may be written bare, without a list: the consumer reads `author`,
+  `creator`, `contributor`, `identifier`, `license` and `publisher` as lists. On a list that holds
+  both strings and objects, a path such as `license[].@id | license[]` reads only the objects. A
+  `keywords` string holds keywords separated by commas: the consumer splits it. An `@id` that starts
+  with `#`, such as `#author-1`, is a local id, not an ORCID. Neither format has a CodeMeta
+  crosswalk; the rows cite the specifications. The `ro-crate` and `croissant` vectors in
+  `mapping-vectors.json` give a file as `raw_input` and the tree these rules make from it as
+  `document`.
 
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
@@ -301,6 +307,7 @@ The schema's `path` pattern accepts exactly this grammar.
 and `expected`. `expected` is the list of values the path resolves to in `document`, in document order,
 from the first alternative that yields any value. A consumer vendors the file with the schema and runs
 every case through its own resolver, so the copies of the grammar stay in step.
+Its `schema_version` is the mapping schema whose grammar the cases need.
 Cases with `raw_input` also test parsing: its `format` names the parser and its `text` is the source
 file content. Parse that text and compare the resulting tree to `document` before resolving `path`.
 The PKG-INFO cases cover comma separation, quoted names, company suffixes and `et al.`.
@@ -322,7 +329,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
 
 ## What a consumer does
 
-1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 2).
+1. Read `schema_version` first. A major it doesn't know is an error ([citesync](https://github.com/simonvanlierde/citesync), the first consumer, exits 3).
 2. Validate the file against the schema it vendors beside it, and update the two together:
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
@@ -330,11 +337,11 @@ They come with a new codemeta tag or a new codemeta-drift release.
    Schema 1.7 adds the `ris`, `endnote`, `gitlab` and `code-json-2.0` format ids, the `publisher` and `resourceType` terms and the `context_terms` list, so a 1.7 file
    passes the 1.6 schema, but the `hub` of 0.6.0 refuses it. Its PKG-INFO author rows read `Author[] + Author-email[]`, so
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
-   lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema. Update the
+   lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
-4. For each format it reads, a missing row for a term it uses is an error (citesync exits 2). A format
+4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format
    that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from
    a file for that tag or later.
    A row with `path: null` is not missing: the format has no place for that term.
