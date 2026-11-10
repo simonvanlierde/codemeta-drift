@@ -2,7 +2,7 @@
 // or an older release's matrix from data-<tag>.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { chosenTag, hubTerm, pageTitle, parseFragment, releaseLinks } from "./fragment.mjs";
+import { chosenTag, pageTitle, parseFragment, releaseLinks } from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -265,7 +265,7 @@ function tabs() {
 }
 
 // Opens what the fragment names (see parseFragment). The first matching cell is chosen and scrolled to.
-function follow() {
+function follow(hub) {
   const target = parseFragment(location.hash);
   if (!target) return;
   if (target.tab) {
@@ -278,7 +278,8 @@ function follow() {
     field: (b) => b.dataset.format === target.format && b.dataset.path === target.path,
   }[target.kind];
   const cells = [...document.querySelectorAll("#matrix .cell")];
-  const term = hubTerm(target, new Set(cells.map((b) => b.dataset.term)));
+  // codemeta.json is the hub and has no cells: its field ids open their row's term instead.
+  const term = target.kind === "field" && target.format === "codemeta" ? hub[target.path] : undefined;
   const button = cells.find(match) ?? (term === undefined ? undefined : cells.find((b) => b.dataset.term === term));
   if (!button) return;
   showTab("matrix");
@@ -339,7 +340,7 @@ async function start() {
   // Before the older file loads, so a failed load still leaves the way back to the newest.
   releases(latest.tags, tag);
   // Only the newest release is compared with CodeMeta's main branch.
-  const { coverage, unreviewed, upstream } = tag === newest ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
+  const { coverage, hub, unreviewed, upstream } = tag === newest ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
   if (!upstream && latest.upstream) document.getElementById("checked").textContent = `upstream main is compared with ${newest} only`;
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   document.title = pageTitle(document.title, coverage.codemeta_tag);
@@ -354,9 +355,9 @@ async function start() {
   route(coverage);
   upstreamSection(upstream, coverage.codemeta_tag);
   tabs();
-  follow();
+  follow(hub);
   window.addEventListener("hashchange", () => {
-    follow();
+    follow(hub);
     drawReleases();
   });
 }

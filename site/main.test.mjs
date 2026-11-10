@@ -24,5 +24,5 @@ test("choosing the Matrix tab keeps ?tag and stays on the site", () => {
 test("the release links are redrawn on every tab choice and fragment change", () => {
   // CI runs no browser: this pins the two call sites that keep the links' fragment current.
   assert.match(source, /history\.replaceState\([^\n]*\n\s*drawReleases\(\);/);
-  assert.match(source, /follow\(\);\n\s*drawReleases\(\);/);
+  assert.match(source, /follow\(hub\);\n\s*drawReleases\(\);/);
 });

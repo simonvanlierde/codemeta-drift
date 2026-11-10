@@ -6,6 +6,7 @@ import subprocess
 import sys
 from collections.abc import Callable
 from pathlib import Path
+from urllib.parse import unquote
 
 import pytest
 
@@ -62,7 +63,7 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert old.startswith("# mapping_set_id: https://w3id.org/codemeta-drift/spokes-3.1.sssom.tsv\n")
     # An older release has its own matrix, read at its own tag, and no upstream check.
     older = json.loads((out / "data-3.1.json").read_text("utf-8"))
-    assert sorted(older) == ["coverage", "unreviewed"]
+    assert sorted(older) == ["coverage", "hub", "unreviewed"]
     assert older["coverage"]["codemeta_tag"] == older["unreviewed"]["codemeta_tag"] == "3.1"
     # Read at 3.1, not the newest tag: these two crosswalks exist only in the 4.0 fixture.
     assert {f["format"] for f in older["unreviewed"]["formats"]}.isdisjoint({"GitLab", "code-json"})
@@ -142,6 +143,21 @@ def test_out_that_is_a_symlink_is_a_usage_error(tmp_path: Path):
     assert build(tmp_path / "link").returncode == 2
     assert build(tmp_path / "dangling").returncode == 2
     assert (tmp_path / "target" / "keep").read_text() == "keep me"
+
+
+def test_every_codemeta_field_id_opens_a_term(tmp_path: Path):
+    """The SSSOM export's codemeta subjects resolve on the page: codemeta has no cells, so through data's hub."""
+    out = tmp_path / "site"
+    assert build(out).returncode == 0
+    tags = json.loads((out / "data.json").read_text("utf-8"))["tags"]
+    for tag in tags:
+        name = "data.json" if tag == tags[-1] else f"data-{tag}.json"
+        data = json.loads((out / name).read_text("utf-8"))
+        ids = re.findall(r"\tfield:codemeta/(\S+)\t", (out / f"spokes-{tag}.sssom.tsv").read_text("utf-8"))
+        assert len(ids) > 10
+        assert data["hub"]["identifier"] == "identifier"  # swhid's row shares the path
+        for path in map(unquote, ids):
+            assert data["hub"][path] in data["coverage"]["terms"], path
 
 
 def test_every_id_main_mjs_looks_up_is_in_the_page():

@@ -34,14 +34,5 @@ export function parseFragment(hash) {
   if (kind === "term") return { kind, term: parts[0] };
   if (kind === "format") return { kind, format: parts[0] };
   if (kind !== "field") return null;
-  const path = parts.slice(1).join("/");
-  // codemeta.json is the hub and has no row: its field ids open the term's first cell instead.
-  // A path with alternatives (version | softwareVersion, publisher.name | publisher) lists each one.
-  const hubTerms = parts[0] === "codemeta" ? path.replaceAll("[]", "").split(" | ") : undefined;
-  return { kind, format: parts[0], path, hubTerms };
-}
-
-// The matrix term a codemeta field id opens: its first alternative that is a term.
-export function hubTerm(target, terms) {
-  return target.hubTerms?.find((term) => terms.has(term));
+  return { kind, format: parts[0], path: parts.slice(1).join("/") };
 }

@@ -188,7 +188,7 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
         for cell in data["cells"]:
             if cell["format"] != fmt or not cell["reason"]:
                 continue
-            # Stripped: DataCite's name cell is "title ", and a code span can't end in a space.
+            # Stripped: DataCite's name cell is "title ", with a stray trailing space.
             was = (
                 f"crosswalk cell {code_span(cell['cell'].strip())}"
                 if (cell["cell"] or "").strip()

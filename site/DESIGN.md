@@ -35,5 +35,5 @@ Don't add inline script or style, another host, or a mark whose meaning lives on
 
 The SSSOM export's identifiers resolve on this page: `#term/<term>`, `#field/<format>/<path>` and
 `#format/<format>` choose the first matching cell and scroll to it. codemeta.json has no row, so
-its field ids open the term's first cell; the Go spoke's one id has no cell. Below 1280px the detail panel
+its field ids open their row's term's first cell; the Go spoke's one id has no cell. Below 1280px the detail panel
 sticks to the foot of the screen. The format column stays put at every width.
