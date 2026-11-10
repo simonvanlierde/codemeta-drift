@@ -298,3 +298,20 @@ def test_main_without_publish_never_calls_gh(tmp_path: Path, monkeypatch: pytest
     monkeypatch.setattr("sys.argv", ["poll", "--root", str(root), "--out", str(out)])
     runner.main()
     assert json.loads(out.read_text()) == []
+
+
+def test_a_failing_gh_call_shows_gh_s_reason(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
+):
+    gh = tmp_path / "bin/gh"
+    gh.parent.mkdir()
+    gh.write_text("#!/bin/sh\necho 'HTTP 401: Bad credentials' >&2\nexit 1\n")
+    gh.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{gh.parent}:/usr/bin:/bin")
+    monkeypatch.setattr(runner, "poll", lambda *_: [{"repo": "o/r", "title": "t", "body": "b"}])
+    root = Path(__file__).resolve().parents[1]
+    monkeypatch.setattr("sys.argv", ["poll", "--root", str(root), "--out", str(tmp_path / "d.json"), "--publish"])
+    with pytest.raises(subprocess.CalledProcessError):
+        runner.main()
+    # The job log is the only place a weekly run's failure is read: CalledProcessError itself omits stderr.
+    assert "Bad credentials" in capfd.readouterr().err

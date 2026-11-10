@@ -162,13 +162,15 @@ def main() -> None:
     plans = poll(mapping, before)
     args.out.write_text(json.dumps(plans, indent=2) + "\n", encoding="utf-8")
     if args.publish:
-        subprocess.run(["gh", "api", "rate_limit"], check=True, capture_output=True, timeout=30)  # noqa: S607
+        # Only stdout is captured: gh's reason for a refusal must reach the job log, which
+        # CalledProcessError does not print.
+        subprocess.run(["gh", "api", "rate_limit"], check=True, stdout=subprocess.DEVNULL, timeout=30)  # noqa: S607
 
         def titles(repo: str) -> set[str]:
             output = subprocess.run(  # noqa: S603 - fixed gh operation, no shell
                 ["gh", "api", "--paginate", "--slurp", f"repos/{repo}/issues?state=all&per_page=100"],  # noqa: S607
                 check=True,
-                capture_output=True,
+                stdout=subprocess.PIPE,
                 text=True,
                 timeout=30,
             ).stdout
