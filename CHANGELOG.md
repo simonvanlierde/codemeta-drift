@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Security
+
+- The schema watcher reads its issue token from a `schema-watch` environment that only `main` can use, so a
+  workflow run from another branch can't read it. See the [schema watcher](docs/schema-watcher.md).
+
 ### Added
 
 - The [coverage page](https://simonvanlierde.com/codemeta-drift/) switches between CodeMeta 3.1 and 4.0, with a link
