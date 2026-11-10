@@ -28,7 +28,7 @@ A path-shaped crosswalk cell, such as `package.version`, supplies the mapping di
 Other rows use `curated-<tag>.json` ([3.1](../src/codemeta_drift/curated-3.1.json),
 [4.0](../src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell, prints the
 findings on standard error and exits 1 without writing output. A successful export exits 0;
-invalid arguments or unreadable inputs exit 2. Without `--out`, JSON goes to standard output.
+invalid arguments, such as a tag with no curated file, exit 2, and unreadable inputs exit 3. Without `--out`, JSON goes to standard output.
 
 | Finding | What to check |
 | --- | --- |

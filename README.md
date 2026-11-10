@@ -55,8 +55,8 @@ Each output line names the check, file, term and problem. For example, the 4.0 c
 EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
 ```
 
-Exit codes are **0** when the checked files agree, **1** when they disagree, and **2**
-when the check cannot run. A check with no findings prints nothing; `SKIPPED` notices
+Exit codes are **0** when the checked files agree, **1** when they disagree, **2** on a usage
+error, **3** when the check cannot run and **130** when interrupted. A check with no findings prints nothing; `SKIPPED` notices
 for optional files do not make it fail. Add `--json` for structured output.
 See [finding codes, compared files and JSON output](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md).
 

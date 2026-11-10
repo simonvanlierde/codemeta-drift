@@ -177,7 +177,7 @@ def test_cli_writes_pair_csv(example: Path, capsys: pytest.CaptureFixture[str]):
 def test_cli_rejects_bad_mapping_without_partial_output(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     source = tmp_path / "mapping.json"
     source.write_text('{"schema_version":"2.0"}')
-    assert main(["hub", "sssom", str(source)]) == 2
+    assert main(["hub", "sssom", str(source)]) == 3
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "codemeta-drift:" in captured.err
@@ -235,7 +235,7 @@ def test_crosswalk_rejects_a_format_the_mapping_has_no_rows_for(
     example: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
     (tmp_path / "properties_description.csv").write_text("Parent Type,Property\nschema:Thing,name\n")
-    assert main(["hub", "crosswalk", str(example), str(tmp_path), "--format", "nope"]) == 2
+    assert main(["hub", "crosswalk", str(example), str(tmp_path), "--format", "nope"]) == 3
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "unknown format 'nope'" in captured.err

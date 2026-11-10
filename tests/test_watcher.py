@@ -97,7 +97,7 @@ def test_cli_watch_previews_and_deduplicates(repo: Path, tmp_path: Path, capsys:
     assert main(args) == 0
     assert json.loads(capsys.readouterr().out) == []
     existing.write_text("{}")
-    assert main(args) == 2
+    assert main(args) == 3
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "JSON list of titles" in captured.err

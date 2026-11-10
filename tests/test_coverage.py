@@ -82,8 +82,8 @@ def test_cli_lists_unreviewed_crosswalks_from_the_tag(example: Path, repo: Path,
     assert len(data["unreviewed"]["formats"]) == 16
 
 
-def test_cli_coverage_without_the_tag_exits_2(example: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
-    assert main(["hub", "coverage", str(example), "--codemeta", str(tmp_path)]) == 2
+def test_cli_coverage_without_the_tag_exits_3(example: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(["hub", "coverage", str(example), "--codemeta", str(tmp_path)]) == 3
     assert capsys.readouterr().err.startswith(f"codemeta-drift: cannot read {tmp_path}: fatal:")
 
 
