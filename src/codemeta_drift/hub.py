@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import quote
 
 from codemeta_drift.checks import table_rows
-from codemeta_drift.export import PATH, TERMS, formats
+from codemeta_drift.export import PATH, SCHEMA_VERSION, TERMS, formats
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
 # w3id.org redirects this base to the coverage page, so the identifiers outlive its hosting.
@@ -46,6 +46,11 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
         msg = "mapping codemeta_tag must be a numeric version"
         raise ValueError(msg)
     allowed_formats = formats(data["codemeta_tag"])
+    # A newer minor may add formats or relax a pattern this build does not know.
+    upgrade = ""
+    if int(data["schema_version"].split(".")[1]) > int(SCHEMA_VERSION.split(".")[1]):
+        newer = data["schema_version"]
+        upgrade = f" (schema_version {newer} is newer than this build's {SCHEMA_VERSION}; upgrade codemeta-drift)"
     seen = set()
     for i, row in enumerate(data["rows"], 1):
         if not isinstance(row, dict) or not {"format", "term", "path", "source"} <= row.keys():
@@ -63,7 +68,7 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
             or any(key in row and not isinstance(row[key], str) for key in ("comment", "see_also"))
             or ("see_also" in row and not row["see_also"].startswith("https://"))
         ):
-            msg = f"invalid or unsupported mapping row {i}"
+            msg = f"invalid or unsupported mapping row {i}{upgrade}"
             raise ValueError(msg)
         key = row["format"], row["term"]
         if key in seen:

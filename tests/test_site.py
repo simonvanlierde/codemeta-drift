@@ -1,4 +1,5 @@
 import contextlib
+import hashlib
 import importlib.util
 import json
 import re
@@ -78,6 +79,17 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "spokes-4.0.sssom.tsv",
         "style.css",
     ]
+
+
+def test_module_urls_carry_their_content_hash(tmp_path: Path):
+    out = tmp_path / "site"
+    assert build(out).returncode == 0
+
+    def stamp(name: str) -> str:
+        return hashlib.sha256((out / name).read_bytes()).hexdigest()[:12]
+
+    assert f'from "./fragment.mjs?v={stamp("fragment.mjs")}";' in (out / "main.mjs").read_text("utf-8")
+    assert f'src="main.mjs?v={stamp("main.mjs")}"' in (out / "index.html").read_text("utf-8")
 
 
 def test_build_without_a_clone_has_no_upstream_or_unreviewed(tmp_path: Path):

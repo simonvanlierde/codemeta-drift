@@ -25,6 +25,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - An issue body shows an empty value as one space in a code span instead of two stray backticks, and an all-space
   value with its own number of spaces.
 - `site/build.py --out` refuses a symbolic link instead of ending in a traceback.
+- `hub` says to upgrade codemeta-drift when a mapping row it cannot read comes from a newer schema minor.
+- The coverage page loads its modules by content hash, so a browser never pairs a new page with a module cached
+  from the previous deploy.
 
 ## [0.7.2] - 2026-11-10
 
