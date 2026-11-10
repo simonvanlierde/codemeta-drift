@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- `hub coverage --json --out FILE` writes its error report to the file when the command cannot run, as it would the
+  output. Before this it printed the report to standard output and left the file unwritten. See the
+  [check docs](docs/checks.md#read-json-output).
+- The schema watcher drafts an issue for a malformed line in citesync's `MAPPING_SOURCE` and checks the other pins.
+  Before this one bad line stopped the whole poll before any draft was written.
+
 ## [0.7.0] - 2026-11-10
 
 Upgrade step: the `hub` commands of 0.6.0 and older refuse an export with the new formats and terms, so upgrade

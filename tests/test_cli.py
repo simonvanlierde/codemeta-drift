@@ -208,6 +208,13 @@ def test_hub_coverage_json_reports_why_it_could_not_run(tmp_path: Path, capsys: 
     assert "missing.json" in report["errors"][0]["message"]
 
 
+def test_hub_coverage_json_writes_the_error_report_to_out(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    out = tmp_path / "coverage.json"
+    assert main(["hub", "coverage", str(tmp_path / "missing.json"), "--json", "--out", str(out)]) == 3
+    assert capsys.readouterr().out == ""
+    assert "missing.json" in json.loads(out.read_text("utf-8"))["errors"][0]["message"]
+
+
 def test_exit_130_interrupted(repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
     def interrupt(_: object) -> None:
         raise KeyboardInterrupt
