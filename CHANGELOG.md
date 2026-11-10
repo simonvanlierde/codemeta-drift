@@ -7,8 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Mapping schema 1.8: `ro-crate` (RO-Crate 1.1 to 1.3) and `croissant` (Croissant 1.0 and 1.1) rows in the 3.1
+  and 4.0 exports and the hub. RO-Crate paths start at `@graph[@id=./]`, so a filter value may now hold `/`, and a
+  1.8 file fails the 1.7 schema. The [export guide](docs/mapping-export.md) gives the reading rules both formats
+  need, and `mapping-vectors.json` has `raw_input` cases for them.
+
 ### Fixed
 
+- The export guide says citesync exits 3, not 2, on an unknown major `schema_version` or a missing row.
 - Every `field:codemeta/...` SSSOM id opens the first cell of its row's term on the
   [coverage page](https://simonvanlierde.com/codemeta-drift/). Before, `field:codemeta/%40type` and
   `field:codemeta/publisher.name%20%7C%20publisher` opened nothing.
