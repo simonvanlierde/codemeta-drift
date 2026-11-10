@@ -96,7 +96,8 @@ def test_curated_json_ld_rows_read_the_vector_documents(fmt: str) -> None:
     for term, values in EXPECTED.items():
         assert resolve(document, paths[term]) == values, term
     assert [a["name"] for a in resolve(document, paths["author"])] == ["Josiah Carberry"]
-    assert resolve(document, paths["keywords"]) in (["ceramics, cracks"], [["ceramics", "cracks"]])
+    keywords = {"ro-crate": ["ceramics, cracks"], "croissant": [["ceramics", "cracks"]]}
+    assert resolve(document, paths["keywords"]) == keywords[fmt]
     assert resolve(document, paths["resourceType"]) in (["Dataset"], ["sc:Dataset"])
     for term in ("contributor", "contributor.givenName", "contributor.familyName", "contributor.@id"):
         assert resolve(document, paths[term]) == [], term

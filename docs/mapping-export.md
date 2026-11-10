@@ -248,9 +248,11 @@ them into one first. These cases need more than the grammar below says:
   property with one value may be written bare, without a list: the consumer reads `author`,
   `creator`, `contributor`, `identifier`, `license` and `publisher` as lists. On a list that holds
   both strings and objects, a path such as `license[].@id | license[]` reads only the objects. A
-  `keywords` string holds keywords separated by commas: the consumer splits it. An `@id` that starts
+  `keywords` value may be one string of keywords separated by commas: the consumer splits it after
+  resolving the path, not while reading the file. An `@id` that starts
   with `#`, such as `#author-1`, is a local id, not an ORCID. Neither format has a CodeMeta
-  crosswalk; the rows cite the specifications. The `ro-crate` and `croissant` vectors in
+  crosswalk; the rows cite the specifications. The rows are for reading: a crate writer puts each
+  object it writes into `@graph` as an entity and links it from the root by reference. The `ro-crate` and `croissant` vectors in
   `mapping-vectors.json` give a file as `raw_input` and the tree these rules make from it as
   `document`.
 

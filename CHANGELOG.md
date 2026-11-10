@@ -18,6 +18,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- The export guide says citesync exits 3, not 2, on an unknown major `schema_version` or a missing row.
 - Every `field:codemeta/...` SSSOM id opens the first cell of its row's term on the
   [coverage page](https://simonvanlierde.com/codemeta-drift/). Before, `field:codemeta/%40type` and
   `field:codemeta/publisher.name%20%7C%20publisher` opened nothing.
