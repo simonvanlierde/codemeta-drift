@@ -1,4 +1,12 @@
-// Reads the page's #fragment. Kept free of the DOM so node --test can import it.
+// Reads the page's #fragment and ?tag. Kept free of the DOM so node --test can import it.
+
+// The CodeMeta tag that ?tag= names, if data.json lists it; otherwise the newest, the last in tags.
+// Only a listed tag picks a file to fetch.
+export function chosenTag(search, tags) {
+  const tag = new URLSearchParams(search).get("tag");
+  return tags.includes(tag) ? tag : tags.at(-1);
+}
+
 //
 // The SSSOM export's identifiers resolve here: #term/<term>, #field/<format>/<path> and #format/<format>,
 // each percent-encoded as the export writes it. #route and #upstream open their tabs.

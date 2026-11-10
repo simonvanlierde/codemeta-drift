@@ -2,9 +2,10 @@
 
     uv run site/build.py --out _site [--codemeta CHECKOUT]
 
-With ``--codemeta``, data.json also holds that checkout's HEAD: its drift findings and the
-crosswalk cells that read differently there than at the export's tag. It also holds the
-crosswalks nobody has reviewed, read at the export's tag, so the clone needs that tag.
+data.json is the newest tag's matrix and lists every tag with an export; data-<tag>.json holds each
+older tag's matrix. With ``--codemeta``, data.json also holds that checkout's HEAD: its drift
+findings and the crosswalk cells that read differently there than at the newest tag. Every
+matrix also holds the crosswalks nobody has reviewed, read at its tag, so the clone needs the tags.
 """
 
 # ruff: noqa: INP001
@@ -20,7 +21,7 @@ from typing import Any
 from codemeta_drift.checks import check
 from codemeta_drift.cli import read_ref
 from codemeta_drift.coverage import coverage, unreviewed, upstream
-from codemeta_drift.export import curated_tags, latest_tag
+from codemeta_drift.export import curated_tags, tag_key
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -50,12 +51,18 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True, help="output directory, replaced if it exists")
     parser.add_argument("--codemeta", type=Path, help="a CodeMeta clone whose HEAD to compare")
     args = parser.parse_args()
-    mapping = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
-    data = {
-        "coverage": coverage(mapping),
-        "unreviewed": unreviewed(read_ref(args.codemeta, mapping["codemeta_tag"]), mapping) if args.codemeta else None,
-        "upstream": upstream_data(args.codemeta, mapping) if args.codemeta else None,
-    }
+    tags = sorted(curated_tags(), key=tag_key)
+    mappings = {tag: json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8")) for tag in tags}
+
+    def matrix(tag: str) -> dict[str, Any]:
+        return {
+            "coverage": coverage(mappings[tag]),
+            "unreviewed": unreviewed(read_ref(args.codemeta, tag), mappings[tag]) if args.codemeta else None,
+        }
+
+    *older, latest = tags
+    upstream = upstream_data(args.codemeta, mappings[latest]) if args.codemeta else None
+    data = {"tags": tags, **matrix(latest), "upstream": upstream}
     # Only a directory this script made, or an empty one, is replaced.
     if args.out.exists() and any(args.out.iterdir()) and not (args.out / "data.json").exists():
         parser.error(f"{args.out} is not empty and has no data.json; refusing to replace it")
@@ -64,10 +71,10 @@ def main() -> None:
     for name in STATIC:
         shutil.copy(ROOT / "site" / name, args.out / name)
     # The SSSOM export's mapping_set_id points here, for every tag with an export, so an older set's id still resolves.
-    for tag in curated_tags():
-        tagged = json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8"))
-        (args.out / f"spokes-{tag}.sssom.tsv").write_text(sssom(tagged), encoding="utf-8")
-    (args.out / "data.json").write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    for tag in tags:
+        (args.out / f"spokes-{tag}.sssom.tsv").write_text(sssom(mappings[tag]), encoding="utf-8")
+    for name, value in [("data.json", data), *((f"data-{tag}.json", matrix(tag)) for tag in older)]:
+        (args.out / name).write_text(json.dumps(value, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -13,7 +13,8 @@ codemeta-drift hub coverage examples/mapping-4.0.json --codemeta ../codemeta --o
 
 `coverage` writes the [coverage matrix](coverage-4.0.md): each term and format with its status
 (as-is, corrected, added, no field or no term) and the reason for every curated cell. Add `--json`
-for the cells as data; the [coverage page](https://simonvanlierde.com/codemeta-drift/) reads that.
+for the cells as data; the [coverage page](https://simonvanlierde.com/codemeta-drift/) reads that,
+for the newest CodeMeta release and, with `?tag=3.1`, for each older one.
 `--codemeta <checkout>` also lists the CodeMeta crosswalks nobody has reviewed, read at the
 export's tag, each cell marked by its shape (path, prose, empty or unmatched); in `--json` they are
 under `unreviewed`.
