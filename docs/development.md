@@ -16,7 +16,7 @@ From an existing checkout, start here:
 uv sync
 uv tool install prek   # once per machine
 prek install           # git hooks
-just check             # lint, types, tests and the dependency audit (needs network)
+just check             # lint, types, tests, the site tests and the dependency audit (needs network)
 just hooks             # the YAML, Markdown, workflow and citation checks CI also runs
 ```
 

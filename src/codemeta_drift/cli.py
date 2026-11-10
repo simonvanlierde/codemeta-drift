@@ -332,9 +332,15 @@ def entry() -> NoReturn:
     A shell loop stops on Ctrl-C only when the command was killed by the signal; exit code 130 alone
     does not stop it. ``main`` itself returns 130, for callers that run it in-process.
     """
-    code = main()
-    if code == EXIT_INTERRUPTED and sys.platform != "win32":
+    try:
+        code = main()
         sys.stdout.flush()
+    except OSError as err:  # writing the output failed: a full disk or a closed pipe; Python would exit 120 or 1
+        print(f"codemeta-drift: cannot write the output: {err}", file=sys.stderr)
+        # Point stdout at devnull, or the interpreter's exit flush fails again and prints a traceback.
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        sys.exit(EXIT_CANNOT_RUN)
+    if code == EXIT_INTERRUPTED and sys.platform != "win32":
         sys.stderr.flush()
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         os.kill(os.getpid(), signal.SIGINT)
