@@ -37,6 +37,13 @@
       "reason": "CodeMeta has no SWHID term; a SWHID sits in identifier, beside the DOI, as a swh:1: string or a PropertyValue (propertyID SWHID) whose value is one"
     },
     {
+      "format": "codemeta",
+      "term": "version",
+      "path": "version | softwareVersion",
+      "reason": "CodeMeta's own term is version, but schema:softwareVersion is a CodeMeta term too; a file that holds only softwareVersion still has a version",
+      "comment": "Write version."
+    },
+    {
       "format": "zenodo",
       "term": "author.givenName",
       "path": "creators[].name",

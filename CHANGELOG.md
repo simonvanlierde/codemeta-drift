@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The `codemeta` `version` row reads `version | softwareVersion`, so a codemeta.json that holds its version only as
+  `softwareVersion` still has one. Writers keep writing `version`. See the [mapping export](docs/mapping-export.md).
+
 ## [0.7.1] - 2026-11-10
 
 ### Fixed
