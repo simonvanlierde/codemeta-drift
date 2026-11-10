@@ -231,6 +231,18 @@ def test_the_command_dies_of_sigint_after_ctrl_c():
     assert subprocess.run([sys.executable, "-c", code], check=False).returncode == -2  # SIGINT
 
 
+@pytest.mark.skipif(not Path("/dev/full").exists(), reason="needs /dev/full")
+@pytest.mark.parametrize("lines", [1, 100_000], ids=["at-exit", "mid-run"])
+def test_output_that_cannot_be_written_exits_3(lines: int):
+    code = f"from codemeta_drift import cli; cli.main = lambda: print('finding\\n' * {lines}) or 1; cli.entry()"
+    with Path("/dev/full").open("w") as full:
+        result = subprocess.run(
+            [sys.executable, "-c", code], check=False, stdout=full, stderr=subprocess.PIPE, text=True
+        )
+    assert result.returncode == 3
+    assert result.stderr.startswith("codemeta-drift: cannot write the output:")
+
+
 def test_the_command_exits_with_mains_code():
     code = "from codemeta_drift import cli; cli.main = lambda: 3; cli.entry()"
     assert subprocess.run([sys.executable, "-c", code], check=False).returncode == 3
