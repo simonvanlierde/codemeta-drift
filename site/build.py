@@ -60,6 +60,9 @@ def main() -> None:
     def matrix(tag: str) -> dict[str, Any]:
         return {
             "coverage": coverage(mappings[tag]),
+            # The hub's rows have no cells; the page opens a codemeta field id (an SSSOM object id) at its term.
+            # Reversed, so a path two rows share (identifier, also swhid's) opens the first row's term.
+            "hub": {r["path"]: r["term"] for r in reversed(mappings[tag]["rows"]) if r["format"] == "codemeta"},
             "unreviewed": unreviewed(read_ref(args.codemeta, tag), mappings[tag]) if args.codemeta else None,
         }
 
@@ -78,6 +81,8 @@ def main() -> None:
         )
     except READ_ERRORS as err:
         parser.error(f"cannot read {args.codemeta}: {type(err).__name__}: {err}")
+    if args.out.is_symlink():  # rmtree cannot replace a link, and must not empty its target
+        parser.error(f"{args.out} is a symbolic link")
     # Only a directory this script made, or an empty one, is replaced.
     if args.out.exists() and not args.out.is_dir():
         parser.error(f"{args.out} is a file, not a directory")

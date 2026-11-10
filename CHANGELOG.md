@@ -7,6 +7,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Every `field:codemeta/...` SSSOM id opens the first cell of its row's term on the
+  [coverage page](https://simonvanlierde.com/codemeta-drift/). Before, `field:codemeta/%40type` and
+  `field:codemeta/publisher.name%20%7C%20publisher` opened nothing.
+- An issue body shows an empty value as one space in a code span instead of two stray backticks, and an all-space
+  value with its own number of spaces.
+- `site/build.py --out` refuses a symbolic link instead of ending in a traceback.
+
 ## [0.7.2] - 2026-11-10
 
 ### Added
@@ -18,7 +27,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The `codemeta` `version` row reads `version | softwareVersion`, so a codemeta.json that holds its version only as
   `softwareVersion` still has one. A writer keeps the alternative the file already has, so it writes `version` into a
-  new file and leaves an existing `softwareVersion` where it is. Its SSSOM subject id becomes
+  new file and leaves an existing `softwareVersion` where it is. Its SSSOM object id becomes
   `field:codemeta/version%20%7C%20softwareVersion`, which the coverage page opens at `version`. See the
   [mapping export](docs/mapping-export.md).
 - Startup no longer loads `importlib.metadata` and `importlib.resources` unless needed, which saves about 10 ms on

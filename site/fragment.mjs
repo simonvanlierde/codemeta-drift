@@ -34,9 +34,13 @@ export function parseFragment(hash) {
   if (kind === "term") return { kind, term: parts[0] };
   if (kind === "format") return { kind, format: parts[0] };
   if (kind !== "field") return null;
-  const path = parts.slice(1).join("/");
-  // codemeta.json is the hub and has no row: its field ids open the term's first cell instead.
-  // A path with alternatives (version | softwareVersion) belongs to its first one's term.
-  const hubTerm = parts[0] === "codemeta" ? path.replaceAll("[]", "").split(" | ")[0] : undefined;
-  return { kind, format: parts[0], path, hubTerm };
+  return { kind, format: parts[0], path: parts.slice(1).join("/") };
+}
+
+// codemeta.json is the hub and has no cells: a codemeta field id opens the term of its row, from the data file's
+// path-to-term map. Undefined for any other target, a path with no row, or data written before the map existed.
+export function hubTerm(target, hub) {
+  if (target.kind !== "field" || target.format !== "codemeta" || !hub || !Object.hasOwn(hub, target.path))
+    return undefined;
+  return hub[target.path];
 }

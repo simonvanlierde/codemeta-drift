@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
+import { chosenTag, hubTerm, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -18,12 +18,7 @@ test("field splits the format from the path and decodes brackets", () => {
     kind: "field",
     format: "cff-1.2.0",
     path: "authors[]/name",
-    hubTerm: undefined,
   });
-});
-
-test("codemeta fields fall back to the term without brackets", () => {
-  assert.equal(parseFragment("#field/codemeta/author%5B%5D").hubTerm, "author");
 });
 
 test("a malformed escape or an unknown prefix selects nothing", () => {
@@ -64,6 +59,20 @@ test("release links carry the fragment and mark the shown release", () => {
   assert.equal(pageTitle("codemeta-drift", "3.1"), "codemeta-drift (CodeMeta 3.1)");
 });
 
-test("a codemeta field id with alternatives opens its first term", () => {
-  assert.equal(parseFragment("#field/codemeta/version%20%7C%20softwareVersion").hubTerm, "version");
+test("a codemeta field id opens its row's term from the hub map", () => {
+  const hub = { "@type": "resourceType", "publisher.name | publisher": "publisher", "author[]": "author", isPartOf: "isPartOf" };
+  assert.equal(hubTerm(parseFragment("#field/codemeta/%40type"), hub), "resourceType");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/publisher.name%20%7C%20publisher"), hub), "publisher");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/author%5B%5D"), hub), "author");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/isPartOf"), hub), "isPartOf");
+  // Not a row, another format, another kind, or a data file from before the map: nothing.
+  assert.equal(hubTerm(parseFragment("#field/codemeta/constructor"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#field/cargo/%40type"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#term/name"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#field/codemeta/%40type"), undefined), undefined);
+  assert.equal(hubTerm(parseFragment("#field/codemeta/"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#format/codemeta"), { undefined: "x" }), undefined);
+  // A JSON key named __proto__ is the data's own; an inherited one is not.
+  assert.equal(hubTerm(parseFragment("#field/codemeta/__proto__"), JSON.parse('{"__proto__": "x"}')), "x");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/__proto__"), hub), undefined);
 });
