@@ -26,3 +26,8 @@ test("the release links are redrawn on every tab choice and fragment change", ()
   assert.match(source, /history\.replaceState\([^\n]*\n\s*drawReleases\(\);/);
   assert.match(source, /follow\(hub\);\n\s*drawReleases\(\);/);
 });
+
+test("codemeta field ids are looked up through hubTerm with the shown release's map", () => {
+  assert.match(source, /const term = hubTerm\(target, hub\);/);
+  assert.match(source, /const \{ coverage, hub, unreviewed, upstream \} =/);
+});

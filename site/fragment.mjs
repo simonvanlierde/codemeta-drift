@@ -36,3 +36,11 @@ export function parseFragment(hash) {
   if (kind !== "field") return null;
   return { kind, format: parts[0], path: parts.slice(1).join("/") };
 }
+
+// codemeta.json is the hub and has no cells: a codemeta field id opens the term of its row, from the data file's
+// path-to-term map. Undefined for any other target, a path with no row, or data written before the map existed.
+export function hubTerm(target, hub) {
+  if (target.kind !== "field" || target.format !== "codemeta" || !hub || !Object.hasOwn(hub, target.path))
+    return undefined;
+  return hub[target.path];
+}

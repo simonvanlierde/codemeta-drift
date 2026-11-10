@@ -27,7 +27,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The `codemeta` `version` row reads `version | softwareVersion`, so a codemeta.json that holds its version only as
   `softwareVersion` still has one. A writer keeps the alternative the file already has, so it writes `version` into a
-  new file and leaves an existing `softwareVersion` where it is. Its SSSOM subject id becomes
+  new file and leaves an existing `softwareVersion` where it is. Its SSSOM object id becomes
   `field:codemeta/version%20%7C%20softwareVersion`, which the coverage page opens at `version`. See the
   [mapping export](docs/mapping-export.md).
 - Startup no longer loads `importlib.metadata` and `importlib.resources` unless needed, which saves about 10 ms on

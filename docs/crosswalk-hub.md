@@ -41,7 +41,7 @@ the format itself; its URI prefix differs from `field:` so SSSOM readers can exp
 All three expand under `https://w3id.org/codemeta-drift/`, which redirects to the
 [coverage page](https://simonvanlierde.com/codemeta-drift/); the page opens the matching cell:
 `field:cargo/package.name` is <https://w3id.org/codemeta-drift/#field/cargo/package.name>. The page has no
-codemeta.json row, so `field:codemeta/...` opens its row's term's first cell instead (`swhid` shares
+codemeta.json row, so `field:codemeta/...` opens the first cell of its row's term instead (`swhid` shares
 `identifier`'s, since codemeta.json holds both there). `format:codemeta` and the Go spoke's
 `field:gomod/module` and `format:gomod` have no cell.
 

@@ -146,7 +146,7 @@ def test_out_that_is_a_symlink_is_a_usage_error(tmp_path: Path):
 
 
 def test_every_codemeta_field_id_opens_a_term(tmp_path: Path):
-    """The SSSOM export's codemeta subjects resolve on the page: codemeta has no cells, so through data's hub."""
+    """The SSSOM export's codemeta object ids resolve on the page: codemeta has no cells, so through data's hub."""
     out = tmp_path / "site"
     assert build(out).returncode == 0
     tags = json.loads((out / "data.json").read_text("utf-8"))["tags"]

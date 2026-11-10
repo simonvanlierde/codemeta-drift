@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
+import { chosenTag, hubTerm, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -57,4 +57,16 @@ test("release links carry the fragment and mark the shown release", () => {
     { tag: "4.0", href: ".", current: true },
   ]);
   assert.equal(pageTitle("codemeta-drift", "3.1"), "codemeta-drift (CodeMeta 3.1)");
+});
+
+test("a codemeta field id opens its row's term from the hub map", () => {
+  const hub = { "@type": "resourceType", "publisher.name | publisher": "publisher", "author[]": "author" };
+  assert.equal(hubTerm(parseFragment("#field/codemeta/%40type"), hub), "resourceType");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/publisher.name%20%7C%20publisher"), hub), "publisher");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/author%5B%5D"), hub), "author");
+  // Not a row, another format, another kind, or a data file from before the map: nothing.
+  assert.equal(hubTerm(parseFragment("#field/codemeta/constructor"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#field/cargo/%40type"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#term/name"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#field/codemeta/%40type"), undefined), undefined);
 });

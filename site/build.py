@@ -60,7 +60,7 @@ def main() -> None:
     def matrix(tag: str) -> dict[str, Any]:
         return {
             "coverage": coverage(mappings[tag]),
-            # The hub's rows have no cells; the page opens a codemeta field id (an SSSOM subject) at its term.
+            # The hub's rows have no cells; the page opens a codemeta field id (an SSSOM object id) at its term.
             # Reversed, so a path two rows share (identifier, also swhid's) opens the first row's term.
             "hub": {r["path"]: r["term"] for r in reversed(mappings[tag]["rows"]) if r["format"] == "codemeta"},
             "unreviewed": unreviewed(read_ref(args.codemeta, tag), mappings[tag]) if args.codemeta else None,
