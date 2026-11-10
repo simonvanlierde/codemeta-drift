@@ -81,9 +81,9 @@ def main() -> None:
         )
     except READ_ERRORS as err:
         parser.error(f"cannot read {args.codemeta}: {type(err).__name__}: {err}")
-    # Only a directory this script made, or an empty one, is replaced.
     if args.out.is_symlink():  # rmtree cannot replace a link, and must not empty its target
         parser.error(f"{args.out} is a symbolic link")
+    # Only a directory this script made, or an empty one, is replaced.
     if args.out.exists() and not args.out.is_dir():
         parser.error(f"{args.out} is a file, not a directory")
     if args.out.exists() and any(args.out.iterdir()) and not (args.out / "data.json").exists():

@@ -153,11 +153,16 @@ def test_every_codemeta_field_id_opens_a_term(tmp_path: Path):
     for tag in tags:
         name = "data.json" if tag == tags[-1] else f"data-{tag}.json"
         data = json.loads((out / name).read_text("utf-8"))
-        ids = re.findall(r"\tfield:codemeta/(\S+)\t", (out / f"spokes-{tag}.sssom.tsv").read_text("utf-8"))
-        assert len(ids) > 10
-        assert data["hub"]["identifier"] == "identifier"  # swhid's row shares the path
-        for path in map(unquote, ids):
-            assert data["hub"][path] in data["coverage"]["terms"], path
+        spokes = (out / f"spokes-{tag}.sssom.tsv").read_text("utf-8")
+        pairs = re.findall(r"^term:(\S+)\t\S+\tfield:codemeta/(\S+)\t", spokes, re.MULTILINE)
+        assert len(pairs) > 10
+        # The first row of each path names its term: identifier's path is swhid's too.
+        expected = {}
+        for term, path in pairs:
+            expected.setdefault(unquote(path), unquote(term))
+        assert data["hub"] == expected
+        assert data["hub"]["identifier"] == "identifier"
+        assert set(expected.values()) <= set(data["coverage"]["terms"])
 
 
 def test_every_id_main_mjs_looks_up_is_in_the_page():

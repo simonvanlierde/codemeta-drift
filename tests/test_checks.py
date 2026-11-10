@@ -370,6 +370,7 @@ def test_seeded_drift_in_the_4_0_release_is_found(
         (" a ", "`  a  `"),
         # All-space content is not stripped; an empty span cannot be written, so it shows one space.
         (" ", "` `"),
+        ("  ", "`  `"),
         ("", "` `"),
     ],
 )
