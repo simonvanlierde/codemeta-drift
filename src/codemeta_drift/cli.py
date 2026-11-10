@@ -225,7 +225,7 @@ def hub_main(argv: list[str]) -> int:
 
 def watch_main(argv: list[str]) -> int:
     """Compare downloaded schemas and print issue drafts, without opening issues."""
-    from codemeta_drift.watcher import issue_plans, schema_changes  # noqa: PLC0415 - only watch needs this
+    from codemeta_drift.watcher import issue_plans, pin_tag, schema_changes  # noqa: PLC0415 - only watch needs this
 
     parser = argparse.ArgumentParser(prog="codemeta-drift watch", description="Preview schema and pin issues offline.")
     parser.add_argument("checkout", type=Path)
@@ -250,18 +250,13 @@ def watch_main(argv: list[str]) -> int:
             {fmt: json.loads((directory / name).read_text("utf-8")) for fmt, name in SCHEMA_FILES.items()}
             for directory in (args.before, args.after)
         ]
-        pins = [
-            line.split()[1] for line in args.citesync_source.read_text("utf-8").splitlines() if line.startswith("tag ")
-        ]
-        if len(pins) != 1:
-            msg = "MAPPING_SOURCE must contain exactly one tag line"
-            raise ValueError(msg)
+        pin = pin_tag(args.citesync_source.read_text("utf-8"))
         existing = json.loads(args.existing.read_text("utf-8"))
         if not isinstance(existing, list) or any(not isinstance(title, str) for title in existing):
             msg = "existing issues must be a JSON list of titles"
             raise ValueError(msg)
         changes = schema_changes(mapping["rows"], *snapshots)
-        print(json.dumps(issue_plans(changes, pins[0], args.latest, set(existing)), indent=2))
+        print(json.dumps(issue_plans(changes, pin, args.latest, set(existing)), indent=2))
     except subprocess.CalledProcessError as err:
         print(f"codemeta-drift: {err.stderr.decode().strip()}", file=sys.stderr)
         return EXIT_CANNOT_RUN

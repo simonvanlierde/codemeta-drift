@@ -259,9 +259,13 @@ def test_fetch_json_refuses_plain_http_before_any_request(monkeypatch: pytest.Mo
 def test_fetch_json_parses_the_response_with_a_timeout(monkeypatch: pytest.MonkeyPatch):
     seen = {}
 
+    class Response(io.BytesIO):
+        def geturl(self) -> str:
+            return seen["url"]
+
     def urlopen(url: str, *, timeout: int) -> io.BytesIO:
         seen.update(url=url, timeout=timeout)
-        return io.BytesIO(b'{"tag_name": "v1"}')
+        return Response(b'{"tag_name": "v1"}')
 
     monkeypatch.setattr(runner, "urlopen", urlopen)
     assert fetch_json("https://example.org/x") == {"tag_name": "v1"}
@@ -300,18 +304,56 @@ def test_main_without_publish_never_calls_gh(tmp_path: Path, monkeypatch: pytest
     assert json.loads(out.read_text()) == []
 
 
+@pytest.mark.parametrize("failing", ["api rate_limit", "api --paginate", "issue create"])
 def test_a_failing_gh_call_shows_gh_s_reason(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str], failing: str
 ):
     gh = tmp_path / "bin/gh"
     gh.parent.mkdir()
-    gh.write_text("#!/bin/sh\necho 'HTTP 401: Bad credentials' >&2\nexit 1\n")
+    gh.write_text(
+        f'#!/bin/sh\ncase "$1 $2" in\n"{failing}") echo "HTTP 401: Bad credentials" >&2; exit 1 ;;\n'
+        '"api --paginate") echo "[[]]" ;;\nesac\n'
+    )
     gh.chmod(0o755)
     monkeypatch.setenv("PATH", f"{gh.parent}:/usr/bin:/bin")
-    monkeypatch.setattr(runner, "poll", lambda *_: [{"repo": "o/r", "title": "t", "body": "b"}])
+    monkeypatch.setattr(runner.time, "sleep", lambda _: None)
+    plans = [{"repo": "o/r", "title": "t", "body": "b"}]
+    monkeypatch.setattr(runner, "poll", lambda *_: plans)
     root = Path(__file__).resolve().parents[1]
     monkeypatch.setattr("sys.argv", ["poll", "--root", str(root), "--out", str(tmp_path / "d.json"), "--publish"])
     with pytest.raises(subprocess.CalledProcessError):
         runner.main()
     # The job log is the only place a weekly run's failure is read: CalledProcessError itself omits stderr.
     assert "Bad credentials" in capfd.readouterr().err
+    # The drafts are the artifact a failed publish leaves to read.
+    assert json.loads((tmp_path / "d.json").read_text()) == plans
+
+
+def test_the_pin_path_is_quoted_in_the_contents_url():
+    seen = []
+
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        seen.append(target)
+        raise HTTPError(target, 404, "Not Found", Message(), None)
+
+    runner.stale_pin_hashes("sha256 abc local.json src/a?ref=main.json\n", "v0.5.0", fetch)
+    assert seen == [API + "simonvanlierde/codemeta-drift/contents/src/a%3Fref%3Dmain.json?ref=v0.5.0"]
+
+
+def test_fetch_json_refuses_a_redirect_to_plain_http(monkeypatch: pytest.MonkeyPatch):
+    class Response(io.BytesIO):
+        def geturl(self) -> str:
+            return "http://example.org/x"
+
+    monkeypatch.setattr(runner, "urlopen", lambda *_a, **_k: Response(b"{}"))
+    with pytest.raises(ValueError, match="HTTPS"):
+        fetch_json("https://example.org/x")
+
+
+def test_a_backtick_in_a_pin_line_keeps_the_code_span_closed():
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        raise HTTPError(target, 404, "Not Found", Message(), None)
+
+    plans = runner.stale_pin_hashes("sha256 abc a`@x b`@y\nsha256 `@z\n", "v0.5.0", fetch)
+    assert "MAPPING_SOURCE pins ``a`@x`` from ``b`@y``," in plans[0]["body"]
+    assert plans[1]["body"].startswith("``sha256 `@z`` is not")
