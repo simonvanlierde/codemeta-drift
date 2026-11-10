@@ -72,7 +72,7 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict)
     text = sssom(mapping)
     # The metadata block is YAML behind "# ", as SSSOM readers parse it.
     header = yaml.safe_load("\n".join(line[2:] for line in text.splitlines() if line.startswith("#")))
-    site = "https://simonvanlierde.com/codemeta-drift/"
+    site = "https://w3id.org/codemeta-drift/"
     assert header == {
         "mapping_set_id": f"{site}spokes-{mapping['codemeta_tag']}.sssom.tsv",
         "mapping_set_version": mapping["generator"]["version"],

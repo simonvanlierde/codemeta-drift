@@ -37,12 +37,12 @@ person paths and `swhid`. It does not add terms to CodeMeta's vocabulary. The `f
 namespace identifies a format and its complete path, percent-encoded. `format:` identifies
 the format itself; its URI prefix differs from `field:` so SSSOM readers can expand both.
 
-All three resolve on the [coverage page](https://simonvanlierde.com/codemeta-drift/), which
-opens the matching cell: `field:cargo/package.name` is
-<https://simonvanlierde.com/codemeta-drift/#field/cargo/package.name>. The page has no
+All three expand under `https://w3id.org/codemeta-drift/`, which redirects to the
+[coverage page](https://simonvanlierde.com/codemeta-drift/); the page opens the matching cell:
+`field:cargo/package.name` is <https://w3id.org/codemeta-drift/#field/cargo/package.name>. The page has no
 codemeta.json row, so `field:codemeta/...` opens the term's first cell instead (`swhid` shares
 `identifier`'s, since codemeta.json holds both there). `format:codemeta` and the Go spoke's
-`field:gomod/module` and `format:gomod` have no cell. They are not registered w3id identifiers.
+`field:gomod/module` and `format:gomod` have no cell.
 
 The header names the set (`mapping_set_id`, title, description and version), its curator by
 ORCID (`creator_id`) and this repository as `mapping_provider`.

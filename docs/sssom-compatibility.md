@@ -50,10 +50,7 @@ a row does not turn its local hub term into an official CodeMeta vocabulary iden
 
 1. Review a small overlapping crosswalk with maintainers. Agree how local compound terms
    and format paths should map to their identifiers and hierarchy.
-2. Agree whether the identifiers move to a w3id namespace. The term, field and format
-   identifiers now resolve on the [coverage page](https://simonvanlierde.com/codemeta-drift/),
-   so a w3id redirect needs no new targets.
-3. Preserve the distinction between field correspondence and value conversion. Any
+2. Preserve the distinction between field correspondence and value conversion. Any
    stronger relationship or combined-field rule needs evidence for that particular row.
 
 The discussion in [CodeMeta #487](https://github.com/codemeta/codemeta/issues/487)
