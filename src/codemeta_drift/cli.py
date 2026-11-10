@@ -12,6 +12,7 @@ error so standard output is never a partial file. A TAG with no curated rows is 
 """
 
 import argparse
+import contextlib
 import fnmatch
 import json
 import os
@@ -209,7 +210,13 @@ def hub_main(argv: list[str]) -> int:
         return EXIT_USAGE
     except (OSError, ValueError) as err:
         if getattr(args, "json", False):
-            print(json_report({}, [{"message": str(err), "help": None}]), end="")
+            report = json_report({}, [{"message": str(err), "help": None}])
+            written = False
+            if args.out:
+                with contextlib.suppress(OSError):  # an unwritable --out falls back to stdout
+                    written = args.out.write_text(report, encoding="utf-8") > 0
+            if not written:
+                print(report, end="")
         else:
             print(f"codemeta-drift: {err}", file=sys.stderr)
         return EXIT_CANNOT_RUN

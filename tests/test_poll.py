@@ -130,9 +130,17 @@ def test_a_pinned_file_missing_at_the_tag_is_an_issue_not_a_crash():
     assert "src/codemeta_drift/mapping-vectors.json" in plans[0]["body"]
 
 
-def test_a_malformed_pin_line_names_the_line():
-    with pytest.raises(ValueError, match=r"sha256 abc local\.json"):
-        runner.stale_pin_hashes("sha256 abc local.json\n", "v0.6.0", lambda _: {})
+def test_a_malformed_pin_line_becomes_a_draft_and_the_other_lines_still_run():
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        raise HTTPError(target, 404, "Not Found", Message(), None)
+
+    source = "sha256 abc local.json\nsha256 def ok.json src/ok.json\n"
+    plans = runner.stale_pin_hashes(source, "v0.6.0", fetch)
+    assert [plan["title"] for plan in plans] == [
+        "Malformed MAPPING_SOURCE line in citesync",
+        "Pinned ok.json is not in codemeta-drift v0.6.0",
+    ]
+    assert "`sha256 abc local.json`" in plans[0]["body"]
 
 
 def test_publisher_fetches_closed_titles_and_publishes_once():

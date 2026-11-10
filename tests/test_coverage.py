@@ -103,12 +103,11 @@ def test_known_cells_get_their_status(mapping: dict):
 
 def test_counts_for_the_crosswalks(mapping: dict):
     found = [s for (fmt, _), s in statuses(mapping).items() if FORMATS[fmt].crosswalk]
-    counts = {s: found.count(s) for s in set(found)}
-    assert counts == (
-        {"as-is": 111, "corrected": 130, "added": 90, "no field": 194, "no term": 7}
-        if mapping["codemeta_tag"] == "3.1"
-        else {"as-is": 120, "corrected": 140, "added": 91, "no field": 212, "no term": 7}
-    )
+    expected = {
+        "3.1": {"as-is": 111, "corrected": 130, "added": 90, "no field": 194, "no term": 7},
+        "4.0": {"as-is": 120, "corrected": 140, "added": 91, "no field": 212, "no term": 7},
+    }
+    assert {s: found.count(s) for s in set(found)} == expected[mapping["codemeta_tag"]]
 
 
 def test_readme_figures_match_the_counts():
@@ -131,7 +130,7 @@ def test_cli_writes_json(mapping: dict, example: Path, capsys: pytest.CaptureFix
     assert main(["hub", "coverage", str(example), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == mapping["codemeta_tag"]
-    assert len(data["cells"]) == (33 if mapping["codemeta_tag"] == "3.1" else 35) * 19
+    assert len(data["cells"]) == {"3.1": 33, "4.0": 35}[mapping["codemeta_tag"]] * 19
     assert "unreviewed" not in data  # only with --codemeta
 
 

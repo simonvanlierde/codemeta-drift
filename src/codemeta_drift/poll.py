@@ -35,14 +35,21 @@ def fetch_json(url: str) -> Any:  # noqa: ANN401
 
 
 def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list[dict[str, str]]:
-    """Draft one citesync issue per `sha256 <hex> <local> <path>` line that differs from, or is missing at, the tag."""
+    """Draft one citesync issue per `sha256 <hex> <local> <path>` line that is malformed, stale or missing at tag."""
     plans = []
     for line in source.splitlines():
         if not line.startswith("sha256 "):
             continue
         if len(fields := line.split()) != 4:
-            msg = f"citesync MAPPING_SOURCE line is not `sha256 <hex> <local> <path>`: {line}"
-            raise ValueError(msg)
+            # A draft, not an exception: one bad line must not stop the rest of the weekly poll.
+            plans.append(
+                {
+                    "repo": "simonvanlierde/citesync",
+                    "title": "Malformed MAPPING_SOURCE line in citesync",
+                    "body": f"`{line}` is not `sha256 <hex> <local> <path>`, so its pin was not checked. Fix the line.",
+                }
+            )
+            continue
         _, digest, local, path = fields
         try:
             published = fetch(API + f"simonvanlierde/codemeta-drift/contents/{path}?ref={quote(tag, safe='')}")

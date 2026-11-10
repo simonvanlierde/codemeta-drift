@@ -7,6 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-10
+
+### Fixed
+
+- `hub coverage --json --out FILE` writes its error report to the file when the command cannot run, as it would the
+  output. Before this it printed the report to standard output and left the file unwritten. See the
+  [check docs](docs/checks.md#read-json-output).
+- The schema watcher drafts an issue for a malformed line in citesync's `MAPPING_SOURCE` and checks the other pins.
+  Before this one bad line stopped the whole poll before any draft was written.
+
 ## [0.7.0] - 2026-11-10
 
 Upgrade step: the `hub` commands of 0.6.0 and older refuse an export with the new formats and terms, so upgrade
@@ -214,7 +224,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.4.0...v0.5.0
