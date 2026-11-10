@@ -68,7 +68,7 @@ Export the reviewed mappings for CodeMeta 4.0 (or `3.1`):
 uvx codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
-The 4.0 export covers 36 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata and GitLab; the
+The 4.0 export covers 38 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata, RO-Crate and Croissant; the
 [mapping export](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md) lists them.
 It records the field path for each term, with a reason for each curated correction.
 It does not convert field values.

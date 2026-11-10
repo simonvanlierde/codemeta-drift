@@ -12,7 +12,7 @@ __all__ = ["PIECES", "Step", "parse", "resolve"]
 
 KEY = r"@?[A-Za-z_][A-Za-z0-9_@-]*(?::[A-Za-z_][A-Za-z0-9_-]*)?"
 # One step of the schema's path pattern: a key, then optionally ``[]`` or ``[k=v]``.
-STEP = re.compile(rf"(?P<key>{KEY})(?P<list>\[(?:(?P<fkey>{KEY})=(?P<fvalue>[A-Za-z0-9_.-]+))?\])?")
+STEP = re.compile(rf"(?P<key>{KEY})(?P<list>\[(?:(?P<fkey>{KEY})=(?P<fvalue>[A-Za-z0-9_./-]+))?\])?")
 
 
 class Step(NamedTuple):

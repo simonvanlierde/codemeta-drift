@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Mapping schema 1.8: `ro-crate` (RO-Crate 1.3 `ro-crate-metadata.json`) and `croissant` (Croissant 1.1
+  `croissant.json`) rows in the 3.1 and 4.0 exports, all curated from the two specifications. RO-Crate paths start
+  at the root data entity, `@graph[@id=./]`, so a filter value may now hold `/`, and a 1.8 file fails the 1.7
+  schema. The [export guide](docs/mapping-export.md) says how a consumer resolves an author reference
+  (`{"@id": ...}`) to its entity in `@graph`, and `mapping-vectors.json` covers the `@graph` lookup.
+
 ### Fixed
 
 - Every `field:codemeta/...` SSSOM id opens the first cell of its row's term on the

@@ -75,7 +75,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.7",
+  "schema_version": "1.8",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.7.2"},
   "context_terms": ["address", "affiliation", "applicationCategory", "..."],
@@ -118,10 +118,11 @@ Each row:
   `spdx-2.3` (an SPDX 2.3 package in JSON), `codemeta-2` (a codemeta.json written to the 2.0
   context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project), `wikidata` (a Wikidata
   item), `ris` (a RIS record with `TY  - COMP`), `endnote` (an EndNote tagged record with
-  `%0 Computer Program`), `gitlab` (the GitLab REST API's project JSON) or `code-json-2.0` (a
-  code.json 2.0 file, the US federal source code metadata). A format whose versions differ puts the
+  `%0 Computer Program`), `gitlab` (the GitLab REST API's project JSON), `code-json-2.0` (a
+  code.json 2.0 file, the US federal source code metadata), `ro-crate` (an RO-Crate 1.3
+  `ro-crate-metadata.json`) or `croissant` (a Croissant 1.1 `croissant.json`). A format whose versions differ puts the
   version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to `wikidata` in
-  1.5, and `ris` to `code-json-2.0` in 1.7. `gitlab` and `code-json-2.0` have rows from the 4.0
+  1.5, `ris` to `code-json-2.0` in 1.7, and `ro-crate` and `croissant` in 1.8. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -235,6 +236,17 @@ them into one first. These cases need more than the grammar below says:
 - Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
   element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object
   with `id` for an item, or an object with `time` for a date. A deprecated statement is skipped.
+- RO-Crate and Croissant are JSON-LD, read as written, not expanded or compacted. An RO-Crate keeps
+  its entities in `@graph`, so its paths start at the root data entity, `@graph[@id=./]`. A detached
+  crate, whose root `@id` is an absolute URL, is not addressed. Before resolving a path, the consumer
+  replaces each reference in the root entity (an object whose only key is `@id`, such as
+  `{"@id": "https://orcid.org/0000-0002-1825-0097"}`) with the `@graph` entity of that `@id`, one
+  level deep; a reference with no entity stays as it is. So `author[].givenName` reads the Person
+  entity, and `author[].@id` reads the same `@id` either way. A Croissant file holds its people in
+  place, under `creator`. In both, a property with one value may be written bare, without a list:
+  the consumer reads `author`, `creator` and `contributor` as lists. An `@id` that
+  starts with `#`, such as `#author-1`, is a local id, not an ORCID. Neither format has a CodeMeta
+  crosswalk; the rows cite the specifications.
 
 Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
 Rows a tool proposed but nobody checked never go in an export.
@@ -243,7 +255,7 @@ A (format, term) pair appears at most once. The schema cannot enforce uniqueness
 those two fields, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, and within a format in the order `name`, `version`, `author`,
+`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`, `croissant`, and within a format in the order `name`, `version`, `author`,
 `author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
 `contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
 `description`, `keywords`, `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer
@@ -265,7 +277,7 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 - A key starts with an ASCII letter or `_`, optionally preceded by `@` (`author[].@id`).
   Later characters can be ASCII letters, digits, `_`, `-` or `@` (R's `Authors@R`, since schema 1.4).
   A key may carry one prefix, `prefix:local`, for RDF formats (`dcterms:title`, since schema 1.6).
-- A filter value contains ASCII letters, digits, `_`, `.` or `-`.
+- A filter value contains ASCII letters, digits, `_`, `.`, `-` or `/` (RO-Crate's `./`, since schema 1.8).
 - Alternatives are separated by exactly one space, `|`, one space, and parts by one space, `+`,
   one space. `+` binds tighter, so `a + b | c` reads `c` only when `a` and `b` both have no value.
 - A filter matches only an element that has the key.
@@ -317,7 +329,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
    path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas.
    Schema 1.7 adds the `ris`, `endnote`, `gitlab` and `code-json-2.0` format ids, the `publisher` and `resourceType` terms and the `context_terms` list, so a 1.7 file
    passes the 1.6 schema, but the `hub` of 0.6.0 refuses it. Its PKG-INFO author rows read `Author[] + Author-email[]`, so
-   the parser must keep both as lists. Update the
+   the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
+   lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
