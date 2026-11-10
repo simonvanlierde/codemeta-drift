@@ -20,8 +20,8 @@ def test_ref_reads_the_commit_not_the_working_tree(repo: Path, capsys: pytest.Ca
 def test_working_tree_and_json_output(repo: Path, capsys: pytest.CaptureFixture[str]):
     assert main([str(repo), "--json"]) == 1
     report = json.loads(capsys.readouterr().out)
-    assert set(report) == {"version", "tool", "findings"}
-    assert report["version"] == 1
+    assert set(report) == {"schema_version", "tool", "findings", "errors"}
+    assert report["schema_version"] == 1
     assert report["tool"]["name"] == "codemeta-drift"
     findings = report["findings"]
     assert all(set(f) == {"code", "file", "term", "detail"} for f in findings)
@@ -53,21 +53,21 @@ def test_a_directory_named_like_an_input_is_skipped(repo: Path, capsys: pytest.C
 
 
 @pytest.mark.parametrize("args", [["--ref", "no-such-ref"], ["--ref=--output=x"]])
-def test_bad_ref_exits_2(repo: Path, args: list[str], capsys: pytest.CaptureFixture[str]):
-    assert main([str(repo), *args]) == 2
+def test_bad_ref_exits_3(repo: Path, args: list[str], capsys: pytest.CaptureFixture[str]):
+    assert main([str(repo), *args]) == 3
     err = capsys.readouterr().err
     assert "fatal:" in err
     assert "b'" not in err  # git's message, decoded
 
 
-def test_directory_without_codemeta_files_exits_2(tmp_path: Path):
-    assert main([str(tmp_path)]) == 2
+def test_directory_without_codemeta_files_exits_3(tmp_path: Path):
+    assert main([str(tmp_path)]) == 3
 
 
-def test_project_with_only_a_codemeta_json_exits_2(tmp_path: Path):
+def test_project_with_only_a_codemeta_json_exits_3(tmp_path: Path):
     """A software project's own metadata is not a codemeta checkout: nothing would be compared."""
     (tmp_path / "codemeta.json").write_text('{"name": "x"}')
-    assert main([str(tmp_path)]) == 2
+    assert main([str(tmp_path)]) == 3
 
 
 @pytest.mark.parametrize(
@@ -79,9 +79,9 @@ def test_project_with_only_a_codemeta_json_exits_2(tmp_path: Path):
         ("crosswalk.csv", b""),
     ],
 )
-def test_malformed_file_exits_2_not_1(repo: Path, path: str, content: bytes):
+def test_malformed_file_exits_3_not_1(repo: Path, path: str, content: bytes):
     (repo / path).write_bytes(content)
-    assert main([str(repo)]) == 2
+    assert main([str(repo)]) == 3
 
 
 def test_no_drift_exits_0(tmp_path: Path):
@@ -139,17 +139,77 @@ def test_watch_exits_1_and_lists_the_findings_when_the_export_is_blocked(
     assert captured.err.strip() == str(finding)
 
 
-def test_watch_with_an_unknown_tag_exits_2_with_gits_message(
-    repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+def test_watch_with_a_tag_without_curated_rows_exits_2(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(_watch_args(tmp_path, repo, tag="3.0")) == 2
+    assert capsys.readouterr().err == "codemeta-drift: no curated rows for 3.0; have 3.1, 4.0\n"
+
+
+def test_watch_on_a_checkout_without_the_tag_exits_3_with_gits_message(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
-    assert main(_watch_args(tmp_path, repo, tag="no-such-tag")) == 2
+    (tmp_path / "empty").mkdir()
+    assert main(_watch_args(tmp_path, tmp_path / "empty")) == 3
     captured = capsys.readouterr()
     assert captured.out == ""
     assert captured.err.startswith("codemeta-drift: fatal:")
 
 
-def test_watch_with_two_pin_tags_exits_2(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
-    assert main(_watch_args(tmp_path, repo, source="tag v0.3.0\ntag v0.4.0\n")) == 2
+def test_watch_with_two_pin_tags_exits_3(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(_watch_args(tmp_path, repo, source="tag v0.3.0\ntag v0.4.0\n")) == 3
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "exactly one tag line" in captured.err
+
+
+# One test per exit code: 0 done, 1 findings, 2 usage error, 3 could not run, 130 interrupted.
+
+
+def test_exit_0_done_with_a_json_report(capsys: pytest.CaptureFixture[str]):
+    example = Path(__file__).parent.parent / "examples/mapping-4.0.json"
+    assert main(["hub", "coverage", str(example), "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert (report["schema_version"], report["errors"]) == (1, [])
+
+
+def test_exit_1_findings_with_a_json_report(repo: Path, capsys: pytest.CaptureFixture[str]):
+    assert main([str(repo), "--json"]) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert (report["schema_version"], report["errors"]) == (1, [])
+    assert report["findings"]
+
+
+@pytest.mark.parametrize("argv", [[], ["--no-such-option", "."], ["export", "--tag", "9.9"], ["hub", "pair", "x.json"]])
+def test_exit_2_usage_error(argv: list[str], capsys: pytest.CaptureFixture[str]):
+    try:
+        code = main(argv)
+    except SystemExit as exit_:  # argparse
+        code = exit_.code
+    assert code == 2
+    assert capsys.readouterr().out == ""
+
+
+def test_exit_3_could_not_run_with_a_json_report(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main([str(tmp_path), "--json"]) == 3
+    report = json.loads(capsys.readouterr().out)
+    assert report["schema_version"] == 1
+    assert report["findings"] == []
+    [error] = report["errors"]
+    assert set(error) == {"message", "help"}
+    assert "codemeta.jsonld" in error["message"]
+    assert error["help"]
+
+
+def test_hub_coverage_json_reports_why_it_could_not_run(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(["hub", "coverage", str(tmp_path / "missing.json"), "--json"]) == 3
+    report = json.loads(capsys.readouterr().out)
+    assert report["schema_version"] == 1
+    assert "missing.json" in report["errors"][0]["message"]
+
+
+def test_exit_130_interrupted(repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
+    def interrupt(_: object) -> None:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr("codemeta_drift.cli.check", interrupt)
+    assert main([str(repo)]) == 130
+    assert "interrupted" in capsys.readouterr().err

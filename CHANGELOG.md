@@ -44,6 +44,9 @@ suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a dot) wit
 
 ### Changed
 
+- **Breaking:** a command that cannot run, such as on a checkout without `codemeta.jsonld`, exits 3, not 2. 2 now
+  means only a usage error, and Ctrl-C exits 130. The `--json` report's `version` is now `schema_version`, and it has
+  `errors`, a list of `{message, help}` objects; `hub coverage --json` has both too. See [checks](docs/checks.md).
 - **Breaking:** the SSSOM spokes' `term:`, `field:` and `format:` prefixes and `mapping_set_id` use
   `https://w3id.org/codemeta-drift/`, which redirects to the coverage page, instead of the page's own address.
   A consumer that stored 0.6.0 identifiers replaces `https://simonvanlierde.com/codemeta-drift/` with the w3id base.

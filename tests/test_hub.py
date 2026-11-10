@@ -177,7 +177,7 @@ def test_cli_writes_pair_csv(example: Path, capsys: pytest.CaptureFixture[str]):
 def test_cli_rejects_bad_mapping_without_partial_output(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     source = tmp_path / "mapping.json"
     source.write_text('{"schema_version":"2.0"}')
-    assert main(["hub", "sssom", str(source)]) == 2
+    assert main(["hub", "sssom", str(source)]) == 3
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "codemeta-drift:" in captured.err
@@ -254,3 +254,10 @@ def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
     mapping["codemeta_tag"] = tag
     with pytest.raises(ValueError, match="codemeta_tag"):
         validate_mapping(mapping)
+
+
+def test_pair_with_a_format_the_mapping_has_no_rows_for_is_a_usage_error(
+    example: Path, capsys: pytest.CaptureFixture[str]
+):
+    assert main(["hub", "pair", str(example), "--from", "nope", "--to", "zenodo"]) == 2
+    assert "source and target must be present formats" in capsys.readouterr().err

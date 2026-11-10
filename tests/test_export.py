@@ -324,7 +324,7 @@ def test_cli_export_reads_the_tag_and_writes_the_example(repo: Path, tmp_path: P
 @pytest.mark.parametrize(
     ("case", "why"), [("not-a-repo", "not a git repository"), ("repo-without-tag", "Needed a single revision")]
 )
-def test_cli_export_without_the_tag_exits_2(
+def test_cli_export_without_the_tag_exits_3(
     case: str, why: str, tmp_path: Path, git: Callable[..., None], capsys: pytest.CaptureFixture[str]
 ):
     shutil.copytree(FIXTURE, tmp_path, dirs_exist_ok=True)
@@ -332,7 +332,7 @@ def test_cli_export_without_the_tag_exits_2(
         git(tmp_path, "init", "-q")
         git(tmp_path, "add", "-A")
         git(tmp_path, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "3.1")
-    assert main(["export", str(tmp_path), "--tag", "3.1"]) == 2
+    assert main(["export", str(tmp_path), "--tag", "3.1"]) == 3
     err = capsys.readouterr().err
     assert err.startswith(f"codemeta-drift: cannot read {tmp_path} at tag 3.1: fatal:")
     assert why in err
@@ -359,35 +359,35 @@ def test_cli_export_path_not_in_schema_exits_1_and_writes_nothing(repo: Path, tm
 
 
 @pytest.mark.parametrize("name", ["properties_description.csv", "codemeta.jsonld"])
-def test_cli_export_without_the_property_table_or_context_exits_2(
+def test_cli_export_without_the_property_table_or_context_exits_3(
     tagged: Callable, capsys: pytest.CaptureFixture[str], name: str
 ):
     files = {p: t for p, t in read_dir(FIXTURE).items() if p != name}
-    assert main(["export", str(tagged(files)), "--tag", "3.1"]) == 2
+    assert main(["export", str(tagged(files)), "--tag", "3.1"]) == 3
     assert name in capsys.readouterr().err
 
 
-def test_cli_export_bad_schemas_dir_exits_2_and_names_the_file(
+def test_cli_export_bad_schemas_dir_exits_3_and_names_the_file(
     repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
-    assert main(["export", str(repo), "--tag", "3.1", "--schemas", str(tmp_path / "none")]) == 2
+    assert main(["export", str(repo), "--tag", "3.1", "--schemas", str(tmp_path / "none")]) == 3
     assert str(tmp_path / "none" / "cff-1.2.0.json") in capsys.readouterr().err
 
 
-def test_cli_export_unwritable_out_exits_2_and_names_the_file(
+def test_cli_export_unwritable_out_exits_3_and_names_the_file(
     repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
     out = tmp_path / "no-dir" / "out.json"
-    assert main(["export", str(repo), "--tag", "3.1", "--out", str(out)]) == 2
+    assert main(["export", str(repo), "--tag", "3.1", "--out", str(out)]) == 3
     assert capsys.readouterr().err.startswith(f"codemeta-drift: cannot read or write {out}: FileNotFoundError:")
 
 
-def test_cli_export_bad_curated_row_exits_2_and_names_the_file(
+def test_cli_export_bad_curated_row_exits_3_and_names_the_file(
     repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
     rows = [{k: v for k, v in c.items() if k != "reason"} for c in read_curated("3.1")]
     monkeypatch.setattr(export_module, "read_curated", lambda _: rows)
-    assert main(["export", str(repo), "--tag", "3.1"]) == 2
+    assert main(["export", str(repo), "--tag", "3.1"]) == 3
     assert "ValueError: curated-3.1.json: row 1 has no reason" in capsys.readouterr().err
 
 

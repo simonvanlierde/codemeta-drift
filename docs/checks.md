@@ -16,7 +16,7 @@ and one missing term. When several crosswalks share a problem, the report groups
 | `crosswalk.csv` | All crosswalks combined into one table, which the website shows |
 
 Other example files use a different context or are intentionally invalid, so their terms
-are not checked. The vocabulary and property list are required; a missing file exits 2.
+are not checked. The vocabulary and property list are required; a missing file exits 3.
 
 ## Every check
 
@@ -61,7 +61,11 @@ These are consistency checks; they do not validate every JSON-LD rule or metadat
 | --- | --- |
 | 0 | No disagreements; optional files may produce `SKIPPED` notices |
 | 1 | The checker found disagreements |
-| 2 | The check could not run, for example because a required file is missing or unreadable |
+| 2 | Usage error: an unknown option or a missing argument |
+| 3 | The check could not run, for example because a required file is missing or unreadable |
+| 130 | Interrupted with Ctrl-C |
+
+Every `codemeta-drift` command uses these codes. For `export` and `watch`, findings are rows they can't make.
 
 A missing optional file produces `SKIPPED`, which does not make the command fail.
 
@@ -75,7 +79,7 @@ The output is one document with these keys:
 
 ```json
 {
-  "version": 1,
+  "schema_version": 1,
   "tool": {"name": "codemeta-drift", "version": "0.7.0"},
   "findings": [
     {
@@ -84,13 +88,16 @@ The output is one document with these keys:
       "term": "softwareSuggestions",
       "detail": "not a term of codemeta.jsonld"
     }
-  ]
+  ],
+  "errors": []
 }
 ```
 
 `code` identifies the check; `term` names the affected property or format. Use these fields
 for filtering. `file` is a label that can describe a group; `detail` is text for a person.
-A minor release may add keys. Removing a key or changing its type bumps `version`.
+`errors` is empty unless the check could not run (exit 3). Then `findings` is empty and each error is an
+object with `message` and `help`, the next step to take or `null`. `hub coverage --json` has the same
+`schema_version` and `errors`. A release may add keys. Removing a key or changing its type bumps `schema_version`.
 
 The command line, exit codes, finding codes and mapping export form the public interface.
 Python modules may change in any 0.x release.
