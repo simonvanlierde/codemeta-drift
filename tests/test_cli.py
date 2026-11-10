@@ -243,6 +243,52 @@ def test_output_that_cannot_be_written_exits_3(lines: int):
     assert result.stderr.startswith("codemeta-drift: cannot write the output:")
 
 
+def _shell(code: str, redirect: str) -> subprocess.CompletedProcess[str]:
+    """Run ``code`` in a fresh interpreter under a shell redirection such as ``>&-``."""
+    return subprocess.run(
+        ["/bin/sh", "-c", f'"$0" -c "$1" {redirect}', sys.executable, code],
+        check=False,
+        capture_output="2>" not in redirect,
+        text=True,
+    )
+
+
+@pytest.mark.skipif(not Path("/dev/full").exists(), reason="needs /dev/full")
+@pytest.mark.parametrize(
+    ("code", "redirect", "expected"),
+    [
+        # A closed stdout makes sys.stdout None: print is a no-op, and main's code stands.
+        ("from codemeta_drift import cli; cli.main = lambda: print('x') or 0; cli.entry()", ">&-", 0),
+        (
+            "from codemeta_drift import cli; cli.main = lambda: print('x') or 1; cli.entry()",
+            ">/dev/full 2>/dev/full",
+            3,
+        ),
+        ("from codemeta_drift import cli; cli.entry()", "--version >/dev/full", 3),
+        ("from codemeta_drift import cli; cli.entry()", "--help >/dev/full", 3),
+        # Ctrl-C still ends by SIGINT when the output cannot be flushed.
+        ("from codemeta_drift import cli; cli.main = lambda: print('x') or 130; cli.entry()", ">/dev/full", -2),
+    ],
+    ids=["closed-stdout", "stderr-full-too", "version", "help", "interrupted"],
+)
+def test_unwritable_output_edge_cases(code: str, redirect: str, expected: int):
+    result = _shell(code, redirect)
+    # sh reports a death by signal n as 128 + n, and Python as -n.
+    assert result.returncode in ({expected, 128 - expected} if expected < 0 else {expected})
+    assert "Traceback" not in (result.stderr or "")
+
+
+def test_a_reader_that_closes_the_pipe_early_gets_exit_3_and_no_noise():
+    code = "from codemeta_drift import cli; cli.main = lambda: print('finding\\n' * 100_000) or 1; cli.entry()"
+    reader = subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    assert reader.stdout is not None
+    reader.stdout.read(1)
+    reader.stdout.close()
+    assert reader.wait(timeout=30) == 3
+    assert reader.stderr is not None
+    assert reader.stderr.read() == ""
+
+
 def test_the_command_exits_with_mains_code():
     code = "from codemeta_drift import cli; cli.main = lambda: 3; cli.entry()"
     assert subprocess.run([sys.executable, "-c", code], check=False).returncode == 3

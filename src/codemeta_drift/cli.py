@@ -332,14 +332,26 @@ def entry() -> NoReturn:
     A shell loop stops on Ctrl-C only when the command was killed by the signal; exit code 130 alone
     does not stop it. ``main`` itself returns 130, for callers that run it in-process.
     """
+    code = EXIT_CANNOT_RUN
     try:
-        code = main()
-        sys.stdout.flush()
-    except OSError as err:  # writing the output failed: a full disk or a closed pipe; Python would exit 120 or 1
-        print(f"codemeta-drift: cannot write the output: {err}", file=sys.stderr)
-        # Point stdout at devnull, or the interpreter's exit flush fails again and prints a traceback.
-        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
-        sys.exit(EXIT_CANNOT_RUN)
+        try:
+            code = main()
+        except SystemExit as done:  # argparse's --help, --version and usage errors still have output to flush
+            if not isinstance(done.code, int | None):
+                raise
+            code = done.code or 0
+        if sys.stdout is not None:  # None when the caller closed fd 1
+            sys.stdout.flush()
+    except OSError as err:  # a full disk or a closed pipe; Python itself would exit 120 or 1
+        if not isinstance(err, BrokenPipeError):  # a reader that stops early, as head does, is no news
+            with contextlib.suppress(OSError):
+                print(f"codemeta-drift: cannot write the output: {err}", file=sys.stderr)
+        # Point the streams at devnull, or the interpreter's exit flush fails again and exits 120.
+        for stream in (sys.stdout, sys.stderr):
+            with contextlib.suppress(OSError, ValueError, AttributeError):
+                os.dup2(os.open(os.devnull, os.O_WRONLY), stream.fileno())
+        if code != EXIT_INTERRUPTED:
+            sys.exit(EXIT_CANNOT_RUN)
     if code == EXIT_INTERRUPTED and sys.platform != "win32":
         sys.stderr.flush()
         signal.signal(signal.SIGINT, signal.SIG_DFL)
