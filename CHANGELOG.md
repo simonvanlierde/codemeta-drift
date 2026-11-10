@@ -14,7 +14,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Mapping schema 1.8: `ro-crate` (RO-Crate 1.1 to 1.3) and `croissant` (Croissant 1.0 and 1.1) rows in the 3.1
   and 4.0 exports and the hub. RO-Crate paths start at `@graph[@id=./]`, so a filter value may now hold `/`, and a
   1.8 file fails the 1.7 schema. The [export guide](docs/mapping-export.md) gives the reading rules both formats
-  need, and `mapping-vectors.json` has `raw_input` cases for them.
+  need, and `mapping-vectors.json` (now schema 1.8) has `raw_input` cases for them.
 
 ### Fixed
 

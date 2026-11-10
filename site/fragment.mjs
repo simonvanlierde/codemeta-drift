@@ -38,9 +38,9 @@ export function parseFragment(hash) {
 }
 
 // codemeta.json is the hub and has no cells: a codemeta field id opens the term of its row, from the data file's
-// path-to-term map. Undefined for any other target, a path with no row, or data written before the map existed.
+// path-to-term map. Undefined for any other target or a path with no row.
 export function hubTerm(target, hub) {
-  if (target.kind !== "field" || target.format !== "codemeta" || !hub || !Object.hasOwn(hub, target.path))
+  if (target.kind !== "field" || target.format !== "codemeta" || !Object.hasOwn(hub, target.path))
     return undefined;
   return hub[target.path];
 }

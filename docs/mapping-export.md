@@ -106,23 +106,23 @@ The header:
 
 Each row:
 
-- `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo`, `npm`,
-  `pkg-info` (Python core metadata), `r-description` (R's DESCRIPTION), `julia` (Julia's
-  Project.toml), `bibtex` (a biblatex-software entry), `datacite` (the DataCite REST API's
-  JSON), `setup-py` (setup.py's `setup()` arguments), `ruby-gem` (a Gem::Specification), `maven`
-  (pom.xml), `cpan-meta-2` (META.json), `nuget` (.nuspec), `pubspec` (pubspec.yaml), `cabal`
-  (a .cabal file), `typst` (typst.toml), `quarto` (a Quarto extension's _extension.yml),
-  `github` (the GitHub REST API's repository JSON), `figshare` (a Figshare article's JSON),
-  `bio-tools` (a bio.tools entry), `leiningen` (project.clj), `octave` (an Octave package's
-  DESCRIPTION), `publiccode-0.8` (publiccode.yml), `swmath` (a zbMATH Open software record),
-  `spdx-2.3` (an SPDX 2.3 package in JSON), `codemeta-2` (a codemeta.json written to the 2.0
-  context), `dcat-3` (a DCAT 3 dataset), `doap` (a DOAP project), `wikidata` (a Wikidata
-  item), `ris` (a RIS record with `TY  - COMP`), `endnote` (an EndNote tagged record with
-  `%0 Computer Program`), `gitlab` (the GitLab REST API's project JSON), `code-json-2.0` (a
-  code.json 2.0 file, the US federal source code metadata), `ro-crate` (an RO-Crate 1.1 to 1.3
-  `ro-crate-metadata.json`) or `croissant` (a Croissant 1.0 or 1.1 `croissant.json`). A format whose versions differ puts the
-  version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to `wikidata` in
-  1.5, `ris` to `code-json-2.0` in 1.7, and `ro-crate` and `croissant` in 1.8. `gitlab` and `code-json-2.0` have rows from the 4.0
+- `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`
+  (Python core metadata), `r-description` (R's DESCRIPTION), `julia` (Julia's Project.toml),
+  `bibtex` (a biblatex-software entry), `datacite` (the DataCite REST API's JSON), `setup-py`
+  (setup.py's `setup()` arguments), `ruby-gem` (a Gem::Specification), `maven` (pom.xml),
+  `cpan-meta-2` (META.json), `nuget` (.nuspec), `pubspec` (pubspec.yaml), `cabal` (a .cabal file),
+  `typst` (typst.toml), `quarto` (a Quarto extension's _extension.yml), `github` (the GitHub REST
+  API's repository JSON), `figshare` (a Figshare article's JSON), `bio-tools` (a bio.tools entry),
+  `leiningen` (project.clj), `octave` (an Octave package's DESCRIPTION), `publiccode-0.8`
+  (publiccode.yml), `swmath` (a zbMATH Open software record), `spdx-2.3` (an SPDX 2.3 package in
+  JSON), `codemeta-2` (a codemeta.json written to the 2.0 context), `dcat-3` (a DCAT 3 dataset),
+  `doap` (a DOAP project), `wikidata` (a Wikidata item), `ris` (a RIS record with `TY - COMP`),
+  `endnote` (an EndNote tagged record with `%0 Computer Program`), `gitlab` (the GitLab REST API's
+  project JSON), `code-json-2.0` (a code.json 2.0 file, the US federal source code metadata),
+  `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`) or `croissant` (a Croissant 1.0 or
+  1.1 `croissant.json`). A format whose versions differ puts the version in the id. `pkg-info` to
+  `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, `ris` to `code-json-2.0` in
+  1.7, and `ro-crate` and `croissant` in 1.8. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -236,24 +236,27 @@ them into one first. These cases need more than the grammar below says:
 - Wikidata: the root is the entity object of `Special:EntityData/Q<id>.json`. A statement is an
   element of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object
   with `id` for an item, or an object with `time` for a date. A deprecated statement is skipped.
-- RO-Crate and Croissant are JSON-LD, read as written, not expanded or compacted. An RO-Crate keeps
-  its entities in `@graph`, so its paths start at the root data entity, `@graph[@id=./]`. A crate
-  whose root `@id` is not `./` (the descriptor's `about.@id` names it) reads no value from these rows.
-  Before resolving a path, the consumer replaces each reference among the root entity's property
-  values and list elements (an object whose only key is `@id`, such as
-  `{"@id": "https://orcid.org/0000-0002-1825-0097"}`) with the `@graph` entity of that `@id`, one
-  level deep; a reference with no entity stays as it is. An entity keeps its `@id`, so
-  `author[].givenName` reads the Person entity, and `author[].@id` reads the same `@id` either way. A Croissant file holds its people in place, under `creator`. In both, a
-  property with one value may be written bare, without a list: the consumer reads `author`,
-  `creator`, `contributor`, `identifier`, `license` and `publisher` as lists. An alternative applies to
-  the whole list, not to each element: when the elements hold the value in different places (strings
-  and objects, or objects with `@id` and objects with only `url`), `license[].@id | license[].url |
-  license[]` reads only the elements its first alternative with a value reaches. The identifier and license paths can also return an object itself; the consumer skips it. A
-  `keywords` value may be one string of keywords separated by commas: the consumer splits it after
-  resolving the path, not while reading the file. An `@id` that is not an
-  ORCID URL, such as `#author-1` or a ROR id, is not an ORCID. Neither format has a CodeMeta
-  crosswalk; the rows cite the specifications. The rows are for reading: a crate writer puts each
-  object it writes into `@graph` as an entity and links it from the root by reference. The `ro-crate` and `croissant` vectors in
+- RO-Crate and Croissant are JSON-LD, read as written, not expanded or compacted. Neither format has
+  a CodeMeta crosswalk; the rows cite the specifications. An RO-Crate keeps its entities in
+  `@graph`, so its paths start at the root data entity, `@graph[@id=./]`. A crate whose root `@id`
+  is not `./` (the descriptor's `about.@id` names it) reads no value from these rows. A Croissant
+  file holds its people in place, under `creator`.
+- Before resolving a path, the consumer replaces each reference among the root entity's property
+  values and list elements (an object whose only key is `@id`, such as `{"@id":
+  "https://orcid.org/0000-0002-1825-0097"}`) with the `@graph` entity of that `@id`, one level deep;
+  a reference with no entity stays as it is. An entity keeps its `@id`, so `author[].givenName`
+  reads the Person entity, and `author[].@id` reads the same `@id` either way. The rows are for
+  reading: a crate writer puts each object it writes into `@graph` as an entity and links it from
+  the root by reference.
+- In both formats, a property with one value may be written bare, without a list: the consumer reads
+  `author`, `creator`, `contributor`, `identifier`, `license` and `publisher` as lists. An
+  alternative applies to the whole list, not to each element: when the elements hold the value in
+  different places (strings and objects, or objects with `@id` and objects with only `url`),
+  `license[].@id | license[].url | license[]` reads only the elements its first alternative with a
+  value reaches. The identifier and license paths can also return an object itself; the consumer
+  skips it. A `keywords` value may be one string of keywords separated by commas: the consumer
+  splits it after resolving the path, not while reading the file. An `@id` that is not an ORCID URL,
+  such as `#author-1` or a ROR id, is not an ORCID. The `ro-crate` and `croissant` vectors in
   `mapping-vectors.json` give a file as `raw_input` and the tree these rules make from it as
   `document`.
 
@@ -263,13 +266,17 @@ Rows a tool proposed but nobody checked never go in an export.
 A (format, term) pair appears at most once. The schema cannot enforce uniqueness by
 those two fields, so the consumer checks it.
 
-`codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`,
-`zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`, `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`, `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`, `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`, `croissant`, and within a format in the order `name`, `version`, `author`,
-`author.givenName`, `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`,
-`contributor.familyName`, `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`,
-`description`, `keywords`, `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer
-can pin the file's sha256. The header's `generator.version` is one of those inputs: a new
-codemeta-drift release changes the bytes even when no row changes. A consumer must not depend on the row order.
+`codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`, `zenodo`,
+`pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`,
+`ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
+`figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
+`codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
+`croissant`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
+`author.familyName`, `author.@id`, `contributor`, `contributor.givenName`, `contributor.familyName`,
+`contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`, `description`, `keywords`,
+`datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
+pin the file's sha256. The header's `generator.version` is one of those inputs: a new codemeta-drift
+release changes the bytes even when no row changes. A consumer must not depend on the row order.
 
 ## Path grammar
 

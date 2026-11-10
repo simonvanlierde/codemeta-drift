@@ -165,6 +165,20 @@ def test_every_codemeta_field_id_opens_a_term(tmp_path: Path):
         assert set(expected.values()) <= set(data["coverage"]["terms"])
 
 
+def test_every_spoke_field_id_opens_a_cell(tmp_path: Path):
+    """Every other format's SSSOM object id names a coverage cell; gomod's module path has none (crosswalk-hub.md)."""
+    out = tmp_path / "site"
+    assert build(out).returncode == 0
+    tags = json.loads((out / "data.json").read_text("utf-8"))["tags"]
+    for tag in tags:
+        name = "data.json" if tag == tags[-1] else f"data-{tag}.json"
+        cells = {(c["format"], c["path"]) for c in json.loads((out / name).read_text("utf-8"))["coverage"]["cells"]}
+        spokes = (out / f"spokes-{tag}.sssom.tsv").read_text("utf-8")
+        ids = set(re.findall(r"\tfield:(?!codemeta/)([^/\s]+)/(\S+)\t", spokes))
+        assert any(fmt == "ro-crate" for fmt, _ in ids)
+        assert {(f, unquote(p)) for f, p in ids} - cells == {("gomod", "module")}
+
+
 def test_every_id_main_mjs_looks_up_is_in_the_page():
     source = (ROOT / "site/main.mjs").read_text("utf-8")
     html = (ROOT / "site/index.html").read_text("utf-8")

@@ -30,7 +30,7 @@ At CodeMeta 4.0, the 30 crosswalks reviewed here, from CFF, Zenodo and DataCite 
 Wikidata and GitLab, have 540 cells for the 18 terms citation tools need. 189 are for terms the format has no field for. Of the other 351, only 120 can be used as written: 140 are wrong,
 ambiguous or prose (30 of them fill a term the format has no field for), and 91 are blank although the format
 has the field. The 19th term, `resourceType`, has no CodeMeta property, so no crosswalk can have its cell.
-CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto extensions, RIS or EndNote at all. The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md)
+CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto extensions, RIS, EndNote, RO-Crate or Croissant at all. The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md)
 shows every cell and the reason for each correction, lists the other 16 crosswalks by the shape
 of their cells, and the
 [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch each week.

@@ -126,6 +126,19 @@ def test_readme_figures_match_the_counts():
     ) in text
 
 
+def test_format_lists_and_counts_match_the_export():
+    order = ", ".join(f"`{f}`" for f in FORMATS)
+    guide = " ".join((ROOT / "docs/mapping-export.md").read_text("utf-8").split())
+    assert f"in the order {order}, and within a format" in guide
+    schema = json.loads((ROOT / "src/codemeta_drift/mapping.schema.json").read_text("utf-8"))
+    described = schema["$defs"]["row"]["properties"]["format"]["description"]
+    assert ", ".join(FORMATS) in described
+    mapping = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
+    n = len({r["format"] for r in mapping["rows"]})
+    for doc in ("README.md", "docs/crosswalk-hub.md"):
+        assert f"{n} formats" in " ".join((ROOT / doc).read_text("utf-8").split()), doc
+
+
 def test_cli_writes_json(mapping: dict, example: Path, capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(example), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
