@@ -358,10 +358,13 @@ def test_cli_export_path_not_in_schema_exits_1_and_writes_nothing(repo: Path, tm
     assert not out.exists()
 
 
-def test_cli_export_without_the_property_table_exits_2(tagged: Callable, capsys: pytest.CaptureFixture[str]):
-    files = {p: t for p, t in read_dir(FIXTURE).items() if p != "properties_description.csv"}
+@pytest.mark.parametrize("name", ["properties_description.csv", "codemeta.jsonld"])
+def test_cli_export_without_the_property_table_or_context_exits_2(
+    tagged: Callable, capsys: pytest.CaptureFixture[str], name: str
+):
+    files = {p: t for p, t in read_dir(FIXTURE).items() if p != name}
     assert main(["export", str(tagged(files)), "--tag", "3.1"]) == 2
-    assert "properties_description.csv" in capsys.readouterr().err
+    assert name in capsys.readouterr().err
 
 
 def test_cli_export_bad_schemas_dir_exits_2_and_names_the_file(

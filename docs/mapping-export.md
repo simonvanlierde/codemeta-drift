@@ -78,6 +78,7 @@ and `repository`, which may be strings or objects.
   "schema_version": "1.7",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.7.0"},
+  "context_terms": ["address", "affiliation", "applicationCategory", "..."],
   "rows": [
     {
       "format": "cargo",
@@ -97,6 +98,11 @@ The header:
   `codemeta-drift export` reads the tag's commit, never a working tree.
 - `generator` names the tool and version that wrote the file. A hand-written file marks itself
   with a local version label, such as `0.1.0+hand`.
+- `context_terms` lists every property term of the tag's `codemeta.jsonld`, sorted: the keys a codemeta.json
+  written to that context may use, besides JSON-LD keywords such as `@type` and the aliases `type` and `id`.
+  A consumer flags any other key as unknown. It is not the `term` of a row, which names a mapping term such as `swhid`.
+  The 3.1 list has `softwareSuggestions`; the 4.0 list does not, because the 4.0 context dropped it.
+  `context_terms` was added in schema 1.7.
 
 Each row:
 
@@ -305,7 +311,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
    a relaxed pattern, such as the `@` keys of schema 1.4, fails an older vendored schema.
    Schema 1.5 only adds format ids, so a 1.5 file passes the 1.4 schema. Schema 1.6 relaxes the
    path pattern for `+` and prefixed keys, so a 1.6 file fails the older schemas.
-   Schema 1.7 adds the `ris`, `endnote`, `gitlab` and `code-json-2.0` format ids and the `publisher` and `resourceType` terms, so a 1.7 file
+   Schema 1.7 adds the `ris`, `endnote`, `gitlab` and `code-json-2.0` format ids, the `publisher` and `resourceType` terms and the `context_terms` list, so a 1.7 file
    passes the 1.6 schema, but the `hub` of 0.6.0 refuses it. Its PKG-INFO author rows read `Author[] + Author-email[]`, so
    the parser must keep both as lists. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list

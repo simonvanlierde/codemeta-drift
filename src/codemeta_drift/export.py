@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from importlib import metadata, resources
 from typing import Any
 
-from codemeta_drift.checks import Finding, csv_rows, table_rows
+from codemeta_drift.checks import Finding, context_terms, csv_rows, table_rows
 
 SCHEMA_VERSION = "1.7"
 
@@ -406,4 +406,5 @@ def generator() -> dict[str, str]:
 def export(files: Mapping[str, str], tag: str) -> tuple[dict[str, Any], list[Finding]]:
     """The mapping export for one CodeMeta tag, and the findings that block it."""
     rows, findings = build_rows(files, tag, read_curated(tag))
-    return {"schema_version": SCHEMA_VERSION, "codemeta_tag": tag, "generator": generator(), "rows": rows}, findings
+    header = {"schema_version": SCHEMA_VERSION, "codemeta_tag": tag, "generator": generator()}
+    return header | {"context_terms": sorted(context_terms(files)), "rows": rows}, findings
