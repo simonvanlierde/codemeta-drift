@@ -1,5 +1,7 @@
 import json
 import shutil
+import subprocess
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
@@ -213,3 +215,15 @@ def test_exit_130_interrupted(repo: Path, monkeypatch: pytest.MonkeyPatch, capsy
     monkeypatch.setattr("codemeta_drift.cli.check", interrupt)
     assert main([str(repo)]) == 130
     assert "interrupted" in capsys.readouterr().err
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="Windows has no death by signal")
+def test_the_command_dies_of_sigint_after_ctrl_c():
+    """A shell loop stops on Ctrl-C only when the command died of SIGINT, not when it exited 130."""
+    code = "from codemeta_drift import cli; cli.main = lambda: 130; cli.entry()"
+    assert subprocess.run([sys.executable, "-c", code], check=False).returncode == -2  # SIGINT
+
+
+def test_the_command_exits_with_mains_code():
+    code = "from codemeta_drift import cli; cli.main = lambda: 3; cli.entry()"
+    assert subprocess.run([sys.executable, "-c", code], check=False).returncode == 3
