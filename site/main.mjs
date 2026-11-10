@@ -6,41 +6,13 @@ import { chosenTag, hubTerm, pageTitle, parseFragment, releaseLinks } from "./fr
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
-  "cff-1.2.0": "CFF 1.2.0",
-  zenodo: "Zenodo",
-  datacite: "DataCite",
-  bibtex: "BibTeX",
-  "codemeta-2": "CodeMeta 2.0",
-  github: "GitHub API",
-  figshare: "Figshare",
-  swmath: "swMATH",
-  wikidata: "Wikidata",
-  ris: "RIS",
-  endnote: "EndNote tagged",
-  gitlab: "GitLab API",
-  "code-json-2.0": "code.json 2.0",
-  "bio-tools": "bio.tools",
-  "dcat-3": "DCAT 3",
-  doap: "DOAP",
-  "spdx-2.3": "SPDX 2.3",
-  pep621: "pyproject.toml",
-  "pkg-info": "Python PKG-INFO",
-  "setup-py": "setup.py",
-  cargo: "Cargo",
-  npm: "npm",
-  "r-description": "R DESCRIPTION",
-  julia: "Julia Project.toml",
-  "ruby-gem": "Ruby gemspec",
-  maven: "Maven pom.xml",
-  "cpan-meta-2": "CPAN META.json",
-  nuget: "NuGet .nuspec",
-  pubspec: "Dart pubspec",
-  cabal: "Haskell Cabal",
-  leiningen: "Leiningen project.clj",
-  octave: "Octave DESCRIPTION",
-  "publiccode-0.8": "publiccode.yml 0.8",
-  typst: "typst.toml",
-  quarto: "Quarto extension",
+  "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
+  github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", gitlab: "GitLab API", "code-json-2.0": "code.json 2.0", "bio-tools": "bio.tools",
+  "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
+  "setup-py": "setup.py", cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
+  "ruby-gem": "Ruby gemspec", maven: "Maven pom.xml", "cpan-meta-2": "CPAN META.json", nuget: "NuGet .nuspec",
+  pubspec: "Dart pubspec", cabal: "Haskell Cabal", leiningen: "Leiningen project.clj", octave: "Octave DESCRIPTION",
+  "publiccode-0.8": "publiccode.yml 0.8", typst: "typst.toml", quarto: "Quarto extension",
 };
 const label = (fmt) => LABELS[fmt] ?? fmt;
 const ORDER = Object.keys(LABELS);
@@ -74,32 +46,20 @@ function matrix(data, unreviewed, onPick) {
   for (const term of data.terms) head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, code(term))));
   head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, "as written")));
   table.append(el("thead", {}, head));
-  const formats = [...data.formats]
-    .sort((a, b) => rank(a) - rank(b))
-    .map((format) => ({ format, label: label(format) }));
+  const formats = [...data.formats].sort((a, b) => rank(a) - rank(b)).map((format) => ({ format, label: label(format) }));
   const legend = unreviewed && el("span", {}, "Reviewed. Every cell is checked, and each change has a reason.");
   table.append(group(data.terms, formats, data, onPick, { legend, tally: usableTally }));
   if (!unreviewed) return;
   const shapes = el("span", {}, "Not reviewed. The mark says only what CodeMeta's cell looks like: ");
-  for (const [name, { mark }] of Object.entries(unreviewed.statuses))
-    shapes.append(el("span", { class: "mark" }, mark), ` ${name} `);
+  for (const [name, { mark }] of Object.entries(unreviewed.statuses)) shapes.append(el("span", { class: "mark" }, mark), ` ${name} `);
   shapes.append(". The last column counts the cells that read as a path.");
-  table.append(
-    group(data.terms, unreviewed.formats, unreviewed, onPick, {
-      legend: shapes,
-      tally: pathTally,
-      note: ", not reviewed",
-    }),
-  );
+  table.append(group(data.terms, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed" }));
 }
 
 // One tbody: an optional group label row, then a row per format with a button per term and a tally.
 function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
   const body = el("tbody");
-  if (legend)
-    body.append(
-      el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)),
-    );
+  if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
   for (const { format, label: name } of formats) {
     const row = el("tr", {}, el("th", { scope: "row" }, name));
@@ -111,15 +71,9 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
         own.push(cell);
         const button = el(
           "button",
-          {
-            type: "button",
-            class: `cell s-${cell.status.replace(" ", "-")}`,
-            "data-status": cell.status,
-            "data-format": format,
-            "data-term": term,
-            "data-path": cell.path ?? "",
-            "aria-label": `${name}, ${term}: ${cell.status}${cell.path ? `, ${cell.path}` : ""}${note}`,
-          },
+          { type: "button", class: `cell s-${cell.status.replace(" ", "-")}`, "data-status": cell.status,
+            "data-format": format, "data-term": term, "data-path": cell.path ?? "",
+            "aria-label": `${name}, ${term}: ${cell.status}${cell.path ? `, ${cell.path}` : ""}${note}` },
           el("span", { class: "mark", "aria-hidden": "true" }, data.statuses[cell.status].mark),
         );
         button.addEventListener("click", () => onPick(cell, button));
@@ -139,10 +93,7 @@ const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no fi
 const usableTally = (cells) => {
   if (!cells[0]?.crosswalk) return ["–", el("span", { class: "vh" }, " no CodeMeta crosswalk")];
   const fields = needed(cells);
-  return [
-    `${fields.filter((c) => c.status === "as-is").length} of ${fields.length}`,
-    el("span", { class: "vh" }, " usable as written"),
-  ];
+  return [`${fields.filter((c) => c.status === "as-is").length} of ${fields.length}`, el("span", { class: "vh" }, " usable as written")];
 };
 
 // Nothing in a crosswalk nobody reviewed is known to work: count the cells that at least read as a path.
@@ -166,28 +117,13 @@ function detail(statuses, labels, reviewed, upstream) {
     const name = labels.get(cell.format) ?? cell.format;
     const rows = [
       ["Status", `${mark} ${cell.status}: ${meaning}`],
-      [
-        "CodeMeta's cell",
-        cell.crosswalk
-          ? was
-            ? code(was)
-            : cell.cell === null
-              ? "can't be joined"
-              : "empty"
-          : "no CodeMeta crosswalk for this format",
-      ],
-      [
-        "Path used",
-        cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: nobody has reviewed this crosswalk",
-      ],
+      ["CodeMeta's cell", cell.crosswalk ? (was ? code(was) : cell.cell === null ? "can't be joined" : "empty") : "no CodeMeta crosswalk for this format"],
+      ["Path used", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: nobody has reviewed this crosswalk"],
     ];
     if (cell.reason) rows.push(["Why", cell.reason]);
     const now = changes.get(`${cell.format} ${cell.term}`);
     if (now) {
-      rows.push([
-        "On main",
-        el("span", {}, `The cell ${STATES[now.state]}`, now.now ? el("span", {}, ": ", code(now.now)) : null, "."),
-      ]);
+      rows.push(["On main", el("span", {}, `The cell ${STATES[now.state]}`, now.now ? el("span", {}, ": ", code(now.now)) : null, ".")]);
     }
     const list = el("dl");
     for (const [key, value] of rows) list.append(el("dt", {}, key), el("dd", {}, value));
@@ -199,8 +135,7 @@ function detail(statuses, labels, reviewed, upstream) {
       // A filter may have made the cell inert; focus the filter that hid it instead.
       (button.closest("[inert]") ? document.querySelector('#filters [aria-pressed="true"]') : button).focus();
     });
-    document.getElementById("picked").textContent =
-      `${cell.term} in ${name}: ${cell.status}${cell.path ? `, path ${cell.path}` : ""}`;
+    document.getElementById("picked").textContent = `${cell.term} in ${name}: ${cell.status}${cell.path ? `, path ${cell.path}` : ""}`;
     box.replaceChildren(el("div", { class: "detail-head" }, el("h2", {}, code(cell.term), ` in ${name}`), close), list);
   };
 }
@@ -213,13 +148,8 @@ function filters(data) {
     // "all" also shows the crosswalks nobody reviewed, which no status counts, so it has no number.
     const count = name === "all" ? null : data.cells.filter((c) => c.status === name).length;
     const mark = name === "all" ? null : el("span", { class: "mark", "aria-hidden": "true" }, data.statuses[name].mark);
-    const button = el(
-      "button",
-      { type: "button", "aria-pressed": String(name === "all") },
-      mark,
-      ` ${name} `,
-      count === null ? null : el("span", { class: "n" }, String(count)),
-    );
+    const button = el("button", { type: "button", "aria-pressed": String(name === "all") }, mark, ` ${name} `,
+      count === null ? null : el("span", { class: "n" }, String(count)));
     button.addEventListener("click", () => {
       for (const b of buttons) b.setAttribute("aria-pressed", String(b === button));
       if (name === "all") delete table.dataset.only;
@@ -246,23 +176,14 @@ function route(data) {
   const paths = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c.path]));
   const end = (fmt, term) => {
     const path = paths.get(`${fmt} ${term}`);
-    return path
-      ? el("span", { class: "stop" }, code(path))
-      : el("span", { class: "stop gap" }, `no ${label(fmt)} field`);
+    return path ? el("span", { class: "stop" }, code(path)) : el("span", { class: "stop gap" }, `no ${label(fmt)} field`);
   };
   const draw = () => {
     list.replaceChildren();
     for (const term of data.terms) {
       const whole = paths.get(`${from.value} ${term}`) && paths.get(`${to.value} ${term}`);
-      list.append(
-        el(
-          "li",
-          { class: whole ? "whole" : "broken" },
-          end(from.value, term),
-          el("span", { class: "hub" }, code(term)),
-          end(to.value, term),
-        ),
-      );
+      list.append(el("li", { class: whole ? "whole" : "broken" }, end(from.value, term),
+        el("span", { class: "hub" }, code(term)), end(to.value, term)));
     }
   };
   from.addEventListener("change", draw);
@@ -278,14 +199,10 @@ function upstreamSection(upstream, tag) {
   const date = upstream.date.slice(0, 10);
   document.getElementById("checked").textContent = `upstream main checked ${date} at ${upstream.commit.slice(0, 7)}`;
   const intro = document.getElementById("upstream-intro");
-  intro.append(
-    `CodeMeta's main branch at commit `,
-    el("a", { href: `https://github.com/codemeta/codemeta/commit/${upstream.commit}` }, upstream.commit.slice(0, 7)),
-    `, ${date}. `,
-    upstream.cells.length
-      ? `${upstream.cells.length} of the matrix's cells read differently there than at ${tag}:`
-      : `Every cell in the matrix reads the same there as at ${tag}.`,
-  );
+  intro.append(`CodeMeta's main branch at commit `, el("a", { href: `https://github.com/codemeta/codemeta/commit/${upstream.commit}` },
+    upstream.commit.slice(0, 7)), `, ${date}. `,
+    upstream.cells.length ? `${upstream.cells.length} of the matrix's cells read differently there than at ${tag}:`
+      : `Every cell in the matrix reads the same there as at ${tag}.`);
   const list = document.getElementById("upstream-cells");
   // A cell with no new text has one cause per term and state, such as a property CodeMeta added to the
   // table but not to the crosswalks, so those cells share a line.
@@ -307,12 +224,9 @@ function upstreamSection(upstream, tag) {
   const counts = new Map();
   for (const f of upstream.drift) counts.set(f.code, (counts.get(f.code) ?? 0) + 1);
   const table = document.getElementById("drift");
-  table.append(
-    el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "Check"), el("th", { scope: "col" }, "Findings"))),
-  );
+  table.append(el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "Check"), el("th", { scope: "col" }, "Findings"))));
   const body = el("tbody");
-  for (const [name, n] of [...counts].sort())
-    body.append(el("tr", {}, el("td", {}, code(name)), el("td", {}, String(n))));
+  for (const [name, n] of [...counts].sort()) body.append(el("tr", {}, el("td", {}, code(name)), el("td", {}, String(n))));
   table.append(body);
 }
 
@@ -389,19 +303,13 @@ function score(data) {
     part.style.flexGrow = String(count(status));
     bar.append(part);
   }
-  document
-    .getElementById("score")
-    .append(
-      el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${fields.length}`)),
-      bar,
-      el(
-        "figcaption",
-        {},
-        `cells in these ${formats} CodeMeta crosswalks can be used as written. ` +
-          `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank although the format has the field. ` +
-          `${crosswalk.filter((c) => c.status === "no field" && !noTerm.has(c.term)).length} more are for terms the format has no field for.`,
-      ),
-    );
+  document.getElementById("score").append(
+    el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${fields.length}`)),
+    bar,
+    el("figcaption", {}, `cells in these ${formats} CodeMeta crosswalks can be used as written. `
+      + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank although the format has the field. `
+      + `${crosswalk.filter((c) => c.status === "no field" && !noTerm.has(c.term)).length} more are for terms the format has no field for.`),
+  );
 }
 
 // One link per CodeMeta release with a reviewed export. A link reloads the page, which draws everything once.
@@ -410,12 +318,8 @@ let drawReleases = () => {};
 
 function releases(tags, shown) {
   const nav = document.getElementById("tags");
-  drawReleases = () =>
-    nav.replaceChildren(
-      ...releaseLinks(tags, shown, location.hash).map(({ tag, href, current }) =>
-        el("a", { href, ...(current && { "aria-current": "page" }) }, tag),
-      ),
-    );
+  drawReleases = () => nav.replaceChildren(...releaseLinks(tags, shown, location.hash)
+    .map(({ tag, href, current }) => el("a", { href, ...(current && { "aria-current": "page" }) }, tag)));
   nav.hidden = tags.length < 2;
   // The chosen link shows the tag; the slug's own copy stays for screen readers, so its sentence ends.
   document.getElementById("tag").classList.toggle("vh", !nav.hidden);
@@ -435,20 +339,15 @@ async function start() {
   // Before the older file loads, so a failed load still leaves the way back to the newest.
   releases(latest.tags, tag);
   // Only the newest release is compared with CodeMeta's main branch.
-  const { coverage, hub, unreviewed, upstream } =
-    tag === newest ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
-  if (!upstream && latest.upstream)
-    document.getElementById("checked").textContent = `upstream main is compared with ${newest} only`;
+  const { coverage, hub, unreviewed, upstream } = tag === newest ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
+  if (!upstream && latest.upstream) document.getElementById("checked").textContent = `upstream main is compared with ${newest} only`;
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   document.title = pageTitle(document.title, coverage.codemeta_tag);
   const matrixLink = document.getElementById("matrix-md");
   matrixLink.href = matrixLink.href.replace(/coverage\.md$/, `coverage-${coverage.codemeta_tag}.md`);
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
   score(coverage);
-  const labels = new Map([
-    ...coverage.formats.map((f) => [f, label(f)]),
-    ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label]),
-  ]);
+  const labels = new Map([...coverage.formats.map((f) => [f, label(f)]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label])]);
   const statuses = { ...coverage.statuses, ...unreviewed?.statuses };
   matrix(coverage, unreviewed, detail(statuses, labels, coverage.statuses, upstream));
   filters(coverage);
@@ -464,7 +363,5 @@ async function start() {
 
 start().catch((err) => {
   document.getElementById("checked").textContent = "";
-  document
-    .getElementById("detail")
-    .replaceChildren(el("p", { class: "note" }, `Could not load the coverage data: ${err.message}`));
+  document.getElementById("detail").replaceChildren(el("p", { class: "note" }, `Could not load the coverage data: ${err.message}`));
 });

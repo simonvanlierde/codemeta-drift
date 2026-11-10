@@ -29,5 +29,5 @@ test("the release links are redrawn on every tab choice and fragment change", ()
 
 test("codemeta field ids are looked up through hubTerm with the shown release's map", () => {
   assert.match(source, /const term = hubTerm\(target, hub\);/);
-  assert.match(source, /const \{ coverage, hub, unreviewed, upstream \} =/);
+  assert.match(source, /const \{ coverage, hub, unreviewed, upstream \} = tag === newest \? latest : \{ \.\.\.\(await load\(`data-\$\{tag\}\.json`\)\)/);
 });

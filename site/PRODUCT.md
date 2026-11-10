@@ -6,9 +6,9 @@ web
 
 ## Stack
 
-Static HTML, CSS and one JavaScript module. `site/build.py` copies them and writes the data from the mapping exports:
+Static HTML, CSS and two JavaScript modules (`main.mjs` and the `fragment.mjs` it imports). `site/build.py` copies them and writes the data from the mapping exports:
 `data.json` for the newest release, with the list of tags, and a `data-<tag>.json` per older release. Each holds the
-term of every codemeta path. `data.json` also holds the HEAD of a CodeMeta clone when given one. GitHub Pages serves it at
+term of each codemeta path. `data.json` also holds the HEAD of a CodeMeta clone when given one. GitHub Pages serves it at
 <https://simonvanlierde.com/codemeta-drift/>, rebuilt on each push to main and every Monday.
 
 ## Users and purpose

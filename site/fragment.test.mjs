@@ -60,13 +60,19 @@ test("release links carry the fragment and mark the shown release", () => {
 });
 
 test("a codemeta field id opens its row's term from the hub map", () => {
-  const hub = { "@type": "resourceType", "publisher.name | publisher": "publisher", "author[]": "author" };
+  const hub = { "@type": "resourceType", "publisher.name | publisher": "publisher", "author[]": "author", isPartOf: "isPartOf" };
   assert.equal(hubTerm(parseFragment("#field/codemeta/%40type"), hub), "resourceType");
   assert.equal(hubTerm(parseFragment("#field/codemeta/publisher.name%20%7C%20publisher"), hub), "publisher");
   assert.equal(hubTerm(parseFragment("#field/codemeta/author%5B%5D"), hub), "author");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/isPartOf"), hub), "isPartOf");
   // Not a row, another format, another kind, or a data file from before the map: nothing.
   assert.equal(hubTerm(parseFragment("#field/codemeta/constructor"), hub), undefined);
   assert.equal(hubTerm(parseFragment("#field/cargo/%40type"), hub), undefined);
   assert.equal(hubTerm(parseFragment("#term/name"), hub), undefined);
   assert.equal(hubTerm(parseFragment("#field/codemeta/%40type"), undefined), undefined);
+  assert.equal(hubTerm(parseFragment("#field/codemeta/"), hub), undefined);
+  assert.equal(hubTerm(parseFragment("#format/codemeta"), { undefined: "x" }), undefined);
+  // A JSON key named __proto__ is the data's own; an inherited one is not.
+  assert.equal(hubTerm(parseFragment("#field/codemeta/__proto__"), JSON.parse('{"__proto__": "x"}')), "x");
+  assert.equal(hubTerm(parseFragment("#field/codemeta/__proto__"), hub), undefined);
 });
