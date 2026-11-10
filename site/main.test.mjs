@@ -30,5 +30,6 @@ test("the release links are redrawn on every tab choice and fragment change", ()
 test("codemeta field ids are looked up through hubTerm with the shown release's map", () => {
   assert.match(source, /const term = hubTerm\(target, hub\);\n.*cells\.find\(match\) \?\? \(term === undefined \? undefined : cells\.find\(\(b\) => b\.dataset\.term === term\)\)/);
   assert.match(source, /follow\(hub\);\n\s*window\.addEventListener\("hashchange"/);
+  assert.match(source, /^function follow\(hub\) \{/m);
   assert.match(source, /const \{ coverage, hub, unreviewed, upstream \} = tag === newest \? latest : \{ \.\.\.\(await load\(`data-\$\{tag\}\.json`\)\)/);
 });
