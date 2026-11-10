@@ -355,7 +355,14 @@ def test_seeded_drift_in_the_4_0_release_is_found(
 
 @pytest.mark.parametrize(
     ("text", "span"),
-    [("a.b", "`a.b`"), ("a`@x", "``a`@x``"), ("x``y`z", "```x``y`z```"), ("`a", "`` `a ``"), ("a\nb", "`a b`")],
+    [
+        ("a.b", "`a.b`"),
+        ("a`@x", "``a`@x``"),
+        ("x``y`z", "```x``y`z```"),
+        ("`a", "`` `a ``"),
+        ("a`", "`` a` ``"),
+        ("a\nb", "`a b`"),
+    ],
 )
 def test_code_span_fences_past_every_backtick_run(text: str, span: str):
     assert code_span(text) == span
