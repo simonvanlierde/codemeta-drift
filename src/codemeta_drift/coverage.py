@@ -151,7 +151,7 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
             + (owns if own else "")
             + "This page shows the pinned tag; the "
             "[web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch "
-            "each week."
+            "against the newest tag each week."
         ),
         "",
         "| Mark | Status | Meaning |",

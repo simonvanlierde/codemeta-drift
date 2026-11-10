@@ -7,17 +7,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Security
-
-- The schema watcher reads its issue token from a `schema-watch` environment that only `main` can use, so a
-  workflow run from another branch can't read it. See the [schema watcher](docs/schema-watcher.md).
+## [0.7.2] - 2026-11-10
 
 ### Added
 
 - The [coverage page](https://simonvanlierde.com/codemeta-drift/) switches between CodeMeta 3.1 and 4.0, with a link
   for each release in its header. `?tag=3.1` links to the older matrix; the Upstream view compares main with 4.0 only.
-
-## [0.7.2] - 2026-11-10
 
 ### Changed
 
@@ -40,6 +35,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   out of the code span. A redirect to plain http is refused.
 - When publishing fails, gh's reason now reaches the job log. The watcher polls once per run, so the issues match the
   uploaded drafts.
+
+### Security
+
+- The schema watcher reads its issue token from a `schema-watch` environment that only `main` can use, so a
+  workflow run from another branch can't read it. A scheduled run without the token now fails instead of passing
+  quietly. See the [schema watcher](docs/schema-watcher.md).
 
 ## [0.7.1] - 2026-11-10
 

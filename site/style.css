@@ -600,6 +600,12 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
+  /* The ring above would hide the focus ring, so focus moves it outside. */
+  .cell[aria-current="true"]:focus-visible,
+  #filters [aria-pressed="true"]:focus-visible,
+  .tags [aria-current="page"]:focus-visible {
+    outline-offset: 2px;
+  }
   .s-corrected,
   .s-added {
     color: Highlight;

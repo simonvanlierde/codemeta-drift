@@ -6,8 +6,8 @@ web
 
 ## Stack
 
-Static HTML, CSS and one JavaScript module. `site/build.py` copies them and writes `data.json` from the
-mapping export, plus the HEAD of a CodeMeta clone when given one. GitHub Pages serves it at
+Static HTML, CSS and one JavaScript module. `site/build.py` copies them and writes `data.json` (the newest release, with the
+list of tags) and a `data-<tag>.json` per older release from the mapping exports, plus the HEAD of a CodeMeta clone when given one. GitHub Pages serves it at
 <https://simonvanlierde.com/codemeta-drift/>, rebuilt on each push to main and every Monday.
 
 ## Users and purpose

@@ -155,9 +155,11 @@ def identity(term: str) -> str:
 
 
 def curated_tags() -> list[str]:
-    """CodeMeta tags with a curated-<tag>.json in this package."""
+    """CodeMeta tags with a curated-<tag>.json in this package, oldest first by version number."""
     names = (p.name for p in PACKAGE.iterdir())
-    return sorted(n.removeprefix("curated-").removesuffix(".json") for n in names if n.startswith("curated-"))
+    return sorted(
+        (n.removeprefix("curated-").removesuffix(".json") for n in names if n.startswith("curated-")), key=tag_key
+    )
 
 
 def tag_key(tag: str) -> tuple[int, ...]:

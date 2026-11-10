@@ -38,6 +38,11 @@ jobs:
           else
             echo "::notice::Publishing skipped: the MAPPING_WATCH_TOKEN secret is not set, so drafts are only in the artifact."
             uv run python -m codemeta_drift.poll --out schema-watch.json
+            # A scheduled run nobody reads must not go green while publishing nothing; the drafts still upload.
+            if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+              echo "::error::MAPPING_WATCH_TOKEN is not set in the schema-watch environment."
+              exit 1
+            fi
           fi
       # poll writes the drafts before it publishes, so they are uploaded even when publishing fails.
       - if: always() && hashFiles('schema-watch.json') != ''

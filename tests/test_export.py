@@ -435,6 +435,13 @@ def test_latest_tag_compares_version_numbers(monkeypatch: pytest.MonkeyPatch):
     assert export_module.latest_tag() == "10.0"
 
 
+def test_curated_tags_are_in_version_order(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    for tag in ("3.10", "3.9", "4.0"):
+        (tmp_path / f"curated-{tag}.json").write_text("{}")
+    monkeypatch.setattr(export_module, "PACKAGE", tmp_path)
+    assert export_module.curated_tags() == ["3.9", "3.10", "4.0"]
+
+
 def test_a_format_starts_at_its_since_tag():
     assert {"gitlab", "code-json-2.0"}.isdisjoint(export_module.formats("3.1"))
     assert {"gitlab", "code-json-2.0"} <= export_module.formats("4.0").keys()
