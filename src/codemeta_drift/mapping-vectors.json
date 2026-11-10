@@ -1098,8 +1098,8 @@
    ]
   },
   {
-   "name": "license on a mixed list: the first alternative reads only the objects",
-   "path": "license[].url | license[].@id | license[]",
+   "name": "license on a list of strings and objects: only the objects are read",
+   "path": "license[].@id | license[].url | license[]",
    "document": {
     "license": [
      "https://spdx.org/licenses/MIT",
@@ -1114,7 +1114,7 @@
   },
   {
    "name": "Croissant license: an inline CreativeWork gives its url",
-   "path": "license[].url | license[].@id | license[]",
+   "path": "license[].@id | license[].url | license[]",
    "document": {
     "license": [
      {
@@ -1129,20 +1129,38 @@
    ]
   },
   {
-   "name": "RO-Crate license: an entity with a local @id gives its url",
-   "path": "@graph[@id=./].license[].url | @graph[@id=./].license[].@id | @graph[@id=./].license[]",
+   "name": "RO-Crate license: an entity's @id comes before its url",
+   "path": "@graph[@id=./].license[].@id | @graph[@id=./].license[].url | @graph[@id=./].license[]",
    "document": {
     "@graph": [
      {
       "@id": "./",
       "license": [
        {
-        "@id": "#license",
+        "@id": "https://spdx.org/licenses/MIT",
         "@type": "CreativeWork",
         "name": "MIT License",
-        "url": "https://spdx.org/licenses/MIT"
+        "url": "https://opensource.org/license/mit"
        }
       ]
+     }
+    ]
+   },
+   "expected": [
+    "https://spdx.org/licenses/MIT"
+   ]
+  },
+  {
+   "name": "license on objects with @id and objects with only url: only the @id ones are read",
+   "path": "license[].@id | license[].url | license[]",
+   "document": {
+    "license": [
+     {
+      "@id": "https://spdx.org/licenses/MIT"
+     },
+     {
+      "@type": "CreativeWork",
+      "url": "https://spdx.org/licenses/Apache-2.0"
      }
     ]
    },

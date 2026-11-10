@@ -4874,9 +4874,9 @@
     {
       "format": "ro-crate",
       "term": "license",
-      "path": "@graph[@id=./].license[].url | @graph[@id=./].license[].@id | @graph[@id=./].license[]",
-      "source": "curated:no RO-Crate crosswalk upstream; RO-Crate 1.3, https://w3id.org/ro/crate/1.3, describes the crate in its root data entity, the @graph entity with @id ./; the spec recommends a reference to a licence entity whose @id is its URL, and allows a plain string; the spec recommends a reference to a licence entity, whose url or @id is its URL, and allows a plain string; license may repeat",
-      "comment": "The URL is usually an SPDX licence URL; the consumer converts between URL and SPDX id.",
+      "path": "@graph[@id=./].license[].@id | @graph[@id=./].license[].url | @graph[@id=./].license[]",
+      "source": "curated:no RO-Crate crosswalk upstream; RO-Crate 1.3, https://w3id.org/ro/crate/1.3, describes the crate in its root data entity, the @graph entity with @id ./; the spec says a licence entity's @id SHOULD be its URL, and allows a plain string; license may repeat",
+      "comment": "The URL is usually an SPDX licence URL; the consumer converts between URL and SPDX id. A local @id, such as #license, is not a licence URL; the consumer ignores it.",
       "crosswalk_cell": null
     },
     {
@@ -5016,9 +5016,9 @@
     {
       "format": "croissant",
       "term": "license",
-      "path": "license[].url | license[].@id | license[]",
-      "source": "curated:no Croissant crosswalk upstream; Croissant 1.1, https://docs.mlcommons.org/croissant/docs/croissant-spec-1.1.html, describes the dataset in the document's top object, an sc:Dataset; license is required and may repeat, each a URL string or a CreativeWork with url or @id",
-      "comment": "The URL is usually an SPDX licence URL; the consumer converts between URL and SPDX id.",
+      "path": "license[].@id | license[].url | license[]",
+      "source": "curated:no Croissant crosswalk upstream; Croissant 1.1, https://docs.mlcommons.org/croissant/docs/croissant-spec-1.1.html, describes the dataset in the document's top object, an sc:Dataset; license is required and may repeat, each a URL string or a CreativeWork whose @id or url is its URL",
+      "comment": "The URL is usually an SPDX licence URL; the consumer converts between URL and SPDX id. A local @id, such as #license, is not a licence URL; the consumer ignores it.",
       "crosswalk_cell": null
     },
     {

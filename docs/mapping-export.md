@@ -245,9 +245,10 @@ them into one first. These cases need more than the grammar below says:
   level deep; a reference with no entity stays as it is. An entity keeps its `@id`, so
   `author[].givenName` reads the Person entity, and `author[].@id` reads the same `@id` either way. A Croissant file holds its people in place, under `creator`. In both, a
   property with one value may be written bare, without a list: the consumer reads `author`,
-  `creator`, `contributor`, `identifier`, `license` and `publisher` as lists. On a list that holds
-  both strings and objects, a path such as `license[].url | license[].@id | license[]` reads only
-  the objects. The identifier and license paths can also return an object itself; the consumer skips it. A
+  `creator`, `contributor`, `identifier`, `license` and `publisher` as lists. An alternative applies to
+  the whole list, not to each element: when the elements hold the value in different places (strings
+  and objects, or objects with `@id` and objects with only `url`), `license[].@id | license[].url |
+  license[]` reads only the elements its first alternative with a value reaches. The identifier and license paths can also return an object itself; the consumer skips it. A
   `keywords` value may be one string of keywords separated by commas: the consumer splits it after
   resolving the path, not while reading the file. An `@id` that is not an
   ORCID URL, such as `#author-1` or a ROR id, is not an ORCID. Neither format has a CodeMeta
