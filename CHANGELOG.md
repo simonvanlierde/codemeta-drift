@@ -7,6 +7,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- The SSSOM id of the `codemeta` `publisher` row, `field:codemeta/publisher.name%20%7C%20publisher`, opens its
+  cell on the [coverage page](https://simonvanlierde.com/codemeta-drift/); before, it opened nothing.
+- An issue body shows an empty or all-space value as one space in a code span, instead of two stray backticks.
+- `site/build.py --out` refuses a symbolic link instead of ending in a traceback.
+
 ## [0.7.2] - 2026-11-10
 
 ### Added

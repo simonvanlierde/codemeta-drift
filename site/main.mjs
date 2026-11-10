@@ -2,7 +2,7 @@
 // or an older release's matrix from data-<tag>.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { chosenTag, pageTitle, parseFragment, releaseLinks } from "./fragment.mjs";
+import { chosenTag, hubTerm, pageTitle, parseFragment, releaseLinks } from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -278,8 +278,8 @@ function follow() {
     field: (b) => b.dataset.format === target.format && b.dataset.path === target.path,
   }[target.kind];
   const cells = [...document.querySelectorAll("#matrix .cell")];
-  const hub = target.hubTerm !== undefined && ((b) => b.dataset.term === target.hubTerm);
-  const button = cells.find(match) ?? (hub ? cells.find(hub) : undefined);
+  const term = hubTerm(target, new Set(cells.map((b) => b.dataset.term)));
+  const button = cells.find(match) ?? (term === undefined ? undefined : cells.find((b) => b.dataset.term === term));
   if (!button) return;
   showTab("matrix");
   // A filtered-out cell can't take focus: show every cell first.

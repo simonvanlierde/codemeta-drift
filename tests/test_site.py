@@ -134,6 +134,16 @@ def test_a_failure_after_the_data_leaves_out_replaceable(tmp_path: Path, monkeyp
     assert build(out).returncode == 0
 
 
+def test_out_that_is_a_symlink_is_a_usage_error(tmp_path: Path):
+    (tmp_path / "target").mkdir()
+    (tmp_path / "target" / "keep").write_text("keep me")
+    (tmp_path / "link").symlink_to(tmp_path / "target", target_is_directory=True)
+    (tmp_path / "dangling").symlink_to(tmp_path / "nowhere")
+    assert build(tmp_path / "link").returncode == 2
+    assert build(tmp_path / "dangling").returncode == 2
+    assert (tmp_path / "target" / "keep").read_text() == "keep me"
+
+
 def test_every_id_main_mjs_looks_up_is_in_the_page():
     source = (ROOT / "site/main.mjs").read_text("utf-8")
     html = (ROOT / "site/index.html").read_text("utf-8")

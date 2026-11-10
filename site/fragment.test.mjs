@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
+import { chosenTag, hubTerm, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -18,12 +18,12 @@ test("field splits the format from the path and decodes brackets", () => {
     kind: "field",
     format: "cff-1.2.0",
     path: "authors[]/name",
-    hubTerm: undefined,
+    hubTerms: undefined,
   });
 });
 
 test("codemeta fields fall back to the term without brackets", () => {
-  assert.equal(parseFragment("#field/codemeta/author%5B%5D").hubTerm, "author");
+  assert.deepEqual(parseFragment("#field/codemeta/author%5B%5D").hubTerms, ["author"]);
 });
 
 test("a malformed escape or an unknown prefix selects nothing", () => {
@@ -65,5 +65,9 @@ test("release links carry the fragment and mark the shown release", () => {
 });
 
 test("a codemeta field id with alternatives opens its first term", () => {
-  assert.equal(parseFragment("#field/codemeta/version%20%7C%20softwareVersion").hubTerm, "version");
+  assert.deepEqual(parseFragment("#field/codemeta/version%20%7C%20softwareVersion").hubTerms, ["version", "softwareVersion"]);
+  assert.equal(
+    hubTerm(parseFragment("#field/codemeta/publisher.name%20%7C%20publisher"), new Set(["publisher", "version"])),
+    "publisher",
+  );
 });

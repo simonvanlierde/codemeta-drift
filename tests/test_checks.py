@@ -368,6 +368,9 @@ def test_seeded_drift_in_the_4_0_release_is_found(
         ("a\r\nb", "`a b`"),
         # CommonMark strips one space each side when both are there; the pad puts them back.
         (" a ", "`  a  `"),
+        # All-space content is not stripped; an empty span cannot be written, so it shows one space.
+        (" ", "` `"),
+        ("", "` `"),
     ],
 )
 def test_code_span_fences_past_every_backtick_run(text: str, span: str):
