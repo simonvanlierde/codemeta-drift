@@ -25,8 +25,8 @@
   .job { position: absolute; font: 400 40px/1.2 var(--serif); width: 600px; }
   .url { position: absolute; font: 400 32px/1 var(--mono); color: var(--faint); letter-spacing: -0.03em; }
   .url::before { content: ""; display: block; width: 96px; border-top: 2px dashed var(--link); margin-bottom: 22px; }
-  :root { --g: 34px; }
-  h1 { top: 50px; } .job { top: 140px; } .url { top: 262px; }  .n { border: 2px dashed #cfc9c0; color: #cfc9c0; }
+  :root { --g: 30px; }
+  h1 { top: 108px; } .job { top: 198px; } .url { top: 330px; }  .n { border: 2px dashed #cfc9c0; color: #cfc9c0; }
 
 </style>
 </head>
@@ -43,10 +43,11 @@
 </main>
 <script>
   const rows = ["ooooox----xxxoooo--", "oooppxpppxoxxxooo--", "xooooxxooxxxxpxxxx-", "opopp-----oxxxopxo-", "ppppp-----p--ppp---", "ooxpp-----x--pxo---", "xoopp-x---o--opx---", "ooopp-xpp-oxxooo---", "xoxxxpxxxpoxxoo-o--", "oppppp-----xx------"];
-  // Rows (0, 1, 2, 3, 4, 5, 7, 8) (Zenodo to R DESCRIPTION, one skipped in the middle keeps matrix order), terms 4-15; row i keeps its last k terms.
-  const P = 76, W = 66, H = 66, cols = 12, c0 = 4, sub = [0, 1, 2, 3, 4, 5, 7, 8], ks = [1, 2, 3, 4, 6, 8, 10, 12];
+  // Top band: DataCite across all 19 terms. Staircase: rows (0, 1, 2, 3, 4, 5, 7, 8), terms 7-18 on the band's own columns; row i keeps its last k terms.
+  const P = 63, W = 56, H = 56, sub = [0, 1, 2, 3, 4, 5, 7, 8], ks = [1, 2, 2, 3, 3, 6, 7, 9];
   const cells = [];
-  ks.forEach((k, i) => { for (let j = cols - k; j < cols; j++) cells.push([sub[i], c0 + j, 1200 - (cols - j) * P + 4, 14 + i * P]); });
+  for (let c = 0; c < 19; c++) cells.push([2, c, 3 + c * P, 14]);
+  ks.forEach((k, i) => { for (let c = 19 - k; c < 19; c++) cells.push([sub[i], c, 3 + c * P, 90 + i * P]); });
   const mark = { o: "✓", x: "✎", p: "+", "-": "–" };
   document.getElementById("m").innerHTML = cells.map(([r, c, x, y]) => {
     const s = rows[r][c];
