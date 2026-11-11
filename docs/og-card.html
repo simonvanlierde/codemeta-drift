@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>codemeta-drift social card</title>
+<!-- Source of site/og.png. Render: see README.md, "Social card". -->
+<style>
+  :root {
+    --paper: #fbfaf6; --ink: #1f2628; --faint: #5d6567; --rule: #d9d6cc; --ochre: #8a4b00; --ochre-wash: #f6e7d2;
+    --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, "Iowan Old Style", Georgia, serif;
+    --mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--paper); color: var(--ink); }
+  /* The coverage matrix at full size: 19 CodeMeta terms across, 10 formats down, one cell each. */
+  #m { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(19, 1fr); grid-template-rows: repeat(10, 1fr); }
+  .c { margin: 3px; display: grid; place-items: center; font: 700 30px/1 var(--serif); }
+  .o { border: 2px solid var(--ink); color: var(--ink); }
+  .x { background: var(--ochre); color: var(--paper); }
+  .p { background: var(--ochre-wash); border: 2px solid var(--ochre); color: var(--ochre); }
+  .n { color: var(--rule); font-weight: 400; }
+  /* A quiet field under the text; the matrix shows through it. Everything that carries meaning sits in the centred 630 px column. */
+  main { position: absolute; z-index: 1; isolation: isolate; left: 285px; top: 0; width: 630px; height: 630px; }
+  main::before { content: ""; position: absolute; inset: 0 -90px; z-index: -1;
+    background: linear-gradient(90deg, #fbfaf600, #fbfaf6d6 90px calc(100% - 90px), #fbfaf600); }
+  h1 { position: absolute; top: 58px; font: 700 70px/1 var(--mono); letter-spacing: -0.04em; }
+  .job { position: absolute; top: 190px; font: 400 40px/1.2 var(--serif); width: 600px; }
+  .url { position: absolute; bottom: 52px; font: 400 32px/1 var(--mono); color: var(--faint); letter-spacing: -0.03em; }
+  .url::before { content: ""; display: block; width: 96px; border-top: 2px dashed var(--ochre); margin-bottom: 26px; }
+</style>
+</head>
+<body>
+<!-- Cells are CodeMeta 4.0's crosswalk status for CFF, Zenodo, DataCite, BibTeX, pyproject.toml, PKG-INFO, Cargo, npm,
+     R DESCRIPTION and Julia (rows) by the 19 terms of the page's matrix, from codemeta_drift.coverage on
+     examples/mapping-4.0.json. o = works as written, x = wrong, p = missing, - = no field. -->
+<div id="m"></div>
+<main>
+  <h1>codemeta-drift</h1>
+  <p class="job">Where CodeMeta's crosswalks are wrong or missing.</p>
+  <p class="url">simonvanlierde.com/codemeta-drift</p>
+</main>
+<script>
+  const rows = ["ooooox----xxxoooo--", "oooppxpppxoxxxooo--", "xooooxxooxxxxpxxxx-", "opopp-----oxxxopxo-", "ppppp-----p--ppp---",
+    "ooxpp-----x--pxo---", "xoopp-x---o--opx---", "ooopp-xpp-oxxooo---", "xoxxxpxxxpoxxoo-o--", "oppppp-----xx------"];
+  const mark = { o: "✓", x: "✎", p: "+", "-": "–" };
+  document.getElementById("m").innerHTML = rows.join("").split("").map((s) => `<div class="c ${s === "-" ? "n" : s}">${mark[s]}</div>`).join("");
+</script>
+</body>
+</html>

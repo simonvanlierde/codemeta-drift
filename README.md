@@ -101,16 +101,15 @@ also checks citesync's mapping pin. Publishing requires a configured token.
 
 ## Social card
 
-[`site/og.png`](site/og.png) is the 1200x630 card shown when the link is shared. It is made with the generator in
-[my site repo](https://github.com/simonvanlierde/simonvanlierde.github.io/tree/main/scripts/social-card)
-(needs Docker). The visual is the page's headline figure, "120 of 351" with its coverage bar, captured from the live page at 3x and cropped tight. `site/build.py` copies the card into the built page; the tags are in `site/index.html`. From a checkout of
-that repo, with this repo next to it:
+[`site/og.png`](site/og.png) is the 1200x630 card shown when the link is shared. It is rendered from
+[`docs/og-card.html`](docs/og-card.html), which draws the page's coverage matrix for CodeMeta 4.0 at full size: ten
+formats by 19 terms, with the wrong crosswalk cells filled and the missing ones outlined. Edit the HTML, then run:
 
 ```sh
-pnpm gen:card --visual ../codemeta-drift/site/og-visual.png --name "codemeta-drift" \
-  --line "Where CodeMeta's crosswalks are wrong or missing." \
-  --domain simonvanlierde.com/codemeta-drift --out ../codemeta-drift/site/og.png --fit contain
+just og-card
 ```
+
+`site/build.py` copies the card into the built page; the tags are in `site/index.html`.
 
 ## Development
 
