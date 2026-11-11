@@ -26,7 +26,7 @@ from codemeta_drift.export import curated_tags
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
-STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg")
+STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg", "og.png")
 
 
 def upstream_data(checkout: Path, mapping: dict[str, Any]) -> dict[str, Any]:
@@ -96,6 +96,7 @@ def main() -> None:
         (args.out / name).write_text(text, encoding="utf-8")
     for name in STATIC:
         shutil.copy(ROOT / "site" / name, args.out / name)
+    shutil.copytree(ROOT / "site" / "fonts", args.out / "fonts")
     # Pages caches each file for 10 minutes: a module URL that carries its content hash never pairs a fresh page
     # with a stale module.
     for page, ref, module in (("main.mjs", '"./{}"', "fragment.mjs"), ("index.html", 'src="{}"', "main.mjs")):

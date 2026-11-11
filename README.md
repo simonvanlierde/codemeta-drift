@@ -99,6 +99,18 @@ Compare downloaded schemas and prepare issue drafts with the
 [schema watcher](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-watcher.md). The weekly workflow polls public sources and
 also checks citesync's mapping pin. Publishing requires a configured token.
 
+## Social card
+
+[`site/og.png`](site/og.png) is the 1200x630 card shown when the link is shared. It is rendered from
+[`docs/og-card.html`](docs/og-card.html), which draws the page's coverage matrix for CodeMeta 4.0 at full size: ten
+formats by 19 terms, with the wrong crosswalk cells filled and the missing ones outlined. Edit the HTML, then run:
+
+```sh
+just og-card
+```
+
+`site/build.py` copies the card into the built page; the tags are in `site/index.html`. `just og-card` also writes the PNG's hash into the `og:image` URL (`?v=`), because link previews are cached by image URL; a test fails if they differ.
+
 ## Development
 
 From a codemeta-drift checkout, with uv, [just](https://just.systems) and Node (its built-in test runner, no packages) installed:
