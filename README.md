@@ -99,6 +99,19 @@ Compare downloaded schemas and prepare issue drafts with the
 [schema watcher](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-watcher.md). The weekly workflow polls public sources and
 also checks citesync's mapping pin. Publishing requires a configured token.
 
+## Social card
+
+[`site/og.png`](site/og.png) is the 1200x630 card shown when the link is shared. It is made with the generator in
+[my site repo](https://github.com/simonvanlierde/simonvanlierde.github.io/tree/main/scripts/social-card)
+(needs Docker). The visual is a screenshot of the live page at phone width, cropped. `site/build.py` copies the card into the built page; the tags are in `site/index.html`. From a checkout of
+that repo, with this repo next to it:
+
+```sh
+pnpm gen:card --visual ../codemeta-drift/site/og-visual.jpg --name "codemeta-drift" \
+  --line "Where CodeMeta's crosswalks are wrong or missing." \
+  --domain simonvanlierde.com/codemeta-drift --out ../codemeta-drift/site/og.png
+```
+
 ## Development
 
 From a codemeta-drift checkout, with uv, [just](https://just.systems) and Node (its built-in test runner, no packages) installed:

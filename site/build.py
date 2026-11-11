@@ -26,7 +26,7 @@ from codemeta_drift.export import curated_tags
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
-STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg")
+STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg", "og.png")
 
 
 def upstream_data(checkout: Path, mapping: dict[str, Any]) -> dict[str, Any]:

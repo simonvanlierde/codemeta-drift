@@ -75,6 +75,7 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "fragment.mjs",
         "index.html",
         "main.mjs",
+        "og.png",
         "spokes-3.1.sssom.tsv",
         "spokes-4.0.sssom.tsv",
         "style.css",
@@ -205,6 +206,24 @@ def test_page_keeps_its_csp_and_no_inline_code():
     assert not re.search(r"<script(?![^>]*\bsrc=)", html)
     assert "<style" not in html
     assert " style=" not in html
+
+
+def test_page_names_its_social_card_and_the_build_ships_it(tmp_path: Path):
+    html = (ROOT / "site/index.html").read_text("utf-8")
+    for tag in (
+        '<meta property="og:image" content="https://simonvanlierde.com/codemeta-drift/og.png">',
+        '<meta property="og:image:width" content="1200">',
+        '<meta property="og:image:height" content="630">',
+        '<meta name="twitter:card" content="summary_large_image">',
+    ):
+        assert tag in html
+    assert re.search(r'<meta property="og:image:alt" content="[^"]*simonvanlierde.com/codemeta-drift">', html)
+    assert 'property="og:title"' in html
+    assert 'property="og:description"' in html
+    out = tmp_path / "site"
+    assert build(out).returncode == 0
+    # IHDR width and height sit at bytes 16-24 of a PNG
+    assert (out / "og.png").read_bytes()[16:24] == (1200).to_bytes(4, "big") + (630).to_bytes(4, "big")
 
 
 def test_build_refuses_a_directory_it_did_not_make(tmp_path: Path):
