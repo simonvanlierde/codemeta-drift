@@ -72,6 +72,7 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "data-3.1.json",
         "data.json",
         "favicon.svg",
+        "fonts",
         "fragment.mjs",
         "index.html",
         "main.mjs",
@@ -79,6 +80,14 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "spokes-3.1.sssom.tsv",
         "spokes-4.0.sssom.tsv",
         "style.css",
+    ]
+    assert sorted(p.name for p in (out / "fonts").iterdir()) == [
+        "OFL-JetBrains-Mono.txt",
+        "OFL-Newsreader.txt",
+        "jetbrains-mono-latin-400-normal.woff2",
+        "jetbrains-mono-latin-700-normal.woff2",
+        "newsreader-latin-400-italic.woff2",
+        "newsreader-latin-400-normal.woff2",
     ]
 
 

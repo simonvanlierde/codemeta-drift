@@ -1,37 +1,68 @@
-/* A surveyor's coverage sheet: warm paper, ink, and one ochre that marks only what a crosswalk gets wrong or leaves out. */
+/* A proofreader's pass over the crosswalks: paper, ink, and one red that marks only what a crosswalk gets wrong or leaves out. */
+@font-face {
+  font-family: Newsreader;
+  src: url("fonts/newsreader-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Newsreader;
+  src: url("fonts/newsreader-latin-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
 :root {
-  --paper: #fbfaf6;
-  --ink: #1f2628;
-  --faint: #5d6567;
-  --rule: #d9d6cc;
-  --tint: #f1efe7;
-  --ochre: #8a4b00;
-  --ochre-wash: #f6e7d2;
-  --ochre-light: #fbf1e3;
+  --serif: Newsreader, Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
+  --paper: #fbf9f6;
+  --ink: #211f24;
+  --faint: #5c5a60;
+  --rule: #ddd9d4;
+  --tint: #f2efea;
+  --mark: #b3261e;
+  --mark-wash: #f6dcd9;
+  --mark-light: #fbeceb;
+  --link: #2f4b7c;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #181a17;
-    --ink: #e8e4d8;
-    --faint: #a49f92;
-    --rule: #3a3a33;
-    --tint: #23241f;
-    --ochre: #f0a24a;
-    --ochre-wash: #3d2a14;
-    --ochre-light: #2c2218;
+    --paper: #1a1819;
+    --ink: #ebe7e6;
+    --faint: #a9a2a4;
+    --rule: #3b3639;
+    --tint: #262324;
+    --mark: #ff948b;
+    --mark-wash: #4a2220;
+    --mark-light: #321e1e;
+    --link: #9fb9ec;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #181a17;
-  --ink: #e8e4d8;
-  --faint: #a49f92;
-  --rule: #3a3a33;
-  --tint: #23241f;
-  --ochre: #f0a24a;
-  --ochre-wash: #3d2a14;
-  --ochre-light: #2c2218;
+  --paper: #1a1819;
+  --ink: #ebe7e6;
+  --faint: #a9a2a4;
+  --rule: #3b3639;
+  --tint: #262324;
+  --mark: #ff948b;
+  --mark-wash: #4a2220;
+  --mark-light: #321e1e;
+  --link: #9fb9ec;
   color-scheme: dark;
 }
 * {
@@ -41,31 +72,32 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 1rem / 1.5 Charter, "Bitstream Charter", "Sitka Text", Cambria, "Iowan Old Style", Georgia, serif;
+  font: 1rem / 1.5 var(--serif);
 }
 code,
 .mono,
 .slug,
 select {
-  font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: var(--mono);
 }
 code {
   font-size: 0.875em;
 }
 ::selection {
-  background: var(--ochre-wash);
+  background: var(--mark-wash);
   color: var(--ink);
 }
 html {
   scrollbar-color: var(--rule) var(--paper);
 }
 a {
-  color: inherit;
-  text-decoration-color: var(--rule);
+  color: var(--link);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 a:hover {
-  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
 }
 :focus-visible {
   outline: 2px solid var(--ink);
@@ -182,7 +214,7 @@ h1 {
 .score figcaption {
   font-size: 0.9375rem;
 }
-/* as-is in ink, corrected and added in the two ochre washes, as in the matrix cells. */
+/* as-is in ink, corrected and added in the two red washes, as in the matrix cells. */
 .bar {
   display: flex;
   height: 10px;
@@ -196,11 +228,11 @@ h1 {
   background: var(--ink);
 }
 .bar .s-corrected {
-  background: var(--ochre);
+  background: var(--mark);
 }
 .bar .s-added {
-  background: var(--ochre-wash);
-  box-shadow: inset 0 0 0 1px var(--ochre);
+  background: var(--mark-wash);
+  box-shadow: inset 0 0 0 1px var(--mark);
 }
 /* The views: a row of tabs on one hairline, the chosen one tinted with a 2px ink bar at its foot. */
 .tabs {
@@ -243,7 +275,7 @@ h2 {
   max-width: 68ch;
 }
 .note {
-  color: var(--ochre);
+  color: var(--mark);
 }
 button,
 select {
@@ -362,7 +394,7 @@ table {
   min-width: 2.25rem;
   border: 0;
   padding: 0;
-  font-family: Charter, Georgia, serif;
+  font-family: var(--serif);
   font-size: 1.0625rem;
 }
 .cell:hover,
@@ -371,27 +403,27 @@ table {
 }
 .s-corrected,
 .s-added {
-  color: var(--ochre);
+  color: var(--mark);
 }
 /* The tint fills the whole table cell, edge to edge, not just the button inside it. */
 #matrix td:has(.s-corrected) {
-  background: var(--ochre-wash);
+  background: var(--mark-wash);
 }
 #matrix td:has(.s-added) {
-  background: var(--ochre-light);
+  background: var(--mark-light);
 }
 .s-no-field,
 .s-no-term {
   color: var(--faint);
 }
-/* A crosswalk nobody reviewed gets no wash: its marks say only the cell's shape. Prose and unjoinable cells are ochre. */
+/* A crosswalk nobody reviewed gets no wash: its marks say only the cell's shape. Prose and unjoinable cells are red. */
 .s-path,
 .s-empty {
   color: var(--faint);
 }
 .s-prose,
 .s-unmatched {
-  color: var(--ochre);
+  color: var(--mark);
 }
 /* tr.group outranks the sticky first-column rule: the label row spans the table and stays put. */
 #matrix tr.group th {
@@ -486,7 +518,7 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
   position: relative;
   padding: 4px 0;
 }
-/* The line from each end to the hub: solid when both formats have the field, ochre and dashed where it breaks. */
+/* The line from each end to the hub: solid when both formats have the field, red and dashed where it breaks. */
 .stop::after {
   content: "";
   position: absolute;
@@ -511,12 +543,12 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
   width: 10px;
 }
 .stop.gap {
-  color: var(--ochre);
+  color: var(--mark);
   font-style: italic;
 }
 .stop.gap::after {
   border-top-style: dashed;
-  border-top-color: var(--ochre);
+  border-top-color: var(--mark);
 }
 .changes {
   padding-left: 1.2em;
