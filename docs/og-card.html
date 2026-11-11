@@ -43,11 +43,11 @@
 </main>
 <script>
   const rows = ["ooooox----xxxoooo--", "oooppxpppxoxxxooo--", "xooooxxooxxxxpxxxx-", "opopp-----oxxxopxo-", "ppppp-----p--ppp---", "ooxpp-----x--pxo---", "xoopp-x---o--opx---", "ooopp-xpp-oxxooo---", "xoxxxpxxxpoxxoo-o--", "oppppp-----xx------"];
-  // Top band: DataCite across all 19 terms. Staircase: rows (0, 1, 2, 3, 4, 5, 7, 8), terms 7-18 on the band's own columns; row i keeps its last k terms.
-  const P = 63, W = 56, H = 56, sub = [0, 1, 2, 3, 4, 5, 7, 8], ks = [1, 2, 2, 3, 3, 6, 7, 9];
+  // Top band: DataCite across all 19 terms. Staircase: rows (0, 1, 2, 3, 4, 5, 7, 8), terms 4-15 (the 12 consecutive terms with the fewest no-field cells), snug to the right edge; row i keeps its last k terms.
+  const P = 63, W = 56, H = 56, cols = 12, c0 = 4, sub = [0, 1, 2, 3, 4, 5, 7, 8], ks = [1, 2, 2, 3, 3, 6, 7, 9];
   const cells = [];
   for (let c = 0; c < 19; c++) cells.push([2, c, 3 + c * P, 14]);
-  ks.forEach((k, i) => { for (let c = 19 - k; c < 19; c++) cells.push([sub[i], c, 3 + c * P, 90 + i * P]); });
+  ks.forEach((k, i) => { for (let j = cols - k; j < cols; j++) cells.push([sub[i], c0 + j, 3 + (7 + j) * P, 90 + i * P]); });
   const mark = { o: "✓", x: "✎", p: "+", "-": "–" };
   document.getElementById("m").innerHTML = cells.map(([r, c, x, y]) => {
     const s = rows[r][c];
