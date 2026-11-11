@@ -12,17 +12,17 @@
   }
   * { box-sizing: border-box; margin: 0; }
   html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--paper); color: var(--ink); }
-  /* The coverage matrix at full size: 19 CodeMeta terms across, 10 formats down, one cell each. */
+  /* The coverage matrix at full size, marks only, no glyphs: 19 CodeMeta terms across, 10 formats down, one cell each. */
   #m { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(19, 1fr); grid-template-rows: repeat(10, 1fr); }
-  .c { margin: 3px; display: grid; place-items: center; font: 700 30px/1 var(--serif); }
-  .o { border: 2px solid var(--ink); color: var(--ink); }
-  .x { background: var(--ochre); color: var(--paper); }
-  .p { background: var(--ochre-wash); border: 2px solid var(--ochre); color: var(--ochre); }
-  .n { color: var(--rule); font-weight: 400; }
+  .c { margin: 13px; }
+  .o { background: #ece9df; }
+  .x { background: var(--ochre); }
+  .p { border: 2px solid var(--ochre); }
+  .n { visibility: hidden; }
   /* A quiet field under the text; the matrix shows through it. Everything that carries meaning sits in the centred 630 px column. */
   main { position: absolute; z-index: 1; isolation: isolate; left: 285px; top: 0; width: 630px; height: 630px; }
-  main::before { content: ""; position: absolute; inset: 0 -90px; z-index: -1;
-    background: linear-gradient(90deg, #fbfaf600, #fbfaf6d6 90px calc(100% - 90px), #fbfaf600); }
+  main::before { content: ""; position: absolute; inset: 0 -170px; z-index: -1;
+    background: linear-gradient(90deg, #fbfaf600, #fbfaf6f0 170px calc(100% - 170px), #fbfaf600); }
   h1 { position: absolute; top: 58px; font: 700 70px/1 var(--mono); letter-spacing: -0.04em; }
   .job { position: absolute; top: 190px; font: 400 40px/1.2 var(--serif); width: 600px; }
   .url { position: absolute; bottom: 52px; font: 400 32px/1 var(--mono); color: var(--faint); letter-spacing: -0.03em; }
@@ -42,8 +42,7 @@
 <script>
   const rows = ["ooooox----xxxoooo--", "oooppxpppxoxxxooo--", "xooooxxooxxxxpxxxx-", "opopp-----oxxxopxo-", "ppppp-----p--ppp---",
     "ooxpp-----x--pxo---", "xoopp-x---o--opx---", "ooopp-xpp-oxxooo---", "xoxxxpxxxpoxxoo-o--", "oppppp-----xx------"];
-  const mark = { o: "✓", x: "✎", p: "+", "-": "–" };
-  document.getElementById("m").innerHTML = rows.join("").split("").map((s) => `<div class="c ${s === "-" ? "n" : s}">${mark[s]}</div>`).join("");
+  document.getElementById("m").innerHTML = rows.join("").split("").map((s) => `<div class="c ${s === "-" ? "n" : s}"></div>`).join("");
 </script>
 </body>
 </html>
