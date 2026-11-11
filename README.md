@@ -109,7 +109,7 @@ formats by 19 terms, with the wrong crosswalk cells filled and the missing ones 
 just og-card
 ```
 
-`site/build.py` copies the card into the built page; the tags are in `site/index.html`.
+`site/build.py` copies the card into the built page; the tags are in `site/index.html`. `just og-card` also writes the PNG's hash into the `og:image` URL (`?v=`), because link previews are cached by image URL; a test fails if they differ.
 
 ## Development
 

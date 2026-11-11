@@ -220,12 +220,14 @@ def test_page_keeps_its_csp_and_no_inline_code():
 def test_page_names_its_social_card_and_the_build_ships_it(tmp_path: Path):
     html = (ROOT / "site/index.html").read_text("utf-8")
     for tag in (
-        '<meta property="og:image" content="https://simonvanlierde.com/codemeta-drift/og.png">',
         '<meta property="og:image:width" content="1200">',
         '<meta property="og:image:height" content="630">',
         '<meta name="twitter:card" content="summary_large_image">',
     ):
         assert tag in html
+    # `just og-card` rewrites the hash; a redrawn card at an unchanged URL would stay cached by link previews
+    digest = hashlib.sha256((ROOT / "site/og.png").read_bytes()).hexdigest()[:8]
+    assert f'<meta property="og:image" content="https://simonvanlierde.com/codemeta-drift/og.png?v={digest}">' in html
     assert re.search(r'<meta property="og:image:alt" content="[^"]*simonvanlierde.com/codemeta-drift">', html)
     assert 'property="og:title"' in html
     assert 'property="og:description"' in html
