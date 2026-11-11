@@ -26,7 +26,8 @@
   .url { position: absolute; font: 400 32px/1 var(--mono); color: var(--faint); letter-spacing: -0.03em; }
   .url::before { content: ""; display: block; width: 96px; border-top: 2px dashed var(--link); margin-bottom: 22px; }
   :root { --g: 34px; }
-  h1 { top: 50px; } .job { top: 140px; } .url { top: 262px; }
+  h1 { top: 50px; } .job { top: 140px; } .url { top: 262px; }  .n { border: 2px dashed #cfc9c0; color: #cfc9c0; }
+
 </style>
 </head>
 <body>
@@ -42,14 +43,14 @@
 </main>
 <script>
   const rows = ["ooooox----xxxoooo--", "oooppxpppxoxxxooo--", "xooooxxooxxxxpxxxx-", "opopp-----oxxxopxo-", "ppppp-----p--ppp---", "ooxpp-----x--pxo---", "xoopp-x---o--opx---", "ooopp-xpp-oxxooo---", "xoxxxpxxxpoxxoo-o--", "oppppp-----xx------"];
-  // Rows 1-8 (Zenodo to R DESCRIPTION), terms 1-15; row i keeps its last k terms, so the staircase is a true corner of the matrix.
-  const P = 76, W = 66, H = 66, cols = 15, c0 = 1, r0 = 1, ks = [1, 2, 3, 4, 6, 8, 10, 12];
+  // Rows (0, 1, 2, 3, 4, 5, 7, 8) (Zenodo to R DESCRIPTION, one skipped in the middle keeps matrix order), terms 4-15; row i keeps its last k terms.
+  const P = 76, W = 66, H = 66, cols = 12, c0 = 4, sub = [0, 1, 2, 3, 4, 5, 7, 8], ks = [1, 2, 3, 4, 6, 8, 10, 12];
   const cells = [];
-  ks.forEach((k, i) => { for (let j = cols - k; j < cols; j++) cells.push([r0 + i, c0 + j, 1200 - (cols - j) * P + 4, 14 + i * P]); });
-  const mark = { o: "✓", x: "✎", p: "+" };
+  ks.forEach((k, i) => { for (let j = cols - k; j < cols; j++) cells.push([sub[i], c0 + j, 1200 - (cols - j) * P + 4, 14 + i * P]); });
+  const mark = { o: "✓", x: "✎", p: "+", "-": "–" };
   document.getElementById("m").innerHTML = cells.map(([r, c, x, y]) => {
     const s = rows[r][c];
-    return s === "-" ? "" : `<div class="c ${s}" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px">${mark[s]}</div>`;
+    return `<div class="c ${s === "-" ? "n" : s}" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px">${mark[s]}</div>`;
   }).join("");
 </script>
 </body>
