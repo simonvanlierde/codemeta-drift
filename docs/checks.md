@@ -62,7 +62,7 @@ These are consistency checks; they do not validate every JSON-LD rule or metadat
 | --- | --- |
 | 0 | No disagreements; optional files may produce `SKIPPED` notices |
 | 1 | The checker found disagreements |
-| 2 | Usage error: an unknown option or a missing argument |
+| 2 | Usage error: an unknown option, a missing argument, or an option value the command can't use (a `--tag` with no curated rows, a `--format`, `--from` or `--to` the mapping lacks) |
 | 3 | The check could not run, for example because a required file is missing or unreadable, or its output can't be written, including a closed pipe |
 | 130 | Interrupted with Ctrl-C. The command then ends by SIGINT, so a shell loop around it stops too; on Windows it exits 130 |
 
