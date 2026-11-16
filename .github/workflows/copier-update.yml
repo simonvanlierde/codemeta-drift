@@ -1,12 +1,12 @@
 name: copier update
 
 # Dependabot can't update a Copier template, so this opens the update PR. It runs
-# weekly, finds the newest template tag, and does nothing when `_commit` in
-# .copier-answers.yml already is that tag. The PR lives on one fixed branch.
+# weekly, finds each template's newest tag, and does nothing when `_commit` in every
+# .copier-answers*.yml already is that tag. The PR lives on one fixed branch.
 # GITHUB_TOKEN can't push a change to .github/workflows/, which most template releases
-# make, and its PR starts no CI. A COPIER_UPDATE_TOKEN secret fixes both; without it, an
-# update that touches a workflow opens an issue instead. See "Hearing about new releases"
-# in the template's docs/usage.md.
+# make, and its PR starts no CI. A token from your own GitHub App fixes both; without one,
+# an update that touches a workflow opens an issue instead. See "The update App"
+# in the template's docs/updates.md.
 
 on:
   schedule:
@@ -30,6 +30,11 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+    env:
+      # As in python.yml: uv checks every package against OSV's malware advisories before
+      # its code runs. The preview flag only silences the "experimental" warning.
+      UV_MALWARE_CHECK: "1"
+      UV_PREVIEW_FEATURES: malware-check
     outputs:
       latest: ${{ steps.copier.outputs.latest }}
       workflows: ${{ steps.copier.outputs.workflows }}
@@ -47,28 +52,50 @@ jobs:
       - name: Update from the newest template tag
         shell: bash
         run: |-
-          src=$(sed -n "s/^_src_path: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" .copier-answers.yml)
-          url=${src/#gh:/https://github.com/}
-          latest=$(git ls-remote --tags --refs --sort=-v:refname "$url" 'v*' | sed 's|.*refs/tags/||' | sed -n '/-/!{p;q;}')
-          current=$(sed -n "s/^_commit: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" .copier-answers.yml)
-          if [ -z "$latest" ]; then
-            echo "::error::no stable v* tag found at $url (_src_path: $src)"
-            exit 1
-          fi
-          if [ "$current" = "$latest" ]; then
-            echo "Already on $latest."
+          # Each answers file is one template: this one, plus any layered over it
+          # (`.copier-answers.<name>.yml`). Copier refuses to update a dirty tree, so each
+          # layer's update is committed here; the patch is everything since the checkout.
+          base=$(git rev-parse HEAD)
+          titles=()
+          lines=()
+          for answers in .copier-answers.yml .copier-answers.*.yml; do
+            [ -f "$answers" ] || continue
+            src=$(sed -n "s/^_src_path: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" "$answers")
+            url=${src/#gh:/https://github.com/}
+            latest=$(git ls-remote --tags --refs --sort=-v:refname "$url" 'v*' | sed 's|.*refs/tags/||' | sed -n '/-/!{p;q;}')
+            current=$(sed -n "s/^_commit: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" "$answers")
+            if [ -z "$latest" ]; then
+              echo "::error::no stable v* tag found at $url (_src_path: $src in $answers)"
+              exit 1
+            fi
+            if [ "$current" = "$latest" ]; then
+              echo "$answers: already on $latest."
+              continue
+            fi
+            uvx --exclude-newer "1 week" "copier@$COPIER_VERSION" update --answers-file "$answers" --defaults --vcs-ref "$latest"
+            git add -A
+            git -c core.hooksPath=/dev/null -c user.name=copier-update -c user.email=copier-update@localhost \
+              commit -q --allow-empty -m "$answers $latest"
+            layer=${answers#.copier-answers.}
+            layer=${layer%yml}
+            layer=${layer%.}
+            titles+=("${layer:+$layer }$latest")
+            lines+=("- ${layer:-This template}: \`$current\` to \`$latest\`")
+          done
+          if [ ${#titles[@]} -eq 0 ]; then
             exit 0
           fi
-
-          uvx "copier@$COPIER_VERSION" update --defaults --vcs-ref "$latest"
-          git add -A
+          summary=$(printf '%s, ' "${titles[@]}")
+          summary=${summary%, }
 
           # Copier exits 0 on conflicts: inline markers, or .rej files.
-          { git grep --cached -l -e '^<<<<<<< ' || true; git ls-files '*.rej'; } | sort -u >conflicts.txt
+          { git grep -l -e '^<<<<<<< ' HEAD -- . | sed 's/^HEAD://' || true; git ls-files '*.rej'; } | sort -u >conflicts.txt
           {
-            echo "Updates this project from the template: \`$current\` to \`$latest\`."
+            echo "Updates this project from its templates:"
             echo
-            echo "Read the diff before merging, then refresh the lockfiles for your stacks (\`uv lock\`, \`pnpm install\`, \`just go-sync\`)."
+            printf '%s\n' "${lines[@]}"
+            echo
+            echo "Read the diff before merging, then refresh the lockfiles (\`uv lock\`)."
             if [ -s conflicts.txt ]; then
               echo
               echo "These files have merge conflicts. Their markers are committed as they are:"
@@ -78,12 +105,12 @@ jobs:
           } >body.md
           mkdir -p "$RUNNER_TEMP/copier-update"
           mv body.md "$RUNNER_TEMP/copier-update/body.md"
-          git diff --cached --binary >"$RUNNER_TEMP/copier-update/update.patch"
+          git diff --binary "$base" HEAD >"$RUNNER_TEMP/copier-update/update.patch"
 
-          if git diff --cached --name-only --no-renames | grep -q '^\.github/workflows/'; then
+          if git diff --name-only --no-renames "$base" HEAD | grep -q '^\.github/workflows/'; then
             echo "workflows=true" >>"$GITHUB_OUTPUT"
           fi
-          echo "latest=$latest" >>"$GITHUB_OUTPUT"
+          echo "latest=$summary" >>"$GITHUB_OUTPUT"
         id: copier
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -100,9 +127,12 @@ jobs:
     if: needs.update.outputs.latest != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # The App's private key is a secret of this environment, which `just repo-settings`
+    # limits to main, so a workflow on another branch can't read it.
+    environment: copier-update
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # without the App, GITHUB_TOKEN pushes the update branch
+      pull-requests: write # and opens or edits its PR
       issues: write # to ask for a local update when it can't push one
     steps:
       # A fresh runner keeps Copier's dependencies away from the push token.
@@ -131,11 +161,22 @@ jobs:
             -c user.email=41898282+github-actions[bot]@users.noreply.github.com \
             commit -q -s -m "chore: update from template $LATEST"
 
+      # The App's token lasts an hour, reaches this repo only, and is revoked when the job ends.
+      - name: Get a token from the update App
+        id: app
+        if: vars.COPIER_UPDATE_CLIENT_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.COPIER_UPDATE_CLIENT_ID }}
+          private-key: ${{ secrets.COPIER_UPDATE_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+
       - name: Push the update and open the PR
         env:
-          # A fine-grained token with contents, pull requests and workflows write on this repo.
-          GH_TOKEN: ${{ secrets.COPIER_UPDATE_TOKEN || github.token }}
-          HAS_TOKEN: ${{ secrets.COPIER_UPDATE_TOKEN != '' }}
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          HAS_TOKEN: ${{ steps.app.outputs.token != '' }}
           REPO: ${{ github.repository }}
           BASE: ${{ github.event.repository.default_branch }}
           LATEST: ${{ needs.update.outputs.latest }}
@@ -143,18 +184,28 @@ jobs:
         shell: bash
         run: |-
           branch=chore/copier-update
+          # `--head` matches a fork's branch of the same name too: only this repo's PRs count.
+          own='map(select(.isCrossRepository == false))'
+          # Closing an update unmerged declines that tag; a later tag can open a new PR.
+          declined=$(gh pr list --head "$branch" --base "$BASE" --state closed --json title,mergedAt,isCrossRepository |
+            jq --arg title "chore: update from template $LATEST" "$own"' | any(.[]; .title == $title and .mergedAt == null)')
+          if [ "$declined" = true ]; then
+            echo "::notice::Template $LATEST was declined; skipping this tag"
+            exit 0
+          fi
           if [ "$HAS_TOKEN" != true ] && [ "$WORKFLOWS" = true ]; then
             title="Update from template $LATEST by hand"
             {
               echo "Template \`$LATEST\` changes files in \`.github/workflows/\`, and \`GITHUB_TOKEN\` can't push those."
-              echo "Run \`copier update --vcs-ref $LATEST\` locally and open the PR yourself, or add a \`COPIER_UPDATE_TOKEN\` secret (see the template's docs/usage.md) so this workflow can."
+              echo "Run \`copier update --answers-file <file> --vcs-ref <tag>\` locally for each template in it, and open the PR yourself, or set up the update App (see the template's docs/updates.md) so this workflow can."
             } >issue.md
             # A closed issue counts too, so closing it stops the weekly reminder for this tag.
-            if [ -z "$(gh issue list --state all --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
+            # Only the issue this step opened with GITHUB_TOKEN counts, not one anyone titled so.
+            if [ -z "$(gh issue list --state all --author app/github-actions --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
               gh issue create --title "$title" --body-file issue.md
             fi
             # An open PR from an older tag would now disagree with the issue.
-            stale=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')
+            stale=$(gh pr list --head "$branch" --state open --json number,isCrossRepository --jq "$own | .[0].number")
             if [ -n "$stale" ]; then
               gh pr close "$stale" --delete-branch --comment "Superseded by template \`$LATEST\`, which needs a local update: see the issue \"$title\"."
             fi
@@ -163,13 +214,29 @@ jobs:
           fi
 
           if [ "$HAS_TOKEN" != true ]; then
-            printf '\n%s\n' "This PR was opened without \`COPIER_UPDATE_TOKEN\`, so its checks do not start: close it and reopen it to run them." >>"$RUNNER_TEMP/copier-update/body.md"
+            printf '\n%s\n' "This PR was opened without the update App, so its checks do not start: close it and reopen it to run them." >>"$RUNNER_TEMP/copier-update/body.md"
           fi
 
-          git -c core.hooksPath=/dev/null push --force "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "$branch"
+          # git reads the token from gh's credential helper, so it stays out of the process list.
+          gh auth setup-git
+          git -c core.hooksPath=/dev/null push --force "https://github.com/${REPO}.git" "$branch"
 
-          if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')" ]; then
-            gh pr edit "$branch" --title "chore: update from template $LATEST" --body-file "$RUNNER_TEMP/copier-update/body.md"
+          open=$(gh pr list --head "$branch" --state open --json number,isCrossRepository --jq "$own | .[0].number")
+          if [ -n "$open" ]; then
+            gh pr edit "$open" --title "chore: update from template $LATEST" --body-file "$RUNNER_TEMP/copier-update/body.md"
           else
             gh pr create --head "$branch" --base "$BASE" --title "chore: update from template $LATEST" --body-file "$RUNNER_TEMP/copier-update/body.md"
           fi
+
+  notify:
+    # Scheduled runs only: without it, a project stops getting template releases unseen.
+    # The only job that may write issues.
+    name: "copier update: report failure"
+    needs: [update, push]
+    # A job that runs past timeout-minutes ends cancelled, not failed.
+    if: always() && github.event_name == 'schedule' && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    permissions:
+      issues: write # opens or comments on the failure issue
+    uses: $/.github/workflows/report-failure.yml
+    with:
+      title: Weekly template update failed
