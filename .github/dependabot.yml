@@ -6,7 +6,9 @@
 #
 # `cooldown` holds a version update back until the release has been public for a
 # week, long enough for a compromised release to be caught and yanked. One number for
-# every ecosystem and every update type. Security updates ignore it.
+# every ecosystem and every update type. Security updates ignore it. The
+# author's own simonvanlierde hooks and packages skip it: whoever can publish those can
+# push to the repos directly.
 #
 # No docker ecosystem: it reads FROM lines only, and those tags are copier answers,
 # so its PRs would fight the next `copier update`.
@@ -34,7 +36,7 @@ updates:
     directory: /
     multi-ecosystem-group: actions-and-hooks
     patterns: ["*"]
-    cooldown: {default-days: 7}
+    cooldown: {default-days: 7, exclude: ["*simonvanlierde/*"]}
 
   # Dev tooling lands as one PR and runtime minor and patch bumps as another, so a risky
   # bump is not buried in lint-tool churn. A runtime major gets its own PR.

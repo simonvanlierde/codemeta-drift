@@ -1,12 +1,12 @@
 name: copier update
 
 # Dependabot can't update a Copier template, so this opens the update PR. It runs
-# weekly, finds the newest template tag, and does nothing when `_commit` in
-# .copier-answers.yml already is that tag. The PR lives on one fixed branch.
+# weekly, finds each template's newest tag, and does nothing when `_commit` in every
+# .copier-answers*.yml already is that tag. The PR lives on one fixed branch.
 # GITHUB_TOKEN can't push a change to .github/workflows/, which most template releases
-# make, and its PR starts no CI. A COPIER_UPDATE_TOKEN secret fixes both; without it, an
-# update that touches a workflow opens an issue instead. See "Hearing about new releases"
-# in the template's docs/usage.md.
+# make, and its PR starts no CI. A token from your own GitHub App fixes both; without one,
+# an update that touches a workflow opens an issue instead. See "The update App"
+# in the template's docs/updates.md.
 
 on:
   schedule:
@@ -30,9 +30,15 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+    env:
+      # As in python.yml: uv checks every package against OSV's malware advisories before
+      # its code runs. The preview flag only silences the "experimental" warning.
+      UV_MALWARE_CHECK: "1"
+      UV_PREVIEW_FEATURES: malware-check
     outputs:
       latest: ${{ steps.copier.outputs.latest }}
       workflows: ${{ steps.copier.outputs.workflows }}
+      conflicts: ${{ steps.copier.outputs.conflicts }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -47,43 +53,130 @@ jobs:
       - name: Update from the newest template tag
         shell: bash
         run: |-
-          src=$(sed -n "s/^_src_path: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" .copier-answers.yml)
-          url=${src/#gh:/https://github.com/}
-          latest=$(git ls-remote --tags --refs --sort=-v:refname "$url" 'v*' | sed 's|.*refs/tags/||' | sed -n '/-/!{p;q;}')
-          current=$(sed -n "s/^_commit: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" .copier-answers.yml)
-          if [ -z "$latest" ]; then
-            echo "::error::no stable v* tag found at $url (_src_path: $src)"
-            exit 1
-          fi
-          if [ "$current" = "$latest" ]; then
-            echo "Already on $latest."
+          # Each answers file is one template: this one, plus any layered over it
+          # (`.copier-answers.<name>.yml`). Copier refuses to update a dirty tree, so each
+          # layer's update is committed here; the patch is everything since the checkout.
+          base=$(git rev-parse HEAD)
+          # A merge conflict must not put markers into a file: a workflow with markers does not run, and
+          # neither does the package. A hunk whose lines differ only in a pinned SHA and its comment keeps
+          # the project's pins, which its dependency bot owns. Any other conflict leaves the project's
+          # file as it was and writes the merge, markers in it, to `<file>.rej` (`<file>.<layer>.rej` for
+          # a layered template): the hooks refuse a pull request that still has one. -I keeps a module
+          # the update rendered at the project root out of the import path.
+          resolve=$(cat <<'PY'
+          import re, subprocess, sys
+          before, layer = sys.argv[1:]
+          sha = re.compile(r"\b[0-9a-f]{40}\b")
+          mask = lambda line: sha.sub("SHA", line.partition(" #")[0])
+          block = re.compile(r"^<<<<<<< before updating\r?\n(.*?)^=======\r?\n(.*?)^>>>>>>> after updating\r?\n", re.M | re.S)
+          def pick(m):
+              mine, theirs = m[1].splitlines(), m[2].splitlines()
+              pins = mine and len(mine) == len(theirs) and all(sha.search(a) and sha.search(b) and mask(a) == mask(b) for a, b in zip(mine, theirs))
+              return m[1] if pins else m[0]
+          # -z: names end in NUL, unquoted, whatever characters they hold.
+          grep = ["git", "grep", "-l", "-I", "-z", "-e", "^<<<<<<< before updating", "--", ".", ":!*.rej"]
+          for name in filter(None, subprocess.run(grep, capture_output=True, text=True).stdout.split("\0")):
+              with open(name, encoding="utf-8", errors="surrogateescape", newline="") as f:
+                  merged = block.sub(pick, f.read())
+              if re.search(r"^<<<<<<< before updating\r?$", merged, re.M):
+                  rej = f"{name}.{layer}.rej" if layer else f"{name}.rej"
+                  with open(rej, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
+                      f.write(merged)
+                  merged = subprocess.run(["git", "show", f"{before}:{name}"], capture_output=True, check=True).stdout.decode("utf-8", "surrogateescape")
+              with open(name, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
+                  f.write(merged)
+          PY
+          )
+          titles=()
+          lines=()
+          for answers in .copier-answers.yml .copier-answers.*.yml; do
+            [ -f "$answers" ] || continue
+            src=$(sed -n "s/^_src_path: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" "$answers")
+            url=${src/#gh:/https://github.com/}
+            tags=$(git ls-remote --tags --refs --sort=-v:refname "$url" 'v*' | sed 's|.*refs/tags/||' | sed -n '/-/!p')
+            current=$(sed -n "s/^_commit: *['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" "$answers")
+            if [ -z "$tags" ]; then
+              echo "::error::no stable v* tag found at $url (_src_path: $src in $answers)"
+              exit 1
+            fi
+            # The newest stable tag that is a week old. A younger tag waits, as `--exclude-newer` makes
+            # Copier's own dependencies wait: a template tag pushed with stolen credentials gets a week
+            # to be noticed before this workflow's token pushes it. The tagger date is the tagger's own
+            # claim, so this stops a careless tag, not a forged one. Templates under simonvanlierde/ are
+            # exempt, as his packages are from the release cooldown.
+            latest='' waiting=''
+            for tag in $tags; do
+              [ "$tag" = "$current" ] && break
+              if [[ $src == gh:simonvanlierde/* || $src == https://github.com/simonvanlierde/* ]]; then
+                latest=$tag
+                break
+              fi
+              tag_repo="$RUNNER_TEMP/tag-age"
+              rm -rf "$tag_repo"
+              git init -q "$tag_repo"
+              git -C "$tag_repo" fetch -q --depth=1 "$url" "refs/tags/$tag:refs/tags/$tag"
+              tagged=$(git -C "$tag_repo" for-each-ref --format='%(creatordate:unix)' "refs/tags/$tag")
+              if [ $(( $(date +%s) - tagged )) -ge 604800 ]; then
+                latest=$tag
+                break
+              fi
+              waiting=${waiting:-$tag}
+            done
+            if [ -z "$latest" ]; then
+              if [ -n "$waiting" ]; then
+                echo "::notice::$answers: $waiting is under a week old; leaving it for a later run."
+                echo "- \`$answers\`: \`$waiting\` is under a week old, so it waits." >>"$GITHUB_STEP_SUMMARY"
+              else
+                echo "$answers: already on $current."
+              fi
+              continue
+            fi
+            layer=${answers#.copier-answers.}
+            layer=${layer%yml}
+            layer=${layer%.}
+            before=$(git rev-parse HEAD)
+            uvx --exclude-newer "1 week" "copier@$COPIER_VERSION" update --answers-file "$answers" --defaults --vcs-ref "$latest"
+            python3 -I -c "$resolve" "$before" "$layer"
+            git add -A
+            git -c core.hooksPath=/dev/null -c user.name=copier-update -c user.email=copier-update@localhost \
+              commit -q --allow-empty -m "$answers $latest"
+            titles+=("${layer:+$layer }$latest")
+            lines+=("- ${layer:-This template}: \`$current\` to \`$latest\`")
+          done
+          if [ ${#titles[@]} -eq 0 ]; then
             exit 0
           fi
+          summary=$(printf '%s, ' "${titles[@]}")
+          summary=${summary%, }
 
-          uvx "copier@$COPIER_VERSION" update --defaults --vcs-ref "$latest"
-          git add -A
-
-          # Copier exits 0 on conflicts: inline markers, or .rej files.
-          { git grep --cached -l -e '^<<<<<<< ' || true; git ls-files '*.rej'; } | sort -u >conflicts.txt
+          # Copier exits 0 on conflicts; the step above turned them into .rej files. Only this run's
+          # count: a .rej the project already had is not news.
+          git -c core.quotePath=false diff --name-only --diff-filter=A "$base" HEAD -- '*.rej' >conflicts.txt
           {
-            echo "Updates this project from the template: \`$current\` to \`$latest\`."
+            echo "Updates this project from its templates:"
             echo
-            echo "Read the diff before merging, then refresh the lockfiles for your stacks (\`uv lock\`, \`pnpm install\`, \`just go-sync\`)."
+            printf '%s\n' "${lines[@]}"
+            echo
+            echo "Read the diff before merging, then refresh the lockfiles (\`uv lock\`)."
             if [ -s conflicts.txt ]; then
               echo
-              echo "These files have merge conflicts. Their markers are committed as they are:"
+              echo "These changes did not merge. Each file keeps the project's version, and the template's, with the conflicts marked, is in the \`.rej\` file next to it. Copy what you need into the file and delete the \`.rej\` file: the hooks fail while one is left. The PR stays a draft until you mark it ready."
               echo
-              sed "s/.*/- \`&\`/" conflicts.txt
+              # A double-backtick span: a backtick in a file name cannot end it.
+              sed "s/.*/- \`\` & \`\`/" conflicts.txt
             fi
           } >body.md
           mkdir -p "$RUNNER_TEMP/copier-update"
           mv body.md "$RUNNER_TEMP/copier-update/body.md"
-          git diff --cached --binary >"$RUNNER_TEMP/copier-update/update.patch"
+          git diff --binary "$base" HEAD >"$RUNNER_TEMP/copier-update/update.patch"
 
-          if git diff --cached --name-only --no-renames | grep -q '^\.github/workflows/'; then
+          if git diff --name-only --no-renames "$base" HEAD | grep -q '^\.github/workflows/'; then
             echo "workflows=true" >>"$GITHUB_OUTPUT"
           fi
-          echo "latest=$latest" >>"$GITHUB_OUTPUT"
+          if [ -s conflicts.txt ]; then
+            echo "conflicts=true" >>"$GITHUB_OUTPUT"
+          fi
+          echo "latest=$summary" >>"$GITHUB_OUTPUT"
         id: copier
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -100,9 +193,12 @@ jobs:
     if: needs.update.outputs.latest != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # The App's private key is a secret of this environment, which `just repo-settings`
+    # limits to main, so a workflow on another branch can't read it.
+    environment: copier-update
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write # without the App, GITHUB_TOKEN pushes the update branch
+      pull-requests: write # and opens or edits its PR
       issues: write # to ask for a local update when it can't push one
     steps:
       # A fresh runner keeps Copier's dependencies away from the push token.
@@ -131,30 +227,52 @@ jobs:
             -c user.email=41898282+github-actions[bot]@users.noreply.github.com \
             commit -q -s -m "chore: update from template $LATEST"
 
+      # The App's token lasts an hour, reaches this repo only, and is revoked when the job ends.
+      - name: Get a token from the update App
+        id: app
+        if: vars.COPIER_UPDATE_CLIENT_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.COPIER_UPDATE_CLIENT_ID }}
+          private-key: ${{ secrets.COPIER_UPDATE_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+
       - name: Push the update and open the PR
         env:
-          # A fine-grained token with contents, pull requests and workflows write on this repo.
-          GH_TOKEN: ${{ secrets.COPIER_UPDATE_TOKEN || github.token }}
-          HAS_TOKEN: ${{ secrets.COPIER_UPDATE_TOKEN != '' }}
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
+          HAS_TOKEN: ${{ steps.app.outputs.token != '' }}
           REPO: ${{ github.repository }}
           BASE: ${{ github.event.repository.default_branch }}
           LATEST: ${{ needs.update.outputs.latest }}
           WORKFLOWS: ${{ needs.update.outputs.workflows }}
+          CONFLICTS: ${{ needs.update.outputs.conflicts }}
         shell: bash
         run: |-
           branch=chore/copier-update
+          # `--head` matches a fork's branch of the same name too: only this repo's PRs count.
+          own='map(select(.isCrossRepository == false))'
+          # Closing an update unmerged declines that tag; a later tag can open a new PR.
+          declined=$(gh pr list --head "$branch" --base "$BASE" --state closed --json title,mergedAt,isCrossRepository |
+            jq --arg title "chore: update from template $LATEST" "$own"' | any(.[]; .title == $title and .mergedAt == null)')
+          if [ "$declined" = true ]; then
+            echo "::notice::Template $LATEST was declined; skipping this tag"
+            exit 0
+          fi
           if [ "$HAS_TOKEN" != true ] && [ "$WORKFLOWS" = true ]; then
             title="Update from template $LATEST by hand"
             {
               echo "Template \`$LATEST\` changes files in \`.github/workflows/\`, and \`GITHUB_TOKEN\` can't push those."
-              echo "Run \`copier update --vcs-ref $LATEST\` locally and open the PR yourself, or add a \`COPIER_UPDATE_TOKEN\` secret (see the template's docs/usage.md) so this workflow can."
+              echo "Run \`copier update --answers-file <file> --vcs-ref <tag>\` locally for each template in it, and open the PR yourself, or set up the update App (see the template's docs/updates.md) so this workflow can."
             } >issue.md
             # A closed issue counts too, so closing it stops the weekly reminder for this tag.
-            if [ -z "$(gh issue list --state all --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
+            # Only the issue this step opened with GITHUB_TOKEN counts, not one anyone titled so.
+            if [ -z "$(gh issue list --state all --author app/github-actions --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
               gh issue create --title "$title" --body-file issue.md
             fi
             # An open PR from an older tag would now disagree with the issue.
-            stale=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')
+            stale=$(gh pr list --head "$branch" --state open --json number,isCrossRepository --jq "$own | .[0].number")
             if [ -n "$stale" ]; then
               gh pr close "$stale" --delete-branch --comment "Superseded by template \`$LATEST\`, which needs a local update: see the issue \"$title\"."
             fi
@@ -163,13 +281,43 @@ jobs:
           fi
 
           if [ "$HAS_TOKEN" != true ]; then
-            printf '\n%s\n' "This PR was opened without \`COPIER_UPDATE_TOKEN\`, so its checks do not start: close it and reopen it to run them." >>"$RUNNER_TEMP/copier-update/body.md"
+            printf '\n%s\n' "This PR was opened without the update App, so its checks do not start: close it and reopen it to run them." >>"$RUNNER_TEMP/copier-update/body.md"
           fi
 
-          git -c core.hooksPath=/dev/null push --force "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "$branch"
+          # Someone resolving .rej files on the branch has commits there that a force-push would drop.
+          # The compare API finds them from the merge base, which a shallow checkout cannot. No branch: nothing to keep.
+          authors=$(gh api "repos/$REPO/compare/$BASE...$branch" --jq '.commits[].commit.author.email' 2>/dev/null) || authors=''
+          if grep -qvxF -e '' -e '41898282+github-actions[bot]@users.noreply.github.com' <<<"$authors"; then
+            echo "::notice::$branch has commits from someone other than this workflow; leaving it for them to finish"
+            echo "- \`$branch\` has commits from someone other than this workflow, so this run left it alone." >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
 
-          if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')" ]; then
-            gh pr edit "$branch" --title "chore: update from template $LATEST" --body-file "$RUNNER_TEMP/copier-update/body.md"
+          # git reads the token from gh's credential helper, so it stays out of the process list.
+          gh auth setup-git
+          git -c core.hooksPath=/dev/null push --force "https://github.com/${REPO}.git" "$branch"
+
+          # With a .rej file left, the PR is a draft, which GitHub will not merge: Copier has already moved
+          # _commit past those changes, so merging them unresolved would drop them for good.
+          open=$(gh pr list --head "$branch" --state open --json number,isCrossRepository --jq "$own | .[0].number")
+          if [ -n "$open" ]; then
+            gh pr edit "$open" --title "chore: update from template $LATEST" --body-file "$RUNNER_TEMP/copier-update/body.md"
+            if [ "$CONFLICTS" = true ]; then gh pr ready "$open" --undo; fi
           else
-            gh pr create --head "$branch" --base "$BASE" --title "chore: update from template $LATEST" --body-file "$RUNNER_TEMP/copier-update/body.md"
+            draft=()
+            if [ "$CONFLICTS" = true ]; then draft=(--draft); fi
+            gh pr create --head "$branch" --base "$BASE" --title "chore: update from template $LATEST" --body-file "$RUNNER_TEMP/copier-update/body.md" "${draft[@]}"
           fi
+
+  notify:
+    # Scheduled runs only: without it, a project stops getting template releases unseen.
+    # The only job that may write issues.
+    name: "copier update: report failure"
+    needs: [update, push]
+    # A job that runs past timeout-minutes ends cancelled, not failed.
+    if: always() && github.event_name == 'schedule' && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    permissions:
+      issues: write # opens or comments on the failure issue
+    uses: $/.github/workflows/report-failure.yml
+    with:
+      title: Weekly template update failed

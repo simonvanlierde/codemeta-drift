@@ -353,13 +353,15 @@ def test_unwritable_output_edge_cases(code: str, redirect: str, expected: int):
 
 def test_a_reader_that_closes_the_pipe_early_gets_exit_3_and_no_noise():
     code = "from codemeta_drift import cli; cli.main = lambda: print('finding\\n' * 100_000) or 1; cli.entry()"
-    reader = subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    assert reader.stdout is not None
-    reader.stdout.read(1)
-    reader.stdout.close()
-    assert reader.wait(timeout=30) == 3
-    assert reader.stderr is not None
-    assert reader.stderr.read() == ""
+    with subprocess.Popen(
+        [sys.executable, "-c", code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    ) as reader:
+        assert reader.stdout is not None
+        reader.stdout.read(1)
+        reader.stdout.close()
+        assert reader.wait(timeout=30) == 3
+        assert reader.stderr is not None
+        assert reader.stderr.read() == ""
 
 
 @pytest.mark.parametrize("command", ["export", "hub", "watch"])

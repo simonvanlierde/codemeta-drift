@@ -1,13 +1,8 @@
 # Task runner: https://just.systems. `just` lists the recipes, `just <name>` runs one.
 #
-# `import?` skips a recipe file you did not scaffold. Recipes are prefixed
-# (`py-`, `ts-`, `rs-`, `go-`) because imports share one namespace, except the few only
-# one kind has, such as `pipeline` or `up`.
+# Each stack's recipes are in just/, prefixed (`py-`) because
+# imports share one namespace, except the few only one kind has, such as `pipeline` or `up`.
 import? 'just/python.just'
-import? 'just/ts.just'
-import? 'just/rust.just'
-import? 'just/go.just'
-import? 'just/docker.just'
 
 # List the recipes (what a bare `just` runs).
 default:
@@ -15,60 +10,24 @@ default:
 
 # The stack checks CI runs. `just hooks` runs the git hooks, which CI also runs.
 check:
-    @node --test site/*.test.mjs
     @just py-check
+    @if just --show local-check >/dev/null 2>&1; then just local-check; fi
 
 # Fix and format every stack here, as each stack's `fmt` recipe does.
 fmt:
     @just py-fmt
 
-# Render the social card, site/og.png, from docs/og-card.html (needs Node and a Playwright Chromium).
-# Then put the PNG's hash in the og:image URL: link previews are cached by image URL.
-og-card:
-    pnpm dlx playwright@1.64.1 screenshot --browser=chromium --viewport-size=1200,630 \
-      "file://$PWD/docs/og-card.html" site/og.png
-    sed -E -i.bak "s/og\.png(\?v=[0-9a-f]+)?\"/og.png?v=$(shasum -a 256 site/og.png | cut -c1-8)\"/" site/index.html
-    rm site/index.html.bak
+# The checks workflow skips the hooks in its SKIP list, which the stack workflows run
+# instead. Here they all run, so this can fail where the checks workflow passes.
 
-# Run every git hook over the whole repo, not just staged files. The checks workflow skips
-# the hooks in its SKIP list, which the stack workflows run instead. Here they all run, so
-# this can fail where the checks workflow passes.
+# Run every git hook over the whole repo, not just staged files.
 hooks:
     prek run -a
 
-# Mutation-test the modules in pyproject's [tool.mutmut]. Fails on a survivor not in
-# tests/mutation-baseline.txt, and on a listed one that no longer survives, so the list stays true.
-mutation:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    # sort and comm must agree on the ǁ in class-method mutant names, so use byte order.
-    export LC_ALL=C
-    # mutmut reuses results from mutants/ even after the tests change, so start clean.
-    rm -rf mutants
-    uv run mutmut run >/dev/null
-    survivors=$(uv run mutmut results | sed -n 's/^ *\(.*\): survived$/\1/p' | sort)
-    listed=$(grep -v '^#' tests/mutation-baseline.txt | awk '{ print $1 }' | sort)
-    new=$(comm -23 <(echo "$survivors" | sed '/^$/d') <(echo "$listed"))
-    gone=$(comm -13 <(echo "$survivors") <(echo "$listed" | sed '/^$/d'))
-    echo "$(echo "$survivors" | grep -c . || true) survivors; not in tests/mutation-baseline.txt:"
-    echo "${new:-none}"
-    echo "listed but no longer surviving (drop them):"
-    echo "${gone:-none}"
-    [ -z "$new$gone" ]
+# The writer exits 1 whenever it changes a file, so the check that follows decides
+# the result.
 
-# Write each tag's SSSOM export to a temp file and validate it with the pinned reference tool (needs network for uvx).
-sssom-validate:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    out=$(mktemp -d)
-    trap 'rm -rf "$out"' EXIT
-    for mapping in examples/mapping-*.json; do
-        uv run codemeta-drift hub sssom "$mapping" --out "$out/spokes.sssom.tsv"
-        uvx --python 3.13 --from sssom==0.4.21 sssom validate "$out/spokes.sssom.tsv"
-    done
-
-# Rewrite codemeta.json to agree with CITATION.cff, then check. The writer
-# exits 1 whenever it changes a file, so the check that follows decides the result.
+# Rewrite codemeta.json to agree with CITATION.cff, then check.
 citation:
     -prek run citesync-write --hook-stage manual --all-files
     prek run citesync --all-files
@@ -90,6 +49,7 @@ release version:
     # changelog bigger than the pipe buffer.
     if git show origin/main:CHANGELOG.md | grep "^## \[$version\] - " >/dev/null; then
         .github/scripts/tag-release.sh "$version"
+        echo "Archive it in Software Heritage: https://archive.softwareheritage.org/save/ (git, $repo). The README badge then links to the SWHID."
         exit 0
     fi
     prev=$(sed -n 's/^## \[\([0-9][0-9.]*\)\].*/\1/p' CHANGELOG.md | head -1)
@@ -108,7 +68,7 @@ release version:
     git commit -s -m "chore: release $version" -- CHANGELOG.md
     echo "Merge this commit to main, then run: just release $version"
 
-# Protect the default branch (no deletion, no force-push, linear history, PRs squash-merged after the always-on checks pass and one approval) and the v* tags. Turn on private vulnerability reporting, CodeQL default setup and Dependabot alerts. Set up release environments with required review. Safe to rerun.
+# Protect the default branch (no deletion, no force-push, linear history, PRs squash-merged after the always-on checks pass and one approval) and the v* tags. Turn on secret scanning with push protection, private vulnerability reporting, CodeQL default setup and Dependabot alerts. Set up release environments with required review. Create the `copier-update` environment, used from `main` only. Safe to rerun.
 repo-settings:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -117,10 +77,18 @@ repo-settings:
     fail() {
         cat "$err" >&2
         grep -qE 'HTTP (403|404)' "$err" && echo "Rulesets on a private repo need a paid GitHub plan (or the repo does not exist, or you lack admin rights)." >&2
+        grep -qE 'HTTP (403|404)' "$err" && echo "On that plan an environment cannot limit branches either, so a workflow on any branch could read the update App's key. Use an App for this repo alone, or none: https://github.com/simonvanlierde/project-templates/blob/main/docs/updates.md#the-update-app" >&2
         exit 1
     }
     # Merge-method switches live on the repo itself; the ruleset also limits the PR button.
     gh api -X PATCH repos/{owner}/{repo} -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false -F delete_branch_on_merge=true -F web_commit_signoff_required=true >/dev/null 2>"$err" || fail
+    # Push protection refuses a push that holds a known secret format, before it reaches the repo.
+    # A private repo without Secret Protection refuses this, so it warns instead of failing.
+    if gh api -X PATCH repos/{owner}/{repo} -f 'security_and_analysis[secret_scanning][status]=enabled' -f 'security_and_analysis[secret_scanning_push_protection][status]=enabled' >/dev/null 2>"$err"; then
+        echo "Turned on secret scanning and push protection."
+    else
+        echo "Warning: secret scanning could not be turned on (a private repo needs Secret Protection): $(cat "$err")" >&2
+    fi
     # Adopt an existing ruleset by name, else one with the same target that protects the same
     # refs as the file, updating it in place. The list has no conditions, so each candidate is read.
     for name in main main-checks tags; do
@@ -159,7 +127,7 @@ repo-settings:
     else
         echo "Warning: CodeQL default setup could not be turned on, so code scanning stays off: $(cat "$err")" >&2
     fi
-    # Dependabot alerts let Renovate open security PRs and turn on the dependency graph.
+    # Dependabot alerts let Dependabot open security PRs and turn on the dependency graph.
     gh api -X PUT repos/{owner}/{repo}/vulnerability-alerts >/dev/null 2>"$err" || fail
     echo "Turned on Dependabot alerts."
     # Environments limit publishing to version tags and require review before release.
@@ -179,15 +147,29 @@ repo-settings:
         fi
         echo "Configured environment '$env'."
     done
+    # An environment that only main may deploy from, with no reviewer.
+    main_only_env() {
+        gh api -X PUT "repos/{owner}/{repo}/environments/$1" \
+            -F "deployment_branch_policy[protected_branches]=false" \
+            -F "deployment_branch_policy[custom_branch_policies]=true" >/dev/null 2>"$err" || fail
+        policies=$(gh api "repos/{owner}/{repo}/environments/$1/deployment-branch-policies" --jq '.branch_policies[].name' 2>/dev/null || true)
+        if ! echo "$policies" | grep -qxF 'main'; then
+            gh api -X POST "repos/{owner}/{repo}/environments/$1/deployment-branch-policies" -f name="main" -f type="branch" >/dev/null 2>"$err" || fail
+        fi
+    }
+    # copier-update.yml's push job reads the update App's key from this environment, from main only.
+    main_only_env copier-update
+    echo "Configured environment 'copier-update'. For template updates that change workflows, add the update App: https://github.com/simonvanlierde/project-templates/blob/main/docs/updates.md#the-update-app"
     repo_full_name=$(gh api repos/{owner}/{repo} --jq .full_name 2>"$err") || fail
     owner=${repo_full_name%%/*}
     repo=${repo_full_name##*/}
     echo "PyPI pending publisher: https://pypi.org/manage/account/publishing/?provider=github&project_name=codemeta-drift&owner=$owner&repository=$repo&workflow_filename=python-release.yml&environment=pypi"
     echo "Zenodo: https://zenodo.org/account/settings/github/"
-
+    if [ -f .github/first-release.md ]; then echo "First-release checklist: gh issue create --title 'First release' --body-file .github/first-release.md"; fi
 # Set the GitHub About box from your answers: description and a topic per stack. Adds topics, never removes yours. Safe to rerun.
 repo-about:
     gh repo edit --description 'Report where CodeMeta'\''s context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping' --add-topic python
 
-# A repo's own recipes that copier updates never touch:
+# A repo's own recipes that copier updates never touch. A `local-check` recipe there runs
+# at the end of `just check`.
 import? 'just/local.just'
