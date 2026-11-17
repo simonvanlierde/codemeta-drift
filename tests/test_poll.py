@@ -57,6 +57,7 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
         with pytest.raises(HTTPError) as caught:
             poll({"rows": []}, before, fetch)
         assert caught.value.code == 429
+        caught.value.close()
         return
     plans = poll({"rows": []}, before, fetch)
     importer = [plan for plan in plans if plan["title"].startswith("Review Zenodo importer")]
@@ -251,6 +252,7 @@ def test_a_pin_hash_lookup_that_fails_for_another_reason_than_404_propagates():
     with pytest.raises(HTTPError) as caught:
         runner.stale_pin_hashes("sha256 abc local.json path.json\n", "v0.5.0", fetch)
     assert caught.value.code == 500
+    caught.value.close()
 
 
 def test_fetch_json_refuses_plain_http_before_any_request(monkeypatch: pytest.MonkeyPatch):

@@ -78,6 +78,7 @@ def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list
         except HTTPError as err:
             if err.code != 404:
                 raise
+            err.close()
             # citesync can pin a file from main before a release ships it.
             plans.append(
                 {
@@ -127,6 +128,7 @@ def poll(
         except HTTPError as err:
             if err.code != 404:
                 raise
+            err.close()
             current_sha = "missing"
         if current_sha != digest:
             plans.append(

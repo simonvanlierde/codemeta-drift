@@ -52,7 +52,8 @@ requires = ["uv_build>=0.12.19,<0.14.0"]
 build-backend = "uv_build"
 
 # Resolve only releases at least a week old: a compromised release is usually
-# caught and yanked within that window. The dependency bot waits the same week.
+# caught and yanked within that window. The dependency bot waits the same week, bar
+# the author's own packages.
 # Set here, not user-wide, so every machine writes the same uv.lock.
 [tool.uv]
 exclude-newer = "1 week"
@@ -102,10 +103,17 @@ max-args = 10
 [tool.ty.terminal]
 error-on-warning = false
 
-[tool.pytest.ini_options]
-addopts = ["-ra", "--strict-config", "--strict-markers", "--import-mode=importlib", "-m", "not live"]
+# pytest 9's native table. strict turns unknown config keys, unknown markers and
+# an xfail test that passes into errors, and filterwarnings turns warnings into
+# failures, so a deprecation shows up in CI, not after the upgrade that removes it.
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "--import-mode=importlib", "-m", "not live"]
 markers = ["live: read-only contract checks against public schema sources"]
 testpaths = ["tests"]
+strict = true
+filterwarnings = ["error"]
+log_level = "INFO"
 
 # Coverage is opt-in via `pytest --cov` (`just py-cov`), not addopts, because it
 # slows every plain test run. No fail_under until there is a suite worth setting
@@ -117,6 +125,19 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]
+
+# Checks from Scientific Python's repo-review (the sp-repo-review git hook) that this
+# project skips on purpose. `prek run sp-repo-review --all-files` runs the rest.
+[tool.repo-review.ignore]
+PY007 = "just is the task runner: `just check` runs what CI runs"
+PC110 = "ruff format runs as a local hook from the venv, the same ruff CI runs"
+PC140 = "ty runs as a local hook from the venv"
+PC170 = "no reStructuredText: rumdl checks the Markdown docs"
+PC190 = "ruff check runs as a local hook from the venv"
+PC901 = "the hooks run in CI's checks workflow, not on pre-commit.ci"
+PC902 = "the hooks run in CI's checks workflow, not on pre-commit.ci"
+PC903 = "the hooks run in CI's checks workflow, not on pre-commit.ci"
+GH212 = "dependabot.yml groups the actions with the hook revs under multi-ecosystem-groups, which this check does not read"
 
 # `just mutation` grades the whole test suite against checks.py and the export modules.
 # cli.py is left out: most of its mutants change help text.
