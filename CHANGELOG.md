@@ -24,6 +24,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and errors (exit 2 and 3) are in the report on standard output, not lines on standard error.
 - An unknown `hub --format`, `--from` or `--to` value is refused by the argument parser with the valid
   choices (exit 2), not by the command after reading the mapping.
+- With `--json`, an error or findings report goes to standard output only, and `--out` keeps the successful
+  write, so a failed run no longer overwrites an existing `--out` file. `hub coverage --json` used to write its
+  error report to `--out`.
 
 ## [0.8.0] - 2026-11-10
 

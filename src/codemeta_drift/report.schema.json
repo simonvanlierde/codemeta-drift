@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "codemeta-drift check report",
-  "description": "What `codemeta-drift <checkout> --json` writes. Keys this schema does not define are allowed: a release may add keys. Removing or retyping a key bumps schema_version. Contract: https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md.",
+  "description": "What `codemeta-drift <checkout> --json` writes. Contract: https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md#read-json-output.",
   "type": "object",
   "required": ["schema_version", "tool", "findings", "errors"],
   "properties": {
@@ -15,28 +15,26 @@
       }
     },
     "findings": {
-      "description": "The disagreements found. Empty when the check could not run (exit 3).",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["code", "file", "term", "detail"],
         "properties": {
-          "code": { "description": "Stable identifier of the rule, such as TABLE_NO_TERM.", "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
-          "file": { "description": "The file, or group of crosswalk files, where it shows.", "type": "string" },
-          "term": { "description": "The property or format it is about.", "type": "string" },
-          "detail": { "description": "What disagrees, for a human reader.", "type": "string" }
+          "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "file": { "type": "string" },
+          "term": { "type": "string" },
+          "detail": { "type": "string" }
         }
       }
     },
     "errors": {
-      "description": "Empty unless the check could not run (exit 3).",
       "type": "array",
       "items": {
         "type": "object",
         "required": ["message", "help"],
         "properties": {
           "message": { "type": "string" },
-          "help": { "description": "The next step to take, or null.", "type": ["string", "null"] }
+          "help": { "type": ["string", "null"] }
         }
       }
     }

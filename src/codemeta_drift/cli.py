@@ -9,8 +9,7 @@ mapping export from the commit of tag TAG, never the working tree, since every r
 it was read from that tag. Its findings are rows it can't make (such as a crosswalk cell
 with no path and no curated row, or a path not in its format's schema), printed on standard
 error so standard output is never a partial file. A TAG with no curated rows is a usage error.
-With ``--json``, findings and errors are one JSON report on standard output instead
-(docs/checks.md, "Read JSON output").
+``--json`` makes standard output one JSON report instead (docs/checks.md, "Read JSON output").
 """
 
 import argparse
@@ -90,15 +89,19 @@ class JsonParser(argparse.ArgumentParser):
         self.exit(EXIT_USAGE)
 
 
-def command_parser(name: str, prog: str, description: str, **kwargs: Any) -> argparse.ArgumentParser:  # noqa: ANN401 - argparse's own
+def help_ending(text: str) -> dict[str, Any]:
+    """Parser keywords for a help that ends with ``text`` and the exit codes, line breaks kept."""
+    return {"epilog": f"{text}\n\n{EXIT_CODES}", "formatter_class": argparse.RawDescriptionHelpFormatter}
+
+
+def example(name: str) -> dict[str, Any]:
+    """Parser keywords for a help that ends with the command's example and the exit codes."""
+    return help_ending(f"example:\n  {EXAMPLES[name]}")
+
+
+def command_parser(name: str, prog: str, description: str) -> JsonParser:
     """A parser whose help ends with the command's example and the exit codes."""
-    return JsonParser(
-        prog=prog,
-        description=description,
-        epilog=f"example:\n  {EXAMPLES[name]}\n\n{EXIT_CODES}",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        **kwargs,
-    )
+    return JsonParser(prog=prog, description=description, **example(name))
 
 
 def read_text(path: Path) -> str:
@@ -106,28 +109,19 @@ def read_text(path: Path) -> str:
     return sys.stdin.read() if str(path) == "-" else path.read_text("utf-8")
 
 
-def report_out(report: str, out: Path | None) -> None:
-    """Write a ``--json`` report to ``out``, or to standard output without one or when it can't be written."""
-    if out:
-        with contextlib.suppress(OSError):
-            out.write_text(report, encoding="utf-8")
-            return
-    print(report, end="")
-
-
-def fail(code: int, message: str, *, as_json: bool, out: Path | None = None) -> int:
-    """Report why a command could not run or was misused, as a JSON error or a line on standard error."""
+def fail(code: int, message: str, *, as_json: bool, help_: str | None = None, **fields: object) -> int:
+    """Report why a command could not run or was misused: a JSON error on stdout, or a line on standard error."""
     if as_json:
-        report_out(json_report({}, [{"message": message, "help": None}]), out)
+        print(json_report(fields, [{"message": message, "help": help_}]), end="")
     else:
         print(f"codemeta-drift: {message}", file=sys.stderr)
     return code
 
 
-def found(findings: Sequence[Finding], *, as_json: bool, out: Path | None = None, **empty: object) -> int:
+def found(findings: Sequence[Finding], *, as_json: bool, **empty: object) -> int:
     """Report the rows a command can't make; ``empty`` is what the JSON report holds besides ``findings``."""
     if as_json:
-        report_out(json_report({**empty, "findings": [asdict(f) for f in findings]}), out)
+        print(json_report({**empty, "findings": [asdict(f) for f in findings]}), end="")
     else:
         print("\n".join(map(str, findings)), file=sys.stderr)
     return EXIT_FINDINGS
@@ -193,7 +187,7 @@ def export_main(argv: list[str]) -> int:
     parser.add_argument("--schemas", type=Path, help="check every path against the format schemas in this directory")
     parser.add_argument("--json", action="store_true", help="write a JSON report (mapping, findings, errors)")
     args = parser.parse_args(argv)
-    kind = {"as_json": args.json, "out": args.out}
+    kind = {"as_json": args.json}
 
     if args.tag not in curated_tags():
         return fail(EXIT_USAGE, f"no curated rows for {args.tag}; have {', '.join(curated_tags())}", **kind)
@@ -253,16 +247,11 @@ def hub_parser() -> argparse.ArgumentParser:
     parser = JsonParser(
         prog="codemeta-drift hub",
         description="Join curated field correspondences.",
-        epilog=f"formats for --format, --from and --to: {', '.join(ids)}\n\n{EXIT_CODES}",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        **help_ending(f"formats for --format, --from and --to: {', '.join(ids)}"),
     )
     commands = parser.add_subparsers(dest="command", required=True, parser_class=JsonParser)
     for name in ("pair", "sssom", "crosswalk", "coverage"):
-        command = commands.add_parser(
-            name,
-            epilog=f"example:\n  {EXAMPLES[name]}\n\n{EXIT_CODES}",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-        )
+        command = commands.add_parser(name, **example(name))
         command.add_argument("mapping", type=Path, help="a mapping JSON export, or - for standard input")
         command.add_argument("--out", type=Path, help="write here instead of standard output")
         if name == "crosswalk":
@@ -272,12 +261,11 @@ def hub_parser() -> argparse.ArgumentParser:
             )
         if name == "coverage":
             command.add_argument("--json", action="store_true", help="write the cells as JSON instead of Markdown")
-        else:
-            command.add_argument("--json", action="store_true", help="write a JSON report instead of the text output")
-        if name == "coverage":
             command.add_argument(
                 "--codemeta", type=Path, help="CodeMeta checkout: also list the crosswalks nobody has reviewed"
             )
+        else:
+            command.add_argument("--json", action="store_true", help="write a JSON report instead of the text output")
         if name == "pair":
             command.add_argument(
                 "--from", dest="source", required=True, help="source format id", choices=ids, metavar="FORMAT"
@@ -311,9 +299,9 @@ def hub_main(argv: list[str]) -> int:
             args.out.write_text(text, encoding="utf-8")
             return 0
     except UsageError as err:
-        return fail(EXIT_USAGE, str(err), as_json=args.json, out=args.out)
+        return fail(EXIT_USAGE, str(err), as_json=args.json)
     except (OSError, ValueError, RecursionError) as err:
-        return fail(EXIT_CANNOT_RUN, str(err), as_json=args.json, out=args.out)
+        return fail(EXIT_CANNOT_RUN, str(err), as_json=args.json)
     print(text, end="")  # outside the try, as in export_main
     return 0
 
@@ -410,13 +398,9 @@ def check_main(argv: list[str]) -> int:
     parser.add_argument("--json", action="store_true", help="print the findings as one JSON document")
     args = parser.parse_args(argv)
 
-    def cannot_run(message: str, help_: str | None) -> int:
-        # A malformed file must not exit 1, which means drift.
-        if args.json:
-            print(json_report({"tool": generator(), "findings": []}, [{"message": message, "help": help_}]), end="")
-        else:
-            print(f"codemeta-drift: {message}", file=sys.stderr)
-        return EXIT_CANNOT_RUN
+    # A malformed file must not exit 1, which means drift.
+    def cannot_run(message: str, help_: str | None = None) -> int:
+        return fail(EXIT_CANNOT_RUN, message, as_json=args.json, help_=help_, tool=generator(), findings=[])
 
     try:
         files = read_ref(args.checkout, args.ref) if args.ref else read_dir(args.checkout)
@@ -424,9 +408,9 @@ def check_main(argv: list[str]) -> int:
             return cannot_run(f"{args.checkout} has no {' or '.join(missing)}", "pass the root of a codemeta clone")
         findings = check(files)
     except subprocess.CalledProcessError as err:
-        return cannot_run(f"cannot read {args.checkout}: {err.stderr.decode().strip()}", None)
+        return cannot_run(f"cannot read {args.checkout}: {err.stderr.decode().strip()}")
     except READ_ERRORS as err:
-        return cannot_run(f"cannot read {args.checkout}: {type(err).__name__}: {err}", None)
+        return cannot_run(f"cannot read {args.checkout}: {type(err).__name__}: {err}")
     if args.json:
         print(json_report({"tool": generator(), "findings": [asdict(f) for f in findings]}), end="")
     elif findings:
