@@ -90,17 +90,19 @@ def test_cli_watch_previews_and_deduplicates(repo: Path, tmp_path: Path, capsys:
         str(existing),
     ]
     assert main(args) == 0
-    plans = json.loads(capsys.readouterr().out)
+    report = json.loads(capsys.readouterr().out)
+    assert (report["schema_version"], report["findings"], report["errors"]) == (1, [], [])
+    plans = report["issues"]
     assert len(plans) == 2
     assert "project.title" in plans[0]["body"]
     existing.write_text(json.dumps([plan["title"] for plan in plans]))
     assert main(args) == 0
-    assert json.loads(capsys.readouterr().out) == []
+    assert json.loads(capsys.readouterr().out)["issues"] == []
     existing.write_text("{}")
     assert main(args) == 3
     captured = capsys.readouterr()
-    assert captured.out == ""
-    assert "JSON list of titles" in captured.err
+    assert captured.err == ""
+    assert "JSON list of titles" in json.loads(captured.out)["errors"][0]["message"]
 
 
 @pytest.mark.parametrize("pin", ["v0.9.0", "0.9.0"])

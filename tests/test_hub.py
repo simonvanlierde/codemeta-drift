@@ -244,14 +244,74 @@ def test_mapping_must_be_an_object_with_a_version_string(data: object):
         validate_mapping(data)
 
 
+def _without_cargo(mapping: dict, tmp_path: Path) -> Path:
+    mapping["rows"] = [row for row in mapping["rows"] if row["format"] != "cargo"]
+    path = tmp_path / "mapping.json"
+    path.write_text(json.dumps(mapping))
+    return path
+
+
 def test_crosswalk_rejects_a_format_the_mapping_has_no_rows_for(
-    example: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
     (tmp_path / "properties_description.csv").write_text("Parent Type,Property\nschema:Thing,name\n")
-    assert main(["hub", "crosswalk", str(example), str(tmp_path), "--format", "nope"]) == 2
+    path = _without_cargo(mapping, tmp_path)
+    assert main(["hub", "crosswalk", str(path), str(tmp_path), "--format", "cargo"]) == 2
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert "unknown format 'nope'" in captured.err
+    assert "unknown format 'cargo'" in captured.err
+
+
+@pytest.mark.parametrize("argv", [["crosswalk", ".", "--format", "nope"], ["pair", "--from", "nope", "--to", "cargo"]])
+def test_an_unknown_format_id_is_refused_by_the_parser_with_the_choices(
+    argv: list[str], example: Path, capsys: pytest.CaptureFixture[str]
+):
+    with pytest.raises(SystemExit) as exit_:
+        main(["hub", argv[0], str(example), *argv[1:]])
+    assert exit_.value.code == 2
+    assert "invalid choice: 'nope' (choose from" in capsys.readouterr().err
+
+
+def test_hub_help_lists_every_format_and_an_example_per_subcommand(capsys: pytest.CaptureFixture[str]):
+    with pytest.raises(SystemExit):
+        main(["hub", "--help"])
+    assert "cargo" in capsys.readouterr().out
+    for name in ("pair", "sssom", "crosswalk", "coverage"):
+        with pytest.raises(SystemExit):
+            main(["hub", name, "--help"])
+        out = capsys.readouterr().out
+        assert f"codemeta-drift hub {name} " in out
+        assert "exit codes: 0 done, 1 findings, 2 usage error, 3 could not run" in out
+
+
+def test_hub_reads_the_mapping_from_standard_input(
+    example: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    assert main(["hub", "sssom", str(example)]) == 0
+    expected = capsys.readouterr().out
+    monkeypatch.setattr("sys.stdin", io.StringIO(example.read_text("utf-8")))
+    assert main(["hub", "sssom", "-"]) == 0
+    assert capsys.readouterr().out == expected
+
+
+def test_hub_json_wraps_each_output_in_the_report(example: Path, capsys: pytest.CaptureFixture[str]):
+    assert main(["hub", "pair", str(example), "--from", "gomod", "--to", "cargo", "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert (report["schema_version"], report["errors"]) == (1, [])
+    assert report["rows"][0] == {"term": "codeRepository", "source": "module", "target": report["rows"][0]["target"]}
+    for argv in (["sssom"], ["crosswalk", str(ROOT / "tests/fixtures/4.0"), "--format", "cargo"]):
+        assert main(["hub", argv[0], str(example), *argv[1:], "--json"]) == 0
+        report = json.loads(capsys.readouterr().out)
+        assert report["text"].count("\n") > 1
+
+
+def test_hub_json_reports_a_usage_error_as_json(mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    path = _without_cargo(mapping, tmp_path)
+    assert main(["hub", "pair", str(path), "--from", "cargo", "--to", "zenodo", "--json"]) == 2
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    [error] = json.loads(captured.out)["errors"]
+    assert "source and target must be present formats" in error["message"]
 
 
 @pytest.mark.parametrize("fmt", ["gitlab", "code-json-2.0"])
@@ -267,10 +327,3 @@ def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
     mapping["codemeta_tag"] = tag
     with pytest.raises(ValueError, match="codemeta_tag"):
         validate_mapping(mapping)
-
-
-def test_pair_with_a_format_the_mapping_has_no_rows_for_is_a_usage_error(
-    example: Path, capsys: pytest.CaptureFixture[str]
-):
-    assert main(["hub", "pair", str(example), "--from", "nope", "--to", "zenodo"]) == 2
-    assert "source and target must be present formats" in capsys.readouterr().err

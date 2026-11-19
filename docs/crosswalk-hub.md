@@ -11,6 +11,11 @@ codemeta-drift hub crosswalk examples/mapping-4.0.json ../codemeta --format carg
 codemeta-drift hub coverage examples/mapping-4.0.json --codemeta ../codemeta --out docs/coverage-4.0.md
 ```
 
+`--format`, `--from` and `--to` take a format id from the list `codemeta-drift hub --help` prints, and every
+subcommand's `--help` ends with an example and the exit codes. A mapping `-` is read from standard input. Add
+`--json` to `pair`, `sssom` or `crosswalk` for a [JSON report](checks.md#read-json-output) in place of the text
+(`rows` for `pair`, `text` for the others); errors are then JSON too.
+
 `coverage` writes the [coverage matrix](coverage-4.0.md): each term and format with its status
 (as-is, corrected, added, no field or no term) and the reason for every curated cell. Add `--json`
 for the cells as data; the [coverage page](https://simonvanlierde.com/codemeta-drift/) reads that,

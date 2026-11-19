@@ -7,6 +7,24 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `export --json` and `hub pair|sssom|crosswalk --json` write the `schema_version` / `errors` report that
+  `check --json` and `hub coverage --json` write, and report an error as JSON on standard output.
+- `hub --format`, `--from` and `--to` take only a known format id; `hub --help` lists them, and every
+  subcommand's `--help` ends with an example and the exit codes.
+- `report.schema.json`, the JSON Schema of `check --json`, in the package; the tests validate real output
+  against it.
+- `hub` reads the mapping from standard input given `-`, and `watch` reads `--existing` from it.
+
+### Changed
+
+- **Breaking:** `watch` prints one report object, `{"schema_version": 1, "issues": [...], "findings": [],
+  "errors": []}`, where it printed the bare list of drafts. Read `issues` for the list. Its findings (exit 1)
+  and errors (exit 2 and 3) are in the report on standard output, not lines on standard error.
+- An unknown `hub --format`, `--from` or `--to` value is refused by the argument parser with the valid
+  choices (exit 2), not by the command after reading the mapping.
+
 ## [0.8.0] - 2026-11-10
 
 ### Added

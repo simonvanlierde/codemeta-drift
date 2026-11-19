@@ -1,6 +1,8 @@
 # Preview schema changes and mapping pin updates
 
-`watch` compares two downloaded schema directories and prints issue drafts as JSON. It
+`watch` compares two downloaded schema directories and prints issue drafts as one JSON report:
+`schema_version`, `issues` (the drafts), `findings` (rows the export can't make, with exit 1) and `errors`
+(why it could not run, with exit 2 or 3), as in [the JSON output](checks.md#read-json-output). It
 sends no requests and opens no issues.
 
 ```sh
@@ -22,7 +24,7 @@ Mapped array containers and filter keys count as covered fields. Pattern propert
 finite list of new field names, so this preview does not enumerate them.
 
 `issue-titles.json` is a JSON list of titles from both destination repositories, including
-closed issues. Supply `[]` for the first preview. Each draft has `repo`, `title` and `body`.
+closed issues, or `-` for standard input. Supply `[]` for the first preview. Each draft has `repo`, `title` and `body`.
 Schema findings get a stable fingerprint in the title. A second preview with the same
 findings and existing titles emits no duplicate. Closed titles also suppress a draft;
 closing an issue must not make the next run reopen it.

@@ -97,8 +97,24 @@ The output is one document with these keys:
 `code` identifies the check; `term` names the affected property or format. Use these fields
 for filtering. `file` is a label that can describe a group; `detail` is text for a person.
 `errors` is empty unless the check could not run (exit 3). Then `findings` is empty and each error is an
-object with `message` and `help`, the next step to take or `null`. `hub coverage --json` has the same
-`schema_version` and `errors`, and writes them to `--out` when given. A release may add keys. Removing a key or changing its type bumps `schema_version`.
+object with `message` and `help`, the next step to take or `null`. The package ships the
+schema as [`report.schema.json`](../src/codemeta_drift/report.schema.json) (JSON Schema 2020-12), and
+the tests validate real output against it.
+
+`export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` write the same `schema_version` and
+`errors`, and with `--json` an error, a usage error included, is an object in `errors` on standard output
+instead of a line on standard error. They write the report to `--out` when given, and fall back to standard
+output when that file can't be written. Their other keys:
+
+| Command | Keys besides `schema_version` and `errors` |
+| --- | --- |
+| `export --json` | `mapping` (the export, `null` when findings block it) and `findings` (strings) |
+| `watch` | `issues` (the drafts) and `findings` (strings) |
+| `hub pair --json` | `rows`, each `term`, `source`, `target` |
+| `hub sssom --json`, `hub crosswalk --json` | `text`, the file's content |
+
+`hub` takes `-` for the mapping and `watch` takes `-` for `--existing` to read standard input.
+A release may add keys. Removing a key or changing its type bumps `schema_version`.
 
 The command line, exit codes, finding codes and mapping export form the public interface.
 Python modules may change in any 0.x release.

@@ -6,6 +6,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+import jsonschema
 import pytest
 
 from codemeta_drift.checks import Finding
@@ -13,6 +14,7 @@ from codemeta_drift.cli import is_input, main, read_dir, read_ref
 from codemeta_drift.conformance import SCHEMA_FILES
 
 FIXTURES = Path(__file__).parent / "fixtures"
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_ref_reads_the_commit_not_the_working_tree(repo: Path, capsys: pytest.CaptureFixture[str]):
@@ -177,20 +179,27 @@ def _watch_args(tmp_path: Path, repo: Path, *, tag: str = "3.1", source: str = "
     ]
 
 
+def _watch_report(capsys: pytest.CaptureFixture[str]) -> dict:
+    """Standard output of a watch run, which is one JSON report whatever the exit code; standard error stays empty."""
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    return json.loads(captured.out)
+
+
 def test_watch_exits_1_and_lists_the_findings_when_the_export_is_blocked(
     repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
     finding = Finding("CURATED_DUPLICATE", "GitLab", "name", "second row for gitlab")
     monkeypatch.setattr("codemeta_drift.cli.export", lambda *_: ({"rows": []}, [finding]))
     assert main(_watch_args(tmp_path, repo)) == 1
-    captured = capsys.readouterr()
-    assert captured.out == ""
-    assert captured.err.strip() == str(finding)
+    report = _watch_report(capsys)
+    assert (report["issues"], report["findings"], report["errors"]) == ([], [str(finding)], [])
 
 
 def test_watch_with_a_tag_without_curated_rows_exits_2(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     assert main(_watch_args(tmp_path, repo, tag="3.0")) == 2
-    assert capsys.readouterr().err == "codemeta-drift: no curated rows for 3.0; have 3.1, 4.0\n"
+    [error] = _watch_report(capsys)["errors"]
+    assert error["message"] == "no curated rows for 3.0; have 3.1, 4.0"
 
 
 def test_watch_on_a_checkout_without_the_tag_exits_3_with_gits_message(
@@ -198,16 +207,75 @@ def test_watch_on_a_checkout_without_the_tag_exits_3_with_gits_message(
 ):
     (tmp_path / "empty").mkdir()
     assert main(_watch_args(tmp_path, tmp_path / "empty")) == 3
-    captured = capsys.readouterr()
-    assert captured.out == ""
-    assert captured.err.startswith("codemeta-drift: fatal:")
+    [error] = _watch_report(capsys)["errors"]
+    assert error["message"].startswith("fatal:")
 
 
 def test_watch_with_two_pin_tags_exits_3(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     assert main(_watch_args(tmp_path, repo, source="tag v0.3.0\ntag v0.4.0\n")) == 3
-    captured = capsys.readouterr()
-    assert captured.out == ""
-    assert "exactly one tag line" in captured.err
+    [error] = _watch_report(capsys)["errors"]
+    assert "exactly one tag line" in error["message"]
+
+
+def test_watch_reads_the_existing_titles_from_standard_input(
+    repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    args = _watch_args(tmp_path, repo)
+    args[args.index("--existing") + 1] = "-"
+    monkeypatch.setattr("sys.stdin", io.StringIO('["a title"]'))
+    assert main(args) == 0
+    assert _watch_report(capsys)["errors"] == []
+    monkeypatch.setattr("sys.stdin", io.StringIO("{}"))
+    assert main(args) == 3
+    assert "JSON list of titles" in _watch_report(capsys)["errors"][0]["message"]
+
+
+def test_export_json_reports_the_mapping_findings_and_errors(
+    repo: Path,
+    tmp_path_factory: pytest.TempPathFactory,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+):
+    empty = tmp_path_factory.mktemp("empty")
+    assert main(["export", str(repo), "--tag", "3.1", "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert (report["schema_version"], report["findings"], report["errors"]) == (1, [], [])
+    assert report["mapping"]["codemeta_tag"] == "3.1"
+    assert main(["export", str(repo), "--tag", "9.9", "--json"]) == 2
+    assert "no curated rows for 9.9" in json.loads(capsys.readouterr().out)["errors"][0]["message"]
+    assert main(["export", str(empty), "--tag", "3.1", "--json"]) == 3
+    assert json.loads(capsys.readouterr().out)["errors"]
+    finding = Finding("CURATED_DUPLICATE", "GitLab", "name", "second row for gitlab")
+    monkeypatch.setattr("codemeta_drift.cli.export", lambda *_: ({"rows": []}, [finding]))
+    assert main(["export", str(repo), "--tag", "3.1", "--json"]) == 1
+    assert json.loads(capsys.readouterr().out)["findings"] == [str(finding)]
+
+
+@pytest.mark.parametrize("argv", [["export", "--help"], ["watch", "--help"], ["--help"]])
+def test_help_ends_with_an_example_and_the_exit_codes(argv: list[str], capsys: pytest.CaptureFixture[str]):
+    with pytest.raises(SystemExit):
+        main(argv)
+    out = capsys.readouterr().out
+    assert "example:\n  codemeta-drift" in out
+    assert "exit codes: 0 done, 1 findings, 2 usage error, 3 could not run, 130 interrupted" in out
+
+
+def test_check_json_validates_against_the_committed_schema(
+    repo: Path, tmp_path_factory: pytest.TempPathFactory, capsys: pytest.CaptureFixture[str]
+):
+    schema = json.loads((ROOT / "src/codemeta_drift/report.schema.json").read_text("utf-8"))
+    jsonschema.Draft202012Validator.check_schema(schema)
+    validator = jsonschema.Draft202012Validator(schema)
+    assert main([str(repo), "--json"]) == 1  # findings
+    report = json.loads(capsys.readouterr().out)
+    assert report["findings"]
+    validator.validate(report)
+    assert main([str(tmp_path_factory.mktemp("empty")), "--json"]) == 3  # could not run
+    report = json.loads(capsys.readouterr().out)
+    assert report["errors"]
+    validator.validate(report)
+    assert not validator.is_valid({**report, "schema_version": 2})
+    assert not validator.is_valid({**report, "errors": [{"message": "x"}]})
 
 
 # One test per exit code: 0 done, 1 findings, 2 usage error, 3 could not run, 130 interrupted.
