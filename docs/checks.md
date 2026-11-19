@@ -104,14 +104,17 @@ the tests validate real output against it.
 `export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` write the same `schema_version` and
 `errors`, and with `--json` an error, a usage error included, is an object in `errors` on standard output
 instead of a line on standard error. They write the report to `--out` when given, and fall back to standard
-output when that file can't be written. Their other keys:
+output when that file can't be written. A command line the parser refuses is an error too, with the usage line as
+its `help`, whenever `--json` is among the arguments (always for `watch`). Their other keys:
 
 | Command | Keys besides `schema_version` and `errors` |
 | --- | --- |
-| `export --json` | `mapping` (the export, `null` when findings block it) and `findings` (strings) |
-| `watch` | `issues` (the drafts) and `findings` (strings) |
+| `export --json` | `mapping` (the export, `null` when findings block it) and `findings` |
+| `watch` | `issues` (the drafts) and `findings` |
 | `hub pair --json` | `rows`, each `term`, `source`, `target` |
 | `hub sssom --json`, `hub crosswalk --json` | `text`, the file's content |
+
+Each `findings` entry has the keys of a `check` finding.
 
 `hub` takes `-` for the mapping and `watch` takes `-` for `--existing` to read standard input.
 A release may add keys. Removing a key or changing its type bumps `schema_version`.

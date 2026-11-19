@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import sys
 from collections.abc import Callable
+from dataclasses import asdict
 from pathlib import Path
 
 import jsonschema
@@ -193,7 +194,8 @@ def test_watch_exits_1_and_lists_the_findings_when_the_export_is_blocked(
     monkeypatch.setattr("codemeta_drift.cli.export", lambda *_: ({"rows": []}, [finding]))
     assert main(_watch_args(tmp_path, repo)) == 1
     report = _watch_report(capsys)
-    assert (report["issues"], report["findings"], report["errors"]) == ([], [str(finding)], [])
+    assert (report["issues"], report["findings"], report["errors"]) == ([], [asdict(finding)], [])
+    assert report["findings"][0]["code"] == "CURATED_DUPLICATE"
 
 
 def test_watch_with_a_tag_without_curated_rows_exits_2(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
@@ -245,10 +247,45 @@ def test_export_json_reports_the_mapping_findings_and_errors(
     assert "no curated rows for 9.9" in json.loads(capsys.readouterr().out)["errors"][0]["message"]
     assert main(["export", str(empty), "--tag", "3.1", "--json"]) == 3
     assert json.loads(capsys.readouterr().out)["errors"]
+    out = empty / "no-such-dir" / "x.json"
+    assert main(["export", str(repo), "--tag", "3.1", "--json", "--out", str(out)]) == 3
+    assert json.loads(capsys.readouterr().out)["errors"]
     finding = Finding("CURATED_DUPLICATE", "GitLab", "name", "second row for gitlab")
     monkeypatch.setattr("codemeta_drift.cli.export", lambda *_: ({"rows": []}, [finding]))
     assert main(["export", str(repo), "--tag", "3.1", "--json"]) == 1
-    assert json.loads(capsys.readouterr().out)["findings"] == [str(finding)]
+    report = json.loads(capsys.readouterr().out)
+    assert report["findings"] == [asdict(finding)]
+    assert report["findings"][0]["code"] == "CURATED_DUPLICATE"
+    assert report["mapping"] is None
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["hub", "pair", "m.json", "--from", "nope", "--to", "cargo", "--json"],
+        ["watch", "."],
+        ["--json", "--bogus", "."],
+        ["export", "--json"],
+    ],
+)
+def test_a_parse_error_is_a_json_report_when_json_is_asked_for(argv: list[str], capsys: pytest.CaptureFixture[str]):
+    with pytest.raises(SystemExit) as exit_:
+        main(argv)
+    assert exit_.value.code == 2
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    [error] = json.loads(captured.out)["errors"]
+    assert error["message"]
+    assert error["help"].startswith("usage: codemeta-drift")
+
+
+def test_a_parse_error_without_json_stays_a_line_on_standard_error(capsys: pytest.CaptureFixture[str]):
+    with pytest.raises(SystemExit) as exit_:
+        main(["--bogus", "."])
+    assert exit_.value.code == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "unrecognized arguments" in captured.err
 
 
 @pytest.mark.parametrize("argv", [["export", "--help"], ["watch", "--help"], ["--help"]])

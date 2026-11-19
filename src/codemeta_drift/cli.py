@@ -9,6 +9,8 @@ mapping export from the commit of tag TAG, never the working tree, since every r
 it was read from that tag. Its findings are rows it can't make (such as a crosswalk cell
 with no path and no curated row, or a path not in its format's schema), printed on standard
 error so standard output is never a partial file. A TAG with no curated rows is a usage error.
+With ``--json``, findings and errors are one JSON report on standard output instead
+(docs/checks.md, "Read JSON output").
 """
 
 import argparse
@@ -24,7 +26,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, NoReturn
 
-from codemeta_drift.checks import CONTEXT, TABLE, check
+from codemeta_drift.checks import CONTEXT, TABLE, Finding, check
 from codemeta_drift.conformance import SCHEMA_FILES, conform
 from codemeta_drift.export import curated_tags, export, formats, generator
 
@@ -73,9 +75,24 @@ EXAMPLES = {
 """One example per command, shown in its ``--help``."""
 
 
+JSON_ERRORS = False
+"""Set by ``main`` when the command line asks for JSON: a parse error is then a report on standard output."""
+
+
+class JsonParser(argparse.ArgumentParser):
+    """An ArgumentParser whose usage errors are ``json_report`` errors when the run asked for JSON."""
+
+    def error(self, message: str) -> NoReturn:
+        """Exit 2 with the message, as a JSON error carrying the usage line as its help when JSON was asked for."""
+        if not JSON_ERRORS:
+            super().error(message)
+        print(json_report({}, [{"message": message, "help": self.format_usage().strip()}]), end="")
+        self.exit(EXIT_USAGE)
+
+
 def command_parser(name: str, prog: str, description: str, **kwargs: Any) -> argparse.ArgumentParser:  # noqa: ANN401 - argparse's own
     """A parser whose help ends with the command's example and the exit codes."""
-    return argparse.ArgumentParser(
+    return JsonParser(
         prog=prog,
         description=description,
         epilog=f"example:\n  {EXAMPLES[name]}\n\n{EXIT_CODES}",
@@ -107,10 +124,10 @@ def fail(code: int, message: str, *, as_json: bool, out: Path | None = None) -> 
     return code
 
 
-def found(findings: Sequence[object], *, as_json: bool, out: Path | None = None, **empty: object) -> int:
+def found(findings: Sequence[Finding], *, as_json: bool, out: Path | None = None, **empty: object) -> int:
     """Report the rows a command can't make; ``empty`` is what the JSON report holds besides ``findings``."""
     if as_json:
-        report_out(json_report({**empty, "findings": [str(f) for f in findings]}), out)
+        report_out(json_report({**empty, "findings": [asdict(f) for f in findings]}), out)
     else:
         print("\n".join(map(str, findings)), file=sys.stderr)
     return EXIT_FINDINGS
@@ -233,13 +250,13 @@ def coverage_text(mapping: dict, checkout: Path | None, *, as_json: bool) -> str
 def hub_parser() -> argparse.ArgumentParser:
     """The ``hub`` command's options."""
     ids = sorted({*(fmt for tag in curated_tags() for fmt in formats(tag)), "gomod"})
-    parser = argparse.ArgumentParser(
+    parser = JsonParser(
         prog="codemeta-drift hub",
         description="Join curated field correspondences.",
         epilog=f"formats for --format, --from and --to: {', '.join(ids)}\n\n{EXIT_CODES}",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    commands = parser.add_subparsers(dest="command", required=True)
+    commands = parser.add_subparsers(dest="command", required=True, parser_class=JsonParser)
     for name in ("pair", "sssom", "crosswalk", "coverage"):
         command = commands.add_parser(
             name,
@@ -346,7 +363,9 @@ def watch_main(argv: list[str]) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     """Run every check on one snapshot and print the findings, or run a subcommand."""
+    global JSON_ERRORS  # noqa: PLW0603 - the parsers' error() has no other way to see the command line
     argv = sys.argv[1:] if argv is None else argv
+    JSON_ERRORS = "--json" in argv or argv[:1] == ["watch"]
     commands = {"hub": hub_main, "watch": watch_main, "export": export_main}
     try:
         if argv and argv[0] in commands:

@@ -327,3 +327,13 @@ def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
     mapping["codemeta_tag"] = tag
     with pytest.raises(ValueError, match="codemeta_tag"):
         validate_mapping(mapping)
+
+
+def test_pair_usage_error_without_json_is_a_line_on_standard_error(
+    mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+):
+    path = _without_cargo(mapping, tmp_path)
+    assert main(["hub", "pair", str(path), "--from", "cargo", "--to", "zenodo"]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err.startswith("codemeta-drift: source and target must be present formats")
