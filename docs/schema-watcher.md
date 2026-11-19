@@ -1,9 +1,7 @@
 # Preview schema changes and mapping pin updates
 
-`watch` compares two downloaded schema directories and prints issue drafts as one JSON report:
-`schema_version`, `issues` (the drafts), `findings` (rows the export can't make, with exit 1) and `errors`
-(why it could not run, with exit 2 or 3), as in [the JSON output](checks.md#read-json-output). It
-sends no requests and opens no issues.
+`watch` compares two downloaded schema directories and prints issue drafts as a
+[JSON report](checks.md#read-json-output). It sends no requests and opens no issues.
 
 ```sh
 codemeta-drift watch ../codemeta --tag 4.0 \

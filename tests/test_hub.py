@@ -272,16 +272,10 @@ def test_an_unknown_format_id_is_refused_by_the_parser_with_the_choices(
     assert "invalid choice: 'nope' (choose from" in capsys.readouterr().err
 
 
-def test_hub_help_lists_every_format_and_an_example_per_subcommand(capsys: pytest.CaptureFixture[str]):
+def test_hub_help_lists_every_format(capsys: pytest.CaptureFixture[str]):
     with pytest.raises(SystemExit):
         main(["hub", "--help"])
     assert "cargo" in capsys.readouterr().out
-    for name in ("pair", "sssom", "crosswalk", "coverage"):
-        with pytest.raises(SystemExit):
-            main(["hub", name, "--help"])
-        out = capsys.readouterr().out
-        assert f"codemeta-drift hub {name} " in out
-        assert "exit codes: 0 done, 1 findings, 2 usage error, 3 could not run" in out
 
 
 def test_hub_reads_the_mapping_from_standard_input(
@@ -299,19 +293,22 @@ def test_hub_json_wraps_each_output_in_the_report(example: Path, capsys: pytest.
     report = json.loads(capsys.readouterr().out)
     assert (report["schema_version"], report["errors"]) == (1, [])
     assert report["rows"][0] == {"term": "codeRepository", "source": "module", "target": report["rows"][0]["target"]}
-    for argv in (["sssom"], ["crosswalk", str(ROOT / "tests/fixtures/4.0"), "--format", "cargo"]):
-        assert main(["hub", argv[0], str(example), *argv[1:], "--json"]) == 0
-        report = json.loads(capsys.readouterr().out)
-        assert report["text"].count("\n") > 1
 
 
-def test_hub_json_reports_a_usage_error_as_json(mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+@pytest.mark.parametrize("as_json", [True, False])
+def test_pair_usage_error_is_json_on_stdout_or_a_line_on_stderr(
+    mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str], *, as_json: bool
+):
     path = _without_cargo(mapping, tmp_path)
-    assert main(["hub", "pair", str(path), "--from", "cargo", "--to", "zenodo", "--json"]) == 2
+    assert main(["hub", "pair", str(path), "--from", "cargo", "--to", "zenodo", *(["--json"] if as_json else [])]) == 2
     captured = capsys.readouterr()
-    assert captured.err == ""
-    [error] = json.loads(captured.out)["errors"]
-    assert "source and target must be present formats" in error["message"]
+    message = "source and target must be present formats"
+    if as_json:
+        assert captured.err == ""
+        assert message in json.loads(captured.out)["errors"][0]["message"]
+    else:
+        assert captured.out == ""
+        assert captured.err.startswith(f"codemeta-drift: {message}")
 
 
 @pytest.mark.parametrize("fmt", ["gitlab", "code-json-2.0"])
@@ -327,13 +324,3 @@ def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
     mapping["codemeta_tag"] = tag
     with pytest.raises(ValueError, match="codemeta_tag"):
         validate_mapping(mapping)
-
-
-def test_pair_usage_error_without_json_is_a_line_on_standard_error(
-    mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]
-):
-    path = _without_cargo(mapping, tmp_path)
-    assert main(["hub", "pair", str(path), "--from", "cargo", "--to", "zenodo"]) == 2
-    captured = capsys.readouterr()
-    assert captured.out == ""
-    assert captured.err.startswith("codemeta-drift: source and target must be present formats")

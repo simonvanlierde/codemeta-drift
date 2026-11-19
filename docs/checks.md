@@ -97,14 +97,12 @@ The output is one document with these keys:
 `code` identifies the check; `term` names the affected property or format. Use these fields
 for filtering. `file` is a label that can describe a group; `detail` is text for a person.
 `errors` is empty unless the check could not run (exit 3). Then `findings` is empty and each error is an
-object with `message` and `help`, the next step to take or `null`. The package ships the
-schema as [`report.schema.json`](../src/codemeta_drift/report.schema.json) (JSON Schema 2020-12), and
-the tests validate real output against it.
+object with `message` and `help`, the next step to take or `null`.
+[`report.schema.json`](../src/codemeta_drift/report.schema.json) is its JSON Schema.
 
 `export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` write the same `schema_version` and
 `errors`, and with `--json` an error, a usage error included, is an object in `errors` on standard output
-instead of a line on standard error. They write the report to `--out` when given, and fall back to standard
-output when that file can't be written. A command line the parser refuses is an error too, with the usage line as
+instead of a line on standard error. With `--out`, only a successful report goes to the file. A command line the parser refuses is an error too, with the usage line as
 its `help`, whenever `--json` is among the arguments (always for `watch`). Their other keys:
 
 | Command | Keys besides `schema_version` and `errors` |

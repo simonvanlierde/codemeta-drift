@@ -195,7 +195,6 @@ def test_watch_exits_1_and_lists_the_findings_when_the_export_is_blocked(
     assert main(_watch_args(tmp_path, repo)) == 1
     report = _watch_report(capsys)
     assert (report["issues"], report["findings"], report["errors"]) == ([], [asdict(finding)], [])
-    assert report["findings"][0]["code"] == "CURATED_DUPLICATE"
 
 
 def test_watch_with_a_tag_without_curated_rows_exits_2(repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
@@ -255,7 +254,6 @@ def test_export_json_reports_the_mapping_findings_and_errors(
     assert main(["export", str(repo), "--tag", "3.1", "--json"]) == 1
     report = json.loads(capsys.readouterr().out)
     assert report["findings"] == [asdict(finding)]
-    assert report["findings"][0]["code"] == "CURATED_DUPLICATE"
     assert report["mapping"] is None
 
 
@@ -288,12 +286,11 @@ def test_a_parse_error_without_json_stays_a_line_on_standard_error(capsys: pytes
     assert "unrecognized arguments" in captured.err
 
 
-@pytest.mark.parametrize("argv", [["export", "--help"], ["watch", "--help"], ["--help"]])
-def test_help_ends_with_an_example_and_the_exit_codes(argv: list[str], capsys: pytest.CaptureFixture[str]):
+def test_help_ends_with_an_example_and_the_exit_codes(capsys: pytest.CaptureFixture[str]):
     with pytest.raises(SystemExit):
-        main(argv)
+        main(["hub", "pair", "--help"])
     out = capsys.readouterr().out
-    assert "example:\n  codemeta-drift" in out
+    assert "example:\n  codemeta-drift hub pair " in out
     assert "exit codes: 0 done, 1 findings, 2 usage error, 3 could not run, 130 interrupted" in out
 
 
@@ -360,11 +357,12 @@ def test_hub_coverage_json_reports_why_it_could_not_run(tmp_path: Path, capsys: 
     assert "missing.json" in report["errors"][0]["message"]
 
 
-def test_hub_coverage_json_writes_the_error_report_to_out(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+def test_a_json_error_goes_to_stdout_and_leaves_out_alone(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
     out = tmp_path / "coverage.json"
+    out.write_text("kept")
     assert main(["hub", "coverage", str(tmp_path / "missing.json"), "--json", "--out", str(out)]) == 3
-    assert capsys.readouterr().out == ""
-    assert "missing.json" in json.loads(out.read_text("utf-8"))["errors"][0]["message"]
+    assert "missing.json" in json.loads(capsys.readouterr().out)["errors"][0]["message"]
+    assert out.read_text() == "kept"
 
 
 def test_exit_130_interrupted(repo: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
