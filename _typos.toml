@@ -3,3 +3,5 @@
 # NumPy's API spells it this way (`array.flags.writeable`).
 writeable = "writeable"
 WRITEABLE = "WRITEABLE"
+# in-toto attestation bundle extension.
+intoto = "intoto"

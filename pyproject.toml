@@ -1,6 +1,6 @@
 [project]
 name = "codemeta-drift"
-version = "0.8.0"
+version = "0.9.0"
 description = "Show where CodeMeta's crosswalks are wrong or missing, check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -145,4 +145,4 @@ GH212 = "dependabot.yml groups the actions with the hook revs under multi-ecosys
 source_paths = ["src/codemeta_drift"]
 only_mutate = ["src/codemeta_drift/checks.py", "src/codemeta_drift/export.py", "src/codemeta_drift/conformance.py", "src/codemeta_drift/paths.py"]
 pytest_add_cli_args_test_selection = ["tests"]
-also_copy = ["README.md", "docs", "examples", "site"]
+also_copy = ["README.md", "docs", "examples", "site", ".github"]

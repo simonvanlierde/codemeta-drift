@@ -295,7 +295,10 @@ def test_help_ends_with_an_example_and_the_exit_codes(capsys: pytest.CaptureFixt
 
 
 def test_check_json_validates_against_the_committed_schema(
-    repo: Path, tmp_path_factory: pytest.TempPathFactory, capsys: pytest.CaptureFixture[str]
+    repo: Path,
+    tmp_path_factory: pytest.TempPathFactory,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
 ):
     schema = json.loads((ROOT / "src/codemeta_drift/report.schema.json").read_text("utf-8"))
     jsonschema.Draft202012Validator.check_schema(schema)
@@ -310,6 +313,17 @@ def test_check_json_validates_against_the_committed_schema(
     validator.validate(report)
     assert not validator.is_valid({**report, "schema_version": 2})
     assert not validator.is_valid({**report, "errors": [{"message": "x"}]})
+    with pytest.raises(SystemExit) as exit_:
+        main(["--json"])
+    assert exit_.value.code == 2
+    report = json.loads(capsys.readouterr().out)
+    assert report["errors"]
+    validator.validate(report)
+    monkeypatch.setattr("codemeta_drift.cli.check", lambda _: [])
+    assert main([str(repo), "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert (report["findings"], report["errors"]) == ([], [])
+    validator.validate(report)
 
 
 # One test per exit code: 0 done, 1 findings, 2 usage error, 3 could not run, 130 interrupted.
@@ -404,6 +418,15 @@ def _shell(code: str, redirect: str) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         text=True,
     )
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="needs POSIX file descriptor redirection")
+def test_closed_standard_input_is_a_json_error():
+    code = "from codemeta_drift.cli import entry; entry()"
+    result = _shell(code, "hub sssom - --json <&-")
+    assert result.returncode == 3
+    assert result.stderr == ""
+    assert "standard input" in json.loads(result.stdout)["errors"][0]["message"]
 
 
 INTERRUPT = (
