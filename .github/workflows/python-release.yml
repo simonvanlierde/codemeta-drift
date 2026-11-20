@@ -19,7 +19,7 @@ name: python release
 # After PyPI, the release job checks every attestation, attaches distributions, a
 # CycloneDX SBOM and their provenance to a draft, then publishes the draft. Immutable
 # releases accept no assets after publication. Each asset carries its bundle as
-# `<asset>.into.jsonl`, the name Scorecard's Signed-Releases check scores highest.
+# `<asset>.intoto.jsonl`, the name Scorecard's Signed-Releases check scores highest.
 
 # No workflow_dispatch: a manual run can target any branch, and neither trusted
 # publishing nor the environment checks which ref it publishes.
@@ -250,19 +250,19 @@ jobs:
           cd assets
           # One provenance bundle covers every asset; each gets a copy under its own name.
           # The glob also checks that each attest step produced exactly one bundle.
-          for f in *; do cp ../provenance/*.json "$f.into.jsonl"; done
+          for f in *; do cp ../provenance/*.json "$f.intoto.jsonl"; done
           sdist=$(echo *.tar.gz)
-          cp ../sbom-attestation/*.json "$sdist.sbom.into.jsonl"
+          cp ../sbom-attestation/*.json "$sdist.sbom.intoto.jsonl"
           # Immutable once published: check every attestation before anything is uploaded.
           for f in *; do
-            case $f in *.into.jsonl) continue ;; esac
+            case $f in *.intoto.jsonl) continue ;; esac
             # The attestation can lag the attest step by a moment.
             for attempt in 1 2 3; do
-              gh attestation verify "$f" --repo "$GH_REPO" --bundle "$f.into.jsonl" --signer-workflow "$GH_REPO/.github/workflows/python-release.yml" && break
+              gh attestation verify "$f" --repo "$GH_REPO" --bundle "$f.intoto.jsonl" --signer-workflow "$GH_REPO/.github/workflows/python-release.yml" && break
               [ "$attempt" -lt 3 ] && sleep 10 || exit 1
             done
           done
-          gh attestation verify "$sdist" --repo "$GH_REPO" --bundle "$sdist.sbom.into.jsonl" \
+          gh attestation verify "$sdist" --repo "$GH_REPO" --bundle "$sdist.sbom.intoto.jsonl" \
             --predicate-type https://cyclonedx.org/bom --signer-workflow "$GH_REPO/.github/workflows/python-release.yml"
           printf '\nThe SBOM lists the dependency versions this release was tested with, not what an install will resolve.\n' >>../notes/notes.md
           # Only "release not found" means there is none: another error (a rate limit, a 5xx) stops the job.

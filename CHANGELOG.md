@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-20
+
+### Upgrade
+
+- Read `watch` drafts from the report's `issues` array instead of the top-level list.
+- Read JSON error and findings reports from standard output. `--out` receives successful output only;
+  check the exit code before reading an existing output file. See [JSON output](docs/checks.md#read-json-output).
+
 ### Added
 
 - `export --json` and `hub pair|sssom|crosswalk --json` write the `schema_version` / `errors` report that
@@ -16,6 +24,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `report.schema.json`, the JSON Schema of `check --json`, in the package; the tests validate real output
   against it.
 - `hub` reads the mapping from standard input given `-`, and `watch` reads `--existing` from it.
+- The [coverage page](https://simonvanlierde.com/codemeta-drift/) uses self-hosted fonts, a red palette
+  for wrong or missing cells, and a preview card when sharing its link.
 
 ### Changed
 
@@ -27,6 +37,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - With `--json`, an error or findings report goes to standard output only, and `--out` keeps the successful
   write, so a failed run no longer overwrites an existing `--out` file. `hub coverage --json` used to write its
   error report to `--out`.
+
+### Fixed
+
+- A closed standard input now returns an input error (exit 3) instead of a traceback when reading `-`.
+- Check usage errors with `--json` now match the packaged report schema.
+- Template updates stop when the remote branch cannot be checked and preserve commits added during an update.
+- Release attestation bundles use the `.intoto.jsonl` extension so Signed-Releases checks can find them.
 
 ## [0.8.0] - 2026-11-10
 
@@ -307,7 +324,8 @@ The new watcher uses the same five-file layout; see [Zenodo coverage and limits]
   and the JSON Schemas of four formats. `tests/fixtures/3.1.sha256` ties the 3.1 files to the
   tag's commit.
 
-[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.2...v0.8.0
 [0.7.2]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/simonvanlierde/codemeta-drift/compare/v0.7.0...v0.7.1

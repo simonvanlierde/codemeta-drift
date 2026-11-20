@@ -285,17 +285,21 @@ jobs:
           fi
 
           # Someone resolving .rej files on the branch has commits there that a force-push would drop.
-          # The compare API finds them from the merge base, which a shallow checkout cannot. No branch: nothing to keep.
-          authors=$(gh api "repos/$REPO/compare/$BASE...$branch" --jq '.commits[].commit.author.email' 2>/dev/null) || authors=''
-          if grep -qvxF -e '' -e '41898282+github-actions[bot]@users.noreply.github.com' <<<"$authors"; then
-            echo "::notice::$branch has commits from someone other than this workflow; leaving it for them to finish"
-            echo "- \`$branch\` has commits from someone other than this workflow, so this run left it alone." >>"$GITHUB_STEP_SUMMARY"
-            exit 0
+          # Inspect one remote commit and lease the push against it, including an absent branch.
+          remote=$(git ls-remote --heads "https://github.com/${REPO}.git" "refs/heads/$branch")
+          read -r expected _ <<<"$remote"
+          if [ -n "$expected" ]; then
+            authors=$(gh api "repos/$REPO/compare/$BASE...$expected" --jq '.commits[].commit.author.email')
+            if grep -qvxF -e '' -e '41898282+github-actions[bot]@users.noreply.github.com' <<<"$authors"; then
+              echo "::notice::$branch has commits from someone other than this workflow; leaving it for them to finish"
+              echo "- \`$branch\` has commits from someone other than this workflow, so this run left it alone." >>"$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
           fi
 
           # git reads the token from gh's credential helper, so it stays out of the process list.
           gh auth setup-git
-          git -c core.hooksPath=/dev/null push --force "https://github.com/${REPO}.git" "$branch"
+          git -c core.hooksPath=/dev/null push "--force-with-lease=refs/heads/$branch:$expected" "https://github.com/${REPO}.git" "$branch"
 
           # With a .rej file left, the PR is a draft, which GitHub will not merge: Copier has already moved
           # _commit past those changes, so merging them unresolved would drop them for good.

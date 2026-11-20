@@ -292,7 +292,7 @@ def test_hub_json_wraps_each_output_in_the_report(example: Path, capsys: pytest.
     assert main(["hub", "pair", str(example), "--from", "gomod", "--to", "cargo", "--json"]) == 0
     report = json.loads(capsys.readouterr().out)
     assert (report["schema_version"], report["errors"]) == (1, [])
-    assert report["rows"][0] == {"term": "codeRepository", "source": "module", "target": report["rows"][0]["target"]}
+    assert report["rows"] == [{"term": "codeRepository", "source": "module", "target": "package.repository"}]
 
 
 @pytest.mark.parametrize("as_json", [True, False])
