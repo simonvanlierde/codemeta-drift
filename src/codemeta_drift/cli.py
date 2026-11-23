@@ -64,7 +64,7 @@ EXAMPLES = {
     "export": "codemeta-drift export ../codemeta --tag 4.0 --out mapping-4.0.json",
     "watch": (
         "codemeta-drift watch ../codemeta --tag 4.0 --before old --after new "
-        "--citesync-source MAPPING_SOURCE --latest v0.8.0 --existing issue-titles.json"
+        "--citesync-source MAPPING_SOURCE --latest v0.9.0 --existing issue-titles.json"
     ),
     "pair": "codemeta-drift hub pair mapping-4.0.json --from pep621 --to cargo",
     "sssom": "codemeta-drift hub sssom mapping-4.0.json --out spokes.sssom.tsv",
@@ -81,11 +81,14 @@ JSON_ERRORS = False
 class JsonParser(argparse.ArgumentParser):
     """An ArgumentParser whose usage errors are ``json_report`` errors when the run asked for JSON."""
 
+    check_report = False
+
     def error(self, message: str) -> NoReturn:
         """Exit 2 with the message, as a JSON error carrying the usage line as its help when JSON was asked for."""
         if not JSON_ERRORS:
             super().error(message)
-        print(json_report({}, [{"message": message, "help": self.format_usage().strip()}]), end="")
+        fields = {"tool": generator(), "findings": []} if self.check_report else {}
+        print(json_report(fields, [{"message": message, "help": self.format_usage().strip()}]), end="")
         self.exit(EXIT_USAGE)
 
 
@@ -106,6 +109,9 @@ def command_parser(name: str, prog: str, description: str) -> JsonParser:
 
 def read_text(path: Path) -> str:
     """A file's text, or standard input for ``-``."""
+    if str(path) == "-" and sys.stdin is None:
+        msg = "standard input is closed"
+        raise OSError(msg)
     return sys.stdin.read() if str(path) == "-" else path.read_text("utf-8")
 
 
@@ -386,6 +392,7 @@ class VersionAction(argparse.Action):
 def check_main(argv: list[str]) -> int:
     """Run every check on one snapshot and print the findings."""
     parser = command_parser("check", "codemeta-drift", "Report where CodeMeta's files disagree.")
+    parser.check_report = True
     parser.epilog = (
         f"{parser.epilog}\n\n"
         "codemeta-drift export --help for mapping JSON\n"

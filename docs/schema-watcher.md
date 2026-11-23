@@ -7,7 +7,7 @@
 codemeta-drift watch ../codemeta --tag 4.0 \
   --before previous-schemas --after new-schemas \
   --citesync-source ../citesync/src/citesync/MAPPING_SOURCE \
-  --latest v0.8.0 --existing issue-titles.json
+  --latest v0.9.0 --existing issue-titles.json
 ```
 
 Each directory needs the five files named in

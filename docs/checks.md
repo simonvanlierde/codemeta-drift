@@ -81,7 +81,7 @@ The output is one document with these keys:
 ```json
 {
   "schema_version": 1,
-  "tool": {"name": "codemeta-drift", "version": "0.8.0"},
+  "tool": {"name": "codemeta-drift", "version": "0.9.0"},
   "findings": [
     {
       "code": "EXAMPLE_NO_TERM",
@@ -96,7 +96,7 @@ The output is one document with these keys:
 
 `code` identifies the check; `term` names the affected property or format. Use these fields
 for filtering. `file` is a label that can describe a group; `detail` is text for a person.
-`errors` is empty unless the check could not run (exit 3). Then `findings` is empty and each error is an
+`errors` holds usage errors (exit 2) or execution errors (exit 3). Then `findings` is empty and each error is an
 object with `message` and `help`, the next step to take or `null`.
 [`report.schema.json`](../src/codemeta_drift/report.schema.json) is its JSON Schema.
 

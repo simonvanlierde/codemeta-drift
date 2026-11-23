@@ -26,8 +26,9 @@ curated file can be exported; currently those are `3.1` and `4.0`. To check a di
 
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
 Other rows use `curated-<tag>.json` ([3.1](../src/codemeta_drift/curated-3.1.json),
-[4.0](../src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell, prints the
-findings on standard error and exits 1 without writing output. A successful export exits 0;
+[4.0](../src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell and exits 1.
+By default, it prints findings on standard error without writing output. With `--json`, it writes a findings report
+on standard output. A successful export exits 0;
 invalid arguments, such as a tag with no curated file, exit 2, and unreadable inputs exit 3. Without `--out`, JSON goes to standard output. `--json` makes the output a [JSON report](checks.md#read-json-output).
 
 | Finding | What to check |
@@ -77,7 +78,7 @@ and `repository`, which may be strings or objects.
 {
   "schema_version": "1.8",
   "codemeta_tag": "3.1",
-  "generator": {"name": "codemeta-drift", "version": "0.8.0"},
+  "generator": {"name": "codemeta-drift", "version": "0.9.0"},
   "context_terms": ["address", "affiliation", "applicationCategory", "..."],
   "rows": [
     {
