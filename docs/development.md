@@ -20,6 +20,9 @@ just check             # lint, types, tests, the site tests and the dependency a
 just hooks             # the YAML, Markdown, workflow and citation checks CI also runs
 ```
 
+The tests run without your GitHub tokens or gh login, and only tests marked `live` reach the
+network: `uv run pytest -m live` runs those.
+
 ## Coverage matrix and page
 
 `docs/coverage-3.1.md` and `docs/coverage-4.0.md` are generated from each example export and, for the crosswalks nobody has

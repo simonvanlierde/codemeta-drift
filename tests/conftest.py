@@ -50,6 +50,7 @@ def no_credentials(
     if request.node.get_closest_marker("live") is None:
         monkeypatch.setattr(socket, "getaddrinfo", _no_network)
         monkeypatch.setattr(socket.socket, "connect", _no_network)
+        monkeypatch.setattr(socket.socket, "connect_ex", _no_network)
 
 
 @pytest.fixture
