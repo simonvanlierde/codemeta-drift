@@ -294,9 +294,10 @@ jobs:
             # The new commit's parent is the checkout that the patch was built from.
             # Keep both sides fixed so default-branch changes cannot shift commits between pages.
             base=$(git rev-parse HEAD^)
-            authors=$(gh api --paginate "repos/$REPO/compare/$base...$expected?per_page=100" \
-              --jq '.commits[].commit.author.email | if . == null or . == "" then "unknown" else . end')
-            if grep -qvxF -e '' -e '41898282+github-actions[bot]@users.noreply.github.com' <<<"$authors"; then
+            # A maintainer can amend a bot-authored commit without changing its author.
+            identities=$(gh api --paginate "repos/$REPO/compare/$base...$expected?per_page=100" \
+              --jq '.commits[].commit | (.author.email, .committer.email) | if . == null or . == "" then "unknown" else . end')
+            if grep -qvxF -e '' -e '41898282+github-actions[bot]@users.noreply.github.com' <<<"$identities"; then
               echo "::notice::$branch has commits from someone other than this workflow; leaving it for them to finish"
               echo "- \`$branch\` has commits from someone other than this workflow, so this run left it alone." >>"$GITHUB_STEP_SUMMARY"
               exit 0

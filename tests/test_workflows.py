@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
         ("later-page-human", False),
         ("base-advances", False),
         ("unknown-author", False),
+        ("human-committer", False),
         ("remote-failure", False),
         ("human", False),
         ("advanced", False),
@@ -31,6 +32,15 @@ def test_copier_update_preserves_unverified_or_changed_remote_commits(tmp_path: 
       if [ "$1" = api ]; then
         if [ "$CASE" = api-failure ]; then return 1; fi
         if [ "$CASE" = human ]; then echo maintainer@example.org; return; fi
+        if [ "$CASE" = human-committer ]; then
+          jq -r "$5" <<'JSON'
+    {"commits":[{"commit":{
+      "author":{"email":"41898282+github-actions[bot]@users.noreply.github.com"},
+      "committer":{"email":"maintainer@example.org"}
+    }}]}
+JSON
+          return
+        fi
         echo '41898282+github-actions[bot]@users.noreply.github.com'
         if [[ " $* " == *" --paginate repos/example/tool/compare/"*"...abc123?per_page=100 "* ]]; then
           case "$CASE" in
@@ -80,8 +90,8 @@ def test_copier_update_preserves_unverified_or_changed_remote_commits(tmp_path: 
         check=False,
     )
     assert marker.exists() is pushed, result.stdout + result.stderr
-    if pushed:
-        assert result.returncode == 0, result.stderr
+    expected_exit = 1 if case in {"api-failure", "later-page-failure", "remote-failure", "advanced"} else 0
+    assert result.returncode == expected_exit, result.stdout + result.stderr
 
 
 def test_copier_update_keeps_older_pull_request_when_workflows_need_app(tmp_path: Path):
