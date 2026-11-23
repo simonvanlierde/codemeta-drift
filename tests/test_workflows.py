@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
         ("api-failure", False),
         ("later-page-failure", False),
         ("later-page-human", False),
+        ("base-advances", False),
         ("unknown-author", False),
         ("remote-failure", False),
         ("human", False),
@@ -31,17 +32,24 @@ def test_copier_update_preserves_unverified_or_changed_remote_commits(tmp_path: 
         if [ "$CASE" = api-failure ]; then return 1; fi
         if [ "$CASE" = human ]; then echo maintainer@example.org; return; fi
         echo '41898282+github-actions[bot]@users.noreply.github.com'
-        if [[ " $* " == *" --paginate repos/example/tool/compare/main...abc123?per_page=100 "* ]]; then
+        if [[ " $* " == *" --paginate repos/example/tool/compare/"*"...abc123?per_page=100 "* ]]; then
           case "$CASE" in
             later-page-failure) return 1 ;;
             later-page-human) echo maintainer@example.org ;;
+            base-advances)
+              # The mutable name can move between pages and change the list being paged.
+              if [ "$3" = repos/example/tool/compare/fed456...abc123?per_page=100 ]; then
+                echo maintainer@example.org
+              fi ;;
           esac
         fi
         if [[ "$CASE" = unknown-author && "$*" == *'then "unknown"'* ]]; then echo unknown; fi
       fi
     }
     git() {
-      if [ "$1" = ls-remote ]; then
+      if [ "$1 $2" = 'rev-parse HEAD^' ]; then
+        echo fed456
+      elif [ "$1" = ls-remote ]; then
         if [ "$CASE" = remote-failure ]; then return 1; fi
         if [ "$CASE" != missing ]; then printf '%s\t%s\n' abc123 refs/heads/chore/copier-update; fi
       else
