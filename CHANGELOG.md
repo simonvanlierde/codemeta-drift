@@ -42,7 +42,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - A closed standard input now returns an input error (exit 3) instead of a traceback when reading `-`.
 - Check usage errors with `--json` now match the packaged report schema.
-- Template updates stop when the remote branch cannot be checked and preserve commits added during an update.
+- Template updates check all commits on the update branch and keep it intact when an author cannot be verified.
+  They also preserve commits added during an update and leave older pull requests open when a manual update is needed.
 - Release attestation bundles use the `.intoto.jsonl` extension so Signed-Releases checks can find them.
 
 ## [0.8.0] - 2026-11-10

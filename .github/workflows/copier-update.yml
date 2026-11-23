@@ -271,10 +271,10 @@ jobs:
             if [ -z "$(gh issue list --state all --author app/github-actions --search "\"$title\" in:title" --json number --jq '.[0].number')" ]; then
               gh issue create --title "$title" --body-file issue.md
             fi
-            # An open PR from an older tag would now disagree with the issue.
+            # The older PR may contain someone's work. Leave it for them to finish or close.
             stale=$(gh pr list --head "$branch" --state open --json number,isCrossRepository --jq "$own | .[0].number")
             if [ -n "$stale" ]; then
-              gh pr close "$stale" --delete-branch --comment "Superseded by template \`$LATEST\`, which needs a local update: see the issue \"$title\"."
+              echo "::notice::Pull request #$stale is still open for an older template version"
             fi
             echo "::warning::$title: GITHUB_TOKEN can't push workflow changes"
             exit 0
@@ -284,12 +284,16 @@ jobs:
             printf '\n%s\n' "This PR was opened without the update App, so its checks do not start: close it and reopen it to run them." >>"$RUNNER_TEMP/copier-update/body.md"
           fi
 
-          # Someone resolving .rej files on the branch has commits there that a force-push would drop.
-          # Inspect one remote commit and lease the push against it, including an absent branch.
-          remote=$(git ls-remote --heads "https://github.com/${REPO}.git" "refs/heads/$branch")
+          # Git uses the credential helper for private repos without putting the token in the command line.
+          gh auth setup-git
+          url="https://github.com/${REPO}.git"
+          ref="refs/heads/$branch"
+          remote=$(git ls-remote --heads "$url" "$ref")
           read -r expected _ <<<"$remote"
           if [ -n "$expected" ]; then
-            authors=$(gh api "repos/$REPO/compare/$BASE...$expected" --jq '.commits[].commit.author.email')
+            # A shallow checkout can't identify branch-only commits. Check every page at the leased SHA.
+            authors=$(gh api --paginate "repos/$REPO/compare/$BASE...$expected?per_page=100" \
+              --jq '.commits[].commit.author.email | if . == null or . == "" then "unknown" else . end')
             if grep -qvxF -e '' -e '41898282+github-actions[bot]@users.noreply.github.com' <<<"$authors"; then
               echo "::notice::$branch has commits from someone other than this workflow; leaving it for them to finish"
               echo "- \`$branch\` has commits from someone other than this workflow, so this run left it alone." >>"$GITHUB_STEP_SUMMARY"
@@ -297,9 +301,8 @@ jobs:
             fi
           fi
 
-          # git reads the token from gh's credential helper, so it stays out of the process list.
-          gh auth setup-git
-          git -c core.hooksPath=/dev/null push "--force-with-lease=refs/heads/$branch:$expected" "https://github.com/${REPO}.git" "$branch"
+          # An empty expectation allows creation only if the branch is still absent.
+          git -c core.hooksPath=/dev/null push "--force-with-lease=$ref:$expected" "$url" "$branch"
 
           # With a .rej file left, the PR is a draft, which GitHub will not merge: Copier has already moved
           # _commit past those changes, so merging them unresolved would drop them for good.
