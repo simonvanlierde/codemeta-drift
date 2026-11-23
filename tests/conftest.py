@@ -1,5 +1,6 @@
 import os
 import shutil
+import socket
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
@@ -27,6 +28,28 @@ def no_git_env(monkeypatch: pytest.MonkeyPatch) -> None:
     """Drop the GIT_ variables for the code under test too, which runs git itself."""
     for key in [k for k in os.environ if k.startswith("GIT_")]:
         monkeypatch.delenv(key)
+
+
+def _no_network(*_args: object, **_kwargs: object) -> None:
+    msg = "only tests marked live may use the network"
+    raise RuntimeError(msg)
+
+
+@pytest.fixture(autouse=True)
+def no_credentials(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFactory
+) -> None:
+    """Keep the developer's GitHub login, and the network, away from the code under test.
+
+    poll --publish runs gh with whatever login it finds, so a test that misses its fake would open real
+    issues. The socket guard covers this process only: a child process keeps the network, not the login.
+    """
+    for key in ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("GH_CONFIG_DIR", str(tmp_path_factory.mktemp("gh-config")))
+    if request.node.get_closest_marker("live") is None:
+        monkeypatch.setattr(socket, "getaddrinfo", _no_network)
+        monkeypatch.setattr(socket.socket, "connect", _no_network)
 
 
 @pytest.fixture
