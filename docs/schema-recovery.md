@@ -40,6 +40,20 @@ A missing or malformed approval file produces a CLI error without creating outpu
 The test runs both modes and checks hashes, deduplication, validation and preservation
 of the original mapping. It also rejects an approval for a different change.
 
-These pins are demonstration artifacts. This does not repin citesync, release a package,
-verify its actual conversion output or enable live issue publication. A real update
-still needs review of the field's meaning, a released artifact and the consumer's tests.
+## Check a pinned consumer
+
+citesync vendors the mapping and pins its hashes in `src/citesync/MAPPING_SOURCE`. To see
+what a rename means for it, run its tests in a citesync worktree twice:
+
+1. At its pin, unchanged. The rename touches only the drafts, so every test passes.
+2. With `mapping.json` from the repaired run copied over `src/citesync/mapping-local.json`.
+   The pin check fails, and so does every test that reads a PEP 621 `name`, because
+   citesync's fixtures still use `project.name`.
+
+The second run is the gate before a repin: the consumer's fixtures must change with the
+mapping. citesync's `check_mapping` accepts both outputs and refuses a `schema_version`
+with a major other than 1.
+
+These pins are demonstration artifacts. This does not repin citesync, release a package
+or enable live issue publication. A real update still needs review of the field's
+meaning, a released artifact and the consumer's tests.
