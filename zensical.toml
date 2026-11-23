@@ -18,6 +18,7 @@ decisions/0000-template.md
 [project.theme]
 font = false
 custom_dir = "docs-overrides"
+favicon = "assets/favicon.svg"
 
 # Follow the reader's light or dark setting, as the coverage page does; the toggle overrides it.
 [[project.theme.palette]]

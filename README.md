@@ -111,7 +111,7 @@ formats by 19 terms, with the wrong crosswalk cells filled and the missing ones 
 just og-card
 ```
 
-`site/build.py` copies the card into the built page and adds the PNG's hash to the `og:image` URL in `site/index.html` (`?v=`), because link previews are cached by image URL. `just og-card` writes the same hash into `zensical.toml` for the docs.
+`site/build.py` copies the card into the built page and adds the PNG's hash to the `og:image` URL in `site/index.html` (`?v=`), because link previews are cached by image URL. `just og-card` writes a hash of the PNG into `zensical.toml` for the docs; a test fails if it is stale.
 
 ## Development
 

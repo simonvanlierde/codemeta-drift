@@ -238,6 +238,12 @@ def test_page_names_its_social_card_and_the_build_ships_it(tmp_path: Path):
     assert f'<meta property="og:image" content="https://simonvanlierde.com/codemeta-drift/og.png?v={digest}">' in built
 
 
+def test_docs_card_url_carries_the_card_hash():
+    # `just og-card` stamps it; a redrawn card at an unchanged URL would stay cached by link previews.
+    digest = hashlib.sha256((ROOT / "docs/assets/og.png").read_bytes()).hexdigest()[:8]
+    assert f'og_image = "assets/og.png?v={digest}"' in (ROOT / "zensical.toml").read_text("utf-8")
+
+
 def test_build_refuses_a_directory_it_did_not_make(tmp_path: Path):
     (tmp_path / "notes.txt").write_text("keep me")
     result = build(tmp_path)
