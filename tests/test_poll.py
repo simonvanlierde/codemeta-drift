@@ -263,7 +263,7 @@ def test_fetch_json_refuses_plain_http_before_any_request(monkeypatch: pytest.Mo
 
 
 def test_tests_run_without_a_github_login_or_network():
-    assert not {"GH_TOKEN", "GITHUB_TOKEN"} & os.environ.keys()
+    assert not {"GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"} & os.environ.keys()
     assert not any(Path(os.environ["GH_CONFIG_DIR"]).iterdir())
     with pytest.raises(RuntimeError, match="only tests marked live"):
         fetch_json("https://example.org/x")

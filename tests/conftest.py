@@ -39,10 +39,10 @@ def _no_network(*_args: object, **_kwargs: object) -> None:
 def no_credentials(
     request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFactory
 ) -> None:
-    """Keep the developer's GitHub login, and the network, away from the code under test.
+    """Keep the developer's GitHub tokens, gh config and the network away from the code under test.
 
-    poll --publish runs gh with whatever login it finds, so a test that misses its fake would open real
-    issues. The socket guard covers this process only: a child process keeps the network, not the login.
+    poll --publish runs gh with whatever login it finds, so a test that misses its fake could open real
+    issues. The socket guard covers this process only: a child process keeps the network, not the tokens.
     """
     for key in ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"):
         monkeypatch.delenv(key, raising=False)
