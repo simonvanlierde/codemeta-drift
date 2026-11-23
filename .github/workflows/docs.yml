@@ -1,0 +1,44 @@
+name: docs
+
+# The documentation site that `just docs` builds from docs/ into _docs/. Every pull request
+# and push builds it with --strict, so a broken link or a warning fails the check. pages.yml
+# deploys it under the coverage page: a repo has one GitHub Pages site.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: "docs: build"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # As in python.yml: uv checks every package against OSV's malware advisories before
+      # its code runs. The preview flag only silences the "experimental" warning.
+      UV_MALWARE_CHECK: "1"
+      UV_PREVIEW_FEATURES: malware-check
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: taiki-e/install-action@1919c4a95903d2c33e4a221102edca87309fc14b # v2.89.0
+        with:
+          tool: just@1.59.0
+          fallback: none
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          save-cache: ${{ github.event_name != 'pull_request' }}
+          version: "0.13.6"
+
+      - run: just docs

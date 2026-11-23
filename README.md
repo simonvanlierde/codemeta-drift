@@ -80,6 +80,8 @@ exported; currently those are `3.1` and `4.0`.
 
 ## Documentation
 
+The pages below are also a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>.
+
 - [Crosswalk coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md) (also [3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-3.1.md)): every term and format, with the reason for each correction.
 - [Offline schema recovery](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-recovery.md): preview a synthetic rename and apply an explicit approval.
 - [Zenodo path coverage](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/zenodo-schema.md): verified paths, upstream source checks and validation limits.
@@ -101,7 +103,7 @@ also checks citesync's mapping pin. Publishing requires a configured token.
 
 ## Social card
 
-[`site/og.png`](site/og.png) is the 1200x630 card shown when the link is shared. It is rendered from
+[`docs/assets/og.png`](docs/assets/og.png) is the 1200x630 card shown when the coverage page or the docs are shared. It is rendered from
 [`docs/og-card.html`](docs/og-card.html), which draws the page's coverage matrix for CodeMeta 4.0 at full size: ten
 formats by 19 terms, with the wrong crosswalk cells filled and the missing ones outlined. Edit the HTML, then run:
 
@@ -109,7 +111,7 @@ formats by 19 terms, with the wrong crosswalk cells filled and the missing ones 
 just og-card
 ```
 
-`site/build.py` copies the card into the built page; the tags are in `site/index.html`. `just og-card` also writes the PNG's hash into the `og:image` URL (`?v=`), because link previews are cached by image URL; a test fails if they differ.
+`site/build.py` copies the card into the built page and adds the PNG's hash to the `og:image` URL in `site/index.html` (`?v=`), because link previews are cached by image URL. `just og-card` writes the same hash into `zensical.toml` for the docs.
 
 ## Development
 

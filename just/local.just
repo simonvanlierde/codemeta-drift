@@ -18,14 +18,6 @@ watch-env:
 local-check:
     @node --test site/*.test.mjs
 
-# Render the social card, site/og.png, from docs/og-card.html (needs Node and a Playwright Chromium).
-# Then put the PNG's hash in the og:image URL: link previews are cached by image URL.
-og-card:
-    pnpm dlx playwright@1.64.1 screenshot --browser=chromium --viewport-size=1200,630 \
-      "file://$PWD/docs/og-card.html" site/og.png
-    sed -E -i.bak "s/og\.png(\?v=[0-9a-f]+)?\"/og.png?v=$(shasum -a 256 site/og.png | cut -c1-8)\"/" site/index.html
-    rm site/index.html.bak
-
 # Mutation-test the modules in pyproject's [tool.mutmut]. Fails on a survivor not in
 # tests/mutation-baseline.txt, and on a listed one that no longer survives, so the list stays true.
 mutation:

@@ -39,23 +39,27 @@ serve the output:
 
 ```sh
 uv run site/build.py --out _site --codemeta ../codemeta
+just docs && cp -R _docs _site/docs
 python3 -m http.server -d _site
 ```
 
-The `pages` workflow builds it on every pull request and deploys from main and every Monday.
-[`site/DESIGN.md`](../site/DESIGN.md) holds the design rules.
+The docs pages are then at `/docs/`. `just docs-serve` previews the docs alone, rebuilt on each
+save, without the coverage page's fonts. The `pages` workflow builds both on every pull request
+and deploys from main and every Monday; the `docs` workflow fails a pull request on a broken
+link or any other warning.
+[`site/DESIGN.md`](https://github.com/simonvanlierde/codemeta-drift/blob/main/site/DESIGN.md) holds the design rules.
 
 ## Mutation tests
 
 `just mutation` tests modified copies of `checks.py`, `export.py`, `conformance.py` and `paths.py`.
 It leaves the source files unchanged and fails when the tests miss a changed behaviour.
-A mutation that cannot alter behaviour belongs in [`tests/mutation-baseline.txt`](../tests/mutation-baseline.txt), with its reason.
+A mutation that cannot alter behaviour belongs in [`tests/mutation-baseline.txt`](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/mutation-baseline.txt), with its reason.
 The command also fails when tests catch a listed mutation, so the baseline stays current.
 CI does not run this command.
 
 ## Update expected findings
 
-The [fixtures](../tests/fixtures/) are unmodified CodeMeta 3.1 and 4.0 files. Each snapshot
+The [fixtures](https://github.com/simonvanlierde/codemeta-drift/tree/main/tests/fixtures/) are unmodified CodeMeta 3.1 and 4.0 files. Each snapshot
 has a sibling file, `3.1.expected` or `4.0.expected`, containing the expected findings.
 
 When you intentionally change that output:
@@ -71,4 +75,4 @@ When you intentionally change that output:
    Exit code 1 is expected: both snapshots contain disagreements.
 3. Review the diff before committing the expected file.
 
-See [CONTRIBUTING.md](../.github/CONTRIBUTING.md) for commit and sign-off rules.
+See [CONTRIBUTING.md](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/CONTRIBUTING.md) for commit and sign-off rules.

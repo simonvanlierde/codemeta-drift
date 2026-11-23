@@ -24,6 +24,22 @@ fmt:
 hooks:
     prek run -a
 
+# Needs Chromium: `pnpm dlx playwright@1.64.1 install chromium`. Check the result at 300 px wide and cropped to the centre square (docs/hosting.md#social-card).
+
+# Render docs/og-card.html to the 1200x630 social card image, in each place the page serves it from.
+og-card:
+    pnpm dlx playwright@1.64.1 install chromium
+    pnpm dlx playwright@1.64.1 screenshot --viewport-size=1200,630 "file://$PWD/docs/og-card.html" "$PWD/docs/assets/og.png"
+    sed -E -i.bak "s/og\.png(\?v=[0-9a-f]+)?\"/og.png?v=$(shasum -a 256 docs/assets/og.png | cut -c1-8)\"/" zensical.toml && rm zensical.toml.bak
+
+# Build docs/ into _docs/, which pages.yml deploys under the coverage page. --strict fails on any warning, such as a broken link.
+docs:
+    uvx --exclude-newer "1 week" zensical@0.0.74 build --strict
+
+# Serve docs/ at http://localhost:8000, rebuilt on each save.
+docs-serve:
+    uvx --exclude-newer "1 week" zensical@0.0.74 serve
+
 # The writer exits 1 whenever it changes a file, so the check that follows decides
 # the result.
 
@@ -160,15 +176,28 @@ repo-settings:
     # copier-update.yml's push job reads the update App's key from this environment, from main only.
     main_only_env copier-update
     echo "Configured environment 'copier-update'. For template updates that change workflows, add the update App: https://github.com/simonvanlierde/project-templates/blob/main/docs/updates.md#the-update-app"
+    # docs.yml deploys to GitHub Pages from the workflow, not from a branch. GitHub answers
+    # 409 when Pages is already on, and then the PUT switches its source instead. A 403 or
+    # 422 means this repo cannot have Pages, such as a private repo on the free plan.
+    if gh api -X POST repos/{owner}/{repo}/pages -f build_type=workflow >"$err" 2>&1; then
+        echo "GitHub Pages deploys from Actions."
+    elif grep -q 'HTTP 409' "$err"; then
+        gh api -X PUT repos/{owner}/{repo}/pages -f build_type=workflow >"$err" 2>&1 || fail
+        echo "GitHub Pages deploys from Actions."
+    elif grep -qE 'HTTP (403|422)' "$err"; then
+        echo "Warning: GitHub Pages is not available for this repo (a private repo needs a paid plan for it), so docs.yml's deploy job skips." >&2
+    else
+        fail
+    fi
     repo_full_name=$(gh api repos/{owner}/{repo} --jq .full_name 2>"$err") || fail
     owner=${repo_full_name%%/*}
     repo=${repo_full_name##*/}
     echo "PyPI pending publisher: https://pypi.org/manage/account/publishing/?provider=github&project_name=codemeta-drift&owner=$owner&repository=$repo&workflow_filename=python-release.yml&environment=pypi"
     echo "Zenodo: https://zenodo.org/account/settings/github/"
     if [ -f .github/first-release.md ]; then echo "First-release checklist: gh issue create --title 'First release' --body-file .github/first-release.md"; fi
-# Set the GitHub About box from your answers: description and a topic per stack. Adds topics, never removes yours. Safe to rerun.
+# Set the GitHub About box from your answers: description, homepage and a topic per stack. Adds topics, never removes yours. Safe to rerun.
 repo-about:
-    gh repo edit --description 'Report where CodeMeta'\''s context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping' --add-topic python
+    gh repo edit --description 'Report where CodeMeta'\''s context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping' --homepage 'https://simonvanlierde.github.io/codemeta-drift/' --add-topic python
 
 # A repo's own recipes that copier updates never touch. A `local-check` recipe there runs
 # at the end of `just check`.

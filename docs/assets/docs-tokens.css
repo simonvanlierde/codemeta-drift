@@ -1,0 +1,54 @@
+/* The docs site's look, in one place: Zensical and Starlight both read these. Values follow
+   site/DESIGN.md: paper and ink, navy for links. Dark values have their own names because the
+   engines mark the dark scheme differently. */
+:root {
+  --docs-paper: #fbf9f6;
+  --docs-ink: #211f24;
+  --docs-accent: #2f4b7c;
+  --docs-paper-dark: #1a1819;
+  --docs-ink-dark: #ebe7e6;
+  --docs-accent-dark: #9fb9ec;
+  --docs-font: Newsreader, Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --docs-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+}
+
+/* The coverage page's own font files: the docs deploy under it at /docs/. `just docs-serve`
+   has no parent site, so it shows the fallbacks. */
+@font-face {
+  font-family: Newsreader;
+  src: url("../../fonts/newsreader-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Newsreader;
+  src: url("../../fonts/newsreader-latin-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* DESIGN.md: navy is for links. */
+:root > * {
+  --md-typeset-a-color: var(--docs-accent);
+}
+:root > [data-md-color-scheme="slate"] {
+  --md-typeset-a-color: var(--docs-accent-dark);
+}
+
+/* The theme's footer grey reaches only 4.4:1 on this dark paper; DESIGN.md's faint clears AA. */
+[data-md-color-scheme="slate"] .md-copyright {
+  color: #a9a2a4;
+}

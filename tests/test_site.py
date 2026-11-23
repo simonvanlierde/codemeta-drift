@@ -225,9 +225,6 @@ def test_page_names_its_social_card_and_the_build_ships_it(tmp_path: Path):
         '<meta name="twitter:card" content="summary_large_image">',
     ):
         assert tag in html
-    # `just og-card` rewrites the hash; a redrawn card at an unchanged URL would stay cached by link previews
-    digest = hashlib.sha256((ROOT / "site/og.png").read_bytes()).hexdigest()[:8]
-    assert f'<meta property="og:image" content="https://simonvanlierde.com/codemeta-drift/og.png?v={digest}">' in html
     assert re.search(r'<meta property="og:image:alt" content="[^"]*simonvanlierde.com/codemeta-drift">', html)
     assert 'property="og:title"' in html
     assert 'property="og:description"' in html
@@ -235,6 +232,10 @@ def test_page_names_its_social_card_and_the_build_ships_it(tmp_path: Path):
     assert build(out).returncode == 0
     # IHDR width and height sit at bytes 16-24 of a PNG
     assert (out / "og.png").read_bytes()[16:24] == (1200).to_bytes(4, "big") + (630).to_bytes(4, "big")
+    # A redrawn card at an unchanged URL would stay cached by link previews.
+    digest = hashlib.sha256((out / "og.png").read_bytes()).hexdigest()[:12]
+    built = (out / "index.html").read_text("utf-8")
+    assert f'<meta property="og:image" content="https://simonvanlierde.com/codemeta-drift/og.png?v={digest}">' in built
 
 
 def test_build_refuses_a_directory_it_did_not_make(tmp_path: Path):

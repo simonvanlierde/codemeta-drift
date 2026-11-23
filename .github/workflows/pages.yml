@@ -1,8 +1,9 @@
 name: pages
 
-# The coverage page (site/). A pull request builds it; a push to main and the Monday run deploy it to
-# GitHub Pages. Each build compares CodeMeta's main branch as it is that day, so the weekly run keeps
-# the upstream section current without a commit.
+# The coverage page (site/), with the docs site (docs.yml checks it) under /docs/. A pull request
+# builds both; a push to main and the Monday run deploy them to GitHub Pages. Each build compares
+# CodeMeta's main branch as it is that day, so the weekly run keeps the upstream section current
+# without a commit.
 on:
   push:
     branches: [main]
@@ -42,6 +43,11 @@ jobs:
       # export's tag, so the clone is full (about 11 MB).
       - run: git clone --no-checkout https://github.com/codemeta/codemeta.git "${RUNNER_TEMP}/codemeta"
       - run: uv run site/build.py --out _site --codemeta "${RUNNER_TEMP}/codemeta"
+      - uses: taiki-e/install-action@1919c4a95903d2c33e4a221102edca87309fc14b # v2.89.0
+        with:
+          tool: just@1.59.0
+          fallback: none
+      - run: just docs && cp -R _docs _site/docs
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site

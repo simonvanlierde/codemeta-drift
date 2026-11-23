@@ -11,8 +11,8 @@ codemeta-drift watch ../codemeta --tag 4.0 \
 ```
 
 Each directory needs the five files named in
-[`SCHEMA_FILES`](../src/codemeta_drift/conformance.py): CFF, pyproject, package.json and
-Cargo, plus the [verified Zenodo structural subset](../tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the curated
+[`SCHEMA_FILES`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/conformance.py): CFF, pyproject, package.json and
+Cargo, plus the [verified Zenodo structural subset](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the curated
 mapping from the selected CodeMeta tag, then checks its paths against the new schemas.
 It lists broken mapped paths and new declared properties that have no row. New tables under pyproject's `tool`
 need no row: they configure tools and hold no metadata. Local refs (including numeric array indices),
@@ -39,7 +39,7 @@ published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issu
 "Pinned <file> is not in codemeta-drift <tag>". The poll's `--root` option names a codemeta-drift checkout
 (default `.`).
 
-The weekly [schema watcher workflow](../.github/workflows/schema-watch.yml) polls the
+The weekly [schema watcher workflow](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/workflows/schema-watch.yml) polls the
 existing public schema sources, CFF's latest release, CodeMeta's tags, the latest stable
 codemeta-drift release and citesync's pin. One poll both uploads the draft JSON as an artifact and publishes the drafts. The artifact is uploaded even when
 publishing fails. The live tests run first and can fail the run. To

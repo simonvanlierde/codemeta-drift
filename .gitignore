@@ -41,3 +41,6 @@ mutants/
 
 # The built coverage page (site/build.py)
 _site/
+
+# What `just docs` builds from docs/
+/_docs/

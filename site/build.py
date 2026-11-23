@@ -26,7 +26,7 @@ from codemeta_drift.export import curated_tags
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
-STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg", "og.png")
+STATIC = ("index.html", "style.css", "main.mjs", "fragment.mjs", "favicon.svg")
 
 
 def upstream_data(checkout: Path, mapping: dict[str, Any]) -> dict[str, Any]:
@@ -97,9 +97,15 @@ def main() -> None:
     for name in STATIC:
         shutil.copy(ROOT / "site" / name, args.out / name)
     shutil.copytree(ROOT / "site" / "fonts", args.out / "fonts")
+    # The docs site's card, which `just og-card` renders.
+    shutil.copy(ROOT / "docs/assets/og.png", args.out / "og.png")
     # Pages caches each file for 10 minutes: a module URL that carries its content hash never pairs a fresh page
-    # with a stale module.
-    for page, ref, module in (("main.mjs", '"./{}"', "fragment.mjs"), ("index.html", 'src="{}"', "main.mjs")):
+    # with a stale module. Link previews cache the card by URL, so a redrawn card needs a new one too.
+    for page, ref, module in (
+        ("main.mjs", '"./{}"', "fragment.mjs"),
+        ("index.html", 'src="{}"', "main.mjs"),
+        ("index.html", '/{}"', "og.png"),
+    ):
         stamp = hashlib.sha256((args.out / module).read_bytes()).hexdigest()[:12]
         text = (args.out / page).read_text("utf-8")
         (args.out / page).write_text(text.replace(ref.format(module), ref.format(f"{module}?v={stamp}")), "utf-8")
