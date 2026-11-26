@@ -35,8 +35,8 @@ Other rows use `curated-<tag>.json` ([3.1](https://github.com/simonvanlierde/cod
 The exporter exits 0 on success. A finding, such as an unresolved cell, makes it exit 1 and write no
 mapping. It prints the findings on standard error, or with `--json` as a
 [JSON report](checks.md#read-json-output) on standard output. Invalid arguments, such as a tag with no
-curated file, exit 2, and unreadable inputs exit 3. Without `--out`, the mapping goes to standard output;
-with `--json` it sits in the report.
+curated file, exit 2, and unreadable inputs exit 3. The mapping goes to `--out`, or to standard
+output without it. With `--json`, the report holding the mapping goes there instead.
 
 | Finding | What to check |
 | --- | --- |

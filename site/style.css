@@ -165,8 +165,6 @@ a:hover {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-family: var(--serif);
-  font-size: 1.125rem;
 }
 .lead {
   display: flex;
@@ -344,7 +342,7 @@ select {
   position: relative;
   overflow-x: auto;
   /* Room for the sticky format column on the left; on the right, Chrome otherwise stops with a focused cell half out. */
-  scroll-padding: 0 3rem 0 9.5rem;
+  scroll-padding: 0 3rem 0 11rem;
   border: 1px solid var(--rule);
 }
 table {
@@ -368,8 +366,8 @@ table {
 #matrix tbody th {
   font-weight: 400;
   padding: 8px 12px;
-  width: 9.5rem;
-  min-width: 9.5rem;
+  width: 11rem;
+  min-width: 11rem;
   vertical-align: middle;
 }
 /* Term names run up the column, so seventeen columns fit beside the detail panel. */
