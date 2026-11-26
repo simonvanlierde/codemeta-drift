@@ -43,12 +43,12 @@ def test_pkg_info_parser_vectors_include_raw_headers(case: dict) -> None:
     assert case["raw_input"]["text"].endswith("\n")
 
 
-# The lists rule of docs/mapping-export.md for RO-Crate and Croissant: these keys are read as lists.
+# The lists rule of docs/reading-formats.md for RO-Crate and Croissant: these keys are read as lists.
 LISTED = ("author", "creator", "contributor", "identifier", "license", "publisher")
 
 
 def read_json_ld(fmt: str, text: str) -> dict:
-    """A crate or Croissant file read as docs/mapping-export.md says: references replaced, bare values listed."""
+    """A crate or Croissant file read as docs/reading-formats.md says: references replaced, bare values listed."""
     tree = json.loads(text)
     root = tree
     if fmt == "ro-crate":
@@ -171,7 +171,7 @@ def raw_case(fmt: str) -> dict:
 
 
 def read_oai_dc(text: str) -> dict:
-    """An oai_dc record read as docs/mapping-export.md says: each element a dc: key, every key a list."""
+    """An oai_dc record read as docs/reading-formats.md says: each element a dc: key, every key a list."""
     tree: dict[str, list[str]] = {}
     for child in ET.fromstring(text):  # noqa: S314 - the vectors ship in this package
         tree.setdefault(f"dc:{child.tag.rpartition('}')[2]}", []).append((child.text or "").strip())
@@ -216,7 +216,7 @@ def test_curated_dublin_core_rows_read_both_carriers(tag: str) -> None:
 
 
 def read_deb822(text: str) -> list[dict[str, str]]:
-    """deb822 stanzas as docs/mapping-export.md reads them: names in Policy's spelling, continuations kept."""
+    """deb822 stanzas as docs/reading-formats.md reads them: names in Policy's spelling, continuations kept."""
     stanzas = []
     for block in re.split(r"\n\s*\n", text.strip("\n")):
         stanza: dict[str, str] = {}
@@ -284,7 +284,7 @@ def test_curated_debian_rows_read_the_source_tree(tag: str) -> None:
 
 
 def read_xml(node: ET.Element) -> Any:  # noqa: ANN401 - a string or a tree
-    """An XML element as docs/mapping-export.md reads MODS: each child a list, attributes @ keys, text in #text."""
+    """An XML element as docs/reading-formats.md reads MODS: each child a list, attributes @ keys, text in #text."""
     tree: dict[str, Any] = {
         "@" + key.replace("{http://www.w3.org/1999/xlink}", "xlink:"): value
         for key, value in node.attrib.items()
@@ -429,7 +429,7 @@ ISO_LISTS = {
 
 
 def read_iso(obj: ET.Element) -> dict[str, Any]:
-    """A class element as docs/mapping-export.md reads ISO 19115-3: each property replaced by its value."""
+    """A class element as docs/reading-formats.md reads ISO 19115-3: each property replaced by its value."""
     tree: dict[str, Any] = {"_class": obj.tag.rpartition("}")[2]}
     for prop in obj:
         key, children = prop.tag.rpartition("}")[2], list(prop)

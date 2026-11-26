@@ -4713,7 +4713,7 @@
       "path": "vivo:relatedBy[@type=Authorship].vivo:relates[]",
       "cell": "relatedBy.relates",
       "reason": "the cell says relatedBy.relates, which also reaches editorships and the work itself; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, links a work to its authors through a vivo:Authorship node that vivo:relates both the work and an agent, so the path keeps only Authorship nodes",
-      "comment": "Needs the VIVO parse rule in docs/mapping-export.md: Authorship is a context term, the parser drops the reference back to the record from each vivo:relates and sorts vivo:relatedBy by vivo:rank. An agent is a foaf:Person, a vcard:Individual (an author with no VIVO profile) or a foaf:Organization."
+      "comment": "Needs the VIVO parse rule in docs/reading-formats.md: Authorship is a context term, the parser drops the reference back to the record from each vivo:relates and sorts vivo:relatedBy by vivo:rank. An agent is a foaf:Person, a vcard:Individual (an author with no VIVO profile) or a foaf:Organization."
     },
     {
       "format": "vivo-1.8",

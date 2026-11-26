@@ -6,10 +6,15 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23774728.svg)](https://doi.org/10.5281/zenodo.23774728)
 
-Shows where CodeMeta's crosswalks to citation and package formats are wrong or missing,
-checks where its vocabulary, definitions, examples and crosswalks disagree, and exports
-reviewed field mappings for citation tools such as
+codemeta-drift shows where CodeMeta's crosswalks to citation and package formats are wrong or
+missing: [see every cell](https://simonvanlierde.com/codemeta-drift/). It also checks CodeMeta's
+own files against each other, and exports a reviewed JSON field mapping for tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
+
+codemeta-drift is not part of the CodeMeta project and proposes no edits to CodeMeta's files. Its
+`identifier` column means the software's DOI, a narrower reading than CodeMeta's "any kind of
+identifier", so a cell that holds a package id or a UUID counts as corrected for citation use, not
+as a CodeMeta error.
 
 ## Why this exists
 
@@ -18,27 +23,32 @@ versions and repository URLs. Its **crosswalks** map fields in other formats to 
 terms. For example, the Citation File Format (CFF) uses `title` where CodeMeta uses `name`.
 
 At CodeMeta commit `e62eb75`, line 46 of the property list changed from `position` to
-`maintainer`, while the crosswalks kept `position`. Joining the tables by row number attaches a field to the wrong
-term. codemeta-drift compares names and reports the mismatch.
+`maintainer`, while the crosswalks kept `position`. Joining the tables by row number attaches a
+field to the wrong term. codemeta-drift compares names and reports the mismatch.
 
 It checks the CodeMeta standard's own files. To keep a project's `CITATION.cff`,
 `codemeta.json` and package manifests in sync, use citesync.
 
-## How the crosswalks hold up
+## What it found
 
-At CodeMeta 4.0, the 36 crosswalks reviewed here, from CFF, Zenodo and DataCite to Maven, SPDX,
-Wikidata and GitLab, have 648 cells, one for each of the 18 terms citation tools need. 212 are for terms the
-format has no field for. Of the other 436, only 123 can be used as written: 203 are wrong,
-ambiguous or prose (40 of them fill a term the format has no field for), and 110 are blank although
-the format has the field. The matrix's 19th column, `resourceType`, has no CodeMeta property, so no
-crosswalk has a cell for it. CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto
+At CodeMeta 4.0 I reviewed 36 of its 46 crosswalks, from CFF, Zenodo and DataCite to Maven, SPDX,
+Wikidata and GitLab, for the 18 terms citation tools need. That gives 648 cells, one per crosswalk
+and term:
+
+- 123 can be used as written.
+- 203 are wrong, ambiguous or prose. 40 of them name a field the format doesn't have.
+- 110 are blank although the format has the field.
+- 212 are for a term the format has no field for.
+
+The matrix has a 19th column, `resourceType`. It has no CodeMeta property, so no crosswalk has a
+cell for it. CodeMeta has no crosswalk at all for `pyproject.toml`, `typst.toml`, Quarto
 extensions, Composer, RIS, EndNote, RO-Crate or Croissant.
 
-The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md)
-shows every cell and the reason for each correction, and lists the other 10 crosswalks by the
-shape of their cells, with the reason none is reviewed. The [web page](https://simonvanlierde.com/codemeta-drift/) also checks
-CodeMeta's main branch each week. The
-[3.1 matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-3.1.md) has the earlier figures.
+The [coverage page](https://simonvanlierde.com/codemeta-drift/) gives the reason for each
+correction and checks CodeMeta's main branch each week. It also lists the 10 crosswalks I haven't
+reviewed, and why. The same matrix is in Markdown for
+[4.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md) and
+[3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-3.1.md).
 
 ## Try it
 
@@ -59,26 +69,20 @@ Each output line names the check, file, term and problem. The 4.0 check reports,
 EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
 ```
 
-Exit codes are **0** when the checked files agree, **1** when they disagree, **2** on a usage
-error, **3** when the check cannot run and **130** when interrupted. A check with no findings
-prints nothing. `SKIPPED` notices for optional files do not make it fail. Add `--json` for
-structured output; the [checks guide](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md) lists the finding codes.
+A check with no findings prints nothing. The command exits 1 when the files disagree. The
+[checks reference](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md)
+lists the finding codes, the other exit codes and the `--json` output.
 
-## Mapping export
-
-Export the reviewed mappings for CodeMeta 4.0 (or `3.1`):
+## Export the mapping
 
 ```sh
 uvx codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
-The 4.0 export covers 45 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata,
-RO-Crate, MODS and ISO 19115-1. It records the field path for each term, with a reason for each curated
-correction. It does not convert field values. Only tags with curated mappings can be exported:
-`3.1` and `4.0`.
-
-The [mapping export guide](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md)
-lists the formats and holds the contract. The
+The export gives the field path for each term in 45 formats, with the reason for each cell I
+corrected by hand. It does not convert values. Only `3.1` and `4.0` have reviewed mappings. The
+[mapping export guide](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md)
+holds the contract, and the
 [committed example](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-4.0.json)
 shows the output.
 
@@ -86,38 +90,15 @@ shows the output.
 
 The pages below are also a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>.
 
-- [Crosswalk coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md) (also [3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-3.1.md)): every term and format, with the reason for each correction.
-- [Offline schema recovery](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-recovery.md): preview a synthetic rename, then approve it.
-- [Zenodo path coverage](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/zenodo-schema.md): verified paths, upstream source checks and validation limits.
-- [Checks](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md): findings and the JSON interface.
-- [Findings](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/findings.md): the dated CodeMeta findings report.
-- [Mapping export](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md): the export contract and path validation against schemas.
-- [Development](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/development.md): set-up and tests.
-
-## Crosswalk hub
-
-[`codemeta-drift hub`](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/crosswalk-hub.md) derives field correspondences between two formats
-and writes SSSOM spokes for every format. Values still need each format's parser.
-
-## Schema watcher
-
-Compare downloaded schemas and prepare issue drafts with the
-[schema watcher](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-watcher.md). The weekly workflow polls public sources and
-checks citesync's mapping pin. Publishing needs a token.
-
-## Social card
-
-[`docs/assets/og.png`](docs/assets/og.png) is the 1200x630 card shown when the coverage page or
-the docs are shared. It is rendered from [`docs/og-card.html`](docs/og-card.html). Edit the HTML,
-then run:
-
-```sh
-just og-card
-```
-
-`site/build.py` copies the card into the built page and adds the PNG's hash to the `og:image`
-URL (`?v=`). `just og-card` writes the hash into `zensical.toml` for the docs; a test fails if
-it is stale.
+- [Checks reference](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/checks.md): finding codes, exit codes and JSON output.
+- [Findings](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/findings.md): what the checks found in earlier CodeMeta snapshots.
+- [Coverage](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage.md): the crosswalk matrix for each CodeMeta release.
+- [Mapping export](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md): the JSON contract consumers pin.
+- [Crosswalk hub](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/crosswalk-hub.md): corresponding fields between two formats, and the SSSOM export.
+- [SSSOM compatibility](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/sssom-compatibility.md): validating the SSSOM export and how it compares with CodeMeta's methodology.
+- [Schema watcher](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-watcher.md): previewing format schema changes, and [Zenodo path coverage](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/zenodo-schema.md).
+- [Schema recovery](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/schema-recovery.md): an offline rename, from the first finding to a reviewed fix.
+- [Development](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/development.md): tests, the site, the schema watcher's publishing and the social card.
 
 ## Development
 

@@ -4,8 +4,9 @@ description: "Validate the hub's SSSOM export with the reference tool, and how i
 
 # SSSOM validation and CodeMeta compatibility
 
-The hub writes a SSSOM table of field correspondences. Its identifiers sit under
-`https://w3id.org/codemeta-drift/`, and every relation is `skos:relatedMatch`.
+The [hub](crosswalk-hub.md) writes an SSSOM (Simple Standard for Sharing Ontological Mappings) table
+of field correspondences. Its identifiers sit under `https://w3id.org/codemeta-drift/`, and every
+relation is `skos:relatedMatch`.
 
 ## Validate an export
 
@@ -39,7 +40,7 @@ contains a CSV authoring sheet and separate YAML metadata.
 
 | Aspect | CodeMeta methodology | This hub |
 | --- | --- | --- |
-| Input | CSV authoring sheet and separate YAML metadata | Validated curated mapping JSON |
+| Input | CSV authoring sheet and separate YAML metadata | Validated reviewed mapping JSON |
 | Direction and identifiers | Source vocabulary terms to CodeMeta terms; hierarchy uses `/` | Local hub terms to format paths, including arrays, filters and alternatives |
 | Relationships | Curator selects exact, close, broader, narrower or part-of relationships | Every exported relation is `skos:relatedMatch` |
 | Combined fields | A formula extension describes how source terms combine | Paths identify fields; parsers and normalization handle values elsewhere |
