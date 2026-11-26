@@ -19,6 +19,7 @@ SCHEMA_FILES = {
     "pep621": "pyproject.json",
     "npm": "package.json",
     "cargo": "cargo.json",
+    "composer": "composer.json",
     "zenodo": "zenodo.json",
 }
 """The schema file for each format that has one. Zenodo uses a verified structural subset; codemeta is not checked."""

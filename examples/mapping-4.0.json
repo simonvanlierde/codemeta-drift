@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.10",
+  "schema_version": "1.9",
   "codemeta_tag": "4.0",
   "generator": {
     "name": "codemeta-drift",
@@ -997,8 +997,8 @@
     {
       "format": "composer",
       "term": "codeRepository",
-      "path": "source.url",
-      "source": "curated:No Composer crosswalk upstream. Composer gives the VCS URL in source.url. A project homepage or support source can point outside the repository",
+      "path": "source.url | support.source",
+      "source": "curated:No Composer crosswalk upstream. A root composer.json gives the sources URL in support.source; source.url is filled in by the repository the package comes from. The homepage can point outside the repository",
       "crosswalk_cell": null
     },
     {

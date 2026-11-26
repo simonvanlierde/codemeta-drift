@@ -1994,6 +1994,18 @@
    "expected": [
     "MIT OR Apache-2.0"
    ]
+  },
+  {
+   "name": "Composer: a root manifest's repository",
+   "path": "source.url | support.source",
+   "document": {
+    "support": {
+     "source": "https://example.org/carberry/notes/tree/1.2.0"
+    }
+   },
+   "expected": [
+    "https://example.org/carberry/notes/tree/1.2.0"
+   ]
   }
  ]
 }

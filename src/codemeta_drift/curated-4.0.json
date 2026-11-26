@@ -498,8 +498,8 @@
     {
       "format": "composer",
       "term": "codeRepository",
-      "path": "source.url",
-      "reason": "No Composer crosswalk upstream. Composer gives the VCS URL in source.url. A project homepage or support source can point outside the repository"
+      "path": "source.url | support.source",
+      "reason": "No Composer crosswalk upstream. A root composer.json gives the sources URL in support.source; source.url is filled in by the repository the package comes from. The homepage can point outside the repository"
     },
     {
       "format": "composer",

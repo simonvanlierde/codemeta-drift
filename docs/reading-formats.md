@@ -38,9 +38,9 @@ if it needs name parts. An array of licences offers alternatives. A string may c
 expression. The path reads the field as one string or one array.
 
 The package registry or VCS often supplies the version and source URL. The mapping reads
-only the values in the supplied object and uses `source.url` for the repository. The
-project homepage and support links are separate. A consumer that needs a date converts the
-UTC release time in `time`.
+only the values in the supplied object and uses `source.url`, or else `support.source`, for the
+repository. The homepage is separate. A consumer that needs a date reads `time`, a UTC date or
+date and time (`YYYY-MM-DD` or `YYYY-MM-DD HH:MM:SS`).
 
 ## Line and key-value formats
 

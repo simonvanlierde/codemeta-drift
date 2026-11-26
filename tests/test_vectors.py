@@ -143,7 +143,7 @@ def test_composer_rows_read_the_manifest_without_guessing(tag: str) -> None:
         "license": ["MIT", "Apache-2.0"],
         "keywords": ["ceramics", "cracks"],
         "source": {"type": "git", "url": "https://example.org/carberry/notes.git", "reference": "1.2.0"},
-        "support": {"source": "https://example.org/notes.zip"},
+        "support": {"source": "https://example.org/carberry/notes/tree/1.2.0"},
         "homepage": "https://example.org/notes",
         "time": "2026-11-10 13:15:00",
         "type": "library",
@@ -163,7 +163,10 @@ def test_composer_rows_read_the_manifest_without_guessing(tag: str) -> None:
     }
     assert {term: resolve(document, path) for term, path in paths.items() if path is not None} == expected
     assert resolve({"license": "MIT OR Apache-2.0"}, paths["license"]) == ["MIT OR Apache-2.0"]
-    assert resolve({"homepage": document["homepage"], "support": document["support"]}, paths["codeRepository"]) == []
+    assert resolve({"homepage": document["homepage"], "support": document["support"]}, paths["codeRepository"]) == [
+        document["support"]["source"]
+    ]
+    assert resolve({"homepage": document["homepage"]}, paths["codeRepository"]) == []
 
 
 def raw_case(fmt: str) -> dict:

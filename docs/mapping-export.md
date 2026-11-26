@@ -51,7 +51,7 @@ a [JSON report](checks.md#read-json-output) on standard output.
 `--schemas DIR` adds a `PATH_NOT_IN_SCHEMA` finding for each path absent from the format's schema.
 In a codemeta-drift checkout, pass `--schemas tests/fixtures/schemas`. The
 [snapshots](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/SOURCES)
-cover CFF 1.2.0, pyproject.toml, package.json and Cargo.toml, and Zenodo a
+cover CFF 1.2.0, pyproject.toml, package.json, Cargo.toml and composer.json, and Zenodo a
 [verified subset](zenodo-schema.md). It catches a missing key (Cargo's `package.keyword`), not a
 wrong meaning (Zenodo's `id` for a DOI).
 
@@ -84,7 +84,7 @@ On macOS, use `shasum -a 256 -c -` in place of `sha256sum -c -`.
 
 ```json
 {
-  "schema_version": "1.10",
+  "schema_version": "1.9",
   "codemeta_tag": "4.0",
   "generator": {"name": "codemeta-drift", "version": "0.9.0"},
   "context_terms": ["address", "affiliation", "alternateName", "..."],

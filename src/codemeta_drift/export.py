@@ -20,7 +20,7 @@ PACKAGE = Path(__file__).parent
 """The installed package directory, which holds the schema and curated files: a plain path, cheaper than
 importlib.resources, which this wheel-only package does not need."""
 
-SCHEMA_VERSION = "1.10"
+SCHEMA_VERSION = "1.9"
 
 TERMS = {
     "name": ("schema:Thing", "name"),

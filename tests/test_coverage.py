@@ -35,6 +35,17 @@ def test_coverage_index_links_every_tag():
     assert all(f"(coverage-{tag}.md)" in index for tag in curated_tags())
 
 
+def test_coverage_index_counts_match_the_newest_export():
+    rows = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))["rows"]
+    formats = {r["format"] for r in rows}
+    shown = formats - {"codemeta"}
+    no_crosswalk = {f for f in shown if FORMATS[f].crosswalk is None}
+    index = " ".join((ROOT / "docs/coverage.md").read_text("utf-8").split())
+    assert f"The page shows {len(shown)} of the export's {len(formats)} formats" in index
+    assert f"{len(no_crosswalk)} of them with no CodeMeta crosswalk" in index
+    assert f"The page's filters count all {len(shown) * len(TERMS)} cells" in index
+
+
 @pytest.mark.parametrize("tag", curated_tags())
 def test_docs_page_is_generated_from_the_example(tag: str):
     # Regenerate as docs/development.md says, with a CodeMeta clone that has the tag.
