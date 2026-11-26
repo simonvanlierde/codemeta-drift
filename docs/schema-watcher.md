@@ -43,7 +43,7 @@ published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issu
 (default `.`).
 
 The weekly [schema watcher workflow](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/workflows/schema-watch.yml) polls the
-existing public schema sources, CFF's latest release, CodeMeta's tags, the latest stable
+existing public schema sources, the latest CFF and Composer releases, CodeMeta's tags, the latest stable
 codemeta-drift release and citesync's pin. When publishing is set up, it opens the drafts as issues.
 [Development](development.md#schema-watcher-workflow) covers running the poll locally and
 publishing.
