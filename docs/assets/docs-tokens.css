@@ -65,6 +65,12 @@
   font-size: 0.875em;
 }
 .md-nav,
-.md-footer-meta {
+.md-footer-meta,
+.md-copyright {
   font-size: 0.8rem;
+}
+
+/* 0.7rem is 14px, the floor; more overflows the header's narrow source widget. */
+.md-source__repository {
+  font-size: 0.7rem;
 }
