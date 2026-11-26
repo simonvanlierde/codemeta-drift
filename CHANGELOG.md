@@ -7,61 +7,6 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Upgrade
-
-- `hub coverage --json` gives two more cell statuses, `scope` and `notation`, for cells it called
-  `corrected` before. A consumer that counts corrected cells adds them back, or reads `statuses` for
-  every name. Read `statuses` and `cells[].status` by name, not by position: the order now puts
-  scope and notation before corrected.
-- The CFF `license` row may now give a licence URL from `license-url`, not only an SPDX id.
-
-### Added
-
-- Each GitHub release attaches `mapping-<tag>.json` for every curated CodeMeta tag and a `SHA256SUMS`
-  file, so a consumer can pin the export without a CodeMeta checkout. See
-  [Pin a release's export](docs/mapping-export.md#pin-a-releases-export).
-
-### Changed
-
-- The coverage pages and the site stop counting every curated cell as wrong. Of the 203 corrected
-  cells at 4.0, 79 now count as `notation` (≈): the cell names the right field in a form a tool
-  can't use as a path, such as Zenodo's `ORCID` for the key `orcid` or MODS's XPath. 42 count as
-  `scope` (⊂): the cell is right by CodeMeta's definition, but codemeta-drift reads the term more
-  narrowly (`identifier` as the software's DOI, a person's `@id` as their ORCID, `publisher` as its
-  name, `swhid` as a term of its own) or also reads another field, such as Maven's fallback
-  `parent.version` or PKG-INFO's newer `License-Expression`. 82 stay `corrected`. A curated row's
-  optional `kind` holds the split, and the export gives it as an optional row field.
-- The page's title is "Where CodeMeta's crosswalk cells work as written, and where they don't".
-- The CFF `license` row reads `license | license-url`: CFF 1.2.0 puts the URL of a licence that is
-  not on the SPDX list in `license-url`, and the export already gives licence URLs for Maven, NuGet
-  and DataCite.
-- The coverage page says that its `identifier` column means the software's DOI, narrower than
-  CodeMeta's definition, and that `swhid` is its own column. It groups the formats that have no
-  CodeMeta crosswalk, and the Upstream tab counts causes rather than cells.
-- The SSSOM `mapping_set_description` calls the subjects codemeta-drift's hub terms, not CodeMeta
-  terms, and credits CodeMeta's crosswalks. NOTICE credits them for the exports and coverage pages.
-- The per-format reading rules moved from the export guide to
-  [Read each format's paths](docs/reading-formats.md). `#the-file` and `#path-grammar` stay put.
-- `hub coverage --json`: the status meanings say "the reviewed mapping" instead of "a curated
-  row", Software Ontology and Software Discovery Index are `niche` rather than `registry`, and
-  ASCL's reason is reworded. The example exports' VIVO comment points at the new page. The export
-  guide's `#check-paths-against-json-schemas`, `#field-paths-and-value-conversion` and
-  `#sssom-spokes` anchors are gone: `--schemas` is under
-  [Export a mapping](docs/mapping-export.md#export-a-mapping), value conversion on
-  [Read each format's paths](docs/reading-formats.md), and SSSOM spokes on
-  [the crosswalk hub page](docs/crosswalk-hub.md).
-- The docs site has a menu in reading order, previous and next links, and a footer with the project links.
-- Coverage page: the matrix is one tab stop with arrow, Home and End keys, a focused or pointed-at cell
-  names its term, and Follow a field hides terms neither format has.
-
-### Fixed
-
-- The coverage page's Upstream tab joins a crosswalk's `name` row on CodeMeta's main branch, where the
-  property table gained a third `name` row the crosswalks lack. It showed 34 cells as unmatched and
-  hid the GitHub `name` fix (codemeta/codemeta#505); it now shows that one cell as fixed. A property
-  whose counts differ joins only its first `schema:Thing` row, and only when the rows on either side
-  match the table's.
-
 ## [0.9.0] - 2026-11-26
 
 ### Upgrade
@@ -72,45 +17,90 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Vendor the 1.9 `mapping.schema.json` and `mapping-vectors.json` with a 1.9 export, and update a
   pinned `codemeta-drift hub`: the 0.8.0 hub refuses 1.9 files. A consumer that reads only some
   formats skips the rows of a format id it does not know.
+- `hub coverage --json` has two new cell statuses, `scope` and `notation`, for cells it called
+  `corrected` before. A consumer that counts corrected cells adds them back, or reads `statuses` for
+  every name. Read `statuses` and `cells[].status` by name, not by position: scope and notation now
+  come before corrected. See [the coverage page](docs/coverage.md).
+- The CFF `license` row reads `license | license-url`, so it may give a licence URL as well as an SPDX
+  id. A writer still puts SPDX ids in `license`. Its SSSOM object id becomes
+  `field:cff-1.2.0/license%20%7C%20license-url`, and so does its coverage page fragment
+  (`#field/cff-1.2.0/license%20%7C%20license-url`). See [the crosswalk hub](docs/crosswalk-hub.md).
 
 ### Added
 
 - `export --json` and `hub pair|sssom|crosswalk --json` write the `schema_version` / `errors` report that
   `check --json` and `hub coverage --json` write, and report an error as JSON on standard output.
+  See [JSON output](docs/checks.md#read-json-output).
 - `hub --format`, `--from` and `--to` take only a known format id; `hub --help` lists them, and every
   subcommand's `--help` ends with an example and the exit codes.
 - `report.schema.json`, the JSON Schema of `check --json`, in the package; the tests validate real output
   against it.
-- `hub` reads the mapping from standard input given `-`, and `watch` reads `--existing` from it.
+- `hub` reads the mapping from standard input given `-`, and `watch` reads `--existing` from it. A closed or
+  empty standard input is an input error (exit 3). See [the crosswalk hub](docs/crosswalk-hub.md).
 - The [coverage page](https://simonvanlierde.com/codemeta-drift/) uses self-hosted fonts, a red palette
   for wrong or missing cells, and a preview card when sharing its link.
 - Mapping schema 1.9: rows for six more formats in the 3.1 and 4.0 exports: `dublin-core` (an `oai_dc`
   record or a DCMI Terms RDF record), `debian` (a source tree's `debian/` directory), `mods` (a MODS 3
   record), `vivo-1.8` (a VIVO software individual), `spase-2.6.1` (a SPASE Software resource) and
-  `iso-19115-1-2014` (an ISO 19115-3 record). No pattern changes, so a 1.9 file passes the 1.8 schema;
-  the `hub` of 0.8.0 refuses it. The [export guide](docs/mapping-export.md) gives each format's reading
-  rules, and `mapping-vectors.json` has a parser case for each. The SSSOM files gain their rows too.
-- The docs are a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>. The coverage page keeps its address.
+  `iso-19115-1-2014` (an ISO 19115-3 record), and an optional row field `kind` (`notation` or `scope`).
+  No pattern changes, so a 1.9 file passes the 1.8 schema; the `hub` of 0.8.0 refuses it.
+  [Read each format's paths](docs/reading-formats.md) gives each format's reading rules, and
+  `mapping-vectors.json` has a parser case for each. The SSSOM files gain their rows too.
+- The docs are a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>, with a menu in
+  reading order, previous and next links, and a footer with the project links. The coverage page keeps its
+  address.
 - The crosswalks nobody reviews say why, on the coverage pages and the site: superseded by a reviewed format
   (DCAT 2, CodeMeta 1), a registry's own schema, or niche. `hub coverage --json` gives each one's `status`,
-  `reason` and `url`.
+  `reason` and `url`. See [the coverage page](docs/coverage.md).
+- Each GitHub release attaches `mapping-<tag>.json` for every curated CodeMeta tag and a `SHA256SUMS`
+  file, so a consumer can pin the export without a CodeMeta checkout. See
+  [Pin a release's export](docs/mapping-export.md#pin-a-releases-export).
 
 ### Changed
 
 - **Breaking:** `watch` prints one report object, `{"schema_version": 1, "issues": [...], "findings": [],
   "errors": []}`, where it printed the bare list of drafts. Read `issues` for the list. Its findings (exit 1)
-  and errors (exit 2 and 3) are in the report on standard output, not lines on standard error.
+  and errors (exit 2 and 3) go to that report on standard output, not to standard error. An error report
+  holds only `schema_version` and `errors`. See [JSON output](docs/checks.md#read-json-output).
 - An unknown `hub --format`, `--from` or `--to` value is refused by the argument parser with the valid
   choices (exit 2), not by the command after reading the mapping.
 - With `--json`, an error or findings report goes to standard output only, and `--out` keeps the successful
   write, so a failed run no longer overwrites an existing `--out` file. `hub coverage --json` used to write its
   error report to `--out`.
+- The coverage pages and the site no longer count every curated cell as wrong. Of the 203 corrected
+  cells at 4.0, 79 now count as `notation` (≈): the cell names the right field in a form a tool
+  can't use as a path, such as Zenodo's `ORCID` for the key `orcid` or MODS's XPath. 42 count as
+  `scope` (⊂): the cell is right by CodeMeta's definition, but codemeta-drift reads the term more
+  narrowly or also reads another field, such as Maven's fallback `parent.version`. 82 stay
+  `corrected`. A curated row's optional `kind` holds the split. The status meanings say "the reviewed
+  mapping" instead of "a curated row". See [the coverage page](docs/coverage.md).
+- The coverage page says that its `identifier` column means the software's DOI, narrower than
+  CodeMeta's definition, and that `swhid` is its own column. It groups the formats that have no
+  CodeMeta crosswalk, and the Upstream tab counts causes rather than cells. Its title is "Where
+  CodeMeta's crosswalk cells work as written, and where they don't".
+- The coverage page's matrix is one tab stop with arrow, Home and End keys. A focused or pointed-at cell
+  names its term, and Follow a field hides terms neither format has.
 - The coverage page and the docs set body text at 18px and nothing under 14px, and each links to the other.
+- The SSSOM `mapping_set_description` calls the subjects codemeta-drift's hub terms, not CodeMeta
+  terms, and credits CodeMeta's crosswalks. NOTICE credits them for the exports and coverage pages.
+  See [the crosswalk hub](docs/crosswalk-hub.md).
+- The per-format reading rules moved from the export guide to [Read each format's paths](docs/reading-formats.md).
+  `#the-file` and `#path-grammar` stay put. These anchors are gone:
+  - the export guide's `#check-paths-against-json-schemas` (now under
+    [Export a mapping](docs/mapping-export.md#export-a-mapping)), `#field-paths-and-value-conversion` (now
+    on [Read each format's paths](docs/reading-formats.md)) and `#sssom-spokes` (now on
+    [the crosswalk hub page](docs/crosswalk-hub.md))
+  - the README's `#how-the-crosswalks-hold-up` (now `#what-it-found`) and `#mapping-export` (now
+    `#export-the-mapping`); `#crosswalk-hub` and `#schema-watcher` are now their docs pages
+  - `docs/checks.md#understand-the-findings` (now `#finding-codes-exit-codes-and-json-output`)
+  - `docs/sssom-compatibility.md#remaining-work-before-an-upstream-offer` (now `#open-points`)
 
 ### Fixed
 
-- A closed standard input now returns an input error (exit 3) instead of a traceback when reading `-`.
 - Check usage errors with `--json` now match the packaged report schema.
+- The coverage page's Upstream tab joins a crosswalk's `name` row on CodeMeta's main branch, where the
+  property table gained a third `name` row the crosswalks lack. It showed 34 cells as unmatched and
+  hid the GitHub `name` fix (codemeta/codemeta#505); it now shows that one cell as fixed.
 - Template updates check all commits on the update branch and keep it intact when an author cannot be verified.
   They also preserve commits added during an update and leave older pull requests open when a manual update is needed.
 - Release attestation bundles use the `.intoto.jsonl` extension so Signed-Releases checks can find them.

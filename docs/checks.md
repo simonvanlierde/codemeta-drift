@@ -99,8 +99,8 @@ The output is one JSON document:
 
 `code` is the check and `term` the affected property or format; filter on these. `file` is a
 label that can describe a group, and `detail` is text for a person.
-`errors` holds usage errors (exit 2) or execution errors (exit 3). Then `findings` is empty and each error is an
-object with `message` and `help` (the next step, or `null`).
+`errors` holds usage errors (exit 2) or execution errors (exit 3). Each error is an object with `message`
+and `help` (the next step, or `null`). In `check`'s report, `findings` is then empty.
 [`report.schema.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/report.schema.json) is its JSON Schema.
 
 `export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` share `schema_version` and
