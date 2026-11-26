@@ -23,7 +23,8 @@ subcommand's `--help` ends with an example and the exit codes. A mapping `-` is 
 `coverage` writes the [coverage matrix](coverage-4.0.md): each term and format with its status
 (as-is, meaning CodeMeta's cell is already the path; corrected; added; no field; or no term) and
 the reason for every reviewed cell. Add `--json` for the cells as data, which the
-[coverage page](https://simonvanlierde.com/codemeta-drift/) reads. With `--codemeta <checkout>`,
+[coverage page](https://simonvanlierde.com/codemeta-drift/) reads: the newest release at its
+bare address, an older one at `?tag=3.1`. With `--codemeta <checkout>`,
 it also lists the crosswalks nobody has reviewed, read at the export's tag, under `unreviewed` in
 the JSON. Each has a `status` (`superseded`, `registry` or `niche`), `reason` and `url`, all three
 `null` when no reason is listed yet.
