@@ -387,6 +387,12 @@ table {
   padding: 8px 10px;
   white-space: nowrap;
 }
+#matrix thead th .kbd {
+  display: block;
+  margin-top: 8px;
+  white-space: normal;
+  font-size: 0.875rem;
+}
 /* A fixed width the scroll padding can match; a long crosswalk name wraps. */
 #matrix tbody th {
   font-weight: 400;

@@ -55,7 +55,9 @@ const source = (tag, path, line) => el("a", { href: sourceHref(tag, path, line) 
 // The reviewed formats come first; the crosswalks nobody reviewed follow in their own group.
 function matrix(data, unreviewed, onPick) {
   const table = document.getElementById("matrix");
-  const head = el("tr", {}, el("th", { scope: "col" }, "Format"));
+  // The hint sits in the corner's empty space; screen readers get it from the region's label.
+  const hint = el("span", { class: "kbd", "aria-hidden": "true" }, "Arrow keys, Home and End move between cells.");
+  const head = el("tr", {}, el("th", { scope: "col" }, "Format", hint));
   for (const term of data.terms) head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, code(term))));
   head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, "as written")));
   table.append(el("thead", {}, head));
