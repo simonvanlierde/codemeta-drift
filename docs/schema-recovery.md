@@ -58,4 +58,4 @@ mapping. citesync's `check_mapping` accepts both outputs and refuses a `schema_v
 with a major other than 1.
 
 The pins in these files are demonstrations. Nothing here repins citesync, releases a package or
-publishes an issue.
+publishes an issue. A real repin also needs a released mapping and the consumer's tests passing.
