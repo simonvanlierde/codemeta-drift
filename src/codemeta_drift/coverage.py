@@ -10,10 +10,10 @@ from codemeta_drift.hub import validate_mapping
 
 STATUSES = {
     "as-is": ("✓", "CodeMeta's crosswalk cell is the path"),
-    "corrected": ("✎", "the crosswalk cell is wrong, ambiguous or prose; a curated row replaces it"),
-    "added": ("+", "the format has the field but the crosswalk has no cell for it; a curated row adds it"),
+    "corrected": ("✎", "the crosswalk cell is wrong, ambiguous or prose; the reviewed mapping gives the path"),
+    "added": ("+", "the format has the field but the crosswalk has no cell for it; the reviewed mapping adds the path"),
     "no field": ("–", "the format has no field for this term"),  # noqa: RUF001 - an en dash, as in the docs
-    "no term": ("∅", "CodeMeta has no property for this term; a curated row adds it"),
+    "no term": ("∅", "CodeMeta has no property for this term; the reviewed mapping adds the path"),
 }
 """Each cell status, its mark and what it means. The order is the legend's."""
 
@@ -42,7 +42,7 @@ NOT_REVIEWED = {
     ),
     "ASCL": (
         "registry",
-        "the Astrophysics Source Code Library's entry fields: a registry record, not a file a citation tool reads",
+        "the Astrophysics Source Code Library's entry fields, a registry record",
         "https://ascl.net/",
     ),
     "SciCrunchRegistry": (
@@ -56,12 +56,12 @@ NOT_REVIEWED = {
         "https://github.com/KnowledgeCaptureAndDiscovery/ontosoft",
     ),
     "Software Ontology": (
-        "registry",
+        "niche",
         "an OWL ontology that classifies software tools in knowledge bases, not a metadata file",
         "https://github.com/allysonlister/swo",
     ),
     "Software Discovery Index": (
-        "registry",
+        "niche",
         "the NIH BD2K software index proposed at a 2014 workshop; no index was launched",
         "https://web.archive.org/web/20141207053849/http://softwarediscoveryindex.org/report/",
     ),

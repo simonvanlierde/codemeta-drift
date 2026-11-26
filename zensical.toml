@@ -1,14 +1,43 @@
 # The documentation site: `just docs` builds the Markdown in docs/ into _docs/, and
-# pages.yml deploys it under the coverage page, at /docs/. Without a `nav`, the menu follows the files in docs/.
+# pages.yml deploys it under the coverage page, at /docs/.
 # Settings: https://zensical.org/docs/setup/basics/
 [project]
 site_name = "codemeta-drift"
 site_description = "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping"
 site_url = "https://simonvanlierde.com/codemeta-drift/docs/"
 repo_url = "https://github.com/simonvanlierde/codemeta-drift"
+repo_name = "simonvanlierde/codemeta-drift"
+edit_uri = "edit/main/docs/"
+copyright = "Simon van Lierde · Apache-2.0 · not part of the CodeMeta project"
 site_dir = "_docs"
 extra_css = ["assets/docs-tokens.css", "assets/docs.css"]
 extra_javascript = ["assets/docs.js"]
+# Reading order: what the project found, then how to use the mapping, then reference. The decision
+# records stay out of the menu while there are none.
+nav = [
+  { "Documentation" = "index.md" },
+  { "Coverage" = [
+    { "Coverage by release" = "coverage.md" },
+    { "CodeMeta 4.0 matrix" = "coverage-4.0.md" },
+    { "CodeMeta 3.1 matrix" = "coverage-3.1.md" },
+  ] },
+  { "Findings" = "findings.md" },
+  { "Use the mapping" = [
+    { "Mapping export" = "mapping-export.md" },
+    { "Read each format's paths" = "reading-formats.md" },
+    { "Crosswalk hub" = "crosswalk-hub.md" },
+    { "SSSOM compatibility" = "sssom-compatibility.md" },
+  ] },
+  { "Schema changes" = [
+    { "Schema watcher" = "schema-watcher.md" },
+    { "Zenodo paths" = "zenodo-schema.md" },
+    { "A rename, start to finish" = "schema-recovery.md" },
+  ] },
+  { "Reference" = [
+    { "Codes, exit codes and JSON" = "checks.md" },
+    { "Development" = "development.md" },
+  ] },
+]
 # The social card's source and the ADR template are not pages.
 exclude_docs = """
 og-card.html
@@ -19,17 +48,35 @@ decisions/0000-template.md
 font = false
 custom_dir = "docs-overrides"
 favicon = "assets/favicon.svg"
+features = [
+  "content.action.edit",
+  "content.code.copy",
+  "navigation.footer",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+  "toc.follow",
+]
 
-# Follow the reader's light or dark setting, as the coverage page does; the toggle overrides it.
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+# Follows the reader's system setting, as the coverage page does, until they pick one with the toggle.
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle = { icon = "lucide/sun-moon", name = "Switch to light mode" }
+
 [[project.theme.palette]]
 media = "(prefers-color-scheme: light)"
 scheme = "default"
-toggle = { icon = "lucide/moon", name = "Switch to dark mode" }
+toggle = { icon = "lucide/sun", name = "Switch to dark mode" }
 
 [[project.theme.palette]]
 media = "(prefers-color-scheme: dark)"
 scheme = "slate"
-toggle = { icon = "lucide/sun", name = "Switch to light mode" }
+toggle = { icon = "lucide/moon", name = "Switch to system preference" }
 
 # docs-overrides/main.html reads og_image for the link-preview tags. `just og-card` renders the
 # image and puts its hash in this URL, since link previews cache by URL.
@@ -37,6 +84,27 @@ toggle = { icon = "lucide/sun", name = "Switch to light mode" }
 # The logo goes back to the coverage page, which the docs sit under.
 homepage = "https://simonvanlierde.com/codemeta-drift/"
 og_image = "assets/og.png?v=908b2d0f"
+generator = false
+
+[[project.extra.social]]
+icon = "lucide/table"
+link = "https://simonvanlierde.com/codemeta-drift/"
+name = "Coverage page"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/simonvanlierde/codemeta-drift"
+name = "Source on GitHub"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/codemeta-drift/"
+name = "codemeta-drift on PyPI"
+
+[[project.extra.social]]
+icon = "lucide/quote"
+link = "https://doi.org/10.5281/zenodo.23774728"
+name = "Cite it: Zenodo DOI"
 
 # Line anchors are empty links, which screen readers announce without a name.
 [project.markdown_extensions.pymdownx.highlight]

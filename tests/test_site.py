@@ -5,7 +5,8 @@ import json
 import re
 import subprocess
 import sys
-from collections.abc import Callable
+import tomllib
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -261,3 +262,17 @@ def test_every_format_has_a_label():
     assert block
     labels = set(re.findall(r'"?([a-z0-9.-]+)"?: "', block[1]))
     assert labels == set(FORMATS) - {"codemeta"}  # codemeta is the hub, not a spoke
+
+
+def test_every_docs_page_is_in_the_menu():
+    # Top level only: the decision records stay out of the menu on purpose.
+    def pages(entries: list) -> Iterator[str]:
+        for entry in entries:
+            for value in entry.values():
+                if isinstance(value, list):
+                    yield from pages(value)
+                else:
+                    yield value
+
+    nav = tomllib.loads((ROOT / "zensical.toml").read_text("utf-8"))["project"]["nav"]
+    assert set(pages(nav)) == {p.name for p in (ROOT / "docs").glob("*.md")}

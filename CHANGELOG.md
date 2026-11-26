@@ -7,6 +7,25 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The coverage page says that its `identifier` column means the software's DOI, narrower than
+  CodeMeta's definition, and that `swhid` is its own column. It groups the formats that have no
+  CodeMeta crosswalk, and the Upstream tab counts causes rather than cells.
+- The SSSOM `mapping_set_description` calls the subjects codemeta-drift's hub terms, not CodeMeta
+  terms, and credits CodeMeta's crosswalks. NOTICE credits them for the exports and coverage pages.
+- The per-format reading rules moved from the export guide to
+  [Read each format's paths](docs/reading-formats.md). `#the-file` and `#path-grammar` stay put.
+- `hub coverage --json`: the status meanings say "the reviewed mapping" instead of "a curated
+  row", Software Ontology and Software Discovery Index are `niche` rather than `registry`, and
+  ASCL's reason is reworded. The example exports' VIVO comment points at the new page. The export
+  guide's `#check-paths-against-json-schemas`, `#field-paths-and-value-conversion` and
+  `#sssom-spokes` anchors are gone: `--schemas` is under
+  [Export a mapping](docs/mapping-export.md#export-a-mapping), value conversion on
+  [Read each format's paths](docs/reading-formats.md), and SSSOM spokes on
+  [the crosswalk hub page](docs/crosswalk-hub.md).
+- The docs site has a menu in reading order, previous and next links, and a footer with the project links.
+
 ### Fixed
 
 - The coverage page's Upstream tab joins a crosswalk's `name` row on CodeMeta's main branch, where the
