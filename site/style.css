@@ -678,7 +678,7 @@ table[data-only="no-term"] td:has(.cell[data-status="no-term"]) {
   font-size: 0.875rem;
   color: var(--faint);
 }
-@media (max-width: 1359px) and (min-height: 480px) {
+@media (max-width: 1359px) {
   /* A chosen cell's detail stays in view at the foot of the screen until it is closed. */
   html:has(.detail dl) {
     /* Tabbing scrolls a focused cell clear of the panel, not under it. */
@@ -769,4 +769,8 @@ table[data-only="no-term"] td:has(.cell[data-status="no-term"]) {
   z-index: 1;
   background: var(--paper);
   box-shadow: inset -1px 0 0 var(--rule);
+}
+/* Without the script these controls have nothing behind them; the noscript note links the docs instead. */
+html:not(.js) :is(.skip, .tabs, .legend, .key, .skip-matrix, .board, #after-matrix) {
+  display: none;
 }

@@ -108,3 +108,48 @@ export function upstreamLines(cells) {
   }
   return [...lines, ...groups.values()];
 }
+
+// A key on a matrix cell. Arrows, Home and End move focus (see nextCell) and are taken from the browser;
+// Alt+Arrow is its Back and Forward and Shift extends a selection, so those pass, and with Ctrl or Meta only
+// Home and End act. cells holds one array per format row, each entry null or {open, focus()}, open false for a
+// cell a filter hides; at is the [row, column] the key was pressed on.
+export function matrixKey(event, cells, at) {
+  if (!/^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(event.key)) return;
+  const ctrl = event.ctrlKey || event.metaKey;
+  if (event.altKey || event.shiftKey || (ctrl && !/^(Home|End)$/.test(event.key))) return;
+  event.preventDefault();
+  const to = nextCell(cells.map((row) => row.map((c) => c?.open ?? false)), at, event.key, ctrl);
+  if (to) cells[to[0]][to[1]].focus();
+}
+
+// The matrix's one tab stop: the current one (an index, -1 for none) while it is shown, else the first shown cell.
+export const tabStop = (shown, current) => (current >= 0 && shown[current] ? current : shown.indexOf(true));
+
+// The crosswalk cells a person had to judge: not 'no field', and not 'no term', which no crosswalk can have.
+// The tally and the headline count these.
+export const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no field" && c.status !== "no term");
+
+// The headline's figures, and its caption after the figure as [mark, words] pairs; the marks are for the eye only.
+export function scoreCaption(cells) {
+  const fields = needed(cells);
+  const n = (status) => fields.filter((c) => c.status === status).length;
+  return {
+    asIs: n("as-is"),
+    of: fields.length,
+    formats: crosswalkFormats(cells).size,
+    parts: [
+      ["✎ ", `${n("corrected")} are wrong, ambiguous or prose, `],
+      ["≈ ", `${n("notation")} need only a notation change, `],
+      ["⊂ ", `${n("scope")} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly or also reads another field, and `],
+      ["+ ", `${n("added")} are blank where the format has a field.`],
+    ],
+  };
+}
+
+// The detail panel's words for CodeMeta's cell, or null when the cell has text to show as code.
+export function cellWords(cell) {
+  if (!cell.crosswalk) return "no CodeMeta crosswalk for this format";
+  if ((cell.cell ?? "").trim()) return null;
+  if (cell.status === "no term") return "none: CodeMeta has no property for this term";
+  return cell.cell === null ? "can't be matched to its property" : "empty";
+}

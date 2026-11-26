@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseHref, releaseLinks, sourceHref, splitByCrosswalk, upstreamLines } from "./fragment.mjs";
+import {
+  cellWords, chosenTag, hubTerm, linkParts, matrixKey, needed, nextCell, pageTitle, parseFragment, releaseHref, releaseLinks, scoreCaption,
+  sourceHref, splitByCrosswalk, tabStop, upstreamLines,
+} from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -155,4 +158,81 @@ test("upstream cells with no new text share a line per state and term", () => {
   assert.equal(lines.length, 2);
   assert.deepEqual(lines[0], { term: "url", state: "changed", now: "x", formats: ["ris"] });
   assert.deepEqual(lines[1], { term: "name", state: "missing", now: null, formats: ["cff", "npm"] });
+});
+
+// A key event as matrixKey reads it, recording whether the browser's default was taken.
+const press = (key, mods = {}) => ({ key, altKey: false, shiftKey: false, ctrlKey: false, metaKey: false, ...mods, taken: false,
+  preventDefault() { this.taken = true; } });
+
+// One row of three cells, the middle one at [0, 1]; focus() records which cell got focus.
+function row() {
+  const focused = [];
+  const cells = [[0, 1, 2].map((i) => ({ open: true, focus: () => focused.push(i) }))];
+  return { cells, focused };
+}
+
+test("an arrow key moves focus and is taken from the browser", () => {
+  const { cells, focused } = row();
+  const event = press("ArrowRight");
+  matrixKey(event, cells, [0, 1]);
+  assert.deepEqual([event.taken, focused], [true, [2]]);
+});
+
+test("Alt, Shift, and Ctrl or Meta with an arrow are left to the browser", () => {
+  for (const mods of [{ altKey: true }, { shiftKey: true }, { ctrlKey: true }, { metaKey: true }]) {
+    const { cells, focused } = row();
+    const event = press("ArrowLeft", mods);
+    matrixKey(event, cells, [0, 1]);
+    assert.deepEqual([event.taken, focused], [false, []], JSON.stringify(mods));
+  }
+});
+
+test("Ctrl+Home and Meta+End move, and other keys are left alone", () => {
+  for (const [key, mods, to] of [["Home", { ctrlKey: true }, [0]], ["End", { metaKey: true }, [2]]]) {
+    const { cells, focused } = row();
+    const event = press(key, mods);
+    matrixKey(event, cells, [0, 1]);
+    assert.deepEqual([event.taken, focused], [true, to]);
+  }
+  const { cells, focused } = row();
+  const event = press("Enter");
+  matrixKey(event, cells, [0, 1]);
+  assert.deepEqual([event.taken, focused], [false, []]);
+});
+
+test("a key at the edge is still taken, so the page does not scroll", () => {
+  const { cells, focused } = row();
+  const event = press("ArrowRight");
+  matrixKey(event, cells, [0, 2]);
+  assert.deepEqual([event.taken, focused], [true, []]);
+});
+
+test("the tab stop is the first cell, and moves off a cell a filter hides", () => {
+  assert.equal(tabStop([true, true], -1), 0);
+  assert.equal(tabStop([false, true, true], 2), 2);
+  assert.equal(tabStop([true, false, true], 1), 0);
+  assert.equal(tabStop([false, false], 0), -1);
+});
+
+test("the headline counts each status it names, crosswalk cells for a field only", () => {
+  const cells = [
+    ...["as-is", "as-is", "corrected", "notation", "notation", "notation", "scope", "scope", "scope", "scope", "added"]
+      .map((status, i) => ({ format: i % 2 ? "a" : "b", status, crosswalk: "x.csv" })),
+    { format: "a", status: "no field", crosswalk: "x.csv" },
+    { format: "a", status: "no term", crosswalk: "x.csv" },
+    { format: "c", status: "added", crosswalk: null },
+  ];
+  assert.equal(needed(cells).length, 11);
+  const { asIs, of, formats, parts } = scoreCaption(cells);
+  assert.deepEqual([asIs, of, formats], [2, 11, 2]);
+  assert.deepEqual(parts.map(([mark, words]) => `${mark}${words.split(" ")[0]}`), ["✎ 1", "≈ 3", "⊂ 4", "+ 1"]);
+});
+
+test("CodeMeta's cell is code when it has text, else words for why not", () => {
+  const cell = { crosswalk: "x.csv", status: "corrected", cell: "a" };
+  assert.equal(cellWords(cell), null);
+  assert.equal(cellWords({ ...cell, cell: " " }), "empty");
+  assert.equal(cellWords({ ...cell, cell: null }), "can't be matched to its property");
+  assert.equal(cellWords({ ...cell, status: "no term", cell: null }), "none: CodeMeta has no property for this term");
+  assert.equal(cellWords({ ...cell, crosswalk: null }), "no CodeMeta crosswalk for this format");
 });

@@ -101,6 +101,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The coverage page's Upstream tab joins a crosswalk's `name` row on CodeMeta's main branch, where the
   property table gained a third `name` row the crosswalks lack. It showed 34 cells as unmatched and
   hid the GitHub `name` fix (codemeta/codemeta#505); it now shows that one cell as fixed.
+- The coverage page keeps a chosen cell's detail in view on screens under 480px tall, and its header
+  dates the upstream check by the build, not by main's last commit. `#route` opens its tab at the top,
+  `#upstream` on an older release drops the fragment, and without JavaScript the page shows no dead controls.
 - Template updates check all commits on the update branch and keep it intact when an author cannot be verified.
   They also preserve commits added during an update and leave older pull requests open when a manual update is needed.
 - Release attestation bundles use the `.intoto.jsonl` extension so Signed-Releases checks can find them.

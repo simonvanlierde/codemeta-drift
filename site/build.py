@@ -17,6 +17,7 @@ import json
 import shutil
 import subprocess
 from dataclasses import asdict
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -45,6 +46,8 @@ def upstream_data(checkout: Path, mapping: dict[str, Any]) -> dict[str, Any]:
     return {
         "commit": commit,
         "date": date,
+        # The day of the build, which is when main was checked; date is main's last commit.
+        "checked": datetime.now(UTC).date().isoformat(),
         "drift": [asdict(f) for f in check(files) if f.code != "SKIPPED"],
         "cells": upstream(files, mapping),
     }

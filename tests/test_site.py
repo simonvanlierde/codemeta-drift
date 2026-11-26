@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tomllib
 from collections.abc import Callable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -59,6 +60,8 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert "SKIPPED" not in codes
     assert data["upstream"]["cells"] == []
     assert len(data["upstream"]["commit"]) == 40
+    # The header's "checked" day is the build's, not main's last commit's.
+    assert data["upstream"]["checked"] == datetime.now(UTC).date().isoformat()
     # The crosswalks nobody reviewed are read at the export's tag.
     assert data["unreviewed"]["codemeta_tag"] == "4.0"
     assert {fmt["format"] for fmt in data["unreviewed"]["formats"]} == {

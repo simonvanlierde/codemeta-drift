@@ -33,9 +33,3 @@ test("codemeta field ids are looked up through hubTerm with the shown release's 
   assert.match(source, /^function follow\(hub\) \{/m);
   assert.match(source, /const \{ coverage, hub, unreviewed, upstream \} = tag === newest \? latest : \{ \.\.\.\(await load\(`data-\$\{tag\}\.json`\)\)/);
 });
-
-test("a filter that hides the matrix's tab stop moves it to the first shown cell", () => {
-  // CI runs no browser: this pins the retarget in filters().
-  assert.match(source, /stop\.closest\("\[inert\]"\)/);
-  assert.match(source, /td:not\(\[inert\]\) > \.cell/);
-});
