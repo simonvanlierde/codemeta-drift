@@ -69,8 +69,9 @@ def matrix(mapping: dict[str, Any], files: dict[str, str] | None) -> dict[str, A
     data["schema_version"] = mapping["schema_version"]
     # A term names where a CodeMeta property sits (author.@id is a Person's identifier).
     data["properties"] = {t: None if t in NO_PROPERTY else " ".join(TERMS[t]) for t in data["terms"]}
-    others = unreviewed(files, mapping) if files is not None else None
-    if files is not None and others is not None:
+    others = None
+    if files is not None:
+        others = unreviewed(files, mapping)
         add_lines(files, data["cells"])
         add_lines(files, others["cells"])
     return {

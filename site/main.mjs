@@ -2,7 +2,7 @@
 // or an older release's matrix from data-<tag>.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { chosenTag, hubTerm, pageTitle, parseFragment, releaseLinks } from "./fragment.mjs";
+import { chosenTag, hubTerm, linkParts, pageTitle, parseFragment, releaseLinks, sourceHref } from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -38,18 +38,10 @@ function el(tag, attrs = {}, ...children) {
 
 const code = (text) => el("code", {}, text);
 
-// A reason's URLs as links; a full stop or comma after a URL stays text.
 const linked = (text) =>
-  el("span", {}, ...text.split(/(https?:\/\/[^\s)]+)/).flatMap((part, i) => {
-    if (i % 2 === 0) return [part];
-    const [, url, tail] = part.match(/^(.*?)([.,;:]?)$/);
-    return [el("a", { href: url }, url), tail];
-  }));
+  el("span", {}, ...linkParts(text).map((part) => (typeof part === "string" ? part : el("a", { href: part.url }, part.url))));
 
-// A crosswalk file at a CodeMeta tag, opened at one line.
-const source = (tag, path, line) =>
-  el("a", { href: `https://github.com/codemeta/codemeta/blob/${tag}/${path.split("/").map(encodeURIComponent).join("/")}?plain=1#L${line}` },
-    `${path.split("/").pop()}, line ${line}`);
+const source = (tag, path, line) => el("a", { href: sourceHref(tag, path, line) }, `${path.split("/").pop()}, line ${line}`);
 
 // One row per format, one column per term: each cell is a status mark, and its path is in the detail.
 // The reviewed formats come first; the crosswalks nobody reviewed follow in their own group.
@@ -159,8 +151,9 @@ function detail(statuses, labels, coverage, upstream) {
 // Every mark in words: the reviewed statuses, then the shapes of the crosswalks nobody reviewed.
 function markKey(statuses, shapes) {
   const box = document.getElementById("key");
-  const seen = new Set();
   for (const [heading, set] of [["Reviewed crosswalks", statuses], ["Not reviewed", shapes ?? {}]]) {
+    // A mark can mean one thing for reviewed cells and another for unreviewed ones, so each group lists its own.
+    const seen = new Set();
     const list = el("dl");
     for (const [name, { mark, meaning }] of Object.entries(set)) {
       if (seen.has(mark)) continue;

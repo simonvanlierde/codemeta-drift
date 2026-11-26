@@ -57,6 +57,15 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "usgs-modelcatalog",
         "VIVO",
     }
+    # A cell's line is its row in the crosswalk at that tag; a cell with no crosswalk row has none.
+    for cell in data["coverage"]["cells"] + data["unreviewed"]["cells"]:
+        if cell["line"] is None:
+            continue
+        line = (repo / cell["crosswalk"]).read_text("utf-8").splitlines()[cell["line"] - 1]
+        assert line.startswith(data["coverage"]["properties"][cell["term"]].split()[-1] + ","), cell
+    assert any(c["line"] for c in data["unreviewed"]["cells"])
+    assert next(c for c in data["coverage"]["cells"] if c["term"] == "resourceType")["line"] is None
+    assert data["coverage"]["properties"]["author.@id"] == "schema:Person identifier"
     # The SSSOM file the page publishes is the one its own mapping_set_id names.
     tsv = (out / "spokes-4.0.sssom.tsv").read_text("utf-8")
     assert tsv.startswith("# mapping_set_id: https://w3id.org/codemeta-drift/spokes-4.0.sssom.tsv\n")

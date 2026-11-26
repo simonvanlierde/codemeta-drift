@@ -137,6 +137,8 @@ def crosswalk_cells(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str,
 def crosswalk_rows(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str, str], tuple[int, str]]:
     """Maps (parent type, property) of the property table to the crosswalk's line and cell for it.
 
+    The line is 1-based: the first physical line of the cell's record, as a quoted cell may span several.
+
     The crosswalk has no type column, so a property listed under two types (``identifier`` under
     Thing and Person) is matched by its n-th occurrence in each file, never by line number. A
     property whose count differs between the files gets no cell, since the match would be a guess.
