@@ -195,7 +195,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == 682
+    assert len(rows) == 701
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():

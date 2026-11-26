@@ -1353,6 +1353,89 @@
    "expected": [
     "Carberry"
    ]
+  },
+  {
+   "name": "Dublin Core parser: each oai_dc element is a prefixed key, and every key is a list",
+   "path": "dc:creator[]",
+   "raw_input": {
+    "format": "oai_dc",
+    "text": "<oai_dc:dc xmlns:oai_dc=\"http://www.openarchives.org/OAI/2.0/oai_dc/\"\n           xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n           xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n           xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd\">\n  <dc:creator>van Leeuwenhoek, Antonie</dc:creator>\n  <dc:creator>Skłodowska-Curie, Marie</dc:creator>\n  <dc:contributor>Hua, Luogeng</dc:contributor>\n  <dc:date>2026-03-14</dc:date>\n  <dc:description>Counts animalcules in microscope images.</dc:description>\n  <dc:identifier>https://doi.org/10.5555/example.1234</dc:identifier>\n  <dc:identifier>oai:example.org:1234</dc:identifier>\n  <dc:publisher>Example Lab</dc:publisher>\n  <dc:relation>https://example.org/lab/animalcule-counter/tree/v1.2.0</dc:relation>\n  <dc:rights>info:eu-repo/semantics/openAccess</dc:rights>\n  <dc:rights>https://spdx.org/licenses/MIT.html</dc:rights>\n  <dc:subject>microscopy</dc:subject>\n  <dc:subject>image analysis</dc:subject>\n  <dc:title>Animalcule Counter</dc:title>\n  <dc:type>Software</dc:type>\n</oai_dc:dc>\n"
+   },
+   "document": {
+    "dc:creator": [
+     "van Leeuwenhoek, Antonie",
+     "Skłodowska-Curie, Marie"
+    ],
+    "dc:contributor": [
+     "Hua, Luogeng"
+    ],
+    "dc:date": [
+     "2026-03-14"
+    ],
+    "dc:description": [
+     "Counts animalcules in microscope images."
+    ],
+    "dc:identifier": [
+     "https://doi.org/10.5555/example.1234",
+     "oai:example.org:1234"
+    ],
+    "dc:publisher": [
+     "Example Lab"
+    ],
+    "dc:relation": [
+     "https://example.org/lab/animalcule-counter/tree/v1.2.0"
+    ],
+    "dc:rights": [
+     "info:eu-repo/semantics/openAccess",
+     "https://spdx.org/licenses/MIT.html"
+    ],
+    "dc:subject": [
+     "microscopy",
+     "image analysis"
+    ],
+    "dc:title": [
+     "Animalcule Counter"
+    ],
+    "dc:type": [
+     "Software"
+    ]
+   },
+   "expected": [
+    "van Leeuwenhoek, Antonie",
+    "Skłodowska-Curie, Marie"
+   ]
+  },
+  {
+   "name": "Dublin Core: a dcterms record is read before the oai_dc elements",
+   "path": "dcterms:creator[].foaf:familyName | dc:creator[]",
+   "document": {
+    "@id": "https://doi.org/10.5555/example.1234",
+    "dcterms:title": "Animalcule Counter",
+    "dcterms:creator": [
+     {
+      "@id": "https://orcid.org/0000-0002-1825-0097",
+      "foaf:givenName": "Josiah",
+      "foaf:familyName": "Carberry"
+     }
+    ],
+    "dcterms:license": {
+     "@id": "https://spdx.org/licenses/MIT.html"
+    },
+    "dcterms:identifier": "https://doi.org/10.5555/example.1234",
+    "dcterms:issued": {
+     "@value": "2026-03-14",
+     "@type": "http://www.w3.org/2001/XMLSchema#date"
+    },
+    "dcterms:publisher": {
+     "foaf:name": "Example Lab"
+    },
+    "dcterms:type": {
+     "@id": "http://purl.org/dc/dcmitype/Software"
+    }
+   },
+   "expected": [
+    "Carberry"
+   ]
   }
  ]
 }

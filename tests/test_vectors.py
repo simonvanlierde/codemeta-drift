@@ -1,7 +1,9 @@
 """The grammar vectors: each path fits the grammar, and resolves to the listed values in its document."""
 
 import json
+import xml.etree.ElementTree as ET
 from importlib import resources
+from typing import Any
 
 import pytest
 
@@ -118,3 +120,53 @@ def test_curated_identifier_keeps_a_string_doi_after_an_object(fmt: str, tag: st
     ids = [{"@id": "#isbn", "@type": "PropertyValue", "value": "978-0-306-40615-7"}, "https://doi.org/10.5555/x"]
     document = {"@graph": [{"@id": "./", "identifier": ids}]} if fmt == "ro-crate" else {"identifier": ids}
     assert "https://doi.org/10.5555/x" in resolve(document, path)
+
+
+def curated_paths(tag: str, fmt: str) -> dict[str, Any]:
+    rows = json.loads(PACKAGE.joinpath(f"curated-{tag}.json").read_text("utf-8"))["rows"]
+    return {r["term"]: r["path"] for r in rows if r["format"] == fmt}
+
+
+def raw_case(fmt: str) -> dict:
+    return next(c for c in CASES if c.get("raw_input", {}).get("format") == fmt)
+
+
+def read_oai_dc(text: str) -> dict:
+    """An oai_dc record read as docs/mapping-export.md says: each element a dc: key, every key a list."""
+    tree: dict[str, list[str]] = {}
+    for child in ET.fromstring(text):  # noqa: S314 - the vectors ship in this package
+        tree.setdefault(f"dc:{child.tag.rpartition('}')[2]}", []).append((child.text or "").strip())
+    return tree
+
+
+def test_oai_dc_parser_vector_matches_the_reading_rules() -> None:
+    case = raw_case("oai_dc")
+    assert read_oai_dc(case["raw_input"]["text"]) == case["document"]
+
+
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_curated_dublin_core_rows_read_both_carriers(tag: str) -> None:
+    paths = curated_paths(tag, "dublin-core")
+    oai = raw_case("oai_dc")["document"]
+    rdf = next(c for c in CASES if c["name"].startswith("Dublin Core: a dcterms record"))["document"]
+    people = ["van Leeuwenhoek, Antonie", "Skłodowska-Curie, Marie"]
+    expected = {
+        "name": (["Animalcule Counter"], ["Animalcule Counter"]),
+        "author": (people, rdf["dcterms:creator"]),
+        "author.givenName": (people, ["Josiah"]),
+        "author.familyName": (people, ["Carberry"]),
+        "author.@id": ([], ["https://orcid.org/0000-0002-1825-0097"]),
+        "contributor": (["Hua, Luogeng"], []),
+        "contributor.givenName": (["Hua, Luogeng"], []),
+        "license": (oai["dc:rights"], [{"@id": "https://spdx.org/licenses/MIT.html"}]),
+        "identifier": (oai["dc:identifier"], ["https://doi.org/10.5555/example.1234"]),
+        "description": (["Counts animalcules in microscope images."], []),
+        "keywords": (["microscopy", "image analysis"], []),
+        "datePublished": (["2026-03-14"], [rdf["dcterms:issued"]]),
+        "publisher": (["Example Lab"], ["Example Lab"]),
+        "resourceType": (["Software"], [{"@id": "http://purl.org/dc/dcmitype/Software"}]),
+    }
+    for term, (from_oai, from_rdf) in expected.items():
+        assert resolve(oai, paths[term]) == from_oai, term
+        assert resolve(rdf, paths[term]) == from_rdf, term
+    assert {t for t, p in paths.items() if p is None} == {"version", "swhid", "codeRepository"}

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.8",
+  "schema_version": "1.9",
   "codemeta_tag": "4.0",
   "generator": {
     "name": "codemeta-drift",
@@ -5357,6 +5357,158 @@
       "term": "resourceType",
       "path": "@type",
       "source": "curated:no Croissant crosswalk upstream; Croissant 1.1, https://docs.mlcommons.org/croissant/docs/croissant-spec-1.1.html, describes the dataset in the document's top object, an sc:Dataset; CodeMeta has no term for the resource type; the top object's @type is sc:Dataset",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "dublin-core",
+      "term": "name",
+      "path": "dcterms:title | dc:title[]",
+      "source": "curated:the cell says title, right as written; Title is dcterms:title (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#title, section 2) and dc:title in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-title, section 3), so the path reads both with their prefix",
+      "comment": "Title is repeatable; a record with several titles gives the first as the name.",
+      "crosswalk_cell": "title"
+    },
+    {
+      "format": "dublin-core",
+      "term": "version",
+      "path": null,
+      "source": "curated:the cell says dcterms:hasVersion, which is wrong: it is a related resource that is a version of this one and 'is intended to be used with non-literal values' (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#hasVersion, section 2); DCMI Terms have no property for a version string",
+      "comment": "Zenodo's oai_dc records carry the version only inside a dc:relation URL (.../tree/v0.9.8), which no path reads.",
+      "crosswalk_cell": "dcterms:hasVersion"
+    },
+    {
+      "format": "dublin-core",
+      "term": "author",
+      "path": "dcterms:creator[] | dc:creator[]",
+      "source": "curated:the cell says creator, right as written; Creator is dcterms:creator, range includes dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#creator), and dc:creator in oai_dc, a name string (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-creator)",
+      "comment": "An element is an agent node, an IRI or a name string; the consumer reads both keys as lists.",
+      "crosswalk_cell": "creator"
+    },
+    {
+      "format": "dublin-core",
+      "term": "author.givenName",
+      "path": "dcterms:creator[].foaf:givenName | dc:creator[]",
+      "source": "curated:no cell; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's given name is foaf:givenName and an oai_dc creator is the whole name string",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "author.familyName",
+      "path": "dcterms:creator[].foaf:familyName | dc:creator[]",
+      "source": "curated:no cell; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's family name is foaf:familyName and an oai_dc creator is the whole name string",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "author.@id",
+      "path": "dcterms:creator[].@id | dc:creator[].@id",
+      "source": "curated:no cell; DCMI has no ORCID property, but recommends identifying the creator with a URI (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#creator), which JSON-LD keeps as the agent node's @id",
+      "comment": "oai_dc has no attributes or nested nodes, so only an RDF record whose agent node is named by its ORCID IRI has this; a ROR or blank-node @id is not an ORCID.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor",
+      "path": "dcterms:contributor[] | dc:contributor[]",
+      "source": "curated:the cell is empty, but Contributor is dcterms:contributor, range includes dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#contributor), and dc:contributor in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-contributor)",
+      "comment": "An element is an agent node, an IRI or a name string; the consumer reads both keys as lists.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor.givenName",
+      "path": "dcterms:contributor[].foaf:givenName | dc:contributor[]",
+      "source": "curated:same reasoning as author.givenName, under contributor",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor.familyName",
+      "path": "dcterms:contributor[].foaf:familyName | dc:contributor[]",
+      "source": "curated:same reasoning as author.familyName, under contributor",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor.@id",
+      "path": "dcterms:contributor[].@id | dc:contributor[].@id",
+      "source": "curated:same reasoning as author.@id, under contributor",
+      "comment": "oai_dc has no attributes or nested nodes, so only an RDF record whose agent node is named by its ORCID IRI has this; a ROR or blank-node @id is not an ORCID.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "license",
+      "path": "dcterms:license | dcterms:rights | dc:rights[]",
+      "source": "curated:the cell says license, right as written for dcterms:license (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#license, section 2); oai_dc has no license element, so the path falls back to Rights, of which License is a subproperty (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#rights, https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-rights)",
+      "comment": "Rights holds any rights statement: Zenodo writes info:eu-repo/semantics/openAccess, the licence name and the licence URL as three dc:rights. The consumer keeps the values it can convert to an SPDX id and skips the rest.",
+      "crosswalk_cell": "license"
+    },
+    {
+      "format": "dublin-core",
+      "term": "identifier",
+      "path": "dcterms:identifier | dc:identifier[]",
+      "source": "curated:the cell says identifier, right as written; Identifier is dcterms:identifier, whose comment names the DOI and says persistent identifiers should be HTTP URIs (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#identifier), and dc:identifier in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-identifier)",
+      "comment": "Identifier is repeatable and untyped: Zenodo writes https://doi.org/10.5281/zenodo.N and oai:zenodo.org:N side by side. A DOI is told by its spelling.",
+      "crosswalk_cell": "identifier"
+    },
+    {
+      "format": "dublin-core",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:the cell says identifier, which holds the DOI; DCMI Terms have no property of their own for a SWHID (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/, section 2)",
+      "comment": "A record may still carry a SWHID as a second identifier; the consumer finds it by its swh:1: spelling.",
+      "crosswalk_cell": "identifier"
+    },
+    {
+      "format": "dublin-core",
+      "term": "codeRepository",
+      "path": null,
+      "source": "curated:the cell is empty and DCMI Terms have no repository property; dcterms:relation is any related resource (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#relation) and dcterms:source the resource this one is derived from (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#source)",
+      "comment": "Zenodo's oai_dc gives the GitHub release URL as one of several dc:relation values, beside DOIs; a consumer that wants it must pick it by host.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "description",
+      "path": "dcterms:description | dc:description[]",
+      "source": "curated:the cell says description, right as written; Description is dcterms:description (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#description) and dc:description in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-description)",
+      "comment": "Description is repeatable; Zenodo writes the abstract first and further notes after it, so the first value is the description.",
+      "crosswalk_cell": "description"
+    },
+    {
+      "format": "dublin-core",
+      "term": "keywords",
+      "path": "dcterms:subject | dc:subject[]",
+      "source": "curated:the cell is empty, but Subject is the topic of the resource, 'typically represented using keywords' (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-subject), as dcterms:subject (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#subject) and dc:subject",
+      "comment": "Each value is one keyword or a subject IRI; a subject IRI is not a keyword.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "dublin-core",
+      "term": "datePublished",
+      "path": "dcterms:issued | dcterms:date | dc:date[]",
+      "source": "curated:the cell says date, which is any lifecycle date (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#date); dcterms:issued is the date of formal issuance (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#issued), so the path reads it first and falls back to date, the only date oai_dc has",
+      "comment": "A typed date may arrive as {\"@value\", \"@type\"}, and may be a year, a year and month, or a full date (W3CDTF).",
+      "crosswalk_cell": "date"
+    },
+    {
+      "format": "dublin-core",
+      "term": "publisher",
+      "path": "dcterms:publisher.foaf:name | dcterms:publisher | dc:publisher[]",
+      "source": "curated:the cell says publisher, right as written; dcterms:publisher's range includes dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#publisher), so a node's name is foaf:name, and dc:publisher in oai_dc is a name string (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-publisher)",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty.",
+      "crosswalk_cell": "publisher"
+    },
+    {
+      "format": "dublin-core",
+      "term": "resourceType",
+      "path": "dcterms:type | dc:type[]",
+      "source": "curated:CodeMeta has no term for the resource type; Type is dcterms:type and dc:type, with the DCMI Type Vocabulary recommended (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#type, https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-type), whose Software class is dctype:Software (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Software, section 7)",
+      "comment": "The value is an IRI or a string; for software a writer gives http://purl.org/dc/dcmitype/Software. Zenodo's oai_dc writes info:eu-repo/semantics/other for software, which does not say software.",
       "crosswalk_cell": null
     }
   ]

@@ -81,7 +81,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.8",
+  "schema_version": "1.9",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.9.0"},
   "context_terms": ["address", "affiliation", "applicationCategory", "..."],
@@ -124,10 +124,10 @@ Each row:
   `doap` (a DOAP project), `wikidata` (a Wikidata item), `ris` (a RIS record with `TY - COMP`),
   `endnote` (an EndNote tagged record with `%0 Computer Program`), `gitlab` (the GitLab REST API's
   project JSON), `code-json-2.0` (a code.json 2.0 file, the US federal source code metadata),
-  `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`) or `croissant` (a Croissant 1.0 or
-  1.1 `croissant.json`). A format whose versions differ puts the version in the id. `pkg-info` to
+  `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`), `croissant` (a Croissant 1.0 or
+  1.1 `croissant.json`) or `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record). A format whose versions differ puts the version in the id. `pkg-info` to
   `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, `ris` to `code-json-2.0` in
-  1.7, and `ro-crate` and `croissant` in 1.8. `gitlab` and `code-json-2.0` have rows from the 4.0
+  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -223,6 +223,17 @@ them into one first. These cases need more than the grammar below says:
   compacted with a context that defines only the prefixes `dcat`, `dcterms`, `owl`, `foaf` and
   `doap`, so each key is a prefixed name such as `dcterms:title`. A property may hold one value or
   a list, a link is an object with `@id`, and a typed date may be an object with `@value`.
+- Dublin Core comes as `oai_dc` XML, which every OAI-PMH repository serves, or as RDF. An `oai_dc`
+  record is read as a tree rooted at `oai_dc:dc`: each child element is a key named by its prefixed
+  name (`dc:title`) holding its trimmed text, and every key is a list, because every element may
+  repeat. An RDF record is read like DCAT: JSON-LD rooted at the described resource's node, compacted
+  with a context that defines only `dc`, `dcterms` and `foaf`; there too every `dc:` key, and
+  `dcterms:creator` and `dcterms:contributor`, are lists. Each row reads `dcterms:` first and falls
+  back to `dc:`. DCMI defines no name parts or ORCID for an agent: a `dcterms` agent's name parts are
+  read at `foaf:givenName` and `foaf:familyName`, and an `oai_dc` creator is one string, which
+  Zenodo writes `Family, Given`, so both name sub-terms point at it and the consumer splits it at the
+  first comma. `dc:rights` mixes access statements, licence names and licence URLs, and
+  `dc:identifier` mixes a DOI with other ids: the consumer keeps the values it can convert.
 - RIS and EndNote tagged are line formats. A consumer reads one record into a tree: each tag is a
   key (RIS `TI`, EndNote `%T` as `T`, and `%7` as `_7`, since a key cannot start with a digit), the
   value is the text after the tag. `AU`, `A1`, `KW` and `UR` in RIS, and `%A` and `%K` in EndNote, are always lists,
@@ -270,7 +281,7 @@ A (format, term) pair appears at most once. The schema cannot enforce that, so t
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
-`croissant`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
+`croissant`, `dublin-core`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
 `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`, `contributor.familyName`,
 `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`, `description`, `keywords`,
 `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
@@ -317,8 +328,8 @@ and `expected`. `expected` is the list of values the path resolves to in `docume
 from the first alternative that yields any value. A consumer vendors the file with the schema and runs
 every case through its own resolver.
 Its `schema_version` is the mapping schema whose grammar the cases need.
-Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate` or
-`croissant`) and its `text` is the source file content. Parse that text and compare the resulting tree
+Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate`,
+`croissant` or `oai_dc`) and its `text` is the source file content. Parse that text and compare the resulting tree
 to `document` before resolving `path`; a consumer that does not read that format skips the parse and
 still resolves `path` in `document`. The PKG-INFO cases cover comma separation, quoted names, company
 suffixes and `et al.`.
@@ -349,7 +360,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
-   that holds `v`.
+   that holds `v`. Schema 1.9 adds the `dublin-core` format id and changes no pattern, so a 1.9
+   file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format
    that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from

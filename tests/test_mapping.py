@@ -131,6 +131,7 @@ PUBLISHER = {
     "code-json-2.0",
     "ro-crate",
     "croissant",
+    "dublin-core",
 }
 RESOURCE_TYPE = {
     "codemeta",
@@ -145,6 +146,7 @@ RESOURCE_TYPE = {
     "endnote",
     "ro-crate",
     "croissant",
+    "dublin-core",
 }
 
 
@@ -403,6 +405,7 @@ def test_example_null_rows():
         | {(f, t) for f in ("gitlab", "code-json-2.0") for t in ("author.givenName", "author.familyName", "author.@id")}
         | {(f, t) for f in ("gitlab", "code-json-2.0") for t in ("identifier", "swhid", "datePublished", *contributor)}
         | {(f, t) for f in ("ro-crate", "croissant") for t in ("swhid", "codeRepository")}
+        | {("dublin-core", t) for t in ("version", "swhid", "codeRepository")}
         | {("gitlab", "version"), ("code-json-2.0", "author")}
     )
 

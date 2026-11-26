@@ -20,7 +20,7 @@ PACKAGE = Path(__file__).parent
 """The installed package directory, which holds the schema and curated files: a plain path, cheaper than
 importlib.resources, which this wheel-only package does not need."""
 
-SCHEMA_VERSION = "1.8"
+SCHEMA_VERSION = "1.9"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -111,6 +111,7 @@ FORMATS = {
     "code-json-2.0": Spoke("crosswalks/code-json.csv", since="4.0"),
     "ro-crate": Spoke(None),
     "croissant": Spoke(None),
+    "dublin-core": Spoke("crosswalks/Dublin Core.csv", person_list=True),
 }
 
 PATH = re.compile(

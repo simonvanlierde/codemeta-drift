@@ -45,7 +45,6 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "csdms",
         "DCAT",
         "Debian Package",
-        "Dublin Core",
         "ISO_19115-1",
         "MODS",
         "OntoSoft",
