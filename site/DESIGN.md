@@ -44,9 +44,16 @@ the source of truth for values.
   carries their legend: • path, ¶ prose, ○ empty, ? unmatched. No wash: a mark says only the cell's
   shape, so prose and unmatched are red text and the rest faint. Their last column counts path cells.
   Under each name, in faint text, is why it is not reviewed (superseded, registry, niche); the detail panel gives the reason.
-  A "Skip past the matrix" link shows on focus, since every cell is a tab stop.
+  A "Skip past the matrix" link shows on focus.
+- **Keyboard.** The matrix is one tab stop, the cell last focused. Arrows move by row and column past
+  empty and filtered-out cells, Home and End go to the row's ends, Ctrl+Home and Ctrl+End to the first
+  and last cell, Enter or Space chooses. The header scrolls away and can't stick inside the sideways
+  scroll, so the focused or pointed-at cell names its term in a box above it and its header is tinted.
+  Escape hides the term box until focus moves. The matrix's empty corner says which keys move, and
+  the scroll region's label says it to screen readers.
 - **Route.** Three columns: the source path, the CodeMeta term in a box, the target path, joined by short
-  rules. A missing end is italic red with a dashed rule. On a phone the three stack.
+  rules. A missing end is italic red with a dashed rule. On a phone the three stack. A checkbox, on by
+  default, hides the terms neither format has.
 - **Copy.** Plain and specific. Upstream state names the commit and date it was read from.
 
 Don't add inline script or style, another host, or a mark whose meaning lives only in colour.

@@ -69,7 +69,7 @@
     </details>
     <a class="skip-matrix" href="#after-matrix">Skip past the matrix</a>
     <div class="board">
-      <div class="scroll" role="region" tabindex="0" aria-label="Coverage matrix, scrolls sideways">
+      <div class="scroll" role="region" tabindex="0" aria-label="Coverage matrix, scrolls sideways. Tab to its cells, then move with the arrow keys, Home and End.">
         <table id="matrix"><caption class="vh">Formats by CodeMeta term, with one status per cell.</caption></table>
       </div>
       <p id="picked" class="vh" role="status"></p>
@@ -86,6 +86,7 @@
     <div class="pickers">
       <label>From <select id="from"></select></label>
       <label>To <select id="to"></select></label>
+      <label class="check"><input type="checkbox" id="hide-none" checked> Hide terms neither format has</label>
     </div>
     <ol id="route" class="route"></ol>
   </section>
