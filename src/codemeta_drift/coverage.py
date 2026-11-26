@@ -70,7 +70,7 @@ NOT_REVIEWED = {
     ),
     "ASCL": (
         "registry",
-        "the Astrophysics Source Code Library's entry fields: a registry record, not a file a citation tool reads",
+        "the Astrophysics Source Code Library's entry fields, a registry record",
         "https://ascl.net/",
     ),
     "SciCrunchRegistry": (
@@ -84,12 +84,12 @@ NOT_REVIEWED = {
         "https://github.com/KnowledgeCaptureAndDiscovery/ontosoft",
     ),
     "Software Ontology": (
-        "registry",
+        "niche",
         "an OWL ontology that classifies software tools in knowledge bases, not a metadata file",
         "https://github.com/allysonlister/swo",
     ),
     "Software Discovery Index": (
-        "registry",
+        "niche",
         "the NIH BD2K software index proposed at a 2014 workshop; no index was launched",
         "https://web.archive.org/web/20141207053849/http://softwarediscoveryindex.org/report/",
     ),

@@ -165,17 +165,19 @@ def test_readme_figures_match_the_counts():
     count = Counter(c["status"] for c in cells)
     null_corrected = sum(c["status"] == "corrected" and c["path"] is None for c in cells)
     text = " ".join((ROOT / "README.md").read_text("utf-8").split())
-    other, terms = len(cells) - count["no field"], len(TERMS) - len(NO_PROPERTY)
+    terms = len(TERMS) - len(NO_PROPERTY)
     assert (
-        f"have {len(cells)} cells, one for each of the {terms} terms citation tools need."
-        f" {count['no field']} are for terms"
-        f" the format has no field for. Of the other {other}, {count['as-is']} can be used as written."
-        f" {count['notation']} name the right field in a form a tool can't use as a path,"
+        f"for the {terms} terms citation tools need. That gives {len(cells)} cells, one per crosswalk and term:"
+        f" - {count['as-is']} can be used as written."
+        f" - {count['notation']} name the right field in a form a tool can't use as a path,"
         f" such as another case, no prefix or XPath."
-        f" {count['scope']} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly,"
+        f" - {count['scope']} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly,"
         f" such as `identifier` as the software's DOI and `swhid` as a term of its own, or also reads another field,"
-        f" such as a fallback or a newer one. {count['corrected']} are wrong, ambiguous or prose"
-        f" ({null_corrected} of them fill a term the format has no field for), and {count['added']} are blank"
+        f" such as a fallback or a newer one."
+        f" - {count['corrected']} are wrong, ambiguous or prose."
+        f" {null_corrected} of them name a field the format doesn't have."
+        f" - {count['added']} are blank although the format has the field."
+        f" - {count['no field']} are for a term the format has no field for."
     ) in text
 
 

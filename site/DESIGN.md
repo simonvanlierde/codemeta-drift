@@ -25,16 +25,18 @@ the source of truth for values.
 - **Docs.** The slug's right side and the colophon link the documentation at `docs/`; the docs'
   logo links back here.
 - **Tabs.** Three views under the headline: Matrix (the default), Follow a field, and Upstream (CodeMeta's main branch)
-  with the count of changed cells. One hairline row; the chosen tab is tinted with a 2px ink bar at its
+  with the count of listed causes. One hairline row; the chosen tab is tinted with a 2px ink bar at its
   foot, like the chosen filter. `#route` and `#upstream` open their views; the SSSOM fragments open Matrix.
 - **Headline.** Beside the intro from 1000px: the count of crosswalk cells usable as written, a bar of
   as-is (ink), scope (faint ink), notation (red outline), corrected (red) and added (red wash), and one caption that counts each. It stacks below on smaller screens.
-- **Matrix.** Formats down, citation files first, then package manifests; terms across, their names
+- **Matrix.** Formats down in groups: reviewed crosswalks, then the formats with no CodeMeta crosswalk,
+  then the crosswalks nobody reviewed. Within a group, citation files come first, then package manifests; terms across, their names
   running up the column. A cell holds only its mark; its path is in the detail panel. The last column
   counts the format's usable cells. The detail panel sits beside the table from 1360px, below it on
   smaller screens.
-- **Key and sources.** Under the filters, a note says when the filter counts take in formats the
-  headline leaves out, and a closed "What the marks mean" lists every mark in words. The detail panel
+- **Key and sources.** Under the filters, a closed "What the rows, columns and marks mean" says what a
+  row and a column are, how `identifier` and `swhid` differ from CodeMeta's own terms, when the filter
+  counts take in formats the headline leaves out, and every mark in words. The detail panel
   names the CodeMeta property behind a term and links the cell's line in CodeMeta's crosswalk file at
   the tag; URLs in a reason are links. The colophon names the export's schema version and links
   the export file the page was built from.
