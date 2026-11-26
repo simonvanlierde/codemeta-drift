@@ -128,6 +128,47 @@ def curated_paths(tag: str, fmt: str) -> dict[str, Any]:
     return {r["term"]: r["path"] for r in rows if r["format"] == fmt}
 
 
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_composer_rows_read_the_manifest_without_guessing(tag: str) -> None:
+    paths = curated_paths(tag, "composer")
+    authors = [
+        {"name": "Josiah Carberry"},
+        {"name": "Marie Skłodowska-Curie", "role": "Developer", "homepage": "https://example.org/author"},
+    ]
+    document = {
+        "name": "carberry/notes",
+        "version": "1.2.0",
+        "description": "Readings from the psychoceramics lab.",
+        "authors": authors,
+        "license": ["MIT", "Apache-2.0"],
+        "keywords": ["ceramics", "cracks"],
+        "source": {"type": "git", "url": "https://example.org/carberry/notes.git", "reference": "1.2.0"},
+        "support": {"source": "https://example.org/carberry/notes/tree/1.2.0"},
+        "homepage": "https://example.org/notes",
+        "time": "2026-11-10 13:15:00",
+        "type": "library",
+    }
+    names = [a["name"] for a in authors]
+    expected = {
+        "name": ["carberry/notes"],
+        "version": ["1.2.0"],
+        "author": authors,
+        "author.givenName": names,
+        "author.familyName": names,
+        "license": [["MIT", "Apache-2.0"]],
+        "codeRepository": ["https://example.org/carberry/notes.git"],
+        "description": ["Readings from the psychoceramics lab."],
+        "keywords": ["ceramics", "cracks"],
+        "datePublished": ["2026-11-10 13:15:00"],
+    }
+    assert {term: resolve(document, path) for term, path in paths.items() if path is not None} == expected
+    assert resolve({"license": "MIT OR Apache-2.0"}, paths["license"]) == ["MIT OR Apache-2.0"]
+    assert resolve({"homepage": document["homepage"], "support": document["support"]}, paths["codeRepository"]) == [
+        document["support"]["source"]
+    ]
+    assert resolve({"homepage": document["homepage"]}, paths["codeRepository"]) == []
+
+
 def raw_case(fmt: str) -> dict:
     return next(c for c in CASES if c.get("raw_input", {}).get("format") == fmt)
 

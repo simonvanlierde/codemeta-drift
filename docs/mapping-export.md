@@ -51,7 +51,7 @@ a [JSON report](checks.md#read-json-output) on standard output.
 `--schemas DIR` adds a `PATH_NOT_IN_SCHEMA` finding for each path absent from the format's schema.
 In a codemeta-drift checkout, pass `--schemas tests/fixtures/schemas`. The
 [snapshots](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/SOURCES)
-cover CFF 1.2.0, pyproject.toml, package.json and Cargo.toml, and Zenodo a
+cover CFF 1.2.0, pyproject.toml, package.json, Cargo.toml and composer.json, and Zenodo a
 [verified subset](zenodo-schema.md). It catches a missing key (Cargo's `package.keyword`), not a
 wrong meaning (Zenodo's `id` for a DOI).
 
@@ -120,7 +120,7 @@ Each row has:
 - `comment` (optional) is for people. Never read it in code.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`, `zenodo`,
-`pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`,
+`pep621`, `cargo`, `npm`, `composer`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`,
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
@@ -156,6 +156,7 @@ depend on the row order.
 | `dublin-core` | OAI-PMH `oai_dc` or DCMI Terms RDF | `debian` | a source tree's `debian/` |
 | `mods` | MODS 3 record | `vivo-1.8` | VIVO 1.8 software individual |
 | `spase-2.6.1` | SPASE 2.6.1 Software resource | `iso-19115-1-2014` | ISO 19115-1:2014 in ISO 19115-3 XML |
+| `composer` | root composer.json | | |
 
 ### Terms
 

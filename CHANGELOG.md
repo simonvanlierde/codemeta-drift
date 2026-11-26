@@ -14,6 +14,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   every name. Read `statuses` and `cells[].status` by name, not by position: the order now puts
   scope and notation before corrected.
 - The CFF `license` row may now give a licence URL from `license-url`, not only an SPDX id.
+- Schema directories passed to `export --schemas` and `watch --before`/`--after` now also need
+  `composer.json`.
 
 ### Added
 
@@ -84,12 +86,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `hub` reads the mapping from standard input given `-`, and `watch` reads `--existing` from it.
 - The [coverage page](https://simonvanlierde.com/codemeta-drift/) uses self-hosted fonts, a red palette
   for wrong or missing cells, and a preview card when sharing its link.
-- Mapping schema 1.9: rows for six more formats in the 3.1 and 4.0 exports: `dublin-core` (an `oai_dc`
-  record or a DCMI Terms RDF record), `debian` (a source tree's `debian/` directory), `mods` (a MODS 3
-  record), `vivo-1.8` (a VIVO software individual), `spase-2.6.1` (a SPASE Software resource) and
-  `iso-19115-1-2014` (an ISO 19115-3 record). No pattern changes, so a 1.9 file passes the 1.8 schema;
-  the `hub` of 0.8.0 refuses it. The [export guide](docs/mapping-export.md) gives each format's reading
-  rules, and `mapping-vectors.json` has a parser case for each. The SSSOM files gain their rows too.
+- Mapping schema 1.9: rows for seven more formats in the 3.1 and 4.0 exports: `composer` (a root
+  `composer.json`), `dublin-core` (an `oai_dc` record or a DCMI Terms RDF record), `debian` (a source
+  tree's `debian/` directory), `mods` (a MODS 3 record), `vivo-1.8` (a VIVO software individual),
+  `spase-2.6.1` (a SPASE Software resource) and `iso-19115-1-2014` (an ISO 19115-3 record). No pattern
+  changes, so a 1.9 file passes the 1.8 schema; the `hub` of 0.8.0 refuses it.
+  [Reading formats](docs/reading-formats.md) gives each format's reading rules, and
+  `mapping-vectors.json` has a parser case for each. The SSSOM files gain their rows too.
 - The docs are a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>. The coverage page keeps its address.
 - The crosswalks nobody reviews say why, on the coverage pages and the site: superseded by a reviewed format
   (DCAT 2, CodeMeta 1), a registry's own schema, or niche. `hub coverage --json` gives each one's `status`,

@@ -79,6 +79,7 @@ FORMATS = {
     "pep621": Spoke(None),
     "cargo": Spoke("crosswalks/Cargo.csv", person_list=True),
     "npm": Spoke("crosswalks/NodeJS.csv"),
+    "composer": Spoke(None),
     "pkg-info": Spoke("crosswalks/Python PKG-INFO.csv"),
     "r-description": Spoke("crosswalks/R Package Description.csv"),
     "julia": Spoke("crosswalks/Julia Project.csv", person_list=True),

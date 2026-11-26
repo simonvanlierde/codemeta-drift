@@ -16,16 +16,18 @@ from urllib.request import Request
 import pytest
 
 from codemeta_drift import poll as runner
-from codemeta_drift.poll import API, SCHEMA_URLS, fetch_json, poll, publish
+from codemeta_drift.conformance import SCHEMA_FILES
+from codemeta_drift.poll import API, RELEASED_SCHEMAS, SCHEMA_URLS, fetch_json, poll, publish
 
 
 @pytest.mark.parametrize("upstream", ["changed", "deleted", "rate-limited"])
 def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
     schema = {"properties": {"title": {"type": "string"}}}
-    before = {fmt: {"properties": {"name": {}}} for fmt in (*SCHEMA_URLS, "cff-1.2.0")}
+    before = {fmt: {"properties": {"name": {}}} for fmt in SCHEMA_FILES}
     before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
     responses = {
         API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": "1.2.0"},
+        API + "composer/composer/releases/latest": {"tag_name": "2.11.2"},
         API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
         API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
             "content": base64.b64encode(b"tag v0.3.0\n").decode()
@@ -33,6 +35,7 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
         API + "codemeta/codemeta/tags?per_page=100": [{"name": "99.0"}, {"name": "4.0"}, {"name": "old"}],
         **dict.fromkeys(SCHEMA_URLS.values(), schema),
         "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": schema,
+        "https://raw.githubusercontent.com/composer/composer/2.11.2/res/composer-schema.json": schema,
     }
     source = before["zenodo"]["x-source"]
     responses.update(
@@ -79,7 +82,7 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
 
 
 def test_poll_flags_stale_pinned_hash_at_the_right_tag():
-    before = {fmt: {"properties": {}} for fmt in (*SCHEMA_URLS, "cff-1.2.0")}
+    before = {fmt: {"properties": {}} for fmt in SCHEMA_FILES}
     before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
     pinned = {"examples/mapping-3.1.json": b'{"rows": []}\n', "src/codemeta_drift/mapping.schema.json": b"{}\n"}
     stale = hashlib.sha256(b"old").hexdigest()
@@ -89,6 +92,7 @@ def test_poll_flags_stale_pinned_hash_at_the_right_tag():
     schema = {"properties": {}}
     responses = {
         API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": "1.2.0"},
+        API + "composer/composer/releases/latest": {"tag_name": "2.11.2"},
         API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
         API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
             "content": base64.b64encode(source.encode()).decode()
@@ -96,6 +100,7 @@ def test_poll_flags_stale_pinned_hash_at_the_right_tag():
         API + "codemeta/codemeta/tags?per_page=100": [],
         **dict.fromkeys(SCHEMA_URLS.values(), schema),
         "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": schema,
+        "https://raw.githubusercontent.com/composer/composer/2.11.2/res/composer-schema.json": schema,
         **{
             # GitHub sends content as newline-wrapped base64.
             API + f"simonvanlierde/codemeta-drift/contents/{path}?ref=v0.4.0": {
@@ -217,11 +222,12 @@ def test_zenodo_importer_source_contract(*, live: bool):
 
 def _sources(pin: str, tags: list[str]) -> tuple[dict[str, Any], Callable[[str], Any]]:
     """The `before` snapshots and a fetch that serves unchanged schemas, the given pin file and CodeMeta tags."""
-    before = {fmt: {"properties": {}} for fmt in (*SCHEMA_URLS, "cff-1.2.0")}
+    before = {fmt: {"properties": {}} for fmt in SCHEMA_FILES}
     before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
     zenodo = before["zenodo"]["x-source"]
     responses = {
         API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": "1.2.0"},
+        API + "composer/composer/releases/latest": {"tag_name": "2.11.2"},
         API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
         API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
             "content": base64.b64encode(pin.encode()).decode()
@@ -231,6 +237,7 @@ def _sources(pin: str, tags: list[str]) -> tuple[dict[str, Any], Callable[[str],
         "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": {
             "properties": {}
         },
+        "https://raw.githubusercontent.com/composer/composer/2.11.2/res/composer-schema.json": {"properties": {}},
         **{API + zenodo["repo"] + "/contents/" + p: {"sha": d} for p, d in zenodo["files"].items()},
     }
     return before, responses.__getitem__
@@ -380,3 +387,8 @@ def test_a_backtick_in_a_pin_line_keeps_the_code_span_closed():
 def test_a_backtick_in_a_stale_pin_keeps_every_code_span_closed():
     plans = runner.stale_pin_hashes("sha256 d`@x a`@y b`@z\n", "v0.5.0", lambda _: {"content": "eA=="})
     assert plans[0]["body"].startswith("The sha256 of ``a`@y`` in MAPPING_SOURCE is ``d`@x``, but ``b`@z`` at v0.5.0")
+
+
+def test_poll_fetches_every_tracked_schema():
+    """Each schema snapshot has an upstream source, so poll's before and after cover the same formats."""
+    assert {*SCHEMA_URLS, *RELEASED_SCHEMAS, "zenodo"} == SCHEMA_FILES.keys()
