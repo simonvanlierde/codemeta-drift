@@ -20,7 +20,7 @@ PACKAGE = Path(__file__).parent
 """The installed package directory, which holds the schema and curated files: a plain path, cheaper than
 importlib.resources, which this wheel-only package does not need."""
 
-SCHEMA_VERSION = "1.9"
+SCHEMA_VERSION = "1.10"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -48,6 +48,25 @@ TERMS = {
 """Each exported term and the property table row (parent type, property) its crosswalk cell sits on."""
 NO_PROPERTY = frozenset({"resourceType"})
 """Terms with no property table row (resourceType): their key in ``TERMS`` is a placeholder no cell joins to."""
+
+CITATION_TERMS = (
+    "author.name",
+    "author.resourceType",
+    "contributor.name",
+    "contributor.resourceType",
+    "url",
+    "containerTitle",
+    "volume",
+    "issue",
+    "pagination",
+    "preferredCitation",
+    "arxivId",
+    "primaryCategory",
+    "relatedDoi",
+    "isVersionOf",
+    "hasVersion",
+)
+"""Citation terms exported only where a curated row supplies a path."""
 PEOPLE = ("author", "contributor")
 """The terms that hold people; each has the person sub-terms ``<term>.givenName``, ``.familyName`` and ``.@id``."""
 
@@ -75,6 +94,9 @@ class Spoke:
 FORMATS = {
     "cff-1.2.0": Spoke("crosswalks/Citation File Format 1.2.0.csv", person_list=True, person_prefix="person."),
     "codemeta": Spoke(None),
+    "crossref": Spoke(None, person_list=True),
+    "arxiv": Spoke(None, person_list=True),
+    "cff-preferred": Spoke(None, person_list=True),
     "zenodo": Spoke("crosswalks/Zenodo.csv", person_list=True, person_prefix=""),
     "pep621": Spoke(None),
     "cargo": Spoke("crosswalks/Cargo.csv", person_list=True),
@@ -210,7 +232,9 @@ def read_curated(tag: str) -> list[dict[str, Any]]:
     """The curated rows for a CodeMeta tag. Raises KeyError for a tag with no file."""
     if tag not in curated_tags():
         raise KeyError(tag)
-    return json.loads((PACKAGE / f"curated-{tag}.json").read_text("utf-8"))["rows"]
+    tagged = json.loads((PACKAGE / f"curated-{tag}.json").read_text("utf-8"))["rows"]
+    citation = json.loads((PACKAGE / "curated-citation.json").read_text("utf-8"))["rows"]
+    return [*tagged, *citation]
 
 
 KINDS = ("notation", "scope")
@@ -242,12 +266,16 @@ def build_rows(
     findings += [
         Finding("CURATED_UNUSED", name, term, f"no {fmt} row has this term")
         for fmt, term in overrides
-        if fmt not in formats(tag) or term not in TERMS
+        if fmt not in formats(tag) or (term not in TERMS and term not in CITATION_TERMS)
     ]
     for fmt, spoke in formats(tag).items():
         cells = crosswalk_cells(files, spoke.crosswalk) if spoke.crosswalk and spoke.crosswalk in files else {}
         made: dict[str, str | None] = {}
-        for term, key in TERMS.items():
+        extras = dict.fromkeys(
+            (term for term in CITATION_TERMS if (fmt, term) in overrides),
+            ("", ""),
+        )
+        for term, key in (TERMS | extras).items():
             override = overrides.get((fmt, term))
             if fmt == "codemeta" and not override:
                 override = {"path": identity(term), "reason": "codemeta's own term"}
@@ -262,10 +290,11 @@ def build_rows(
     return rows, findings
 
 
-# (format, two terms) whose paths are equal by design: codemeta.json holds the SWHID in identifier, beside the DOI.
+# Equal paths by design: CodeMeta keeps DOI and SWHID together, and DataCite may give a repository as its landing URL.
 SHARED_ON_PURPOSE = {
     ("codemeta", frozenset({"identifier", "swhid"})),
     ("codemeta-2", frozenset({"identifier", "swhid"})),
+    ("datacite", frozenset({"url", "codeRepository"})),
 }
 
 
@@ -274,8 +303,7 @@ def shared_paths(label: str, fmt: str, rows: list[dict[str, Any]]) -> list[Findi
 
     A wrong cell that still looks like a path (npm's identifier cell ``name``) mostly names another
     term's key. Person sub-terms are left out: they sit inside author's path on purpose. So are the
-    pairs in ``SHARED_ON_PURPOSE``, codemeta's and codemeta-2's identifier and swhid, which the
-    consumer tells apart by spelling. In every other format those two have keys of their own.
+    pairs in ``SHARED_ON_PURPOSE``, whose consumers check what the shared value represents.
     """
     paths = [
         (row["term"], alternative)

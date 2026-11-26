@@ -14,7 +14,7 @@ from urllib.parse import unquote
 import pytest
 
 from codemeta_drift.coverage import STATUSES, coverage
-from codemeta_drift.export import FORMATS
+from codemeta_drift.export import FORMATS, TERMS
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -45,7 +45,7 @@ def test_og_card_rows_match_the_coverage():
     letter = dict(zip(STATUSES, "osqxp--", strict=True))
     data = coverage(json.loads((ROOT / "examples/mapping-4.0.json").read_text("utf-8")))
     found = {(c["format"], c["term"]): letter[c["status"]] for c in data["cells"]}
-    assert rows == ["".join(found[fmt, term] for term in data["terms"]) for fmt in formats]
+    assert rows == ["".join(found[fmt, term] for term in TERMS) for fmt in formats]
 
 
 def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):

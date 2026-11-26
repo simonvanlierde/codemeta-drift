@@ -12,7 +12,7 @@ document.documentElement.classList.add("js");
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
-  "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
+  "cff-1.2.0": "CFF 1.2.0", "cff-preferred": "CFF preferred citation", crossref: "Crossref REST API", arxiv: "arXiv Atom", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
   github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", gitlab: "GitLab API", "code-json-2.0": "code.json 2.0", "ro-crate": "RO-Crate", croissant: "Croissant", "dublin-core": "Dublin Core", "iso-19115-1-2014": "ISO 19115-1", "spase-2.6.1": "SPASE 2.6.1", "vivo-1.8": "VIVO 1.8", "mods": "MODS", "bio-tools": "bio.tools",
   "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
   "setup-py": "setup.py", cargo: "Cargo", npm: "npm", composer: "Composer composer.json", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",

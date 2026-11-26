@@ -86,7 +86,7 @@ lists the finding codes, the other exit codes and the `--json` output.
 uvx codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
-The export gives the field path for each term in 45 formats, with the reason for each cell I
+The export gives the field paths for terms in 48 formats, with the reason for each cell I
 corrected by hand. It does not convert values. Only `3.1` and `4.0` have reviewed mappings. The
 [mapping export guide](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md)
 holds the contract, and the

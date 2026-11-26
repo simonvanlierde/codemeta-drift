@@ -84,7 +84,7 @@ On macOS, use `shasum -a 256 -c -` in place of `sha256sum -c -`.
 
 ```json
 {
-  "schema_version": "1.9",
+  "schema_version": "1.10",
   "codemeta_tag": "4.0",
   "generator": {"name": "codemeta-drift", "version": "0.9.0"},
   "context_terms": ["address", "affiliation", "alternateName", "..."],
@@ -119,14 +119,19 @@ Each row has:
 - `see_also` (optional) is the upstream issue or pull request about the cell.
 - `comment` (optional) is for people. Never read it in code.
 
-`codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`, `zenodo`,
+`codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`, `crossref`, `arxiv`, `cff-preferred`, `zenodo`,
 `pep621`, `cargo`, `npm`, `composer`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`,
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
 `croissant`, `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1`, `iso-19115-1-2014`, and
-within a format in the order of the term table, each person term followed by its sub-terms. Don't
-depend on the row order.
+within a format in the order of the term table, each person term followed by its sub-terms.
+Curated citation terms follow the base rows. Consumers can look up a row by format and term.
+
+Since schema 1.10, the export can also give curated paths for citation fields such as a
+container title, full person name, arXiv ID or DOI version relation. These additional rows
+appear only where a mapping was reviewed. A CFF preferred citation describes a separate work.
+Pass the value at the root `preferredCitation` path to the `cff-preferred` rows.
 
 ### Format ids
 
@@ -135,6 +140,8 @@ depend on the row order.
 | Id | What it is | Id | What it is |
 | --- | --- | --- | --- |
 | `cff-1.2.0` | `CITATION.cff` | `codemeta` | codemeta.json |
+| `crossref` | Crossref REST work `message` | `arxiv` | One Atom entry parsed with local XML names |
+| `cff-preferred` | A CFF 1.2.0 `preferred-citation` reference | | |
 | `zenodo` | `.zenodo.json` | `pep621` | pyproject.toml `[project]` |
 | `cargo` | Cargo.toml | `npm` | package.json |
 | `pkg-info` | Python core metadata | `r-description` | R DESCRIPTION |

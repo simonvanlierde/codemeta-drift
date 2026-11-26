@@ -64,7 +64,7 @@ def test_coverage_index_counts_match_the_newest_export():
     index = " ".join((ROOT / "docs/coverage.md").read_text("utf-8").split())
     assert f"The page shows {len(shown)} of the export's {len(formats)} formats" in index
     assert f"{len(no_crosswalk)} of them with no CodeMeta crosswalk" in index
-    assert f"The page's filters count all {len(shown) * len(TERMS)} cells" in index
+    assert f"The page's filters count all {sum(r['format'] in shown for r in rows)} cells" in index
 
 
 @pytest.mark.parametrize("tag", curated_tags())
@@ -192,7 +192,7 @@ def test_a_scope_cell_with_no_path_is_one_the_meaning_admits(mapping: dict):
 
 
 def test_counts_for_the_crosswalks(mapping: dict):
-    found = [s for (fmt, _), s in statuses(mapping).items() if FORMATS[fmt].crosswalk]
+    found = [s for (fmt, term), s in statuses(mapping).items() if FORMATS[fmt].crosswalk and term in TERMS]
     expected = {
         "3.1": {
             "as-is": 114,
@@ -219,7 +219,7 @@ def test_counts_for_the_crosswalks(mapping: dict):
 def test_readme_figures_match_the_counts():
     mapping = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
     # resourceType has no CodeMeta property row, so no crosswalk could have its cell.
-    cells = [c for c in coverage(mapping)["cells"] if c["crosswalk"] and c["term"] not in NO_PROPERTY]
+    cells = [c for c in coverage(mapping)["cells"] if c["crosswalk"] and c["term"] in TERMS.keys() - NO_PROPERTY]
     count = Counter(c["status"] for c in cells)
     null_corrected = sum(c["status"] == "corrected" and c["path"] is None for c in cells)
     text = " ".join((ROOT / "README.md").read_text("utf-8").split())
@@ -256,7 +256,7 @@ def test_cli_writes_json(mapping: dict, example: Path, capsys: pytest.CaptureFix
     assert main(["hub", "coverage", str(example), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == mapping["codemeta_tag"]
-    assert len(data["cells"]) == {"3.1": 42, "4.0": 44}[mapping["codemeta_tag"]] * 19
+    assert len(data["cells"]) == sum(r["format"] != "codemeta" for r in mapping["rows"])
     assert "unreviewed" not in data  # only with --codemeta
 
 
