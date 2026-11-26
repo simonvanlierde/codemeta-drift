@@ -1418,6 +1418,12 @@
       "foaf:familyName": "Carberry"
      }
     ],
+    "dcterms:contributor": [
+     {
+      "foaf:givenName": "Luogeng",
+      "foaf:familyName": "Hua"
+     }
+    ],
     "dcterms:license": {
      "@id": "https://spdx.org/licenses/MIT.html"
     },

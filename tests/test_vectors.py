@@ -4,6 +4,7 @@ import json
 import re
 import xml.etree.ElementTree as ET
 from importlib import resources
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -12,6 +13,7 @@ from codemeta_drift.export import PATH
 from codemeta_drift.paths import resolve
 
 PACKAGE = resources.files("codemeta_drift")
+ROOT = Path(__file__).resolve().parents[1]
 VECTORS = json.loads(PACKAGE.joinpath("mapping-vectors.json").read_text("utf-8"))
 CASES = VECTORS["cases"]
 
@@ -157,8 +159,10 @@ def test_curated_dublin_core_rows_read_both_carriers(tag: str) -> None:
         "author.givenName": (people, ["Josiah"]),
         "author.familyName": (people, ["Carberry"]),
         "author.@id": ([], ["https://orcid.org/0000-0002-1825-0097"]),
-        "contributor": (["Hua, Luogeng"], []),
-        "contributor.givenName": (["Hua, Luogeng"], []),
+        "contributor": (["Hua, Luogeng"], rdf["dcterms:contributor"]),
+        "contributor.givenName": (["Hua, Luogeng"], ["Luogeng"]),
+        "contributor.familyName": (["Hua, Luogeng"], ["Hua"]),
+        "contributor.@id": ([], []),
         "license": (oai["dc:rights"], [{"@id": "https://spdx.org/licenses/MIT.html"}]),
         "identifier": (oai["dc:identifier"], ["https://doi.org/10.5555/example.1234"]),
         "description": (["Counts animalcules in microscope images."], []),
@@ -170,7 +174,9 @@ def test_curated_dublin_core_rows_read_both_carriers(tag: str) -> None:
     for term, (from_oai, from_rdf) in expected.items():
         assert resolve(oai, paths[term]) == from_oai, term
         assert resolve(rdf, paths[term]) == from_rdf, term
-    assert {t for t, p in paths.items() if p is None} == {"version", "swhid", "codeRepository"}
+    nulls = {t for t, p in paths.items() if p is None}
+    assert nulls == {"version", "swhid", "codeRepository"}
+    assert set(expected) | nulls == set(paths)
 
 
 def read_deb822(text: str) -> list[dict[str, str]]:
@@ -435,4 +441,8 @@ def test_curated_iso_rows_read_the_vector_document(tag: str) -> None:
     assert [p["name"] for p in resolve(document, paths["author"])] == authors
     assert [p["name"] for p in resolve(document, paths["contributor"])] == ["Hua Luogeng"]
     # name, version and description read their crosswalk cells, which have no curated row.
-    assert resolve(document, "identificationInfo.citation.title") == ["carberry-notes"]
+    mapping = json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8"))
+    cells = {r["term"]: r["path"] for r in mapping["rows"] if r["format"] == "iso-19115-1-2014"}
+    assert resolve(document, cells["name"]) == ["carberry-notes"]
+    assert resolve(document, cells["version"]) == ["1.4.0"]
+    assert resolve(document, cells["description"]) == ["Keeps lab notes next to the code that produced them."]
