@@ -23,7 +23,7 @@ codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
 The exporter reads the tag's commit, not the working tree. Only `3.1` and `4.0` have curated files.
-Write a directory named `export` as `./export`.
+Write a directory named `export` as `./export`, so the CLI does not read it as the subcommand.
 
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly. Other rows
 come from `curated-<tag>.json`
@@ -220,7 +220,8 @@ new required field, a changed meaning, or a grammar change an old reader would m
    says which do.
 3. Ignore formats, terms and fields it doesn't use.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A
-   `path: null` row is not missing.
+   `path: null` row is not missing. A format that starts at a later tag, such as `gitlab` from 4.0,
+   has no rows in an older tag's file: read it from a file for that tag or later.
 5. Treat two rows for the same (format, term) as an error. The schema can't check this.
 
 The [crosswalk hub](crosswalk-hub.md) builds SSSOM spokes and crosswalk CSVs from this file. Every

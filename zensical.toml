@@ -15,7 +15,7 @@ extra_javascript = ["assets/docs.js"]
 # Reading order: what the project found, then how to use the mapping, then reference. The decision
 # records stay out of the menu while there are none.
 nav = [
-  { "Overview" = "index.md" },
+  { "Documentation" = "index.md" },
   { "Coverage" = [
     { "Coverage by release" = "coverage.md" },
     { "CodeMeta 4.0 matrix" = "coverage-4.0.md" },

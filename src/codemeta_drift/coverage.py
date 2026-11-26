@@ -42,7 +42,7 @@ NOT_REVIEWED = {
     ),
     "ASCL": (
         "registry",
-        "the Astrophysics Source Code Library's entry fields, a registry record; not reviewed yet",
+        "the Astrophysics Source Code Library's entry fields, a registry record",
         "https://ascl.net/",
     ),
     "SciCrunchRegistry": (

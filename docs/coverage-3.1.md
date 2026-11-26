@@ -899,7 +899,7 @@ CodeMeta has 10 more crosswalks with no reviewed mapping.
 
 Why each is not reviewed:
 
-- ASCL (registry): the Astrophysics Source Code Library's entry fields, a registry record; not reviewed yet. <https://ascl.net/>
+- ASCL (registry): the Astrophysics Source Code Library's entry fields, a registry record. <https://ascl.net/>
 - codemeta-V1 (superseded): CodeMeta 1.0; the reviewed codemeta and codemeta-2 rows read the contexts that replaced it. <https://codemeta.github.io/terms/>
 - csdms (registry): the model-description fields of the CSDMS model repository, a catalogue of earth-surface models. <https://csdms.colorado.edu/wiki/Model_download_portal>
 - DCAT-2 (superseded): DCAT 2, which DCAT 3 replaced as the W3C Recommendation in 2024; the reviewed dcat-3 rows read that. <https://www.w3.org/TR/vocab-dcat-3/>

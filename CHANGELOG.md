@@ -16,6 +16,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   terms, and credits CodeMeta's crosswalks. NOTICE credits them for the exports and coverage pages.
 - The per-format reading rules moved from the export guide to
   [Read each format's paths](docs/reading-formats.md). `#the-file` and `#path-grammar` stay put.
+- `hub coverage --json`: the status meanings say "the reviewed mapping" instead of "a curated
+  row", Software Ontology and Software Discovery Index are `niche` rather than `registry`, and
+  ASCL's reason is reworded. The example exports' VIVO comment points at the new page. The export
+  guide's `#check-paths-against-json-schemas`, `#field-paths-and-value-conversion` and
+  `#sssom-spokes` anchors are gone: `--schemas` is under
+  [Export a mapping](docs/mapping-export.md#export-a-mapping), value conversion on
+  [Read each format's paths](docs/reading-formats.md), and SSSOM spokes on
+  [the crosswalk hub page](docs/crosswalk-hub.md).
 - The docs site has a menu in reading order, previous and next links, and a footer with the project links.
 
 ## [0.9.0] - 2026-11-26

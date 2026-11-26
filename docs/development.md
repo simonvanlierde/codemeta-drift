@@ -85,8 +85,9 @@ the `schema-watch` environment, which allows deployments from `main` only and ha
 
 Keep the token in the environment, not as a repository secret, which every workflow on every
 branch can read. Use a fine-grained token for simonvanlierde/codemeta-drift and
-simonvanlierde/citesync with only Issues: read and write. Without it, a scheduled run fails after
-uploading the drafts. A run from another branch stops at the environment, so test a branch with the
+simonvanlierde/citesync with only Issues: read and write; both repositories are public, so it needs no Contents
+permission. Without it, a manual run prints a notice that publishing was skipped, and a scheduled
+run fails after uploading the drafts. A run from another branch stops at the environment, so test a branch with the
 local poll. A local `--publish` run uses `gh` credentials and must not run beside another publisher.
 
 ## Mutation tests
