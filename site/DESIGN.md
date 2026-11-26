@@ -14,12 +14,15 @@ the source of truth for values.
   the filter, with counts.
 - **Type.** Newsreader for prose and JetBrains Mono for every path, term and check code, both OFL and self-hosted as
   latin woff2 in `fonts/` (Newsreader 400 and italic; JetBrains Mono 400 and 700), with the licence texts beside them. The CSP
-  allows only the page's own files, so no font host. Fallbacks are the system serif and mono stacks.
+  allows only the page's own files, so no font host. Fallbacks are the system serif and mono stacks. Body text is 18px
+  Newsreader, which reads small for its size; nothing on the page is under 14px, and only mono labels go that low.
 - **Flat.** Hairlines and one dashed rule under the slug. No shadows, rounded corners or boxes beyond the
   table's own border. The selected cell gets a 2px ink inset.
 - **Releases.** Beside the slug's title sits one link per CodeMeta release with a reviewed export, styled like the
   filters, the shown one tinted with an ink bar. The newest is the bare page; an older one is `?tag=<tag>`, and a
   link keeps the open view's fragment. Upstream is shown with the newest release only.
+- **Docs.** The slug's right side and the colophon link the documentation at `docs/`; the docs'
+  logo links back here.
 - **Tabs.** Three views under the headline: Matrix (the default), Follow a field, and Upstream (CodeMeta's main branch)
   with the count of changed cells. One hairline row; the chosen tab is tinted with a 2px ink bar at its
   foot, like the chosen filter. `#route` and `#upstream` open their views; the SSSOM fragments open Matrix.
@@ -27,7 +30,7 @@ the source of truth for values.
   as-is, corrected and added in the cells' own colours, and one caption. It stacks below on smaller screens.
 - **Matrix.** Formats down, citation files first, then package manifests; terms across, their names
   running up the column. A cell holds only its mark; its path is in the detail panel. The last column
-  counts the format's usable cells. The detail panel sits beside the table from 1280px, below it on
+  counts the format's usable cells. The detail panel sits beside the table from 1360px, below it on
   smaller screens.
 - **Not reviewed.** The other crosswalks follow the reviewed rows under an italic group label that
   carries their legend: • path, ¶ prose, ○ empty, ? unmatched. No wash: a mark says only the cell's
@@ -41,5 +44,5 @@ Don't add inline script or style, another host, or a mark whose meaning lives on
 
 The SSSOM export's identifiers resolve on this page: `#term/<term>`, `#field/<format>/<path>` and
 `#format/<format>` choose the first matching cell and scroll to it. codemeta.json has no row, so
-its field ids open the first cell of their row's term; the Go spoke's one id has no cell. Below 1280px the detail panel
+its field ids open the first cell of their row's term; the Go spoke's one id has no cell. Below 1360px the detail panel
 sticks to the foot of the screen. The format column stays put at every width.

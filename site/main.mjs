@@ -47,12 +47,12 @@ function matrix(data, unreviewed, onPick) {
   head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, "as written")));
   table.append(el("thead", {}, head));
   const formats = [...data.formats].sort((a, b) => rank(a) - rank(b)).map((format) => ({ format, label: label(format) }));
-  const legend = unreviewed && el("span", {}, "Reviewed. Every cell is checked, and each change has a reason.");
+  const legend = unreviewed && el("span", {}, "Reviewed crosswalks. Choose a changed cell to see why.");
   table.append(group(data.terms, formats, data, onPick, { legend, tally: usableTally }));
   if (!unreviewed) return;
-  const shapes = el("span", {}, "Not reviewed. The mark says only what CodeMeta's cell looks like: ");
+  const shapes = el("span", {}, "Not reviewed yet. A mark shows only what CodeMeta's cell holds: ");
   for (const [name, { mark }] of Object.entries(unreviewed.statuses)) shapes.append(el("span", { class: "mark" }, mark), ` ${name} `);
-  shapes.append(". The last column counts the cells that read as a path.");
+  shapes.append(". The last column counts path cells.");
   table.append(group(data.terms, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed" }));
 }
 
@@ -118,7 +118,7 @@ function detail(statuses, labels, reviewed, upstream) {
     const rows = [
       ["Status", `${mark} ${cell.status}: ${meaning}`],
       ["CodeMeta's cell", cell.crosswalk ? (was ? code(was) : cell.cell === null ? "can't be joined" : "empty") : "no CodeMeta crosswalk for this format"],
-      ["Path used", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: nobody has reviewed this crosswalk"],
+      ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", cell.reason]);
     const now = changes.get(`${cell.format} ${cell.term}`);
@@ -306,9 +306,9 @@ function score(data) {
   document.getElementById("score").append(
     el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${fields.length}`)),
     bar,
-    el("figcaption", {}, `cells in these ${formats} CodeMeta crosswalks can be used as written. `
-      + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank although the format has the field. `
-      + `${crosswalk.filter((c) => c.status === "no field" && !noTerm.has(c.term)).length} more are for terms the format has no field for.`),
+    el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written. `
+      + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank where the format has a field. `
+      + `Another ${crosswalk.filter((c) => c.status === "no field" && !noTerm.has(c.term)).length} are for terms the format has no field for.`),
   );
 }
 

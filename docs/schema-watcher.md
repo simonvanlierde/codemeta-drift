@@ -22,19 +22,18 @@ It lists broken mapped paths and new declared properties that have no row. New t
 need no row: they configure tools and hold no metadata. Local refs (including numeric array indices),
 combined schemas and array item properties are followed; recursive schemas stop at the
 first repeated node. Tuple arrays use both draft-07 `items` and modern `prefixItems`.
-Mapped array containers and filter keys count as covered fields. Pattern properties and arbitrary external refs do not yield a
-finite list of new field names, so this preview does not enumerate them.
+Mapped array containers and filter keys count as covered fields. Pattern properties and
+external refs give no finite list of field names, so the preview does not enumerate them.
 
 `issue-titles.json` is a JSON list of titles from both destination repositories, including
 closed issues, or `-` for standard input. Supply `[]` for the first preview. Each draft has `repo`, `title` and `body`.
 Schema findings get a stable fingerprint in the title. A second preview with the same
-findings and existing titles emits no duplicate. Closed titles also suppress a draft;
-closing an issue must not make the next run reopen it.
+findings and existing titles emits no duplicate, and a closed title suppresses a draft too.
 
 The pin check reads the `tag` line in citesync's `MAPPING_SOURCE`. It drafts a citesync
 issue when that stable release tag is older than `--latest`. Equal and newer pins get
-no issue. Release tags must use `vMAJOR.MINOR.PATCH` or `MAJOR.MINOR.PATCH`; arbitrary refs
-and prereleases are errors because this preview cannot infer their release order.
+no issue. Release tags must use `vMAJOR.MINOR.PATCH` or `MAJOR.MINOR.PATCH`. Other refs and
+prereleases are errors: their release order is unknown.
 
 The poll also compares each `sha256` line of `MAPPING_SOURCE` with the hash of that file as
 published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issue titled
@@ -45,7 +44,7 @@ published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issu
 
 The weekly [schema watcher workflow](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/workflows/schema-watch.yml) polls the
 existing public schema sources, CFF's latest release, CodeMeta's tags, the latest stable
-codemeta-drift release and citesync's pin. One poll both uploads the draft JSON as an artifact and publishes the drafts. The artifact is uploaded even when
+codemeta-drift release and citesync's pin. One poll uploads the draft JSON as an artifact and publishes the drafts. The upload happens even when
 publishing fails. The live tests run first and can fail the run. To
 run the same read-only poll locally:
 
@@ -55,24 +54,19 @@ uv run python -m codemeta_drift.poll --out schema-watch.json
 
 Publishing is opt-in. The workflow publishes only when the `MAPPING_WATCH_TOKEN` secret is set
 in the `schema-watch` environment, which allows deployments from `main` only and has no reviewers
-(`just watch-env` sets it up). Keep the token there and never as a repository secret, which every
-workflow on every branch can read. Without it a manual run prints a notice that publishing was
-skipped, and a scheduled run fails after uploading the drafts. The workflow runs from `main` only: a
-run started on another branch stops at the environment, so test a branch with the local poll above. Use a
+(`just watch-env` sets it up). Keep the token there, not as a repository secret, which every workflow on every branch can read. Without it a manual run prints a notice that publishing was
+skipped, and a scheduled run fails after uploading the drafts. A run started on another branch stops at the environment, so test a branch with the local poll above. Use a
 fine-grained token limited to simonvanlierde/codemeta-drift and simonvanlierde/citesync with
-only Issues: read and write. Both repositories are public, so reading the schema sources and
-citesync's `MAPPING_SOURCE` needs no Contents permission. It reads all
-issue pages, including closed issues, before creating any missing drafts. Issue creations are spaced
-one second apart. The workflow's concurrency group serializes runs. A local
+only Issues: read and write; both repositories are public, so no Contents permission is needed.
+The poll reads all issue pages, including closed issues, before creating any missing drafts, and spaces
+issue creations one second apart. The workflow's concurrency group serializes runs. A local
 `--publish` run uses `gh` credentials and must not run beside another publisher.
 
-Only the latest numeric CodeMeta tag gets a missing-export draft; older unsupported tags
-do not each open an issue. The five bundled schema files remain the baseline until they
-are deliberately refreshed. Draft fingerprints suppress repeat reports against that baseline.
+Only the latest numeric CodeMeta tag gets a missing-export draft. The five bundled schema files
+stay the baseline until refreshed, and draft fingerprints suppress repeat reports against it.
 
-Zenodo uses [verified structural path coverage](zenodo-schema.md), not a complete
-public JSON Schema. Changes to the importer source produce review drafts; they do
-not automatically modify that subset or the mapping.
+Zenodo has no complete public JSON Schema, so the watcher uses [verified structural path coverage](zenodo-schema.md).
+A change to the importer source produces a review draft; it does not modify the subset or the mapping.
 
-Run the [offline change-and-recovery example](schema-recovery.md) to induce a rename,
-deduplicate its review and apply an explicit synthetic approval without changing a real pin.
+The [offline change-and-recovery example](schema-recovery.md) induces a rename, deduplicates its review
+and applies a synthetic approval. It changes no real pin.

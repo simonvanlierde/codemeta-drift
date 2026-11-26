@@ -1,13 +1,12 @@
 # Documentation
 
-codemeta-drift checks CodeMeta's own files: where its context, definitions, property table,
-examples and crosswalks disagree, and which crosswalk cells are wrong or missing. It also
+codemeta-drift checks CodeMeta's own files for disagreement between its context, definitions,
+property table, examples and crosswalks, and for crosswalk cells that are wrong or missing. It
 exports the reviewed crosswalks as a JSON mapping for tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
 
-These pages are for people who maintain CodeMeta's crosswalks or build on the mapping. The
-[coverage page](https://simonvanlierde.com/codemeta-drift/) shows every cell; to install and
-run the command, start with the [README](https://github.com/simonvanlierde/codemeta-drift#try-it).
+The [coverage page](https://simonvanlierde.com/codemeta-drift/) shows every cell. The
+[README](https://github.com/simonvanlierde/codemeta-drift#try-it) shows how to run the command.
 
 - [Checks](checks.md): finding codes, compared files, exit codes and JSON output.
 - [Findings](findings.md): what the checks found in earlier CodeMeta snapshots.
@@ -18,4 +17,4 @@ run the command, start with the [README](https://github.com/simonvanlierde/codem
 - [Schema watcher](schema-watcher.md): the weekly check of the format schemas, and [Zenodo path coverage](zenodo-schema.md).
 - [Schema recovery](schema-recovery.md): an offline rename, from the first finding to a reviewed fix.
 - [Development](development.md): tests, mutation testing and the site.
-- [Decisions](decisions/README.md): the records of choices that shape the project.
+- [Decisions](decisions/README.md): records of project choices.

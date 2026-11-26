@@ -34,6 +34,8 @@ toggle = { icon = "lucide/sun", name = "Switch to light mode" }
 # docs-overrides/main.html reads og_image for the link-preview tags. `just og-card` renders the
 # image and puts its hash in this URL, since link previews cache by URL.
 [project.extra]
+# The logo goes back to the coverage page, which the docs sit under.
+homepage = "https://simonvanlierde.com/codemeta-drift/"
 og_image = "assets/og.png?v=908b2d0f"
 
 # Line anchors are empty links, which screen readers announce without a name.

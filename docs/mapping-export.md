@@ -25,15 +25,18 @@ codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
 The exporter reads the tag's commit, not the working tree. Only tags with a bundled
-curated file can be exported; currently those are `3.1` and `4.0`. To check a directory named
-`export`, write `./export` so the CLI does not treat it as the subcommand.
+curated file can be exported: `3.1` and `4.0`. To pass a directory named `export`, write
+`./export` so the CLI does not read it as the subcommand.
 
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
 Other rows use `curated-<tag>.json` ([3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-3.1.json),
-[4.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell and exits 1.
-By default, it prints findings on standard error without writing output. With `--json`, it writes a findings report
-on standard output. A successful export exits 0;
-invalid arguments, such as a tag with no curated file, exit 2, and unreadable inputs exit 3. Without `--out`, JSON goes to standard output. `--json` makes the output a [JSON report](checks.md#read-json-output).
+[4.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason.
+
+The exporter exits 0 on success. A finding, such as an unresolved cell, makes it exit 1 and write no
+mapping. It prints the findings on standard error, or with `--json` as a
+[JSON report](checks.md#read-json-output) on standard output. Invalid arguments, such as a tag with no
+curated file, exit 2, and unreadable inputs exit 3. The mapping goes to `--out`, or to standard
+output without it. With `--json`, the report holding the mapping goes there instead.
 
 | Finding | What to check |
 | --- | --- |
@@ -47,8 +50,6 @@ invalid arguments, such as a tag with no curated file, exit 2, and unreadable in
 
 Cells join to property-table rows by name. When a name occurs under several types,
 such as `identifier` under Thing and Person, the join uses its occurrence order.
-The DOI and SWHID deliberately share CodeMeta's `identifier` path; consumers distinguish
-them by their values.
 
 ## Check paths against JSON Schemas
 
@@ -98,9 +99,8 @@ and `repository`, which may be strings or objects.
 
 The header:
 
-- `schema_version` is `"MAJOR.MINOR"`. It is a string, not a number, so `1.10` can't turn into `1.1`.
+- `schema_version` is a `"MAJOR.MINOR"` string, so `1.10` cannot turn into `1.1`.
 - `codemeta_tag` is the codemeta/codemeta tag the crosswalk rows were read from.
-  `codemeta-drift export` reads the tag's commit, never a working tree.
 - `generator` names the tool and version that wrote the file. A hand-written file marks itself
   with a local version label, such as `0.1.0+hand`.
 - `context_terms` lists every property term of the tag's `codemeta.jsonld`, sorted: the keys a codemeta.json
@@ -132,8 +132,7 @@ Each row:
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
   `resourceType`, or a person sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
-  sub-term names the term it sits under, because `contributor.givenName` sits somewhere else
-  than `author.givenName`. `identifier` is the DOI. `swhid` is the
+  sub-term is written with its parent, as in `contributor.givenName`. `identifier` is the DOI. `swhid` is the
   [Software Heritage identifier](https://www.swhid.org/), such as
   `swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505`. CodeMeta has no term of its own for it:
   codemeta.json holds it in `identifier`, beside the DOI, so both rows of `codemeta` and of
@@ -148,13 +147,13 @@ Each row:
   The `codemeta` `version` path is `version | softwareVersion`: schema.org's `softwareVersion` is a CodeMeta term too,
   so a codemeta.json that holds only it still has a version.
 - `path` is where the value sits, in the grammar below, or `null` when the format has no place
-  for it (Cargo has no DOI). A `null` row is a real answer, not a missing row.
+  for it (Cargo has no DOI). A `null` row is not a missing row.
 - `source` says where the row comes from. `crosswalk:<file>@<tag>` means the path is that
   crosswalk's cell, for example `crosswalk:crosswalks/Zenodo.csv@3.1`. The exporter expands
   list and person paths: `authors` becomes `authors[]`, and CFF's `person.given-names`
   becomes `authors[].given-names`. `curated:<reason>` means the row departs from the crosswalk, picks
   one path out of a prose cell, or fills a cell it leaves empty, and says why. An empty cell is
-  never read as `null`, because the crosswalks also leave cells empty that the format has.
+  never read as `null`: the crosswalks also leave cells empty that the format has.
 - `crosswalk_cell` (optional, added in schema 1.3) is the original crosswalk cell, before
   trimming whitespace or expanding a relative path. `""` means the joined cell was empty;
   `null` means no cell could be joined, including formats without an upstream crosswalk.
@@ -179,8 +178,7 @@ them into one first. These cases need more than the grammar below says:
   build backends write `Author: A, B`. The parser splits `Author` at commas outside double quotes and
   trims each piece. A company suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a
   dot) stays with the piece before it, so `Datadog, Inc.` is one name, and a piece that is `et al.` is
-  dropped. The split loses names that hold a comma, such as `Last, First` and the core metadata spec's own
-  example `C. Schultz, Universal Features Syndicate, Los Angeles, CA`: they read as several names; quote such
+  dropped. The split loses names that hold a comma, such as `Last, First`: they read as several names. Quote such
   a name (`"Smith, Jane"`) to keep it whole, and the parser drops the quotes. `Author-email` is an RFC 822 address list: the parser
   splits it at commas that are outside double quotes and angle brackets, so
   `"Smith, Jane" <j@example.org>, Ada Lovelace <ada@example.org>` is two addresses. Both fields are
@@ -265,11 +263,7 @@ them into one first. These cases need more than the grammar below says:
   `mapping-vectors.json` give a file as `raw_input` and the tree these rules make from it as
   `document`.
 
-Every row in an export has been checked by a person: `crosswalk:` and `curated:` rows alike.
-Rows a tool proposed but nobody checked never go in an export.
-
-A (format, term) pair appears at most once. The schema cannot enforce uniqueness by
-those two fields, so the consumer checks it.
+A (format, term) pair appears at most once. The schema cannot enforce that, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`, `zenodo`,
 `pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`,
@@ -280,7 +274,7 @@ those two fields, so the consumer checks it.
 `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`, `contributor.familyName`,
 `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`, `description`, `keywords`,
 `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
-pin the file's sha256. The header's `generator.version` is one of those inputs: a new codemeta-drift
+pin the file's sha256. `generator.version` is one of the inputs: a new codemeta-drift
 release changes the bytes even when no row changes. A consumer must not depend on the row order.
 
 ## Path grammar
@@ -314,20 +308,20 @@ consumer splits it.
 When a term has alternatives, each of its sub-terms has the same alternatives in the same order,
 each starting with its term's. A consumer reads a sub-term from the alternative its term resolved
 through, not by first match: a DOAP file with a developer and a maintainer reads `author.@id` from
-`developer[].@id` even when only the maintainer has one, so one person's ORCID never lands on another.
+`developer[].@id` even when only the maintainer has one.
 
 The schema's `path` pattern accepts exactly this grammar.
 
 `mapping-vectors.json`, in the package beside `mapping.schema.json`, lists cases of `path`, `document`
 and `expected`. `expected` is the list of values the path resolves to in `document`, in document order,
 from the first alternative that yields any value. A consumer vendors the file with the schema and runs
-every case through its own resolver, so the copies of the grammar stay in step.
+every case through its own resolver.
 Its `schema_version` is the mapping schema whose grammar the cases need.
 Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate` or
 `croissant`) and its `text` is the source file content. Parse that text and compare the resulting tree
 to `document` before resolving `path`; a consumer that does not read that format skips the parse and
 still resolves `path` in `document`. The PKG-INFO cases cover comma separation, quoted names, company
-suffixes and `et al.`. The resolver tests alone do not check those parser rules.
+suffixes and `et al.`.
 
 ## Compatibility
 
@@ -365,10 +359,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
 
 ## SSSOM spokes
 
-The [crosswalk hub](crosswalk-hub.md) exports SSSOM 1.0 TSV spokes from this JSON file.
-The JSON contract stays unchanged. The spokes use `skos:relatedMatch`, because these
-paths identify corresponding fields without proving that their values or meanings match.
+The [crosswalk hub](crosswalk-hub.md) exports SSSOM 1.0 TSV spokes from this JSON file. The JSON
+contract is unchanged. Every spoke relation is `skos:relatedMatch`.
 
-The hub uses its own term namespace for person sub-terms and `swhid`. It does not invent
-CodeMeta vocabulary terms for them. Both crosswalk and curated rows retain
-`semapv:ManualMappingCuration` with their source reason in `comment`.
+Person sub-terms and `swhid` get terms in the hub's own namespace, not CodeMeta's. Crosswalk and curated rows
+both carry `semapv:ManualMappingCuration`, with the row's source reason in `comment`.
