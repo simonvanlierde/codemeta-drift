@@ -189,7 +189,11 @@ a:hover {
   background: var(--tint);
   box-shadow: inset 0 -2px 0 var(--ink);
 }
+p {
+  text-wrap: pretty;
+}
 h1 {
+  text-wrap: balance;
   font-size: clamp(1.9rem, 3.4vw, 2.6rem);
   line-height: 1.2;
   font-weight: 400;
@@ -544,6 +548,7 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
 }
 .route .hub {
   text-align: center;
+  overflow-wrap: anywhere;
   padding: 4px 8px;
   border: 1px solid var(--ink);
   background: var(--paper);
@@ -631,6 +636,15 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
 @media (max-width: 560px) {
   .tabs [role="tab"] {
     padding-inline: 12px;
+  }
+  /* Narrower names leave room for eight term columns on a phone; long names wrap. */
+  #matrix tbody th {
+    width: 7rem;
+    min-width: 7rem;
+    overflow-wrap: anywhere;
+  }
+  .scroll {
+    scroll-padding-left: 7rem;
   }
   .route li {
     grid-template-columns: minmax(0, 1fr);

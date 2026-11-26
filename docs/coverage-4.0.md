@@ -7,10 +7,10 @@ How CodeMeta's 4.0 crosswalks map 19 CodeMeta terms in 43 formats, read from the
 | Mark | Status | Meaning |
 | --- | --- | --- |
 | ✓ | as-is | CodeMeta's crosswalk cell is the path |
-| ✎ | corrected | the crosswalk cell is wrong, ambiguous or prose; a curated row replaces it |
-| + | added | the format has the field but the crosswalk has no cell for it; a curated row adds it |
+| ✎ | corrected | the crosswalk cell is wrong, ambiguous or prose; the reviewed mapping gives the path |
+| + | added | the format has the field but the crosswalk has no cell for it; the reviewed mapping adds the path |
 | – | no field | the format has no field for this term |
-| ∅ | no term | CodeMeta has no property for this term; a curated row adds it |
+| ∅ | no term | CodeMeta has no property for this term; the reviewed mapping adds the path |
 
 ## Counts
 
@@ -936,13 +936,13 @@ CodeMeta has 10 more crosswalks with no reviewed mapping.
 
 Why each is not reviewed:
 
-- ASCL (registry): the Astrophysics Source Code Library's entry fields: a registry record, not a file a citation tool reads. <https://ascl.net/>
+- ASCL (registry): the Astrophysics Source Code Library's entry fields, a registry record; not reviewed yet. <https://ascl.net/>
 - codemeta-V1 (superseded): CodeMeta 1.0; the reviewed codemeta and codemeta-2 rows read the contexts that replaced it. <https://codemeta.github.io/terms/>
 - csdms (registry): the model-description fields of the CSDMS model repository, a catalogue of earth-surface models. <https://csdms.colorado.edu/wiki/Model_download_portal>
 - DCAT-2 (superseded): DCAT 2, which DCAT 3 replaced as the W3C Recommendation in 2024; the reviewed dcat-3 rows read that. <https://www.w3.org/TR/vocab-dcat-3/>
 - OntoSoft (registry): the ontology of the OntoSoft software registry, whose code was last changed in 2023. <https://github.com/KnowledgeCaptureAndDiscovery/ontosoft>
 - SciCrunchRegistry (registry): the SciCrunch Registry's resource fields, the records behind RRIDs. <https://scicrunch.org/resources>
-- Software Discovery Index (registry): the NIH BD2K software index proposed at a 2014 workshop; no index was launched. <https://web.archive.org/web/20141207053849/http://softwarediscoveryindex.org/report/>
-- Software Ontology (registry): an OWL ontology that classifies software tools in knowledge bases, not a metadata file. <https://github.com/allysonlister/swo>
+- Software Discovery Index (niche): the NIH BD2K software index proposed at a 2014 workshop; no index was launched. <https://web.archive.org/web/20141207053849/http://softwarediscoveryindex.org/report/>
+- Software Ontology (niche): an OWL ontology that classifies software tools in knowledge bases, not a metadata file. <https://github.com/allysonlister/swo>
 - Trove Software Map (niche): Trove classifiers, a category vocabulary rather than a record format; a package's classifiers are in pkg-info. <https://pypi.org/classifiers/>
 - usgs-modelcatalog (registry): the record fields of the USGS model catalog. <https://data.usgs.gov/modelcatalog/>
