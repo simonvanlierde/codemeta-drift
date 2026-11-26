@@ -83,7 +83,7 @@ toggle = { icon = "lucide/moon", name = "Switch to system preference" }
 [project.extra]
 # The logo goes back to the coverage page, which the docs sit under.
 homepage = "https://simonvanlierde.com/codemeta-drift/"
-og_image = "assets/og.png?v=908b2d0f"
+og_image = "assets/og.png?v=1d9bf357"
 generator = false
 
 [[project.extra.social]]

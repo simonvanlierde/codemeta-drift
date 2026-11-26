@@ -213,6 +213,10 @@ def read_curated(tag: str) -> list[dict[str, Any]]:
     return json.loads((PACKAGE / f"curated-{tag}.json").read_text("utf-8"))["rows"]
 
 
+KINDS = ("notation", "scope")
+"""A curated row's optional ``kind``: why a cell that is not wrong still needs the row. The export copies it."""
+
+
 def build_rows(
     files: Mapping[str, str], tag: str, curated: list[dict[str, Any]]
 ) -> tuple[list[dict[str, Any]], list[Finding]]:
@@ -227,6 +231,9 @@ def build_rows(
     for i, c in enumerate(curated, 1):
         if missing := sorted({"format", "term", "path", "reason"} - c.keys()):
             msg = f"{name}: row {i} has no {', '.join(missing)}"
+            raise ValueError(msg)
+        if c.get("kind") not in (None, *KINDS):
+            msg = f"{name}: row {i} has kind {c['kind']!r}, not one of {', '.join(KINDS)}"
             raise ValueError(msg)
         if (c["format"], c["term"]) in overrides:
             findings.append(Finding("CURATED_DUPLICATE", name, c["term"], f"second row for {c['format']}"))
@@ -304,7 +311,7 @@ def make_row(
         if finding := curated_finding(label, term, cell, derived, override):
             return None, finding
         row = {"format": fmt, "term": term, "path": override["path"], "source": f"curated:{override['reason']}"}
-        return row | {k: override[k] for k in ("see_also", "comment") if k in override}, None
+        return row | {k: override[k] for k in ("kind", "see_also", "comment") if k in override}, None
     if finding := cell_finding(spoke, label, term, cell, derived):
         return None, finding
     row = {"format": fmt, "term": term, "path": derived, "source": f"crosswalk:{spoke.crosswalk}@{tag}"}

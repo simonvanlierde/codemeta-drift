@@ -386,7 +386,7 @@ function score(data) {
   const count = (status) => fields.filter((c) => c.status === status).length;
   const formats = crosswalkFormats(data.cells).size;
   const bar = el("div", { class: "bar", "aria-hidden": "true" });
-  for (const status of ["as-is", "corrected", "added"]) {
+  for (const status of Object.keys(data.statuses).filter((s) => s !== "no field" && s !== "no term")) {
     const part = el("span", { class: `s-${status}` });
     part.style.flexGrow = String(count(status));
     bar.append(part);
@@ -396,8 +396,10 @@ function score(data) {
     bar,
     el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written`,
       el("span", { "aria-hidden": "true" }, " (✓)"), ". ", el("span", { "aria-hidden": "true" }, "✎ "),
-      `${count("corrected")} are wrong, ambiguous or prose, and `, el("span", { "aria-hidden": "true" }, "+ "),
-      `${count("added")} are blank where the format has a field.`),
+      `${count("corrected")} are wrong, ambiguous or prose, `, el("span", { "aria-hidden": "true" }, "≈ "),
+      `${count("notation")} need only a notation change, `, el("span", { "aria-hidden": "true" }, "⊂ "),
+      `${count("scope")} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly or also reads another field, and `,
+      el("span", { "aria-hidden": "true" }, "+ "), `${count("added")} are blank where the format has a field.`),
   );
 }
 
