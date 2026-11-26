@@ -49,7 +49,6 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "SciCrunchRegistry",
         "Software Discovery Index",
         "Software Ontology",
-        "spase-v2.6.1",
         "Trove Software Map",
         "usgs-modelcatalog",
     }

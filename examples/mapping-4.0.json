@@ -5939,6 +5939,148 @@
       "source": "curated:CodeMeta has no term for the resource type; VIVO states it in the node's rdf:type, and VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, types software as obo:ERO_0000071",
       "comment": "@type may be a list; the consumer looks for obo:ERO_0000071 in it.",
       "crosswalk_cell": null
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "name",
+      "path": "ResourceHeader.ResourceName",
+      "source": "curated:the cell says ResourceHeader/ResourceName, right as written with / for the element path; ResourceName is the resource's short name (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#ResourceName)",
+      "comment": "Real records often put the version in the name (FitsFlow v0.1.0).",
+      "crosswalk_cell": "ResourceHeader/ResourceName"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "version",
+      "path": "SoftwareVersion",
+      "source": "curated:no cell for version; the crosswalk maps softwareVersion to SoftwareVersion, a child of Software that describes the edition of the release (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software_SoftwareVersion)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author",
+      "path": "ResourceHeader.PublicationInfo.Authors",
+      "source": "curated:no cell; PublicationInfo.Authors names who made the resource, as one string (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "comment": "Authors is one string; the consumer splits it on semicolons and trims each name. A Contact with Role Author points to a Person record by PersonID instead, which a path cannot follow.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author.givenName",
+      "path": "ResourceHeader.PublicationInfo.Authors",
+      "source": "curated:no cell; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "comment": "The consumer splits on semicolons, then each name at its first comma into family and given name. A name with no comma is an organization or a name written in display order (India Jackson), and the consumer splits it as for Zenodo.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author.familyName",
+      "path": "ResourceHeader.PublicationInfo.Authors",
+      "source": "curated:no cell; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "comment": "The consumer splits on semicolons, then each name at its first comma into family and given name. A name with no comma is an organization or a name written in display order (India Jackson), and the consumer splits it as for Zenodo.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:the cell says ResourceHeader/DOI, which is the resource's DOI, not a person's id; Authors is plain text, and an ORCID sits only in a separate Person record's ORCIdentifier (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
+      "crosswalk_cell": "ResourceHeader/DOI"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor",
+      "path": "ResourceHeader.Contact[Role=Contributor]",
+      "source": "curated:no cell; a Contact names a person and the roles they hold, and the Role list has Contributor (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Contact)",
+      "comment": "Role repeats, so match a Contact whose roles include Contributor. A Contact holds only PersonID, the ResourceID of a Person record (spase://SMWG/Person/...); the name is in that record, so an element has no name sub-fields.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:no cell; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:no cell; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:the cell says ResourceHeader/DOI, which is the resource's DOI, not a person's id; a Contact's PersonID is a SPASE registry id, and the ORCID sits in the separate Person record's ORCIdentifier (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
+      "crosswalk_cell": "ResourceHeader/DOI"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "license",
+      "path": null,
+      "source": "curated:no cell; 2.6.1 has no licence element, and AccessRights (Open, PartiallyRestricted, Restricted) says who may access the resource, not under which licence (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#AccessRights)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "identifier",
+      "path": "ResourceHeader.DOI",
+      "source": "curated:the cell says ResourceID, the spase:// URI that names the record in the SPASE registry, not a DOI; the DOI is ResourceHeader.DOI, which the crosswalk puts on the Person identifier row (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#DOI)",
+      "comment": "The schema types DOI as a plain string; real records write the URL form (https://doi.org/10.5281/zenodo.17069413).",
+      "crosswalk_cell": "ResourceID"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:the cell says ResourceID, a spase:// URI of the SPASE registry, not a Software Heritage id; SPASE has no place for one (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#ResourceID)",
+      "crosswalk_cell": "ResourceID"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "codeRepository",
+      "path": "AccessInformation[].AccessURL[Style=Git].URL",
+      "source": "curated:the cell says AccessInformation/RepositoryID, which is the ResourceID of a SPASE Repository record (spase://NASA/Repository/NASA-GitHub), not a URL; the link is an AccessURL, and Style Git marks a Git one (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Style)",
+      "comment": "Style is optional, and real records often leave it out (Kamodo gives its GitHub URL with no Style). The consumer may then take an AccessURL whose URL is on a known code host.",
+      "crosswalk_cell": "AccessInformation/RepositoryID"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "description",
+      "path": "ResourceHeader.Description",
+      "source": "curated:the cell says ResourceHeader/Description, right as written with / for the element path (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#ResourceHeader)",
+      "crosswalk_cell": "ResourceHeader/Description"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "keywords",
+      "path": null,
+      "source": "curated:no cell; Software has no Keyword element, which 2.6.1 gives only to Catalog, data and model-run resources and Document (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software)",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "datePublished",
+      "path": "ResourceHeader.PublicationInfo.PublicationDate",
+      "source": "curated:the cell says ResourceHeader/ReleaseDate, which the spec says should be the date the resource description was published; PublicationInfo.PublicationDate is the date the work was first issued (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#PublicationDate)",
+      "comment": "An xsd:dateTime (2025-09-06T00:00:00Z); the consumer keeps the date part.",
+      "crosswalk_cell": "ResourceHeader/ReleaseDate"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "publisher",
+      "path": "ResourceHeader.PublicationInfo.PublishedBy",
+      "source": "curated:the cell is empty; PublishedBy names the organization or person that issues the work (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#PublishedBy)",
+      "comment": "A name string (Zenodo), not an object.",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "resourceType",
+      "path": null,
+      "source": "curated:CodeMeta has no term for the resource type; SPASE 2.6.1 states it in the resource element's name (Software under Spase), which a path cannot reach (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software)",
+      "crosswalk_cell": null
     }
   ]
 }

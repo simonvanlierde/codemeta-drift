@@ -327,3 +327,47 @@ def test_curated_vivo_rows_read_the_framed_graph(tag: str) -> None:
     # Ranked: the first Authorship is rank 1, though the graph lists it second.
     assert [a["rdfs:label"] for a in resolve(document, paths["author"])] == ["van Leeuwenhoek, Antonie", "Hua, Luogeng"]
     assert [d["@value"] for d in resolve(document, paths["datePublished"])] == ["2025-03-14T00:00:00"]
+
+
+SPASE_LISTS = {"AccessInformation", "AccessURL", "Contact", "Role"}
+"""The elements of the vector record that the SPASE schema lets repeat, so the reading rule lists them."""
+
+
+def read_spase(node: ET.Element) -> Any:  # noqa: ANN401 - a string or a tree
+    if not len(node):
+        return (node.text or "").strip()
+    tree: dict[str, Any] = {}
+    for child in node:
+        key = child.tag.rpartition("}")[2]
+        if key in SPASE_LISTS:
+            tree.setdefault(key, []).append(read_spase(child))
+        else:
+            tree[key] = read_spase(child)
+    return tree
+
+
+def test_spase_parser_vector_matches_the_reading_rules() -> None:
+    case = raw_case("spase")
+    root = ET.fromstring(case["raw_input"]["text"].encode())  # noqa: S314 - the vectors ship in this package
+    assert read_spase(next(root.iter("{http://www.spase-group.org/data/schema}Software"))) == case["document"]
+
+
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_curated_spase_rows_read_the_vector_document(tag: str) -> None:
+    paths = curated_paths(tag, "spase-2.6.1")
+    document = raw_case("spase")["document"]
+    authors = ["Lovelace, Ada; Hopper, Grace Brewster"]
+    expected = {
+        "name": ["fern-spectra"],
+        "version": ["1.4.0"],
+        "author": authors,
+        "author.givenName": authors,
+        "author.familyName": authors,
+        "contributor": [{"PersonID": "spase://SMWG/Person/Alan.Turing", "Role": ["Contributor"]}],
+        "identifier": ["https://doi.org/10.5281/zenodo.1234567"],
+        "codeRepository": ["https://github.com/example/fern-spectra"],
+        "description": ["Fits and plots auroral emission spectra from all-sky camera frames."],
+        "datePublished": ["2026-02-27T00:00:00Z"],
+        "publisher": ["Zenodo"],
+    }
+    assert {t: resolve(document, p) for t, p in paths.items() if p is not None} == expected

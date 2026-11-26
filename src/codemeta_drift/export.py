@@ -115,6 +115,7 @@ FORMATS = {
     "debian": Spoke("crosswalks/Debian Package.csv"),
     "mods": Spoke("crosswalks/MODS.csv", person_list=True),
     "vivo-1.8": Spoke("crosswalks/VIVO.csv", person_list=True),
+    "spase-2.6.1": Spoke("crosswalks/spase-v2.6.1.csv"),
 }
 
 PATH = re.compile(

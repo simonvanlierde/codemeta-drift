@@ -94,7 +94,7 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict)
     }
     assert "may need conversion" in header["mapping_set_description"]
     # Counted from the rows, with Go's spoke, so a new format can't leave the number stale.
-    formats = {"3.1": 41, "4.0": 43}[mapping["codemeta_tag"]]
+    formats = {"3.1": 42, "4.0": 44}[mapping["codemeta_tag"]]
     assert f"and {formats} metadata formats" in header["mapping_set_description"]
 
 
@@ -154,6 +154,7 @@ def test_sssom_rows_use_curie_identifiers_and_conservative_predicates(mapping: d
         "format:debian",
         "format:mods",
         "format:vivo-1.8",
+        "format:spase-2.6.1",
     }
     if mapping["codemeta_tag"] != "3.1":
         expected_formats |= {"format:gitlab", "format:code-json-2.0"}

@@ -10,8 +10,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Mapping schema 1.9: `dublin-core` rows (an `oai_dc` record or a DCMI Terms RDF record) , `debian`
-  rows (a source tree's `debian/` directory) , `mods` rows (a MODS 3 record) and
-  `vivo-1.8` rows (a VIVO 1.8 software individual) in the 3.1 and 4.0 exports. No pattern changes, so a 1.9 file passes the 1.8 schema; the `hub` of 0.9.0 refuses it.
+  rows (a source tree's `debian/` directory) , `mods` rows (a MODS 3 record) ,
+  `vivo-1.8` rows (a VIVO 1.8 software individual) and `spase-2.6.1` rows (a SPASE Software resource)
+  in the 3.1 and 4.0 exports. No pattern changes, so a 1.9 file passes the 1.8 schema; the `hub` of 0.9.0 refuses it.
   The [export guide](docs/mapping-export.md) gives the reading rules.
 - The docs are a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>. The coverage page keeps its address.
 - The crosswalks nobody reviews say why, on the coverage pages and the site: superseded by a reviewed format

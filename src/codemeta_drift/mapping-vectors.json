@@ -1741,6 +1741,74 @@
    "expected": [
     "https://orcid.org/0000-0002-1825-0097"
    ]
+  },
+  {
+   "name": "SPASE parser: the tree starts at Spase.Software, and only the elements the schema lets repeat are lists",
+   "path": "AccessInformation[].AccessURL[Style=Git].URL",
+   "raw_input": {
+    "format": "spase",
+    "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Spase xmlns=\"http://www.spase-group.org/data/schema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.spase-group.org/data/schema https://spase-group.org/data/schema/spase-2.6.1.xsd\">\n   <Version>2.6.1</Version>\n   <Software>\n      <ResourceID>spase://Example/Software/fern-spectra</ResourceID>\n      <ResourceHeader>\n         <ResourceName>fern-spectra</ResourceName>\n         <DOI>https://doi.org/10.5281/zenodo.1234567</DOI>\n         <ReleaseDate>2026-03-02T09:30:00</ReleaseDate>\n         <Description>Fits and plots auroral emission spectra from all-sky camera frames.</Description>\n         <PublicationInfo>\n            <Authors>Lovelace, Ada; Hopper, Grace Brewster</Authors>\n            <PublicationDate>2026-02-27T00:00:00Z</PublicationDate>\n            <PublishedBy>Zenodo</PublishedBy>\n            <LandingPageURL>https://zenodo.org/records/1234567</LandingPageURL>\n         </PublicationInfo>\n         <Contact>\n            <PersonID>spase://SMWG/Person/Ada.Lovelace</PersonID>\n            <Role>Author</Role>\n            <Role>Developer</Role>\n         </Contact>\n         <Contact>\n            <PersonID>spase://SMWG/Person/Alan.Turing</PersonID>\n            <Role>Contributor</Role>\n         </Contact>\n      </ResourceHeader>\n      <AccessInformation>\n         <RepositoryID>spase://Example/Repository/GitHub</RepositoryID>\n         <AccessURL>\n            <Name>Source code</Name>\n            <URL>https://github.com/example/fern-spectra</URL>\n            <Style>Git</Style>\n         </AccessURL>\n         <AccessURL>\n            <Name>Release archive</Name>\n            <URL>https://zenodo.org/records/1234567/files/fern-spectra-1.4.0.zip</URL>\n            <Style>File</Style>\n         </AccessURL>\n         <Format>Text</Format>\n      </AccessInformation>\n      <SoftwareVersion>1.4.0</SoftwareVersion>\n      <CodeLanguage>Python</CodeLanguage>\n      <Prerequisites>Python 3.11 or later, NumPy, Astropy</Prerequisites>\n      <ExecutionEnvironment>\n         <OperatingSystem>Linux, macOS, Windows</OperatingSystem>\n         <Installer>\n            <URL>https://pypi.org/project/fern-spectra/</URL>\n         </Installer>\n      </ExecutionEnvironment>\n   </Software>\n</Spase>\n"
+   },
+   "document": {
+    "ResourceID": "spase://Example/Software/fern-spectra",
+    "ResourceHeader": {
+     "ResourceName": "fern-spectra",
+     "DOI": "https://doi.org/10.5281/zenodo.1234567",
+     "ReleaseDate": "2026-03-02T09:30:00",
+     "Description": "Fits and plots auroral emission spectra from all-sky camera frames.",
+     "PublicationInfo": {
+      "Authors": "Lovelace, Ada; Hopper, Grace Brewster",
+      "PublicationDate": "2026-02-27T00:00:00Z",
+      "PublishedBy": "Zenodo",
+      "LandingPageURL": "https://zenodo.org/records/1234567"
+     },
+     "Contact": [
+      {
+       "PersonID": "spase://SMWG/Person/Ada.Lovelace",
+       "Role": [
+        "Author",
+        "Developer"
+       ]
+      },
+      {
+       "PersonID": "spase://SMWG/Person/Alan.Turing",
+       "Role": [
+        "Contributor"
+       ]
+      }
+     ]
+    },
+    "AccessInformation": [
+     {
+      "RepositoryID": "spase://Example/Repository/GitHub",
+      "AccessURL": [
+       {
+        "Name": "Source code",
+        "URL": "https://github.com/example/fern-spectra",
+        "Style": "Git"
+       },
+       {
+        "Name": "Release archive",
+        "URL": "https://zenodo.org/records/1234567/files/fern-spectra-1.4.0.zip",
+        "Style": "File"
+       }
+      ],
+      "Format": "Text"
+     }
+    ],
+    "SoftwareVersion": "1.4.0",
+    "CodeLanguage": "Python",
+    "Prerequisites": "Python 3.11 or later, NumPy, Astropy",
+    "ExecutionEnvironment": {
+     "OperatingSystem": "Linux, macOS, Windows",
+     "Installer": {
+      "URL": "https://pypi.org/project/fern-spectra/"
+     }
+    }
+   },
+   "expected": [
+    "https://github.com/example/fern-spectra"
+   ]
   }
  ]
 }

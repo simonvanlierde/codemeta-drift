@@ -134,6 +134,7 @@ PUBLISHER = {
     "dublin-core",
     "mods",
     "vivo-1.8",
+    "spase-2.6.1",
 }
 RESOURCE_TYPE = {
     "codemeta",
@@ -414,6 +415,7 @@ def test_example_null_rows():
         | {("debian", t) for t in ("identifier", "swhid", "keywords", "datePublished")}
         | {("mods", t) for t in ("swhid", "codeRepository")}
         | {("vivo-1.8", t) for t in ("license", "codeRepository", *contributor)}
+        | {("spase-2.6.1", t) for t in ("author.@id", "license", "swhid", "keywords", *contributor[1:])}
         | {("gitlab", "version"), ("code-json-2.0", "author")}
     )
 
