@@ -3,7 +3,7 @@
   "@type": "SoftwareSourceCode",
   "name": "codemeta-drift",
   "version": "0.9.0",
-  "datePublished": "2026-11-20",
+  "datePublished": "2026-11-26",
   "description": "Show where CodeMeta's crosswalk cells work as written and where they don't, check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review",
   "dateCreated": "2026-10-13",
   "developmentStatus": "https://www.repostatus.org/#active",

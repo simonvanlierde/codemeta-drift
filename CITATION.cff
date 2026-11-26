@@ -5,7 +5,7 @@ cff-version: 1.2.0
 message: If you use this software, please cite it as below.
 title: "codemeta-drift"
 version: "0.9.0"
-date-released: "2026-11-20"
+date-released: "2026-11-26"
 abstract: "Show where CodeMeta's crosswalk cells work as written and where they don't, check CodeMeta consistency, export JSON crosswalk mappings and SSSOM, and preview schema drift for review"
 authors:
   - given-names: "Simon"

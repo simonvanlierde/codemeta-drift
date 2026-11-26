@@ -30,7 +30,7 @@ codemeta-drift = "codemeta_drift.cli:entry"
 
 [project.urls]
 Homepage = "https://github.com/simonvanlierde/codemeta-drift"
-Documentation = "https://simonvanlierde.com/codemeta-drift/"
+Documentation = "https://simonvanlierde.com/codemeta-drift/docs/"
 Source = "https://github.com/simonvanlierde/codemeta-drift"
 Issues = "https://github.com/simonvanlierde/codemeta-drift/issues"
 DOI = "https://doi.org/10.5281/zenodo.23774728"
