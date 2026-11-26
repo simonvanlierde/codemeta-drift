@@ -915,7 +915,7 @@ CodeMeta has 10 more crosswalks with no reviewed mapping.
 
 | Mark | Shape | Meaning |
 | --- | --- | --- |
-| • | path | the cell looks like one path; not checked |
+| • | path | the cell looks like one path; nobody has checked it |
 | ¶ | prose | the cell is prose or a list, not one path |
 | ○ | empty | the cell is empty: the format may have no field, or the crosswalk leaves it out |
 | ∅ | no-term | CodeMeta's property table has no row for this term |

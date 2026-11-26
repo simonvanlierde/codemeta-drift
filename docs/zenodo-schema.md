@@ -21,6 +21,7 @@ It does not check required deposit fields, ORCID checksums, licences, contributo
 vocabularies or every field the service accepts. Read the importer source before
 mapping a field outside this subset. The mapping filters related identifiers by `scheme`. Zenodo
 ignores that field and infers the scheme from the value.
+The poller reads the importer source; it never runs or copies it.
 
 Path checks detect the old crosswalk's uppercase `creators[].ORCID`, bare `id`
 and `related_identifiers.isSupplementTo` paths. The reviewed mapping already uses

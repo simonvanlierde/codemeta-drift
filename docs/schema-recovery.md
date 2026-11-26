@@ -58,4 +58,4 @@ citesync can only repin once its fixtures use the new path. Its `check_mapping` 
 outputs and refuses a `schema_version` with a major other than 1.
 
 The pins in these files are demonstrations. Nothing here repins citesync, releases a package or
-publishes an issue.
+publishes an issue. A real repin also needs a released mapping and the consumer's tests passing.

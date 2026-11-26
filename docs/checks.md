@@ -41,6 +41,7 @@ a file or to a folder such as `crosswalks/`, are not followed: the target counts
 | `SKIPPED` | A file this version doesn't have; the checks that need it don't run, and it doesn't count as a problem |
 
 The checks are in [`checks.py`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/checks.py).
+It imports only the standard library, so another repository can vendor it.
 
 ## Read the output
 
