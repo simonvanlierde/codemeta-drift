@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, hubTerm, linkParts, pageTitle, parseFragment, releaseHref, releaseLinks, sourceHref } from "./fragment.mjs";
+import { chosenTag, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseHref, releaseLinks, sourceHref } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -101,4 +101,36 @@ test("a source link encodes each path segment and opens the line", () => {
     sourceHref("4.0", "crosswalks/Citation File Format 1.2.0.csv", 46),
     "https://github.com/codemeta/codemeta/blob/4.0/crosswalks/Citation%20File%20Format%201.2.0.csv?plain=1#L46",
   );
+});
+
+// Three format rows of four terms; false is an empty or filtered-out cell.
+const grid = [
+  [false, true, false, true],
+  [true, false, false, false],
+  [false, true, true, false],
+];
+
+test("arrows step over empty cells and stop at the edge", () => {
+  assert.deepEqual(nextCell(grid, [0, 1], "ArrowRight"), [0, 3]);
+  assert.equal(nextCell(grid, [0, 3], "ArrowRight"), null);
+  assert.deepEqual(nextCell(grid, [2, 2], "ArrowLeft"), [2, 1]);
+  assert.equal(nextCell(grid, [1, 0], "ArrowLeft"), null);
+});
+
+test("up and down keep the column and pass rows with no cell there", () => {
+  assert.deepEqual(nextCell(grid, [0, 1], "ArrowDown"), [2, 1]);
+  assert.deepEqual(nextCell(grid, [2, 1], "ArrowUp"), [0, 1]);
+  assert.equal(nextCell(grid, [1, 0], "ArrowDown"), null);
+});
+
+test("Home and End stay in the row; with Ctrl they go to the first and last cell", () => {
+  assert.deepEqual(nextCell(grid, [2, 2], "Home"), [2, 1]);
+  assert.deepEqual(nextCell(grid, [0, 1], "End"), [0, 3]);
+  assert.deepEqual(nextCell(grid, [2, 2], "Home", true), [0, 1]);
+  assert.deepEqual(nextCell(grid, [0, 1], "End", true), [2, 2]);
+  assert.equal(nextCell([[false]], [0, 0], "End", true), null);
+});
+
+test("other keys move nowhere", () => {
+  assert.equal(nextCell(grid, [0, 1], "Enter"), null);
 });

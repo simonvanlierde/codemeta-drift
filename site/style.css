@@ -126,7 +126,7 @@ a:hover {
 .skip:focus {
   top: 8px;
 }
-/* Every cell is a tab stop, so a keyboard user can jump past the matrix. */
+/* The scroll box and the matrix's cell are two tab stops, so a keyboard user can jump past both. */
 .skip-matrix:not(:focus) {
   position: absolute;
   width: 1px;
@@ -425,6 +425,7 @@ table {
   border-left: 1px solid var(--rule);
 }
 .cell {
+  position: relative;
   display: grid;
   place-items: center;
   width: 100%;
@@ -437,6 +438,28 @@ table {
 .cell:hover,
 .cell[aria-current="true"] {
   box-shadow: inset 0 0 0 2px var(--ink);
+}
+/* The header scrolls away by the eighth row, and sticky can't hold it inside a box that scrolls sideways:
+   the pointed-at or focused cell names its term in a box, as the route does, and its header is marked. */
+.cell:is(:hover, :focus-visible)::after {
+  content: attr(data-term);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  /* Grows left, over the format column, since the scroll padding keeps that side in view. */
+  right: 0;
+  z-index: 3;
+  padding: 0 6px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 0.875rem / 1.6 var(--mono);
+  white-space: nowrap;
+  pointer-events: none;
+}
+#matrix thead th.on {
+  color: var(--ink);
+  background: var(--tint);
+  box-shadow: inset 0 -2px 0 var(--ink);
 }
 .s-corrected,
 .s-added {
@@ -530,6 +553,19 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
 .pickers select {
   margin-left: 8px;
   padding: 0 8px;
+}
+.pickers .check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.check input {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  accent-color: var(--ink);
 }
 .route {
   list-style: none;
@@ -664,6 +700,7 @@ table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
   }
   /* Forced colours drop box-shadow, which marks the chosen cell and filter otherwise. */
   .cell[aria-current="true"],
+  #matrix thead th.on,
   #filters [aria-pressed="true"],
   .tags [aria-current="page"] {
     outline: 2px solid Highlight;

@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Coverage page: the matrix is one tab stop with arrow, Home and End keys, a focused or pointed-at cell
+  names its term, and Follow a field hides terms neither format has.
+
 ## [0.9.0] - 2026-11-26
 
 ### Upgrade

@@ -2,7 +2,7 @@
 // or an older release's matrix from data-<tag>.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { chosenTag, hubTerm, linkParts, pageTitle, parseFragment, releaseLinks, sourceHref } from "./fragment.mjs";
+import { chosenTag, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseLinks, sourceHref } from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -88,6 +88,41 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
     body.append(row);
   }
   return body;
+}
+
+// The matrix is one tab stop, the cell last focused; arrows, Home and End move between cells (see nextCell).
+// Hovering or focusing a cell marks its column's header.
+function roving(table) {
+  const cells = table.querySelectorAll(".cell");
+  for (const cell of cells) cell.tabIndex = -1;
+  cells[0].tabIndex = 0;
+  const heads = table.querySelectorAll("thead th");
+  let marked = null;
+  const mark = (cell) => {
+    marked?.classList.remove("on");
+    marked = cell ? heads[cell.parentElement.cellIndex] : null;
+    marked?.classList.add("on");
+  };
+  const focused = () => document.activeElement.closest("#matrix .cell");
+  table.addEventListener("pointerover", (event) => mark(event.target.closest(".cell") ?? focused()));
+  table.addEventListener("pointerleave", () => mark(focused()));
+  table.addEventListener("focusout", () => mark(null));
+  table.addEventListener("focusin", (event) => {
+    if (!event.target.classList.contains("cell")) return;
+    table.querySelector('.cell[tabindex="0"]').tabIndex = -1;
+    event.target.tabIndex = 0;
+    mark(event.target);
+  });
+  table.addEventListener("keydown", (event) => {
+    if (!event.target.classList.contains("cell") || !/^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(event.key)) return;
+    event.preventDefault();
+    const rows = [...table.querySelectorAll("tbody tr:not(.group)")].map((tr) => [...tr.querySelectorAll("td:not(.tally)")]);
+    const td = event.target.parentElement;
+    const r = rows.findIndex((row) => row.includes(td));
+    const open = rows.map((row) => row.map((d) => !d.inert && d.firstElementChild !== null));
+    const at = nextCell(open, [r, rows[r].indexOf(td)], event.key, event.ctrlKey || event.metaKey);
+    if (at) rows[at[0]][at[1]].firstElementChild.focus();
+  });
 }
 
 // The crosswalk cells a person had to judge: not 'no field', and not 'no term', which no crosswalk can have. The tally and the headline count these.
@@ -185,6 +220,13 @@ function filters(data) {
         const cell = td.querySelector(".cell");
         td.inert = name !== "all" && cell?.dataset.status !== name;
       }
+      // The matrix's one tab stop moves to the first shown cell when the filter hides it.
+      const stop = table.querySelector('.cell[tabindex="0"]');
+      if (!stop || stop.closest("[inert]")) {
+        if (stop) stop.tabIndex = -1;
+        const first = table.querySelector("td:not([inert]) > .cell");
+        if (first) first.tabIndex = 0;
+      }
     });
     buttons.push(button);
     box.append(button);
@@ -209,9 +251,11 @@ function route(data) {
     const path = paths.get(`${fmt} ${term}`);
     return path ? el("span", { class: "stop" }, code(path)) : el("span", { class: "stop gap" }, `no ${label(fmt)} field`);
   };
+  const hide = document.getElementById("hide-none");
   const draw = () => {
     list.replaceChildren();
     for (const term of data.terms) {
+      if (hide.checked && !paths.get(`${from.value} ${term}`) && !paths.get(`${to.value} ${term}`)) continue;
       const whole = paths.get(`${from.value} ${term}`) && paths.get(`${to.value} ${term}`);
       list.append(el("li", { class: whole ? "whole" : "broken" }, end(from.value, term),
         el("span", { class: "hub" }, code(term)), end(to.value, term)));
@@ -219,6 +263,7 @@ function route(data) {
   };
   from.addEventListener("change", draw);
   to.addEventListener("change", draw);
+  hide.addEventListener("change", draw);
   draw();
 }
 
@@ -383,6 +428,7 @@ async function start() {
   const formats = new Map([...coverage.formats.map((f) => [f, { label: label(f) }]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f])]);
   const statuses = { ...coverage.statuses, ...unreviewed?.statuses };
   matrix(coverage, unreviewed, detail(statuses, formats, coverage, upstream));
+  roving(document.getElementById("matrix"));
   filters(coverage);
   markKey(coverage.statuses, unreviewed?.statuses);
   route(coverage);
