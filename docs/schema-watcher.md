@@ -1,3 +1,7 @@
+---
+description: "Compare downloaded format schemas with the mapping, draft review issues, and check that citesync's mapping pin is current."
+---
+
 # Preview schema changes and mapping pin updates
 
 `watch` compares two downloaded schema directories and prints issue drafts as a

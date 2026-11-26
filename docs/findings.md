@@ -1,3 +1,7 @@
+---
+description: "A dated report of where CodeMeta's context, definitions, property table, examples and crosswalks disagreed in the checked snapshots."
+---
+
 # Findings in the checked CodeMeta snapshots
 
 This is a historical report, not a live status page. The last column refers to
