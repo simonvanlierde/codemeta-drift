@@ -495,7 +495,8 @@ table[data-only="as-is"] td:has(.cell:not(.s-as-is)),
 table[data-only="corrected"] td:has(.cell:not(.s-corrected)),
 table[data-only="added"] td:has(.cell:not(.s-added)),
 table[data-only="no-field"] td:has(.cell:not(.s-no-field)),
-table[data-only="no-term"] td:has(.cell:not(.s-no-term)) {
+table[data-only="no-term"] td:has(.cell:not(.s-no-term)),
+table[data-only="no-term"] td:has(.cell[data-status="no-term"]) {
   opacity: 0.4;
 }
 .detail {
