@@ -27,9 +27,9 @@ uv run python examples/schema-recovery.py /tmp/codemeta-repaired \
   --approval examples/schema-recovery-approval.json
 ```
 
-The repaired mapping passes both its declared JSON Schema and the changed format
+The repaired mapping passes its declared JSON Schema and the changed format
 schema. It has a curated source reason and an example-only generator label. The old
-mapping still passes its original schemas.
+mapping still passes the original schemas.
 
 Each output directory contains:
 
@@ -38,7 +38,7 @@ Each output directory contains:
 - `mapping.json`: the original or explicitly repaired mapping;
 - `pin.json`: the mapping and contract SHA-256 hashes, CodeMeta tag and generator version.
 
-The example refuses to overwrite an output directory, so use a fresh path for each run. A missing or
+The example refuses to overwrite an output directory: use a fresh path for each run. A missing or
 malformed approval file is a CLI error and creates no output. The test runs both modes and checks hashes,
 deduplication, validation and that the original mapping is kept. It also rejects an approval for a
 different change.
@@ -53,7 +53,7 @@ what a rename means for it, run its tests in a citesync worktree twice:
    The pin check fails, and so does every test that reads a PEP 621 `name`, because
    citesync's fixtures still use `project.name`.
 
-The second run is the gate before a repin: the consumer's fixtures must change with the
+The second run gates a repin: the consumer's fixtures must change with the
 mapping. citesync's `check_mapping` accepts both outputs and refuses a `schema_version`
 with a major other than 1.
 

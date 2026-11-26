@@ -5,8 +5,7 @@ description: "Records of the decisions that shape codemeta-drift: what was chose
 # Decisions
 
 Each file here records one decision that shapes this project: what was chosen, why,
-and what it costs. The record keeps the reasoning once the people who made the choice
-have moved on.
+and what it costs.
 
 ## Adding a record
 

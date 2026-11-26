@@ -34,15 +34,14 @@ alternatives, order and selectors.
 `sssom` writes [SSSOM 1.0 TSV](https://mapping-commons.github.io/sssom/1.0/spec-formats-tsv/)
 with an embedded metadata block and explicit CURIE prefixes. It covers the 38 formats
 in the 4.0 JSON export and `gomod`. The Go spoke has only `codeRepository`, corresponding
-to the `module` directive. The JSON export is unchanged.
+to the `module` directive.
 
-All predicates are `skos:relatedMatch`, because matching paths do not mean the fields mean the same.
+All predicates are `skos:relatedMatch`: matching paths do not make the fields mean the same.
 Examples are name components stored in one string, SPDX identifiers stored as URLs, and Go module paths.
 
 The `term:` namespace holds the hub's terms from the JSON export, including compound person paths
 and `swhid`. They are not CodeMeta vocabulary. The `field:` namespace holds a format and its complete
-path, percent-encoded. `format:` holds the format itself, under a different URI prefix so SSSOM readers can
-expand both.
+path, percent-encoded. `format:` holds the format itself, under a separate URI prefix.
 
 All three expand under `https://w3id.org/codemeta-drift/`, which redirects to the
 [coverage page](https://simonvanlierde.com/codemeta-drift/); the page opens the matching cell:
@@ -65,7 +64,7 @@ software identifiers from person identifiers. Person rows use the author's paths
 separate contributor person rows. Unmapped properties have empty cells. Cells hold this export's paths,
 with their selectors and alternatives, in place of CodeMeta's prose.
 
-The w3id base is one redirect to the coverage page. No crosswalk, term or field has its own registration.
+No crosswalk, term or field has its own w3id registration.
 
 ## Validate the SSSOM export
 

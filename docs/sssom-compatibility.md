@@ -23,8 +23,7 @@ It checks the JSON schema, prefix-map completeness and CURIE syntax, and needs n
 access for `uvx`.
 
 The reference parser rejects an export whose `field:` and `format:` prefixes share a URI base.
-The hub's prefixes expand to `https://w3id.org/codemeta-drift/#field/` and `#format/`, and a
-regression test keeps them apart. See the [crosswalk hub](crosswalk-hub.md).
+The hub's prefixes expand to `https://w3id.org/codemeta-drift/#field/` and `#format/`. See the [crosswalk hub](crosswalk-hub.md).
 
 A pass means the reference tool can read the export. It says nothing about whether a mapping is right or
 whether the export follows CodeMeta's methodology.

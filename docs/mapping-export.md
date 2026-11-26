@@ -50,7 +50,6 @@ with `--json` it sits in the report.
 
 Cells join to property-table rows by name. When a name occurs under several types,
 such as `identifier` under Thing and Person, the join uses its occurrence order.
-The DOI and SWHID share CodeMeta's `identifier` path. Consumers tell them apart by value.
 
 ## Check paths against JSON Schemas
 
@@ -133,8 +132,7 @@ Each row:
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
   `resourceType`, or a person sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
-  sub-term names the term it sits under, because `contributor.givenName` sits somewhere else
-  than `author.givenName`. `identifier` is the DOI. `swhid` is the
+  sub-term is written with its parent, as in `contributor.givenName`. `identifier` is the DOI. `swhid` is the
   [Software Heritage identifier](https://www.swhid.org/), such as
   `swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505`. CodeMeta has no term of its own for it:
   codemeta.json holds it in `identifier`, beside the DOI, so both rows of `codemeta` and of
@@ -155,7 +153,7 @@ Each row:
   list and person paths: `authors` becomes `authors[]`, and CFF's `person.given-names`
   becomes `authors[].given-names`. `curated:<reason>` means the row departs from the crosswalk, picks
   one path out of a prose cell, or fills a cell it leaves empty, and says why. An empty cell is
-  never read as `null`, because the crosswalks also leave cells empty that the format has.
+  never read as `null`: the crosswalks also leave cells empty that the format has.
 - `crosswalk_cell` (optional, added in schema 1.3) is the original crosswalk cell, before
   trimming whitespace or expanding a relative path. `""` means the joined cell was empty;
   `null` means no cell could be joined, including formats without an upstream crosswalk.
@@ -180,8 +178,7 @@ them into one first. These cases need more than the grammar below says:
   build backends write `Author: A, B`. The parser splits `Author` at commas outside double quotes and
   trims each piece. A company suffix (`Inc`, `LLC`, `Ltd`, `GmbH`, `PBC` or `Corp`, with or without a
   dot) stays with the piece before it, so `Datadog, Inc.` is one name, and a piece that is `et al.` is
-  dropped. The split loses names that hold a comma, such as `Last, First` and the core metadata spec's own
-  example `C. Schultz, Universal Features Syndicate, Los Angeles, CA`: they read as several names; quote such
+  dropped. The split loses names that hold a comma, such as `Last, First`: they read as several names. Quote such
   a name (`"Smith, Jane"`) to keep it whole, and the parser drops the quotes. `Author-email` is an RFC 822 address list: the parser
   splits it at commas that are outside double quotes and angle brackets, so
   `"Smith, Jane" <j@example.org>, Ada Lovelace <ada@example.org>` is two addresses. Both fields are
@@ -265,8 +262,6 @@ them into one first. These cases need more than the grammar below says:
   such as `#author-1` or a ROR id, is not an ORCID. The `ro-crate` and `croissant` vectors in
   `mapping-vectors.json` give a file as `raw_input` and the tree these rules make from it as
   `document`.
-
-A person has checked every row in an export, `crosswalk:` and `curated:` alike.
 
 A (format, term) pair appears at most once. The schema cannot enforce that, so the consumer checks it.
 
@@ -364,9 +359,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
 
 ## SSSOM spokes
 
-The [crosswalk hub](crosswalk-hub.md) exports SSSOM 1.0 TSV spokes from this JSON file.
-The JSON contract is unchanged. Every spoke relation is `skos:relatedMatch`: the paths say
-which fields correspond, not that their values or meanings match.
+The [crosswalk hub](crosswalk-hub.md) exports SSSOM 1.0 TSV spokes from this JSON file. The JSON
+contract is unchanged. Every spoke relation is `skos:relatedMatch`.
 
 Person sub-terms and `swhid` get terms in the hub's own namespace, not CodeMeta's. Crosswalk and curated rows
 both carry `semapv:ManualMappingCuration`, with the row's source reason in `comment`.

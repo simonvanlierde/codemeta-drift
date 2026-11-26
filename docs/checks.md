@@ -4,9 +4,9 @@ description: "The finding codes codemeta-drift reports, the CodeMeta files it co
 
 # Understand the findings
 
-codemeta-drift checks the files that define CodeMeta and its crosswalks. It compares
-terms by name and checks the row order. A renamed term appears as one unexpected term
-and one missing term. When several crosswalks share a problem, the report groups them.
+codemeta-drift compares the files that define CodeMeta and its crosswalks. It matches
+terms by name and checks row order, so a renamed term appears as one unexpected term and
+one missing term. A problem shared by several crosswalks is reported once, as a group.
 
 ## The files it compares
 
@@ -19,8 +19,9 @@ and one missing term. When several crosswalks share a problem, the report groups
 | `crosswalks/*.csv` | One translation table per format, listing the same terms in the same order |
 | `crosswalk.csv` | All crosswalks combined into one table, which the website shows |
 
-Other example files are not checked: they use a different context or are invalid. The vocabulary and property list are required; a missing file exits 3. A symbolic link, to
-a file or to a folder such as `crosswalks/`, is never followed: the file counts as missing.
+Other example files are not checked: they use a different context or are invalid.
+The vocabulary and property list are required; a missing one exits 3. Symbolic links, to
+a file or to a folder such as `crosswalks/`, are not followed: the target counts as missing.
 
 ## Every check
 
@@ -39,8 +40,7 @@ a file or to a folder such as `crosswalks/`, is never followed: the file counts 
 | `AGGREGATE_FORMAT` | A crosswalk missing from the combined table, or a column with no crosswalk |
 | `SKIPPED` | A file this version doesn't have; the checks that need it don't run, and it doesn't count as a problem |
 
-The checks live in [`checks.py`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/checks.py), which uses only
-the Python standard library.
+The checks are in [`checks.py`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/checks.py).
 
 ## Read the output
 
@@ -57,8 +57,8 @@ CROSSWALK_ROWS crosswalks/*.csv (all 46): position: line 44 is not in properties
 EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
 ```
 
-A file label can name a group of files, as in the first line. Compare the named files before changing a term or mapping.
-These are consistency checks; they do not validate every JSON-LD rule or metadata value.
+A file label can name a group of files, as in the first line.
+The checks test consistency between files. They do not validate every JSON-LD rule or metadata value.
 
 | Exit code | Meaning |
 | --- | --- |
@@ -66,7 +66,7 @@ These are consistency checks; they do not validate every JSON-LD rule or metadat
 | 1 | The checker found disagreements |
 | 2 | Usage error: an unknown option, a missing argument, or an option value the command can't use (a `--tag` with no curated rows, a `--format`, `--from` or `--to` the mapping lacks) |
 | 3 | The check could not run, for example because a required file is missing or unreadable, or its output can't be written, including a closed pipe |
-| 130 | Interrupted with Ctrl-C. The command then ends by SIGINT, so a shell loop around it stops too; on Windows it exits 130 |
+| 130 | Interrupted with Ctrl-C. The command ends by SIGINT, so a shell loop around it stops too; on Windows it exits 130 |
 
 Every `codemeta-drift` command uses these codes. For `export` and `watch`, findings are rows they can't make.
 
@@ -76,7 +76,7 @@ Every `codemeta-drift` command uses these codes. For `export` and `watch`, findi
 codemeta-drift codemeta --json
 ```
 
-The output is one document with these keys:
+The output is one JSON document:
 
 ```json
 {
@@ -94,10 +94,10 @@ The output is one document with these keys:
 }
 ```
 
-`code` identifies the check; `term` names the affected property or format. Use these fields
-for filtering. `file` is a label that can describe a group; `detail` is text for a person.
+`code` is the check and `term` the affected property or format; filter on these. `file` is a
+label that can describe a group, and `detail` is text for a person.
 `errors` holds usage errors (exit 2) or execution errors (exit 3). Then `findings` is empty and each error is an
-object with `message` and `help`, the next step to take or `null`.
+object with `message` and `help` (the next step, or `null`).
 [`report.schema.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/report.schema.json) is its JSON Schema.
 
 `export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` write the same `schema_version` and

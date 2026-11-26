@@ -4,9 +4,8 @@ description: "A dated report of where CodeMeta's context, definitions, property 
 
 # Findings in the checked CodeMeta snapshots
 
-This is a historical report, not a live status page. The last column refers to
-CodeMeta commit `e62eb75`, checked on 2026-10-13.
-With the [command installed](https://github.com/simonvanlierde/codemeta-drift/blob/main/README.md#try-it), check a current CodeMeta checkout to see what remains:
+This is a dated report, not a live status page. The last column is CodeMeta commit
+`e62eb75`, checked on 2026-10-13. To see what remains, with the [command installed](https://github.com/simonvanlierde/codemeta-drift/blob/main/README.md#try-it), check a current CodeMeta checkout:
 
 ```sh
 codemeta-drift codemeta
@@ -29,7 +28,7 @@ codemeta-drift codemeta
 ## Counts by snapshot
 
 Counts are finding entries, not affected files. A finding shared by several crosswalks
-counts once. The last column is the dated commit above:
+counts once.
 
 | Check | 3.1 | 4.0 | `e62eb75` |
 | --- | --- | --- | --- |
@@ -46,6 +45,6 @@ counts once. The last column is the dated commit above:
 3.1 has no definitions file, so those checks didn't run. The full output for 3.1 and 4.0 is
 in [`tests/fixtures/`](https://github.com/simonvanlierde/codemeta-drift/tree/main/tests/fixtures/).
 
-Use the [finding reference](checks.md) to interpret each code. A correction to a
-crosswalk cell belongs in CodeMeta upstream or in a reviewed
-[curated mapping](mapping-export.md); counts do not say which value is right.
+[Finding reference](checks.md) explains each code. The counts do not say which value is
+right: a crosswalk correction belongs upstream in CodeMeta or in a reviewed
+[curated mapping](mapping-export.md).
