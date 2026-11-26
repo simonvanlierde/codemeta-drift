@@ -429,6 +429,12 @@ def test_closed_standard_input_is_a_json_error():
     assert "standard input" in json.loads(result.stdout)["errors"][0]["message"]
 
 
+def test_empty_standard_input_is_an_input_error(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
+    monkeypatch.setattr("sys.stdin", io.StringIO(""))
+    assert main(["hub", "sssom", "-"]) == 3
+    assert capsys.readouterr().err == "codemeta-drift: standard input is empty\n"
+
+
 INTERRUPT = (
     "from codemeta_drift import cli\ndef stop(argv): raise KeyboardInterrupt\ncli.check_main = stop\ncli.entry()"
 )
