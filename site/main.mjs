@@ -15,7 +15,7 @@ const LABELS = {
   "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
   github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", gitlab: "GitLab API", "code-json-2.0": "code.json 2.0", "ro-crate": "RO-Crate", croissant: "Croissant", "dublin-core": "Dublin Core", "iso-19115-1-2014": "ISO 19115-1", "spase-2.6.1": "SPASE 2.6.1", "vivo-1.8": "VIVO 1.8", "mods": "MODS", "bio-tools": "bio.tools",
   "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
-  "setup-py": "setup.py", cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
+  "setup-py": "setup.py", cargo: "Cargo", npm: "npm", composer: "Composer composer.json", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
   "ruby-gem": "Ruby gemspec", maven: "Maven pom.xml", "cpan-meta-2": "CPAN META.json", nuget: "NuGet .nuspec",
   pubspec: "Dart pubspec", cabal: "Haskell Cabal", debian: "Debian source", leiningen: "Leiningen project.clj", octave: "Octave DESCRIPTION",
   "publiccode-0.8": "publiccode.yml 0.8", typst: "typst.toml", quarto: "Quarto extension",

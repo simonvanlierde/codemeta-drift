@@ -26,6 +26,11 @@ SCHEMA_URLS = {
     "npm": "https://json.schemastore.org/package.json",
     "cargo": "https://json.schemastore.org/cargo.json",
 }
+RELEASED_SCHEMAS = {
+    "cff-1.2.0": ("citation-file-format/citation-file-format", "schema.json"),
+    "composer": ("composer/composer", "res/composer-schema.json"),
+}
+"""Schemas read at their repository's latest release: the repo and the schema's path in it."""
 
 
 class HTTPSOnlyRedirects(HTTPRedirectHandler):
@@ -110,12 +115,10 @@ def poll(
     mapping: dict[str, Any], before: dict[str, Any], fetch: Callable[[str], Any] = fetch_json
 ) -> list[dict[str, str]]:
     """Build drafts from current public schemas, release tags, and citesync's pin."""
-    cff_tag = fetch(API + "citation-file-format/citation-file-format/releases/latest")["tag_name"]
     after = {fmt: fetch(url) for fmt, url in SCHEMA_URLS.items()}
-    after["cff-1.2.0"] = fetch(
-        "https://raw.githubusercontent.com/citation-file-format/citation-file-format/"
-        f"{quote(cff_tag, safe='')}/schema.json"
-    )
+    for fmt, (repo, path) in RELEASED_SCHEMAS.items():
+        tag = fetch(API + repo + "/releases/latest")["tag_name"]
+        after[fmt] = fetch(f"https://raw.githubusercontent.com/{repo}/{quote(tag, safe='')}/{path}")
     after["zenodo"] = before["zenodo"]
     latest = fetch(API + "simonvanlierde/codemeta-drift/releases/latest")["tag_name"]
     pin = fetch(API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE")

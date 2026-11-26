@@ -30,6 +30,18 @@ handles Cargo workspace inheritance, and npm's `author` and `repository` as stri
   of `claims.P<n>`, with its value under `mainsnak.datavalue.value`: a string, an object with `id`
   for an item, or an object with `time` for a date. Skip deprecated statements.
 
+### Composer
+
+Read the root object of [composer.json](https://getcomposer.org/doc/04-schema.md) as JSON.
+The name includes the vendor prefix. An author has one full name, which the consumer splits
+if it needs name parts. An array of licences offers alternatives. A string may contain an SPDX
+expression. The path reads the field as one string or one array.
+
+The package registry or VCS often supplies the version and source URL. The mapping reads
+only the values in the supplied object and uses `source.url`, or else `support.source`, for the
+repository. The homepage is separate. A consumer that needs a date reads `time`, a UTC date or
+date and time (`YYYY-MM-DD` or `YYYY-MM-DD HH:MM:SS`).
+
 ## Line and key-value formats
 
 - **Cabal.** Field names are lower case, and each top-level field is a key holding its text. A

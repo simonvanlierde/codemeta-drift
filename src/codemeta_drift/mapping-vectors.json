@@ -1968,6 +1968,44 @@
    "expected": [
     "0000-0002-1825-0097"
    ]
+  },
+  {
+   "name": "Composer: licence array keeps every option",
+   "path": "license",
+   "document": {
+    "license": [
+     "MIT",
+     "Apache-2.0"
+    ]
+   },
+   "expected": [
+    [
+     "MIT",
+     "Apache-2.0"
+    ]
+   ]
+  },
+  {
+   "name": "Composer: a licence expression stays intact",
+   "path": "license",
+   "document": {
+    "license": "MIT OR Apache-2.0"
+   },
+   "expected": [
+    "MIT OR Apache-2.0"
+   ]
+  },
+  {
+   "name": "Composer: a root manifest's repository",
+   "path": "source.url | support.source",
+   "document": {
+    "support": {
+     "source": "https://example.org/carberry/notes/tree/1.2.0"
+    }
+   },
+   "expected": [
+    "https://example.org/carberry/notes/tree/1.2.0"
+   ]
   }
  ]
 }

@@ -25,6 +25,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   id. A writer still puts SPDX ids in `license`. Its SSSOM object id becomes
   `field:cff-1.2.0/license%20%7C%20license-url`, and so does its coverage page fragment
   (`#field/cff-1.2.0/license%20%7C%20license-url`). See [the crosswalk hub](docs/crosswalk-hub.md).
+- Schema directories passed to `export --schemas` and `watch --before`/`--after` now also need
+  `composer.json`.
 
 ### Added
 
@@ -39,8 +41,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   empty standard input is an input error (exit 3). See [the crosswalk hub](docs/crosswalk-hub.md).
 - The [coverage page](https://simonvanlierde.com/codemeta-drift/) uses self-hosted fonts, a red palette
   for wrong or missing cells, and a preview card when sharing its link.
-- Mapping schema 1.9: rows for six more formats in the 3.1 and 4.0 exports: `dublin-core` (an `oai_dc`
-  record or a DCMI Terms RDF record), `debian` (a source tree's `debian/` directory), `mods` (a MODS 3
+- Mapping schema 1.9: rows for seven more formats in the 3.1 and 4.0 exports: `composer` (a root
+  `composer.json`), `dublin-core` (an `oai_dc` record or a DCMI Terms RDF record), `debian` (a source tree's `debian/` directory), `mods` (a MODS 3
   record), `vivo-1.8` (a VIVO software individual), `spase-2.6.1` (a SPASE Software resource) and
   `iso-19115-1-2014` (an ISO 19115-3 record), and an optional row field `kind` (`notation` or `scope`).
   No pattern changes, so a 1.9 file passes the 1.8 schema; the `hub` of 0.8.0 refuses it.

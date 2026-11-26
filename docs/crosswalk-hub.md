@@ -35,7 +35,7 @@ alternatives, order and selectors.
 
 `sssom` writes an SSSOM (Simple Standard for Sharing Ontological Mappings)
 [1.0 TSV](https://mapping-commons.github.io/sssom/1.0/spec-formats-tsv/) table with an embedded
-metadata block and explicit CURIE prefixes. It covers the 44 formats in the 4.0 JSON export and
+metadata block and explicit CURIE prefixes. It covers the 45 formats in the 4.0 JSON export and
 `gomod`. The Go spoke has only `codeRepository`, corresponding to the `module` directive.
 
 All predicates are `skos:relatedMatch`: matching paths do not make the fields mean the same.

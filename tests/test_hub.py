@@ -107,7 +107,7 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict)
     }
     assert "may need conversion" in header["mapping_set_description"]
     # Counted from the rows, with Go's spoke, so a new format can't leave the number stale.
-    formats = {"3.1": 43, "4.0": 45}[mapping["codemeta_tag"]]
+    formats = {"3.1": 44, "4.0": 46}[mapping["codemeta_tag"]]
     assert f"and {formats} metadata formats" in header["mapping_set_description"]
 
 
@@ -132,6 +132,7 @@ def test_sssom_rows_use_curie_identifiers_and_conservative_predicates(mapping: d
         "format:pep621",
         "format:cargo",
         "format:npm",
+        "format:composer",
         "format:pkg-info",
         "format:r-description",
         "format:julia",

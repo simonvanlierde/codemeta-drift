@@ -171,6 +171,7 @@ def test_example_null_rows():
         {(f, t) for f in ("pep621", "cargo", "npm") for t in ("author.@id", "identifier", "swhid", "contributor.@id")}
         | {(f, t) for f in ("cff-1.2.0", "pep621", "cargo") for t in contributor}
         | {(f, "datePublished") for f in ("pep621", "cargo", "npm")}
+        | {("composer", t) for t in ("author.@id", "identifier", "swhid", "publisher", "resourceType", *contributor)}
         | {("pkg-info", t) for t in ("author.@id", "identifier", "swhid", "datePublished", *contributor)}
         | {("r-description", t) for t in ("identifier", "swhid", "keywords")}
         | {("julia", t) for t in ("license", "identifier", "swhid", "codeRepository", "description", "keywords")}

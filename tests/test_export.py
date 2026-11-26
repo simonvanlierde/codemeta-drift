@@ -1,4 +1,5 @@
 import json
+import re
 import shutil
 from collections.abc import Callable
 from pathlib import Path
@@ -261,7 +262,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == 796
+    assert len(rows) == 815
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():
@@ -533,3 +534,17 @@ def test_curated_tags_ignore_a_stray_file(monkeypatch: pytest.MonkeyPatch, tmp_p
         (tmp_path / name).write_text("{}")
     monkeypatch.setattr(export_module, "PACKAGE", tmp_path)
     assert export_module.curated_tags() == ["4.0"]
+
+
+def test_format_lists_match_the_formats():
+    """The schema's format description, the docs' row order and the site's labels each list every format."""
+    described = SCHEMA["$defs"]["row"]["properties"]["format"]["description"]
+    listed = described.removeprefix("Stable format id: ").split(". ")[0].split(", ")
+    docs = " ".join((ROOT / "docs/mapping-export.md").read_text("utf-8").split())
+    order = re.search(r"in the order (`.*?`), and within a format", docs)
+    assert order
+    labels = re.search(r"const LABELS = \{(.*?)\n\};", (ROOT / "site/main.mjs").read_text("utf-8"), re.DOTALL)
+    assert labels
+    assert listed == list(FORMATS)
+    assert re.findall(r"`([a-z0-9.-]+)`", order[1]) == list(FORMATS)
+    assert set(re.findall(r'"?([a-z0-9.-]+)"?: "', labels[1])) == set(FORMATS) - {"codemeta"}
