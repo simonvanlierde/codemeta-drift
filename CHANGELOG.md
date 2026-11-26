@@ -7,6 +7,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Each GitHub release attaches `mapping-<tag>.json` for every curated CodeMeta tag and a `SHA256SUMS`
+  file, so a consumer can pin the export without a CodeMeta checkout. See
+  [Pin a release's export](docs/mapping-export.md#pin-a-releases-export).
+
 ### Changed
 
 - The coverage page says that its `identifier` column means the software's DOI, narrower than

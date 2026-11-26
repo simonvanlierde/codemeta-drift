@@ -82,6 +82,22 @@ jobs:
 
       - run: uv build
 
+      # Project-owned, not from the template: one committed export per CodeMeta tag that has a
+      # curated file, plus their checksums, so a consumer can pin one without a CodeMeta checkout.
+      - name: collect the mapping exports
+        run: |
+          mkdir export
+          for c in src/codemeta_drift/curated-*.json; do
+            tag=${c##*/curated-}
+            cp "examples/mapping-$tag" export/
+          done
+          cd export && sha256sum mapping-*.json >SHA256SUMS
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: export
+          path: ./export/
+
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist
@@ -101,10 +117,10 @@ jobs:
 
       # What publish signs and uploads must be what was built here, whatever the test job ran.
       - id: digest
-        run: echo "value=$(sha256sum dist/* sbom/* | sha256sum | cut -d' ' -f1)" >>"$GITHUB_OUTPUT"
+        run: echo "value=$(sha256sum dist/* sbom/* export/* | sha256sum | cut -d' ' -f1)" >>"$GITHUB_OUTPUT"
 
   # Publish only what passes, on the exact commit being released. The dev group runs
-  # here, after dist/ is uploaded; publish compares a digest of dist/ and sbom/ with the build job's.
+  # here, after dist/ is uploaded; publish compares a digest of dist/, sbom/ and export/ with the build job's.
   test:
     needs: build
     runs-on: ubuntu-latest
@@ -155,10 +171,14 @@ jobs:
         with:
           name: sbom
           path: sbom/
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: export
+          path: export/
       - name: refuse artifacts that changed after the build
         env:
           EXPECTED: ${{ needs.build.outputs.digest }}
-        run: test "$(sha256sum dist/* sbom/* | sha256sum | cut -d' ' -f1)" = "$EXPECTED"
+        run: test "$(sha256sum dist/* sbom/* export/* | sha256sum | cut -d' ' -f1)" = "$EXPECTED"
       # A signed build-provenance attestation per file, so anyone can check where a wheel
       # was built: `gh attestation verify <file> --repo <owner>/<repo>`. This job runs no
       # project code, so the token that signs it never reaches the test suite.
@@ -168,6 +188,7 @@ jobs:
           subject-path: |
             dist/*
             sbom/*
+            export/*
       # sbom-path takes one literal path, not a glob as subject-path does.
       - id: sbom
         run: echo "path=$(echo sbom/*.cdx.json)" >>"$GITHUB_OUTPUT"
@@ -239,6 +260,11 @@ jobs:
         with:
           name: release-notes
           path: notes/
+      # Project-owned: the mapping exports and SHA256SUMS, attested with the rest.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: export
+          path: assets/
       # No checkout or project code runs with the write token.
       - name: publish the GitHub release
         env:
