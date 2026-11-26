@@ -40,7 +40,7 @@ the source of truth for values.
 - **Not reviewed.** The other crosswalks follow the reviewed rows under an italic group label that
   carries their legend: • path, ¶ prose, ○ empty, ? unmatched. No wash: a mark says only the cell's
   shape, so prose and unmatched are red text and the rest faint. Their last column counts path cells.
-  Under each name, in faint italic, is why it is not reviewed (superseded, registry, niche); the detail panel gives the reason.
+  Under each name, in faint text, is why it is not reviewed (superseded, registry, niche); the detail panel gives the reason.
   A "Skip past the matrix" link shows on focus, since every cell is a tab stop.
 - **Route.** Three columns: the source path, the CodeMeta term in a box, the target path, joined by short
   rules. A missing end is italic red with a dashed rule. On a phone the three stack.
