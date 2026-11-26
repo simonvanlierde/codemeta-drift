@@ -66,3 +66,16 @@ jobs:
     steps:
       - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         id: deploy
+
+  notify:
+    # Scheduled runs only. Opens one issue, or comments on the open one, when the weekly build or deploy fails.
+    # The only job that may write issues.
+    name: "pages: report failure"
+    needs: [build, deploy]
+    # A job that runs past timeout-minutes ends cancelled, not failed.
+    if: always() && github.event_name == 'schedule' && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    permissions:
+      issues: write # opens or comments on the failure issue
+    uses: $/.github/workflows/report-failure.yml
+    with:
+      title: Weekly Pages build failed

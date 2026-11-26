@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -120,3 +121,34 @@ def test_copier_update_keeps_older_pull_request_when_workflows_need_app(tmp_path
     )
     assert result.returncode == 0, result.stderr
     assert "Pull request #34 is still open" in result.stdout
+
+
+def _workflow(name: str) -> dict:
+    return yaml.safe_load((ROOT / ".github/workflows" / name).read_text("utf-8"))
+
+
+# The template's own scheduled workflows (fair, links, scorecard) are its to change.
+@pytest.mark.parametrize("name", ["advisories.yml", "copier-update.yml", "pages.yml", "schema-watch.yml"])
+def test_a_scheduled_workflow_reports_its_failure(name: str):
+    workflow = _workflow(name)
+    assert "schedule" in workflow[True]  # YAML reads the bare key on as True
+    notify = workflow["jobs"]["notify"]
+    assert notify["uses"].endswith("/.github/workflows/report-failure.yml")
+    assert set(notify["needs"]) == set(workflow["jobs"]) - {"notify"}
+    assert "github.event_name == 'schedule'" in notify["if"]
+    assert notify["permissions"] == {"issues": "write"}
+
+
+def test_the_job_with_the_watch_token_runs_no_dev_packages():
+    jobs = _workflow("schema-watch.yml")["jobs"]
+    [holder] = [job for job in jobs.values() if job.get("environment") == "schema-watch"]
+    runs = [step["run"] for step in holder["steps"] if "run" in step]
+    assert "uv sync --locked --no-dev" in runs
+    assert all("pytest" not in run for run in runs)
+    assert all("uv run --no-dev " in line for run in runs for line in run.splitlines() if "uv run" in line)
+
+
+def test_the_pypi_check_retries_and_times_out():
+    workflow = (ROOT / ".github/workflows/python-release.yml").read_text("utf-8")
+    [line] = [line for line in workflow.splitlines() if "https://pypi.org/pypi/" in line]
+    assert "--retry 3 --retry-all-errors --max-time 30" in line
