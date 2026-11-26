@@ -127,9 +127,10 @@ Each row:
   `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`), `croissant` (a Croissant 1.0 or
   1.1 `croissant.json`), `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record) ,
   `debian` (a Debian source tree's `debian/` directory), `mods` (a MODS 3 record) ,
-  `vivo-1.8` (a VIVO 1.8 software individual) or `spase-2.6.1` (a SPASE 2.6.1 Software resource). A format whose versions differ puts the version in the id. `pkg-info` to
+  `vivo-1.8` (a VIVO 1.8 software individual) , `spase-2.6.1` (a SPASE 2.6.1 Software resource)
+  or `iso-19115-1-2014` (an ISO 19115-1:2014 record in ISO 19115-3 XML). A format whose versions differ puts the version in the id. `pkg-info` to
   `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, `ris` to `code-json-2.0` in
-  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core`, `debian`, `mods`, `vivo-1.8` and `spase-2.6.1` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
+  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1` and `iso-19115-1-2014` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -222,6 +223,19 @@ them into one first. These cases need more than the grammar below says:
   `PersonID`, the id of a Person record in another document, where the name and ORCID are; no path
   follows it. `PublicationInfo.Authors` is one string, names separated by semicolons, each
   `Family, Given`: the consumer splits it. Dates are xsd:dateTime; the consumer keeps the date.
+- ISO 19115-3 XML: CodeMeta's ISO cells are paths in the ISO 19115-1 model, while the XML puts a
+  class element between each property and its value (`citation/CI_Citation/title/gco:CharacterString`).
+  The consumer reads the record into the model's tree first. The tree starts at `MD_Metadata`, with
+  the namespace ignored, and each property is replaced by its one child's content: a class element
+  (`CI_Citation`, `CI_Individual`) becomes an object of its own properties, with the class name under
+  `_class`; a codelist element becomes its `codeListValue` (`role` reads `author`); a value element
+  (`gco:CharacterString`, `gcx:Anchor`, `gco:Date`) becomes its text, an Anchor's `xlink:href`
+  dropped; an empty property (`gco:nilReason`) is left out. A property its class lets repeat
+  (`maxOccurs="unbounded"`) is a list even when it occurs once, so `CI_Citation.date` is a list and
+  `CI_Date.date` is not. Only the first `identificationInfo` counts. `_class` tells a person from an
+  organisation and a licence from other constraints; no path reads it. A licence path reads every
+  `resourceConstraints` reference, and the consumer skips those that are not licences. ISO 19139
+  records (`gmd:MD_Metadata`) are another tree, which these rows do not read.
 - A .cabal file: field names are lower case, and each top-level field is a key holding its text.
   A section is an element of a list named after it, with its first argument as `kind`, so
   `source-repository head` is read at `source-repository[kind=head].location`.
@@ -326,7 +340,7 @@ A (format, term) pair appears at most once. The schema cannot enforce that, so t
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
-`croissant`, `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
+`croissant`, `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1`, `iso-19115-1-2014`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
 `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`, `contributor.familyName`,
 `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`, `description`, `keywords`,
 `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
@@ -374,7 +388,7 @@ from the first alternative that yields any value. A consumer vendors the file wi
 every case through its own resolver.
 Its `schema_version` is the mapping schema whose grammar the cases need.
 Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate`,
-`croissant`, `oai_dc`, `debian-control`, `mods`, `vivo` or `spase`) and its `text` is the source file content. Parse that text and compare the resulting tree
+`croissant`, `oai_dc`, `debian-control`, `mods`, `vivo`, `spase` or `iso-19115-3`) and its `text` is the source file content. Parse that text and compare the resulting tree
 to `document` before resolving `path`; a consumer that does not read that format skips the parse and
 still resolves `path` in `document`. The `vivo` case gives Turtle as `raw_input` and the framed tree as `document`; this package's own tests
 resolve that tree but do not frame the Turtle. The PKG-INFO cases cover comma separation, quoted names, company
@@ -406,7 +420,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
-   that holds `v`. Schema 1.9 adds the `dublin-core`, `debian`, `mods`, `vivo-1.8` and `spase-2.6.1` format ids and changes no pattern, so a 1.9
+   that holds `v`. Schema 1.9 adds the `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1` and `iso-19115-1-2014` format ids and changes no pattern, so a 1.9
    file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format

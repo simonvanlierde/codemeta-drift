@@ -44,7 +44,6 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "codemeta-V1",
         "csdms",
         "DCAT",
-        "ISO_19115-1",
         "OntoSoft",
         "SciCrunchRegistry",
         "Software Discovery Index",

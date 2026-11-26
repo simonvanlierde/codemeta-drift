@@ -6081,6 +6081,153 @@
       "path": null,
       "source": "curated:CodeMeta has no term for the resource type; SPASE 2.6.1 states it in the resource element's name (Software under Spase), which a path cannot reach (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software)",
       "crosswalk_cell": null
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "name",
+      "path": "identificationInfo.citation.title",
+      "source": "crosswalk:crosswalks/ISO_19115-1.csv@4.0",
+      "crosswalk_cell": "identificationInfo.citation.title"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "version",
+      "path": "identificationInfo.citation.edition",
+      "source": "crosswalk:crosswalks/ISO_19115-1.csv@4.0",
+      "crosswalk_cell": "identificationInfo.citation.edition"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[] + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[] | identificationInfo.citation.citedResponsibleParty[role=originator].party[]",
+      "source": "curated:the cell reads party.name, a string, quotes the filter values and joins with 'or'; the author is each party (1..*) of a CI_Responsibility whose role is author, else originator (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Responsibility_Type). coAuthor, 'party who jointly authors the resource', is added beside author (https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)",
+      "comment": "A party is a CI_Individual or a CI_Organisation; the parser keeps which in _class.",
+      "crosswalk_cell": "identificationInfo.citation.citedResponsibleParty[role='author'].party.name or identificationInfo.citation.citedResponsibleParty[role='originator'].party.name"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author.givenName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[].name + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[].name | identificationInfo.citation.citedResponsibleParty[role=originator].party[].name",
+      "source": "curated:the cell says party.name, relative to the party: a party has one name string (0..1) and no given or family name apart (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, AbstractCI_Party_Type)",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name.",
+      "crosswalk_cell": "party.name*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author.familyName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[].name + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[].name | identificationInfo.citation.citedResponsibleParty[role=originator].party[].name",
+      "source": "curated:the cell says party.name, relative to the party: a party has one name string (0..1) and no given or family name apart (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, AbstractCI_Party_Type)",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name.",
+      "crosswalk_cell": "party.name*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author.@id",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[].partyIdentifier[].code + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[].partyIdentifier[].code | identificationInfo.citation.citedResponsibleParty[role=originator].party[].partyIdentifier[].code",
+      "source": "curated:the cell says identificationInfo.citation.identifier.code, the resource's own identifier, not a person's; Habermann's source table gives party.partyIdentifier.code (https://doi.org/10.6084/m9.figshare.7430282.v1). partyIdentifier (0..*), 'value uniquely identifying a party', came with Amd 1:2018 (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, AbstractCI_Party_Type)",
+      "comment": "partyIdentifier exists only in cit 2.0 records (namespace http://standards.iso.org/iso/19115/-3/cit/2.0); a cit 1.0 record has none. A party may carry several identifiers and codeSpace has no fixed spelling, so keep the code that reads as an ORCID iD, bare or as an https://orcid.org/ URL.",
+      "crosswalk_cell": "identificationInfo.citation.identifier.code"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[] + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[]",
+      "source": "curated:the cell takes every role but author, principalInvestigator and originator, which the grammar cannot negate and which also takes publisher, funder and pointOfContact; the 2014 role codes have contributor, 'party contributing to the resource', and collaborator, 'party who assists with the generation of the resource' (https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)",
+      "comment": "A party is a CI_Individual or a CI_Organisation; the parser keeps which in _class.",
+      "crosswalk_cell": "identificationInfo.citation.citedResponsibleParty[not(role='author' or role='principalInvestigator' or role='originator')].party.name*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor.givenName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[].name + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[].name",
+      "source": "curated:same reasoning as author.givenName, under contributor",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name.",
+      "crosswalk_cell": "party.name*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor.familyName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[].name + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[].name",
+      "source": "curated:same reasoning as author.familyName, under contributor",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name.",
+      "crosswalk_cell": "party.name*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor.@id",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[].partyIdentifier[].code + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[].partyIdentifier[].code",
+      "source": "curated:same reasoning as author.@id, under contributor",
+      "comment": "partyIdentifier exists only in cit 2.0 records (namespace http://standards.iso.org/iso/19115/-3/cit/2.0); a cit 1.0 record has none. A party may carry several identifiers and codeSpace has no fixed spelling, so keep the code that reads as an ORCID iD, bare or as an https://orcid.org/ URL.",
+      "crosswalk_cell": "identificationInfo.citation.identifier.code"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "license",
+      "path": "identificationInfo.resourceConstraints[].reference[].onlineResource[].linkage | identificationInfo.resourceConstraints[].reference[].title",
+      "source": "curated:the cell names reference, a CI_Citation object 'for the limitation or constraint, e.g. copyright statement, license agreement' (https://schemas.isotc211.org/19115/-3/mco/1.0/constraints.xsd, MD_Constraints_Type); the licence is that citation's link, else its title (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_OnlineResource_Type.linkage)",
+      "comment": "A reference can also cite a copyright statement or another constraint: keep those under an MD_LegalConstraints (_class) whose useConstraints holds licence, licenceUnrestricted, licenceEndUser or licenceDistributor (British spelling). The value is a URL or a licence title, not an SPDX id; the consumer converts it.",
+      "crosswalk_cell": "identificationInfo.resourceConstraints.reference"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "identifier",
+      "path": "identificationInfo.citation.identifier[].code",
+      "source": "curated:the cell names identifier.code, but identifier repeats (0..*), so it is a list (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Citation_Type; https://schemas.isotc211.org/19115/-3/mcc/1.0/commonClasses.xsd, MD_Identifier_Type)",
+      "comment": "identifier is repeatable and codeSpace (doi.org, say) has no fixed spelling; a DOI is told from a SWHID by its spelling, bare or as an https://doi.org/ URL.",
+      "crosswalk_cell": "identificationInfo.citation.identifier.code"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:the cell says identifier.code, which holds the DOI; ISO 19115-1 has no property or codeSpace of its own for a SWHID (https://schemas.isotc211.org/19115/-3/mcc/1.0/commonClasses.xsd, MD_Identifier_Type)",
+      "comment": "A record may still carry a SWHID as another citation identifier; the consumer finds it by its swh:1: spelling.",
+      "crosswalk_cell": "identificationInfo.citation.identifier.code"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "codeRepository",
+      "path": null,
+      "source": "curated:no cell; CI_OnlineResource.function has no value for a source repository (download, information, offlineAccess, order, search, completeMetadata, browseGraphic, upload, emailService, browsing, fileAccess; https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd). Habermann's source table maps it to distribution download or information links (https://doi.org/10.6084/m9.figshare.7430282.v1), which are not the repository",
+      "crosswalk_cell": ""
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "description",
+      "path": "identificationInfo.abstract",
+      "source": "crosswalk:crosswalks/ISO_19115-1.csv@4.0",
+      "crosswalk_cell": "identificationInfo.abstract"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "keywords",
+      "path": "identificationInfo.descriptiveKeywords[type=theme].keyword[]",
+      "source": "curated:the cell quotes the filter value and keyword repeats (1..*) inside each MD_Keywords (https://schemas.isotc211.org/19115/-3/mri/1.0/identification.xsd, MD_Keywords_Type)",
+      "comment": "type is optional, so keywords with no type are not read; other types (place, temporal and so on) are not free keywords. A block with a thesaurusName holds terms of a controlled vocabulary.",
+      "crosswalk_cell": "identificationInfo.descriptiveKeywords[type='theme'].keyword*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "datePublished",
+      "path": "identificationInfo.citation.date[dateType=publication].date",
+      "source": "curated:the cell quotes the filter value and date repeats (0..*); the publication date is the CI_Date whose dateType is publication, 'date identifies when the resource was issued' (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Date_Type)",
+      "comment": "date is a gco:Date (xs:date, gYearMonth or gYear) or a gco:DateTime.",
+      "crosswalk_cell": "identificationInfo.citation.date[dateType='publication'].date*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "publisher",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=publisher].party[].name",
+      "source": "curated:the cell quotes the filter value, and party repeats (1..*) under each CI_Responsibility (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Responsibility_Type; role publisher, https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)",
+      "crosswalk_cell": "identificationInfo.citation.citedResponsibleParty[role='publisher'].party.name*"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "resourceType",
+      "path": "metadataScope[].resourceScope",
+      "source": "curated:CodeMeta has no term for the resource type; MD_Metadata.metadataScope (0..*) gives the resourceScope, an MD_ScopeCode (https://schemas.isotc211.org/19115/-3/mdb/2.0/metadataBase.xsd, MD_MetadataScope_Type)",
+      "comment": "For software the value is software ('information applies to a computer program or routine'). A record with no metadataScope describes a dataset.",
+      "crosswalk_cell": null
     }
   ]
 }

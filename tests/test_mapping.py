@@ -85,7 +85,7 @@ def test_example_generator_is_this_release():
 
 
 def test_person_sub_terms_line_up_with_their_term():
-    """Each alternative of a sub-term starts with the matching alternative of its term."""
+    """Each alternative of a sub-term, and each + part of it, starts with the matching one of its term."""
     paths = {(row["format"], row["term"]): row["path"] for row in EXAMPLE["rows"]}
     for (fmt, term), path in paths.items():
         parent = paths.get((fmt, term.split(".")[0])) if "." in term else None
@@ -93,7 +93,14 @@ def test_person_sub_terms_line_up_with_their_term():
             continue
         subs, terms = path.split(" | "), parent.split(" | ")
         assert len(subs) == len(terms), (fmt, term)
-        assert all(sub.startswith(alt) for sub, alt in zip(subs, terms, strict=True)), (fmt, term)
+        for sub, alt in zip(subs, terms, strict=True):
+            parts, term_parts = sub.split(" + "), alt.split(" + ")
+            # A one-chain term may still have + parts in a sub-term (VIVO's two shapes of author name).
+            if len(term_parts) == 1:
+                assert all(part.startswith(alt) for part in parts), (fmt, term)
+            else:
+                assert len(parts) == len(term_parts), (fmt, term)
+                assert all(p.startswith(t) for p, t in zip(parts, term_parts, strict=True)), (fmt, term)
 
 
 EXAMPLES = {tag: json.loads((ROOT / f"examples/mapping-{tag}.json").read_text()) for tag in curated_tags()}
@@ -135,6 +142,7 @@ PUBLISHER = {
     "mods",
     "vivo-1.8",
     "spase-2.6.1",
+    "iso-19115-1-2014",
 }
 RESOURCE_TYPE = {
     "codemeta",
@@ -152,6 +160,7 @@ RESOURCE_TYPE = {
     "dublin-core",
     "mods",
     "vivo-1.8",
+    "iso-19115-1-2014",
 }
 
 
@@ -415,6 +424,7 @@ def test_example_null_rows():
         | {("debian", t) for t in ("identifier", "swhid", "keywords", "datePublished")}
         | {("mods", t) for t in ("swhid", "codeRepository")}
         | {("vivo-1.8", t) for t in ("license", "codeRepository", *contributor)}
+        | {("iso-19115-1-2014", t) for t in ("swhid", "codeRepository")}
         | {("spase-2.6.1", t) for t in ("author.@id", "license", "swhid", "keywords", *contributor[1:])}
         | {("gitlab", "version"), ("code-json-2.0", "author")}
     )

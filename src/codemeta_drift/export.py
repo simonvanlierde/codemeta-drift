@@ -116,6 +116,7 @@ FORMATS = {
     "mods": Spoke("crosswalks/MODS.csv", person_list=True),
     "vivo-1.8": Spoke("crosswalks/VIVO.csv", person_list=True),
     "spase-2.6.1": Spoke("crosswalks/spase-v2.6.1.csv"),
+    "iso-19115-1-2014": Spoke("crosswalks/ISO_19115-1.csv", person_list=True, person_prefix="party."),
 }
 
 PATH = re.compile(

@@ -1809,6 +1809,159 @@
    "expected": [
     "https://github.com/example/fern-spectra"
    ]
+  },
+  {
+   "name": "ISO 19115-3 parser: each property replaced by its value, repeatable properties as lists, codelists as their value",
+   "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[].partyIdentifier[].code",
+   "raw_input": {
+    "format": "iso-19115-3",
+    "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mdb:MD_Metadata xmlns:mdb=\"http://standards.iso.org/iso/19115/-3/mdb/2.0\"\n    xmlns:cit=\"http://standards.iso.org/iso/19115/-3/cit/2.0\"\n    xmlns:mcc=\"http://standards.iso.org/iso/19115/-3/mcc/1.0\"\n    xmlns:mri=\"http://standards.iso.org/iso/19115/-3/mri/1.0\"\n    xmlns:mco=\"http://standards.iso.org/iso/19115/-3/mco/1.0\"\n    xmlns:lan=\"http://standards.iso.org/iso/19115/-3/lan/1.0\"\n    xmlns:gco=\"http://standards.iso.org/iso/19115/-3/gco/1.0\"\n    xmlns:gcx=\"http://standards.iso.org/iso/19115/-3/gcx/1.0\"\n    xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n  <mdb:metadataScope>\n    <mdb:MD_MetadataScope>\n      <mdb:resourceScope>\n        <mcc:MD_ScopeCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/mcc-1.0-codelists.xml#MD_ScopeCode\" codeListValue=\"software\">software</mcc:MD_ScopeCode>\n      </mdb:resourceScope>\n      <mdb:name>\n        <gco:CharacterString>Python package</gco:CharacterString>\n      </mdb:name>\n    </mdb:MD_MetadataScope>\n  </mdb:metadataScope>\n  <mdb:contact>\n    <cit:CI_Responsibility>\n      <cit:role>\n        <cit:CI_RoleCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode\" codeListValue=\"pointOfContact\">pointOfContact</cit:CI_RoleCode>\n      </cit:role>\n      <cit:party>\n        <cit:CI_Organisation>\n          <cit:name>\n            <gco:CharacterString>Carberry Institute</gco:CharacterString>\n          </cit:name>\n        </cit:CI_Organisation>\n      </cit:party>\n    </cit:CI_Responsibility>\n  </mdb:contact>\n  <mdb:dateInfo>\n    <cit:CI_Date>\n      <cit:date>\n        <gco:DateTime>2024-05-02T09:00:00</gco:DateTime>\n      </cit:date>\n      <cit:dateType>\n        <cit:CI_DateTypeCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_DateTypeCode\" codeListValue=\"creation\">creation</cit:CI_DateTypeCode>\n      </cit:dateType>\n    </cit:CI_Date>\n  </mdb:dateInfo>\n  <mdb:identificationInfo>\n    <mri:MD_DataIdentification>\n      <mri:citation>\n        <cit:CI_Citation>\n          <cit:title>\n            <gco:CharacterString>carberry-notes</gco:CharacterString>\n          </cit:title>\n          <cit:date>\n            <cit:CI_Date>\n              <cit:date>\n                <gco:Date>2024-05-02</gco:Date>\n              </cit:date>\n              <cit:dateType>\n                <cit:CI_DateTypeCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</cit:CI_DateTypeCode>\n              </cit:dateType>\n            </cit:CI_Date>\n          </cit:date>\n          <cit:edition>\n            <gco:CharacterString>1.4.0</gco:CharacterString>\n          </cit:edition>\n          <cit:identifier>\n            <mcc:MD_Identifier>\n              <mcc:code>\n                <gcx:Anchor xlink:href=\"https://doi.org/10.5555/carberry.notes\">10.5555/carberry.notes</gcx:Anchor>\n              </mcc:code>\n              <mcc:codeSpace>\n                <gco:CharacterString>doi.org</gco:CharacterString>\n              </mcc:codeSpace>\n            </mcc:MD_Identifier>\n          </cit:identifier>\n          <cit:identifier>\n            <mcc:MD_Identifier>\n              <mcc:code>\n                <gco:CharacterString>swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505</gco:CharacterString>\n              </mcc:code>\n            </mcc:MD_Identifier>\n          </cit:identifier>\n          <cit:citedResponsibleParty>\n            <cit:CI_Responsibility>\n              <cit:role>\n                <cit:CI_RoleCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode\" codeListValue=\"author\">author</cit:CI_RoleCode>\n              </cit:role>\n              <cit:party>\n                <cit:CI_Individual>\n                  <cit:name>\n                    <gco:CharacterString>Antonie van Leeuwenhoek</gco:CharacterString>\n                  </cit:name>\n                  <cit:partyIdentifier>\n                    <mcc:MD_Identifier>\n                      <mcc:code>\n                        <gcx:Anchor xlink:href=\"https://orcid.org/0000-0002-1825-0097\">0000-0002-1825-0097</gcx:Anchor>\n                      </mcc:code>\n                      <mcc:codeSpace>\n                        <gco:CharacterString>orcid.org</gco:CharacterString>\n                      </mcc:codeSpace>\n                    </mcc:MD_Identifier>\n                  </cit:partyIdentifier>\n                </cit:CI_Individual>\n              </cit:party>\n            </cit:CI_Responsibility>\n          </cit:citedResponsibleParty>\n          <cit:citedResponsibleParty>\n            <cit:CI_Responsibility>\n              <cit:role>\n                <cit:CI_RoleCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode\" codeListValue=\"coAuthor\">coAuthor</cit:CI_RoleCode>\n              </cit:role>\n              <cit:party>\n                <cit:CI_Individual>\n                  <cit:name>\n                    <gco:CharacterString>Marie Skłodowska-Curie</gco:CharacterString>\n                  </cit:name>\n                </cit:CI_Individual>\n              </cit:party>\n            </cit:CI_Responsibility>\n          </cit:citedResponsibleParty>\n          <cit:citedResponsibleParty>\n            <cit:CI_Responsibility>\n              <cit:role>\n                <cit:CI_RoleCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode\" codeListValue=\"contributor\">contributor</cit:CI_RoleCode>\n              </cit:role>\n              <cit:party>\n                <cit:CI_Individual>\n                  <cit:name>\n                    <gco:CharacterString>Hua Luogeng</gco:CharacterString>\n                  </cit:name>\n                </cit:CI_Individual>\n              </cit:party>\n            </cit:CI_Responsibility>\n          </cit:citedResponsibleParty>\n          <cit:citedResponsibleParty>\n            <cit:CI_Responsibility>\n              <cit:role>\n                <cit:CI_RoleCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode\" codeListValue=\"publisher\">publisher</cit:CI_RoleCode>\n              </cit:role>\n              <cit:party>\n                <cit:CI_Organisation>\n                  <cit:name>\n                    <gco:CharacterString>Carberry Institute</gco:CharacterString>\n                  </cit:name>\n                </cit:CI_Organisation>\n              </cit:party>\n            </cit:CI_Responsibility>\n          </cit:citedResponsibleParty>\n        </cit:CI_Citation>\n      </mri:citation>\n      <mri:abstract>\n        <gco:CharacterString>Keeps lab notes next to the code that produced them.</gco:CharacterString>\n      </mri:abstract>\n      <mri:descriptiveKeywords>\n        <mri:MD_Keywords>\n          <mri:keyword>\n            <gco:CharacterString>lab notes</gco:CharacterString>\n          </mri:keyword>\n          <mri:keyword>\n            <gco:CharacterString>reproducibility</gco:CharacterString>\n          </mri:keyword>\n          <mri:type>\n            <mri:MD_KeywordTypeCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/mri-1.0-codelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\">theme</mri:MD_KeywordTypeCode>\n          </mri:type>\n        </mri:MD_Keywords>\n      </mri:descriptiveKeywords>\n      <mri:descriptiveKeywords>\n        <mri:MD_Keywords>\n          <mri:keyword>\n            <gco:CharacterString>Delft</gco:CharacterString>\n          </mri:keyword>\n          <mri:type>\n            <mri:MD_KeywordTypeCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/mri-1.0-codelists.xml#MD_KeywordTypeCode\" codeListValue=\"place\">place</mri:MD_KeywordTypeCode>\n          </mri:type>\n        </mri:MD_Keywords>\n      </mri:descriptiveKeywords>\n      <mri:resourceConstraints>\n        <mco:MD_LegalConstraints>\n          <mco:reference>\n            <cit:CI_Citation>\n              <cit:title>\n                <gco:CharacterString>MIT License</gco:CharacterString>\n              </cit:title>\n              <cit:onlineResource>\n                <cit:CI_OnlineResource>\n                  <cit:linkage>\n                    <gco:CharacterString>https://spdx.org/licenses/MIT.html</gco:CharacterString>\n                  </cit:linkage>\n                </cit:CI_OnlineResource>\n              </cit:onlineResource>\n            </cit:CI_Citation>\n          </mco:reference>\n          <mco:useConstraints>\n            <mco:MD_RestrictionCode codeList=\"https://schemas.isotc211.org/19115/resources/codelists/mco-1.0-codelists.xml#MD_RestrictionCode\" codeListValue=\"licence\">licence</mco:MD_RestrictionCode>\n          </mco:useConstraints>\n        </mco:MD_LegalConstraints>\n      </mri:resourceConstraints>\n    </mri:MD_DataIdentification>\n  </mdb:identificationInfo>\n</mdb:MD_Metadata>\n"
+   },
+   "document": {
+    "_class": "MD_Metadata",
+    "metadataScope": [
+     {
+      "_class": "MD_MetadataScope",
+      "resourceScope": "software",
+      "name": "Python package"
+     }
+    ],
+    "contact": [
+     {
+      "_class": "CI_Responsibility",
+      "role": "pointOfContact",
+      "party": [
+       {
+        "_class": "CI_Organisation",
+        "name": "Carberry Institute"
+       }
+      ]
+     }
+    ],
+    "dateInfo": [
+     {
+      "_class": "CI_Date",
+      "date": "2024-05-02T09:00:00",
+      "dateType": "creation"
+     }
+    ],
+    "identificationInfo": {
+     "_class": "MD_DataIdentification",
+     "citation": {
+      "_class": "CI_Citation",
+      "title": "carberry-notes",
+      "date": [
+       {
+        "_class": "CI_Date",
+        "date": "2024-05-02",
+        "dateType": "publication"
+       }
+      ],
+      "edition": "1.4.0",
+      "identifier": [
+       {
+        "_class": "MD_Identifier",
+        "code": "10.5555/carberry.notes",
+        "codeSpace": "doi.org"
+       },
+       {
+        "_class": "MD_Identifier",
+        "code": "swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505"
+       }
+      ],
+      "citedResponsibleParty": [
+       {
+        "_class": "CI_Responsibility",
+        "role": "author",
+        "party": [
+         {
+          "_class": "CI_Individual",
+          "name": "Antonie van Leeuwenhoek",
+          "partyIdentifier": [
+           {
+            "_class": "MD_Identifier",
+            "code": "0000-0002-1825-0097",
+            "codeSpace": "orcid.org"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "_class": "CI_Responsibility",
+        "role": "coAuthor",
+        "party": [
+         {
+          "_class": "CI_Individual",
+          "name": "Marie Skłodowska-Curie"
+         }
+        ]
+       },
+       {
+        "_class": "CI_Responsibility",
+        "role": "contributor",
+        "party": [
+         {
+          "_class": "CI_Individual",
+          "name": "Hua Luogeng"
+         }
+        ]
+       },
+       {
+        "_class": "CI_Responsibility",
+        "role": "publisher",
+        "party": [
+         {
+          "_class": "CI_Organisation",
+          "name": "Carberry Institute"
+         }
+        ]
+       }
+      ]
+     },
+     "abstract": "Keeps lab notes next to the code that produced them.",
+     "descriptiveKeywords": [
+      {
+       "_class": "MD_Keywords",
+       "keyword": [
+        "lab notes",
+        "reproducibility"
+       ],
+       "type": "theme"
+      },
+      {
+       "_class": "MD_Keywords",
+       "keyword": [
+        "Delft"
+       ],
+       "type": "place"
+      }
+     ],
+     "resourceConstraints": [
+      {
+       "_class": "MD_LegalConstraints",
+       "reference": [
+        {
+         "_class": "CI_Citation",
+         "title": "MIT License",
+         "onlineResource": [
+          {
+           "_class": "CI_OnlineResource",
+           "linkage": "https://spdx.org/licenses/MIT.html"
+          }
+         ]
+        }
+       ],
+       "useConstraints": [
+        "licence"
+       ]
+      }
+     ]
+    }
+   },
+   "expected": [
+    "0000-0002-1825-0097"
+   ]
   }
  ]
 }

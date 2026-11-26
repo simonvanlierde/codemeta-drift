@@ -26,7 +26,7 @@ SHAPES = {
 }
 """What a cell of a crosswalk with no reviewed mapping shows: only its shape, from ``classify``."""
 
-SHORT_LABELS = {"ISO_19115-1": "ISO 19115-1", "Perl Module Description (CPAN::Meta)": "Perl (CPAN::Meta)"}
+SHORT_LABELS = {"Perl Module Description (CPAN::Meta)": "Perl (CPAN::Meta)"}
 """Shorter names for the crosswalks whose own header runs long, keyed by file name."""
 
 NOT_REVIEWED = {

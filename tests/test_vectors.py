@@ -371,3 +371,68 @@ def test_curated_spase_rows_read_the_vector_document(tag: str) -> None:
         "publisher": ["Zenodo"],
     }
     assert {t: resolve(document, p) for t, p in paths.items() if p is not None} == expected
+
+
+ISO_LISTS = {
+    "MD_Metadata": {"metadataScope", "contact", "dateInfo"},
+    "MD_DataIdentification": {"descriptiveKeywords", "resourceConstraints"},
+    "CI_Citation": {"date", "identifier", "citedResponsibleParty", "onlineResource"},
+    "CI_Responsibility": {"party"},
+    "CI_Individual": {"contactInfo", "partyIdentifier"},
+    "CI_Organisation": {"contactInfo", "partyIdentifier", "individual"},
+    "MD_Keywords": {"keyword"},
+    "MD_LegalConstraints": {"reference", "useConstraints", "accessConstraints", "otherConstraints"},
+}
+"""The properties of the vector record's classes that the 19115-3 schemas let repeat (maxOccurs unbounded)."""
+
+
+def read_iso(obj: ET.Element) -> dict[str, Any]:
+    """A class element as docs/mapping-export.md reads ISO 19115-3: each property replaced by its value."""
+    tree: dict[str, Any] = {"_class": obj.tag.rpartition("}")[2]}
+    for prop in obj:
+        key, children = prop.tag.rpartition("}")[2], list(prop)
+        if not children:  # a gco:nilReason or an empty property
+            continue
+        child = children[0]
+        code = child.get("codeListValue")
+        value = code if code is not None else (child.text or "").strip() if not len(child) else read_iso(child)
+        if key == "identificationInfo":
+            tree.setdefault(key, value)  # only the first counts
+        elif key in ISO_LISTS.get(tree["_class"], ()):
+            tree.setdefault(key, []).append(value)
+        else:
+            tree[key] = value
+    return tree
+
+
+def test_iso_parser_vector_matches_the_reading_rules() -> None:
+    case = raw_case("iso-19115-3")
+    root = ET.fromstring(case["raw_input"]["text"].encode())  # noqa: S314 - the vectors ship in this package
+    assert read_iso(root) == case["document"]
+
+
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_curated_iso_rows_read_the_vector_document(tag: str) -> None:
+    paths = curated_paths(tag, "iso-19115-1-2014")
+    document = raw_case("iso-19115-3")["document"]
+    authors = ["Antonie van Leeuwenhoek", "Marie Skłodowska-Curie"]
+    expected = {
+        "author.givenName": authors,
+        "author.familyName": authors,
+        "author.@id": ["0000-0002-1825-0097"],
+        "contributor.givenName": ["Hua Luogeng"],
+        "contributor.familyName": ["Hua Luogeng"],
+        "contributor.@id": [],
+        "license": ["https://spdx.org/licenses/MIT.html"],
+        "identifier": ["10.5555/carberry.notes", "swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505"],
+        "keywords": ["lab notes", "reproducibility"],
+        "datePublished": ["2024-05-02"],
+        "publisher": ["Carberry Institute"],
+        "resourceType": ["software"],
+    }
+    for term, values in expected.items():
+        assert resolve(document, paths[term]) == values, term
+    assert [p["name"] for p in resolve(document, paths["author"])] == authors
+    assert [p["name"] for p in resolve(document, paths["contributor"])] == ["Hua Luogeng"]
+    # name, version and description read their crosswalk cells, which have no curated row.
+    assert resolve(document, "identificationInfo.citation.title") == ["carberry-notes"]
