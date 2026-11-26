@@ -5,13 +5,9 @@ missing: [see every cell](https://simonvanlierde.com/codemeta-drift/). It also c
 own files against each other, and exports a reviewed JSON field mapping for tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
 
-codemeta-drift is not part of the CodeMeta project and proposes no edits to CodeMeta's files. Its
-`identifier` column means the software's DOI, a narrower reading than CodeMeta's "any kind of
-identifier", so a cell that holds a package id or a UUID counts as corrected for citation use, not
-as a CodeMeta error.
-
-The [README](https://github.com/simonvanlierde/codemeta-drift#try-it) shows how to run the command.
-To compare two formats, read [Coverage](coverage.md), then [Crosswalk hub](crosswalk-hub.md).
+It is not part of the CodeMeta project. Its `identifier` column means the software's DOI, narrower
+than CodeMeta's "any kind of identifier". The [README](https://github.com/simonvanlierde/codemeta-drift#try-it)
+shows how to run the command.
 
 - [Coverage](coverage.md): the crosswalk matrix for each CodeMeta release, and what each count covers.
 - [Findings](findings.md): what the checks found in earlier CodeMeta snapshots.

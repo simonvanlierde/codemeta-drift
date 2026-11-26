@@ -66,16 +66,14 @@ then run:
 just og-card
 ```
 
-`site/build.py` copies the card into the built page and adds the PNG's hash to the `og:image`
-URL (`?v=`). `just og-card` writes the hash into `zensical.toml` for the docs; a test fails if
-it is stale.
+`just og-card` writes the PNG's hash into the docs' `og:image` URL (`?v=`), and `site/build.py`
+does the same for the page. A test fails while the hash is stale.
 
 ## Schema watcher workflow
 
 The weekly [schema watcher workflow](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/workflows/schema-watch.yml)
-runs the live tests first, and they can fail the run. One poll then uploads the draft JSON as an
-artifact and publishes the drafts. The upload happens even when publishing fails. To run the same
-read-only poll locally:
+runs the live tests, then one poll that uploads the draft JSON as an artifact and publishes the
+drafts. To run the same read-only poll locally:
 
 ```sh
 uv run python -m codemeta_drift.poll --out schema-watch.json
@@ -85,17 +83,11 @@ Publishing is opt-in. The workflow publishes only when the `MAPPING_WATCH_TOKEN`
 the `schema-watch` environment, which allows deployments from `main` only and has no reviewers.
 `just watch-env` sets it up.
 
-- Keep the token in the environment. Every workflow on every branch can read a repository secret.
-- Without the token, a manual run prints a notice that publishing was skipped, and a scheduled run
-  fails after uploading the drafts.
-- A run started on another branch stops at the environment, so test a branch with the local poll.
-- Use a fine-grained token limited to simonvanlierde/codemeta-drift and simonvanlierde/citesync,
-  with only Issues: read and write. Both repositories are public, so it needs no Contents
-  permission.
-
-The poll reads all issue pages, including closed issues, before it creates any missing drafts, and
-spaces issue creations one second apart. The workflow's concurrency group serializes runs. A local
-`--publish` run uses `gh` credentials and must not run beside another publisher.
+Keep the token in the environment, not as a repository secret, which every workflow on every
+branch can read. Use a fine-grained token for simonvanlierde/codemeta-drift and
+simonvanlierde/citesync with only Issues: read and write. Without it, a scheduled run fails after
+uploading the drafts. A run from another branch stops at the environment, so test a branch with the
+local poll. A local `--publish` run uses `gh` credentials and must not run beside another publisher.
 
 ## Mutation tests
 
