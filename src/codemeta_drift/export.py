@@ -166,7 +166,8 @@ def crosswalk_rows(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str, 
             cells[(parents[name][seen[name]], name)] = (line, cell)
         elif seen[name] == 0 and parents.get(name, [""])[0] == "schema:Thing":
             at = next(k for k, (_, n) in enumerate(table) if n == name)
-            if neighbours([n for _, n in table], at) == neighbours([n for _, n, _ in rows], i):
+            pair = neighbours([n for _, n, _ in rows], i)
+            if None not in pair and pair == neighbours([n for _, n in table], at):
                 cells[("schema:Thing", name)] = (line, cell)
         seen[name] += 1
     return cells

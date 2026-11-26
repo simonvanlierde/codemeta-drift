@@ -293,8 +293,8 @@ def upstream(files: Mapping[str, str], mapping: dict[str, Any]) -> list[dict[str
     """The cells whose crosswalk text in ``files`` (a newer CodeMeta commit) differs from the export's tag.
 
     ``state`` is ``missing`` when the new commit has no such crosswalk file or no property table;
-    ``unmatched`` when its crosswalk and property table list a property a different number of times,
-    so its cell can't be joined; ``fixed`` when a corrected or added cell now gives the reviewed
+    ``unmatched`` when its crosswalk and property table list a property a different number of times
+    and :func:`crosswalk_rows` can't join its cell; ``fixed`` when a corrected or added cell now gives the reviewed
     path, so the curated row could go; else ``changed``.
     """
     paths = {(row["format"], row["term"]): row["path"] for row in mapping["rows"]}
