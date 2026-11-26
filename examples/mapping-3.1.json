@@ -5109,7 +5109,7 @@
       "format": "dublin-core",
       "term": "author.givenName",
       "path": "dcterms:creator[].foaf:givenName | dc:creator[]",
-      "source": "curated:no cell; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's given name is foaf:givenName and an oai_dc creator is the whole name string",
+      "source": "curated:the cell is empty; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's given name is foaf:givenName and an oai_dc creator is the whole name string",
       "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms.",
       "crosswalk_cell": ""
     },
@@ -5117,7 +5117,7 @@
       "format": "dublin-core",
       "term": "author.familyName",
       "path": "dcterms:creator[].foaf:familyName | dc:creator[]",
-      "source": "curated:no cell; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's family name is foaf:familyName and an oai_dc creator is the whole name string",
+      "source": "curated:the cell is empty; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's family name is foaf:familyName and an oai_dc creator is the whole name string",
       "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms.",
       "crosswalk_cell": ""
     },
@@ -5125,7 +5125,7 @@
       "format": "dublin-core",
       "term": "author.@id",
       "path": "dcterms:creator[].@id | dc:creator[].@id",
-      "source": "curated:no cell; DCMI has no ORCID property, but recommends identifying the creator with a URI (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#creator), which JSON-LD keeps as the agent node's @id",
+      "source": "curated:the cell is empty; DCMI has no ORCID property, but recommends identifying the creator with a URI (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#creator), which JSON-LD keeps as the agent node's @id",
       "comment": "oai_dc has no attributes or nested nodes, so only an RDF record whose agent node is named by its ORCID IRI has this; a ROR or blank-node @id is not an ORCID.",
       "crosswalk_cell": ""
     },
@@ -5237,7 +5237,7 @@
       "format": "debian",
       "term": "name",
       "path": "copyright.Upstream-Name | control.Source",
-      "source": "curated:no cell; copyright-format 1.0 section 6.2 (https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/) makes Upstream-Name \"the name upstream uses for the software\", optional; Policy 5.6.1 Source is the Debian source package name, lower case only, and mandatory",
+      "source": "curated:the cell is empty; copyright-format 1.0 section 6.2 (https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/) makes Upstream-Name \"the name upstream uses for the software\", optional; Policy 5.6.1 Source is the Debian source package name, lower case only, and mandatory",
       "comment": "control.Source may differ from the upstream name (python-carberry for carberry), so it is only the fallback.",
       "crosswalk_cell": ""
     },
@@ -5253,63 +5253,63 @@
       "format": "debian",
       "term": "author",
       "path": null,
-      "source": "curated:no cell; no Debian field names the authors: Maintainer and Uploaders are the Debian package's maintainers (Policy 5.6.2, 5.6.3, https://www.debian.org/doc/debian-policy/ch-controlfields.html), Copyright holds copyright statements (copyright-format 6.8) and Upstream-Contact is an address to reach the project (6.3)",
+      "source": "curated:the cell is empty; no Debian field names the authors: Maintainer and Uploaders are the Debian package's maintainers (Policy 5.6.2, 5.6.3, https://www.debian.org/doc/debian-policy/ch-controlfields.html), Copyright holds copyright statements (copyright-format 6.8) and Upstream-Contact is an address to reach the project (6.3)",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "author.givenName",
       "path": null,
-      "source": "curated:no cell, and no author path to extend",
+      "source": "curated:the cell is empty, and no author path to extend",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "author.familyName",
       "path": null,
-      "source": "curated:no cell, and no author path to extend",
+      "source": "curated:the cell is empty, and no author path to extend",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "author.@id",
       "path": null,
-      "source": "curated:no cell, and no author path to extend",
+      "source": "curated:the cell is empty, and no author path to extend",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "contributor",
       "path": null,
-      "source": "curated:no cell; Uploaders lists the co-maintainers of the Debian package (Policy 5.6.3), who are not contributors to the software",
+      "source": "curated:the cell is empty; Uploaders lists the co-maintainers of the Debian package (Policy 5.6.3), who are not contributors to the software",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "contributor.givenName",
       "path": null,
-      "source": "curated:no cell, and no contributor path to extend",
+      "source": "curated:the cell is empty, and no contributor path to extend",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "contributor.familyName",
       "path": null,
-      "source": "curated:no cell, and no contributor path to extend",
+      "source": "curated:the cell is empty, and no contributor path to extend",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "contributor.@id",
       "path": null,
-      "source": "curated:no cell, and no contributor path to extend",
+      "source": "curated:the cell is empty, and no contributor path to extend",
       "crosswalk_cell": ""
     },
     {
       "format": "debian",
       "term": "license",
       "path": "copyright.License",
-      "source": "curated:no cell; in the debian/copyright header stanza License gives \"the license information for the package as a whole\" (copyright-format 1.0 section 6.7)",
+      "source": "curated:the cell is empty; in the debian/copyright header stanza License gives \"the license information for the package as a whole\" (copyright-format 1.0 section 6.7)",
       "comment": "Read the first line only: a DEP-5 short name or expression (GPL-2+, Expat, GPL-1+ or Artistic), not SPDX; the consumer maps it. The header License is optional; without it, take the License of the Files stanza whose Files is * (section 5.2), which no path can select yet.",
       "crosswalk_cell": ""
     },
@@ -5347,7 +5347,7 @@
       "format": "debian",
       "term": "keywords",
       "path": null,
-      "source": "curated:no cell; the only candidate, Section, is one archive section such as science or python (Policy 5.6.5), not a keyword list",
+      "source": "curated:the cell is empty; the only candidate, Section, is one archive section such as science or python (Policy 5.6.5), not a keyword list",
       "crosswalk_cell": ""
     },
     {
@@ -5391,7 +5391,7 @@
       "term": "author",
       "path": "name[roleTerm=aut]",
       "source": "curated:the cell says name/role/roleTerm[@type='code']/[.='aut'], an XPath: a name whose MARC relator code is aut (MODS 3.8 Guidelines, name, role, https://www.loc.gov/standards/mods/userguide/name.html; relator codes, https://www.loc.gov/marc/relators/relacode.html)",
-      "comment": "The parser lifts the texts of a name's role.roleTerm elements into a roleTerm list on the name, so the filter can match them. Some records mark the main author with cre (creator) instead. Zotero's MODS export writes a computer program's programmers as ctb, not aut.",
+      "comment": "The parser lifts the texts of a name's role.roleTerm elements into a roleTerm list on the name, so the filter can match them. Some records mark the main author with cre (creator), or a program's authors with prg (programmer) or swd (software developer), instead. Zotero's MODS export writes a computer program's programmers as ctb, not aut.",
       "crosswalk_cell": "name/role/roleTerm[@type='code']/[.='aut']"
     },
     {
@@ -5544,7 +5544,7 @@
       "format": "vivo-1.8",
       "term": "author.givenName",
       "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].obo:ARG_2000028[].vcard:hasName.vcard:givenName + vivo:relatedBy[@type=Authorship].vivo:relates[].vcard:hasName.vcard:givenName",
-      "source": "curated:no cell; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, gives vcard:givenName the domain vcard:Name; a foaf:Person reaches its vcard:Individual through obo:ARG_2000028 (has contact info), and an author with no profile is a vcard:Individual itself, as VIVO 1.16.0's AddAuthorsToInformationResourceGenerator writes them",
+      "source": "curated:the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, gives vcard:givenName the domain vcard:Name; a foaf:Person reaches its vcard:Individual through obo:ARG_2000028 (has contact info), and an author with no profile is a vcard:Individual itself, as VIVO 1.16.0's AddAuthorsToInformationResourceGenerator writes them",
       "comment": "Read per author: obo:ARG_2000028[].vcard:hasName for a foaf:Person, vcard:hasName for a vcard:Individual. A middle name sits in vivo:middleName on the same vcard:Name. An agent with only rdfs:label has no given name here; the consumer then splits the label.",
       "crosswalk_cell": ""
     },
@@ -5552,7 +5552,7 @@
       "format": "vivo-1.8",
       "term": "author.familyName",
       "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].obo:ARG_2000028[].vcard:hasName.vcard:familyName + vivo:relatedBy[@type=Authorship].vivo:relates[].vcard:hasName.vcard:familyName",
-      "source": "curated:no cell; same as author.givenName, with vcard:familyName, which VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, also puts on vcard:Name",
+      "source": "curated:the cell is empty; same as author.givenName, with vcard:familyName, which VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, also puts on vcard:Name",
       "comment": "Read per author, as for author.givenName. An agent with only rdfs:label has no family name here; the consumer then splits the label.",
       "crosswalk_cell": ""
     },
@@ -5568,7 +5568,7 @@
       "format": "vivo-1.8",
       "term": "contributor",
       "path": null,
-      "source": "curated:the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, links people to a work only as authors (vivo:Authorship) or editors (vivo:Editorship) and declares dcterms:contributor only as the parent of bibo:performer and bibo:translator",
+      "source": "curated:the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, links people to a work only as authors (vivo:Authorship) or editors (vivo:Editorship) and declares dcterms:contributor only as the parent of bibo:performer and bibo:translator; vivo:contributingRole links a role (BFO_0000023), not a person, to a work",
       "crosswalk_cell": ""
     },
     {
@@ -5674,14 +5674,14 @@
       "format": "spase-2.6.1",
       "term": "version",
       "path": "SoftwareVersion",
-      "source": "curated:no cell for version; the crosswalk maps softwareVersion to SoftwareVersion, a child of Software that describes the edition of the release (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software_SoftwareVersion)",
+      "source": "curated:the cell is empty; the crosswalk maps softwareVersion to SoftwareVersion, a child of Software that describes the edition of the release (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software_SoftwareVersion)",
       "crosswalk_cell": ""
     },
     {
       "format": "spase-2.6.1",
       "term": "author",
       "path": "ResourceHeader.PublicationInfo.Authors",
-      "source": "curated:no cell; PublicationInfo.Authors names who made the resource, as one string (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "source": "curated:the cell is empty; PublicationInfo.Authors names who made the resource, as one string (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
       "comment": "Authors is one string; the consumer splits it on semicolons and trims each name. A Contact with Role Author points to a Person record by PersonID instead, which a path cannot follow.",
       "crosswalk_cell": ""
     },
@@ -5689,7 +5689,7 @@
       "format": "spase-2.6.1",
       "term": "author.givenName",
       "path": "ResourceHeader.PublicationInfo.Authors",
-      "source": "curated:no cell; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "source": "curated:the cell is empty; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
       "comment": "The consumer splits on semicolons, then each name at its first comma into family and given name. A name with no comma is an organization or a name written in display order (India Jackson), and the consumer splits it as for Zenodo.",
       "crosswalk_cell": ""
     },
@@ -5697,7 +5697,7 @@
       "format": "spase-2.6.1",
       "term": "author.familyName",
       "path": "ResourceHeader.PublicationInfo.Authors",
-      "source": "curated:no cell; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "source": "curated:the cell is empty; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
       "comment": "The consumer splits on semicolons, then each name at its first comma into family and given name. A name with no comma is an organization or a name written in display order (India Jackson), and the consumer splits it as for Zenodo.",
       "crosswalk_cell": ""
     },
@@ -5712,22 +5712,22 @@
       "format": "spase-2.6.1",
       "term": "contributor",
       "path": "ResourceHeader.Contact[Role=Contributor]",
-      "source": "curated:no cell; a Contact names a person and the roles they hold, and the Role list has Contributor (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Contact)",
-      "comment": "Role repeats, so match a Contact whose roles include Contributor. A Contact holds only PersonID, the ResourceID of a Person record (spase://SMWG/Person/...); the name is in that record, so an element has no name sub-fields.",
+      "source": "curated:the cell is empty; a Contact names a person and the roles they hold, and the Role list has Contributor (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Contact)",
+      "comment": "Role repeats, so match a Contact whose roles include Contributor. A Contact holds only PersonID, the ResourceID of a Person record (spase://SMWG/Person/...); the name is in that record, so an element has no name sub-fields. Role also has Developer; a Contact whose only role is Developer is left out.",
       "crosswalk_cell": ""
     },
     {
       "format": "spase-2.6.1",
       "term": "contributor.givenName",
       "path": null,
-      "source": "curated:no cell; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
+      "source": "curated:the cell is empty; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
       "crosswalk_cell": ""
     },
     {
       "format": "spase-2.6.1",
       "term": "contributor.familyName",
       "path": null,
-      "source": "curated:no cell; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
+      "source": "curated:the cell is empty; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)",
       "crosswalk_cell": ""
     },
     {
@@ -5741,7 +5741,7 @@
       "format": "spase-2.6.1",
       "term": "license",
       "path": null,
-      "source": "curated:no cell; 2.6.1 has no licence element, and AccessRights (Open, PartiallyRestricted, Restricted) says who may access the resource, not under which licence (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#AccessRights)",
+      "source": "curated:the cell is empty; 2.6.1 has no licence element, and AccessRights (Open, PartiallyRestricted, Restricted) says who may access the resource, not under which licence (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#AccessRights)",
       "crosswalk_cell": ""
     },
     {
@@ -5778,7 +5778,7 @@
       "format": "spase-2.6.1",
       "term": "keywords",
       "path": null,
-      "source": "curated:no cell; Software has no Keyword element, which 2.6.1 gives only to Catalog, data and model-run resources and Document (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software)",
+      "source": "curated:the cell is empty; Software has no Keyword element, which 2.6.1 gives only to Catalog, data and model-run resources and Document (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software)",
       "crosswalk_cell": ""
     },
     {
@@ -5854,7 +5854,7 @@
       "format": "iso-19115-1-2014",
       "term": "contributor",
       "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[] + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[]",
-      "source": "curated:the cell takes every role but author, principalInvestigator and originator, which the grammar cannot negate and which also takes publisher, funder and pointOfContact; the 2014 role codes have contributor, 'party contributing to the resource', and collaborator, 'party who assists with the generation of the resource' (https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)",
+      "source": "curated:the cell takes every role but author, principalInvestigator and originator, which the grammar cannot negate and which also takes publisher, funder and pointOfContact; the 2014 role codes have contributor, 'party contributing to the resource', and collaborator, 'party who assists with the generation of the resource other than the principal investigator' (https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)",
       "comment": "A party is a CI_Individual or a CI_Organisation; the parser keeps which in _class.",
       "crosswalk_cell": "identificationInfo.citation.citedResponsibleParty[not(role='author' or role='principalInvestigator' or role='originator')].party.name*"
     },
@@ -5910,7 +5910,7 @@
       "format": "iso-19115-1-2014",
       "term": "codeRepository",
       "path": null,
-      "source": "curated:no cell; CI_OnlineResource.function has no value for a source repository (download, information, offlineAccess, order, search, completeMetadata, browseGraphic, upload, emailService, browsing, fileAccess; https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd). Habermann's source table maps it to distribution download or information links (https://doi.org/10.6084/m9.figshare.7430282.v1), which are not the repository",
+      "source": "curated:the cell is empty; CI_OnlineResource.function has no value for a source repository (download, information, offlineAccess, order, search, completeMetadata, browseGraphic, upload, emailService, browsing, fileAccess; https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd). Habermann's source table maps it to distribution download or information links (https://doi.org/10.6084/m9.figshare.7430282.v1), which are not the repository",
       "crosswalk_cell": ""
     },
     {
