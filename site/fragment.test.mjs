@@ -121,6 +121,7 @@ test("up and down keep the column and pass rows with no cell there", () => {
   assert.deepEqual(nextCell(grid, [0, 1], "ArrowDown"), [2, 1]);
   assert.deepEqual(nextCell(grid, [2, 1], "ArrowUp"), [0, 1]);
   assert.equal(nextCell(grid, [1, 0], "ArrowDown"), null);
+  assert.equal(nextCell(grid, [0, 1], "ArrowUp"), null);
 });
 
 test("Home and End stay in the row; with Ctrl they go to the first and last cell", () => {
@@ -129,6 +130,8 @@ test("Home and End stay in the row; with Ctrl they go to the first and last cell
   assert.deepEqual(nextCell(grid, [2, 2], "Home", true), [0, 1]);
   assert.deepEqual(nextCell(grid, [0, 1], "End", true), [2, 2]);
   assert.equal(nextCell([[false]], [0, 0], "End", true), null);
+  assert.deepEqual(nextCell(grid, [0, 3], "End"), [0, 3]);
+  assert.deepEqual(nextCell([[false, false], [false, true]], [1, 1], "Home", true), [1, 1]);
 });
 
 test("other keys move nowhere", () => {

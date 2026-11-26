@@ -106,15 +106,23 @@ function roving(table) {
   const focused = () => document.activeElement.closest("#matrix .cell");
   table.addEventListener("pointerover", (event) => mark(event.target.closest(".cell") ?? focused()));
   table.addEventListener("pointerleave", () => mark(focused()));
-  table.addEventListener("focusout", () => mark(null));
+  table.addEventListener("focusout", () => mark(table.querySelector(".cell:hover")));
   table.addEventListener("focusin", (event) => {
     if (!event.target.classList.contains("cell")) return;
+    delete event.target.dataset.quiet;
     table.querySelector('.cell[tabindex="0"]').tabIndex = -1;
     event.target.tabIndex = 0;
     mark(event.target);
   });
   table.addEventListener("keydown", (event) => {
-    if (!event.target.classList.contains("cell") || !/^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(event.key)) return;
+    if (!event.target.classList.contains("cell")) return;
+    if (event.key === "Escape") {
+      event.target.dataset.quiet = "";
+      return;
+    }
+    if (!/^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(event.key)) return;
+    // Alt+Arrow is the browser's Back and Forward; only Ctrl+Home and Ctrl+End mean something here.
+    if (event.altKey || event.shiftKey || ((event.ctrlKey || event.metaKey) && !/^(Home|End)$/.test(event.key))) return;
     event.preventDefault();
     const rows = [...table.querySelectorAll("tbody tr:not(.group)")].map((tr) => [...tr.querySelectorAll("td:not(.tally)")]);
     const td = event.target.parentElement;
@@ -335,6 +343,7 @@ function tabs() {
     const at = names.indexOf(document.activeElement.id.replace("tab-", ""));
     const next = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: names.length - 1 }[event.key];
     if (at < 0 || next === undefined) return;
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     event.preventDefault();
     choose(names[(next + names.length) % names.length], true);
   });

@@ -46,6 +46,7 @@ the source of truth for values.
   empty and filtered-out cells, Home and End go to the row's ends, Ctrl+Home and Ctrl+End to the first
   and last cell, Enter or Space chooses. The header scrolls away and can't stick inside the sideways
   scroll, so the focused or pointed-at cell names its term in a box above it and its header is tinted.
+  Escape hides the term box until focus moves.
 - **Route.** Three columns: the source path, the CodeMeta term in a box, the target path, joined by short
   rules. A missing end is italic red with a dashed rule. On a phone the three stack. A checkbox, on by
   default, hides the terms neither format has.

@@ -434,6 +434,8 @@ table {
   padding: 0;
   font-family: var(--serif);
   font-size: 1.125rem;
+  /* Room for the term box above a cell that focus scrolls to the top edge. */
+  scroll-margin-top: 2rem;
 }
 .cell:hover,
 .cell[aria-current="true"] {
@@ -441,7 +443,7 @@ table {
 }
 /* The header scrolls away by the eighth row, and sticky can't hold it inside a box that scrolls sideways:
    the pointed-at or focused cell names its term in a box, as the route does, and its header is marked. */
-.cell:is(:hover, :focus-visible)::after {
+.cell:focus-visible:not([data-quiet])::after {
   content: attr(data-term);
   position: absolute;
   bottom: calc(100% + 4px);
@@ -455,6 +457,12 @@ table {
   font: 0.875rem / 1.6 var(--mono);
   white-space: nowrap;
   pointer-events: none;
+}
+/* A tap leaves :hover on a touch screen, so only a real pointer's hover shows the box. */
+@media (hover: hover) {
+  .cell:hover:not([data-quiet])::after {
+    content: attr(data-term);
+  }
 }
 #matrix thead th.on {
   color: var(--ink);
