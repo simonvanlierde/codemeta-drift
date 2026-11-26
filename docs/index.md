@@ -1,3 +1,7 @@
+---
+description: "codemeta-drift's documentation: what the crosswalk review found, how to use the JSON mapping export and the crosswalk hub, and how the schema watcher works."
+---
+
 # Documentation
 
 codemeta-drift shows where CodeMeta's crosswalk cells for citation and package formats work as

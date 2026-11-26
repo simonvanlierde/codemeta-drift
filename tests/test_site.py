@@ -297,3 +297,17 @@ def test_every_docs_page_is_in_the_menu():
 
     nav = tomllib.loads((ROOT / "zensical.toml").read_text("utf-8"))["project"]["nav"]
     assert set(pages(nav)) == {p.name for p in (ROOT / "docs").glob("*.md")}
+
+
+def test_docs_description_is_the_package_description():
+    docs = tomllib.loads((ROOT / "zensical.toml").read_text("utf-8"))["project"]["site_description"]
+    assert docs == tomllib.loads((ROOT / "pyproject.toml").read_text("utf-8"))["project"]["description"]
+
+
+def test_docs_and_page_describe_the_same_card():
+    def alt(path: str) -> str:
+        found = re.search(r'<meta property="og:image:alt" content="([^"]*)"', (ROOT / path).read_text("utf-8"))
+        assert found, path
+        return found[1]
+
+    assert alt("docs-overrides/main.html") == alt("site/index.html")
