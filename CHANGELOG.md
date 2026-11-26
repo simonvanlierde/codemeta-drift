@@ -14,6 +14,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   every name. Read `statuses` and `cells[].status` by name, not by position: the order now puts
   scope and notation before corrected.
 - The CFF `license` row may now give a licence URL from `license-url`, not only an SPDX id.
+- Schema directories passed to `export --schemas` and `watch --before`/`--after` now also need
+  `composer.json`.
 
 ### Added
 

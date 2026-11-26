@@ -14,9 +14,9 @@ codemeta-drift watch ../codemeta --tag 4.0 \
   --latest v0.9.0 --existing issue-titles.json
 ```
 
-Only five of the export's formats have a schema check. Each directory needs their files, named in
-[`SCHEMA_FILES`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/conformance.py): CFF, pyproject, package.json and
-Cargo, plus the [verified Zenodo structural subset](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the reviewed
+Only six of the export's formats have a schema check. Each directory needs their files, named in
+[`SCHEMA_FILES`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/conformance.py): CFF, pyproject, package.json,
+Cargo and composer, plus the [verified Zenodo structural subset](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the reviewed
 mapping from the selected CodeMeta tag, then checks its paths against the new schemas.
 It lists broken mapped paths and new declared properties that have no row. New tables under pyproject's `tool`
 need no row: they configure tools and hold no metadata. Local refs (including numeric array indices),
