@@ -1,4 +1,4 @@
-// Reads the page's #fragment and ?tag, and builds its outside links. Kept free of the DOM so node --test can import it.
+// Reads the page's #fragment and ?tag, builds its outside links, and moves focus in the matrix. Kept free of the DOM so node --test can import it.
 
 // The CodeMeta tag that ?tag= names, if data.json lists it; otherwise the newest, the last in tags.
 // Only a listed tag picks a file to fetch.
@@ -57,6 +57,36 @@ export function linkParts(text) {
 // A crosswalk file at a CodeMeta tag, opened at one 1-based line.
 export const sourceHref = (tag, path, line) =>
   `https://github.com/codemeta/codemeta/blob/${tag}/${path.split("/").map(encodeURIComponent).join("/")}?plain=1#L${line}`;
+
+// Where a key moves focus in the matrix. rows holds one array per format row, true where a cell can take focus
+// (a button not hidden by a filter); at is [row, column]. Up and down keep the column and pass over rows that
+// have no cell there. Returns the new [row, column], or null when the key moves nowhere.
+export function nextCell(rows, [r, c], key, ctrl = false) {
+  const along = (row, from, step) => {
+    for (let i = from; i >= 0 && i < row.length; i += step) if (row[i]) return i;
+    return -1;
+  };
+  const down = (step) => {
+    for (let i = r + step; i >= 0 && i < rows.length; i += step) if (rows[i][c]) return [i, c];
+    return null;
+  };
+  const inRow = (i) => (i < 0 ? null : [r, i]);
+  if (ctrl && (key === "Home" || key === "End")) {
+    const order = key === "Home" ? rows.keys() : [...rows.keys()].reverse();
+    for (const i of order) {
+      const j = key === "Home" ? along(rows[i], 0, 1) : along(rows[i], rows[i].length - 1, -1);
+      if (j >= 0) return [i, j];
+    }
+    return null;
+  }
+  if (key === "ArrowRight") return inRow(along(rows[r], c + 1, 1));
+  if (key === "ArrowLeft") return inRow(along(rows[r], c - 1, -1));
+  if (key === "Home") return inRow(along(rows[r], 0, 1));
+  if (key === "End") return inRow(along(rows[r], rows[r].length - 1, -1));
+  if (key === "ArrowDown") return down(1);
+  if (key === "ArrowUp") return down(-1);
+  return null;
+}
 
 export const crosswalkFormats = (cells) => new Set(cells.filter((c) => c.crosswalk).map((c) => c.format));
 

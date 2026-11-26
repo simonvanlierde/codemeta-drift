@@ -31,6 +31,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   [Read each format's paths](docs/reading-formats.md), and SSSOM spokes on
   [the crosswalk hub page](docs/crosswalk-hub.md).
 - The docs site has a menu in reading order, previous and next links, and a footer with the project links.
+- Coverage page: the matrix is one tab stop with arrow, Home and End keys, a focused or pointed-at cell
+  names its term, and Follow a field hides terms neither format has.
 
 ### Fixed
 
