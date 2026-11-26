@@ -137,7 +137,7 @@ function detail(statuses, formats, coverage, upstream) {
       ["Status", `${mark} ${cell.status}: ${meaning}`],
       ["CodeMeta property", coverage.properties?.[cell.term] ? code(coverage.properties[cell.term]) : "none"],
       ["CodeMeta's cell", cell.crosswalk
-        ? el("span", {}, was ? code(was) : cell.cell === null ? "can't be joined" : "empty",
+        ? el("span", {}, was ? code(was) : cell.cell === null ? "can't be matched to its property" : "empty",
           cell.line ? el("span", {}, " in ", source(coverage.codemeta_tag, cell.crosswalk, cell.line)) : null)
         : "no CodeMeta crosswalk for this format"],
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
