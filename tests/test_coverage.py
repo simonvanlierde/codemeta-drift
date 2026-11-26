@@ -131,18 +131,18 @@ def test_counts_for_the_crosswalks(mapping: dict):
     expected = {
         "3.1": {
             "as-is": 114,
-            "scope": 39,
+            "scope": 42,
             "notation": 77,
-            "corrected": 77,
+            "corrected": 74,
             "added": 109,
             "no field": 219,
             "no term": 11,
         },
         "4.0": {
             "as-is": 123,
-            "scope": 41,
+            "scope": 44,
             "notation": 77,
-            "corrected": 85,
+            "corrected": 82,
             "added": 110,
             "no field": 237,
             "no term": 11,
@@ -166,8 +166,8 @@ def test_readme_figures_match_the_counts():
         f" {count['notation']} name the right field in a form a tool can't use as a path,"
         f" such as another case, no prefix or XPath."
         f" {count['scope']} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly,"
-        f" such as `identifier` as the software's DOI and `swhid` as a term of its own, or adds a fallback for files"
-        f" that leave the cell's field out. {count['corrected']} are wrong, ambiguous or prose"
+        f" such as `identifier` as the software's DOI and `swhid` as a term of its own, or also reads another field,"
+        f" such as a fallback or a newer one. {count['corrected']} are wrong, ambiguous or prose"
         f" ({null_corrected} of them fill a term the format has no field for), and {count['added']} are blank"
     ) in text
 

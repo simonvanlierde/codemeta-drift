@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23774728.svg)](https://doi.org/10.5281/zenodo.23774728)
 
-Shows where CodeMeta's crosswalks to citation and package formats are wrong or missing,
+Shows where CodeMeta's crosswalk cells for citation and package formats work as written and where they don't,
 checks where its vocabulary, definitions, examples and crosswalks disagree, and exports
 reviewed field mappings for citation tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
@@ -29,10 +29,10 @@ It checks the CodeMeta standard's own files. To keep a project's `CITATION.cff`,
 At CodeMeta 4.0, the 36 crosswalks reviewed here, from CFF, Zenodo and DataCite to Maven, SPDX,
 Wikidata and GitLab, have 648 cells, one for each of the 18 terms citation tools need. 212 are for terms the
 format has no field for. Of the other 436, 123 can be used as written. 77 name the right field
-in a form a tool can't use as a path, such as another case, no prefix or XPath. 41 are right by
+in a form a tool can't use as a path, such as another case, no prefix or XPath. 44 are right by
 CodeMeta's definition, but codemeta-drift reads the term more narrowly, such as `identifier` as the
-software's DOI and `swhid` as a term of its own, or adds a fallback for files that leave the cell's
-field out. 85 are wrong, ambiguous or prose (19 of them fill a term the format has no
+software's DOI and `swhid` as a term of its own, or also reads another field, such as a fallback
+or a newer one. 82 are wrong, ambiguous or prose (19 of them fill a term the format has no
 field for), and 110 are blank although the format has the field. The matrix's 19th column, `resourceType`, has no CodeMeta property, so no
 crosswalk has a cell for it. CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto
 extensions, RIS, EndNote, RO-Crate or Croissant at all.

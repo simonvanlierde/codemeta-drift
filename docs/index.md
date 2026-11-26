@@ -1,7 +1,7 @@
 # Documentation
 
 codemeta-drift checks CodeMeta's own files for disagreement between its context, definitions,
-property table, examples and crosswalks, and for crosswalk cells that are wrong or missing. It
+property table, examples and crosswalks, and for crosswalk cells that don't work as written. It
 exports the reviewed crosswalks as a JSON mapping for tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
 

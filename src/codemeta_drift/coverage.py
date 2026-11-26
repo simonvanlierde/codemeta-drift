@@ -25,8 +25,8 @@ STATUSES = {
         (
             "the crosswalk cell is right by CodeMeta's definition, but codemeta-drift reads the term more narrowly"
             " (identifier as the software's DOI, a person's @id as their ORCID, publisher as its name, swhid as a"
-            " term of its own) or adds a fallback for files that leave the cell's field out; the reviewed mapping"
-            " gives the path"
+            " term of its own) or also reads another field, such as a fallback or a newer one; the reviewed"
+            " mapping gives the path"
         ),
     ),
     "notation": (

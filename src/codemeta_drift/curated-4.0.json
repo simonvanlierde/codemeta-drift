@@ -1,5 +1,5 @@
 {
-  "description": "Rows of the CodeMeta 4.0 mapping export that do not read their crosswalk cell: the cell is prose, empty, wrong, or the format has no crosswalk. 'cell' is the crosswalk cell the row was written for, left out when the format has no crosswalk; when the cell changes the row is reported as CURATED_STALE. 'reason' becomes the row's source as curated:<reason>. 'kind' (optional) sorts a row whose cell is not wrong: notation when the cell names the right field in a form a tool cannot use as a path (case, prefix, XPath), scope when the cell is right by CodeMeta's definition but the hub reads the term more narrowly (identifier as the DOI, a person's @id as the ORCID, publisher as its name, swhid as a term of its own) or adds a fallback field. The coverage pages show it; the export leaves it out. Format: docs/mapping-export.md.",
+  "description": "Rows of the CodeMeta 4.0 mapping export that do not read their crosswalk cell: the cell is prose, empty, wrong, or the format has no crosswalk. 'cell' is the crosswalk cell the row was written for, left out when the format has no crosswalk; when the cell changes the row is reported as CURATED_STALE. 'reason' becomes the row's source as curated:<reason>. 'kind' (optional) sorts a row whose cell is not wrong: notation when the cell names the right field in a form a tool cannot use as a path (case, prefix, XPath), scope when the cell is right by CodeMeta's definition but the hub reads the term more narrowly (identifier as the DOI, a person's @id as the ORCID, publisher as its name, swhid as a term of its own) or also reads another field (a fallback or a newer one). The coverage pages show it; the export leaves it out. Format: docs/mapping-export.md.",
   "codemeta_tag": "4.0",
   "rows": [
     {
@@ -478,7 +478,8 @@
       "term": "license",
       "path": "License-Expression | License",
       "cell": "License",
-      "reason": "the cell says License, which is free text; metadata 2.4 puts the SPDX expression in License-Expression"
+      "reason": "the cell says License, the free-text licence field, which metadata 2.4 deprecates 'in favour of License-Expression', an SPDX expression; the two are mutually exclusive (https://packaging.python.org/en/latest/specifications/core-metadata/#license), so the path reads License-Expression first",
+      "kind": "scope"
     },
     {
       "format": "pkg-info",
@@ -915,8 +916,9 @@
       "term": "datePublished",
       "path": "dates[dateType=Issued].date | publicationYear",
       "cell": "publicationYear",
-      "reason": "the cell says publicationYear, a bare year; bolognese's writers give datePublished as the Issued date and use publicationYear only when there is none",
-      "comment": "publicationYear is a number (2023), dates[].date can be a full date or a range."
+      "reason": "the cell says publicationYear, 'The year when the data was or will be made publicly available' (DataCite 4.6, property 5), which is right but only a year; a date of dateType Issued, 'The date that the resource is published or distributed' (appendix 1), gives the day, so the path reads it first, as bolognese's writers do",
+      "comment": "publicationYear is a number (2023), dates[].date can be a full date or a range.",
+      "kind": "scope"
     },
     {
       "format": "setup-py",
@@ -983,8 +985,9 @@
       "term": "license",
       "path": "license_expression | license",
       "cell": "license",
-      "reason": "the cell says license, which is free text; setup() also takes license_expression, the SPDX expression setuptools writes to License-Expression in place of License",
-      "comment": "license_expression is the PEP 639 SPDX expression; license is free text."
+      "reason": "the cell says license, 'A string specifying the license of the package' (https://setuptools.pypa.io/en/latest/references/keywords.html); setuptools 77.0.0 added license_expression for PEP 639 (https://setuptools.pypa.io/en/latest/history.html#v77-0-0), the SPDX expression it writes to License-Expression, so the path reads it first",
+      "comment": "license_expression is the PEP 639 SPDX expression; license is free text.",
+      "kind": "scope"
     },
     {
       "format": "setup-py",
@@ -4364,7 +4367,7 @@
       "term": "datePublished",
       "path": "dcterms:issued | dcterms:date | dc:date[]",
       "cell": "date",
-      "reason": "the cell says date, which is any lifecycle date (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#date); dcterms:issued is the date of formal issuance (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#issued), so the path reads it first and falls back to date, the only date oai_dc has",
+      "reason": "the cell says date, 'A point or period of time associated with an event in the lifecycle of the resource' (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#date), so a date may be a creation or modification date as well; dcterms:issued is the 'Date of formal issuance of the resource' (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#issued), so the path reads it first and falls back to date, the only date oai_dc has",
       "comment": "A typed date may arrive as {\"@value\", \"@type\"}, and may be a year, a year and month, or a full date (W3CDTF)."
     },
     {
@@ -4484,7 +4487,7 @@
       "term": "codeRepository",
       "path": "upstream.Repository | control.Homepage",
       "cell": "HomePage",
-      "reason": "the cell says HomePage; Policy 5.6.23 spells it Homepage, \"the URL of the web site for this package\", so it is the fallback after DEP-12's Repository, \"URL to a repository containing the upstream sources\" (https://dep-team.pages.debian.net/deps/dep12/)",
+      "reason": "the cell says HomePage; Policy 5.6.23 spells it Homepage, 'The URL of the web site for this package, preferably (when applicable) the site from which the original source can be obtained' (https://www.debian.org/doc/debian-policy/ch-controlfields.html), a web site and not a repository, so it is the fallback after DEP-12's Repository, 'URL to a repository containing the upstream sources' (https://dep-team.pages.debian.net/deps/dep12/)",
       "comment": "Vcs-Git and Vcs-Browser are the repository of the Debian packaging (Policy 5.6.26), not upstream: never read them here. Homepage may be a project site rather than a repository."
     },
     {

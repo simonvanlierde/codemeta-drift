@@ -17,10 +17,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The coverage pages and the site stop counting every curated cell as wrong. Of the 203 corrected
   cells at 4.0, 77 now count as `notation` (≈): the cell names the right field in a form a tool
-  can't use as a path, such as Zenodo's `ORCID` for the key `orcid` or MODS's XPath. 41 count as
+  can't use as a path, such as Zenodo's `ORCID` for the key `orcid` or MODS's XPath. 44 count as
   `scope` (⊂): the cell is right by CodeMeta's definition, but codemeta-drift reads the term more
   narrowly (`identifier` as the software's DOI, a person's `@id` as their ORCID, `publisher` as its
-  name, `swhid` as a term of its own) or adds a fallback, such as Maven's `parent.version`. 85 stay
+  name, `swhid` as a term of its own) or also reads another field, such as Maven's fallback `parent.version` or PKG-INFO's newer
+  `License-Expression`. 82 stay
   `corrected`. A curated row's optional `kind` holds the split; the export leaves it out, so the
   mapping schema stays at 1.9.
 - The page's title is "Where CodeMeta's crosswalk cells work as written, and where they don't".
