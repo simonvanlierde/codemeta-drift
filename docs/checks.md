@@ -36,12 +36,12 @@ a file or to a folder such as `crosswalks/`, is never followed: the file counts 
 | `AGGREGATE_FORMAT` | A crosswalk missing from the combined table, or a column with no crosswalk |
 | `SKIPPED` | A file this version doesn't have; the checks that need it don't run, and it doesn't count as a problem |
 
-The checks live in [`checks.py`](../src/codemeta_drift/checks.py). That module uses only
+The checks live in [`checks.py`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/checks.py). That module uses only
 the Python standard library, so another repository can include it in its own CI.
 
 ## Read the output
 
-With the [command installed](../README.md#try-it), check the CodeMeta checkout:
+With the [command installed](https://github.com/simonvanlierde/codemeta-drift/blob/main/README.md#try-it), check the CodeMeta checkout:
 
 ```sh
 codemeta-drift codemeta
@@ -98,7 +98,7 @@ The output is one document with these keys:
 for filtering. `file` is a label that can describe a group; `detail` is text for a person.
 `errors` holds usage errors (exit 2) or execution errors (exit 3). Then `findings` is empty and each error is an
 object with `message` and `help`, the next step to take or `null`.
-[`report.schema.json`](../src/codemeta_drift/report.schema.json) is its JSON Schema.
+[`report.schema.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/report.schema.json) is its JSON Schema.
 
 `export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` write the same `schema_version` and
 `errors`, and with `--json` an error, a usage error included, is an object in `errors` on standard output

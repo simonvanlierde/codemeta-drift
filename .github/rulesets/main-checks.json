@@ -15,7 +15,8 @@
           { "context": "DCO sign-off", "integration_id": 15368 },
           { "context": "dependency review", "integration_id": 15368 },
           { "context": "python: lint, types, tests (3.13)", "integration_id": 15368 },
-          { "context": "python: lint, types, tests (3.14)", "integration_id": 15368 }
+          { "context": "python: lint, types, tests (3.14)", "integration_id": 15368 },
+          { "context": "docs: build", "integration_id": 15368 }
         ]
       }
     }

@@ -6,10 +6,10 @@ Zenodo's GitHub importer reads `.zenodo.json` through `LegacySchema`, then
 The [current help example](https://help.zenodo.org/docs/github/describe-software/zenodo-json/)
 confirms `version`, creators, typed contributors and related identifiers.
 
-The [bundled structural subset](../tests/fixtures/schemas/zenodo.json) is locally
+The [bundled structural subset](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/zenodo.json) is locally
 authored. It records the field paths used by the curated mapping and their array
 structure. Its `x-source` identifies the reviewed commit and the Git blob hashes
-of the importer and deserializer files. The [snapshot manifest](../tests/fixtures/schemas/SOURCES)
+of the importer and deserializer files. The [snapshot manifest](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/SOURCES)
 records the subset's SHA-256 hash.
 
 This is not an official Zenodo JSON Schema or a complete deposit validator.

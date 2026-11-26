@@ -1,0 +1,41 @@
+# The documentation site: `just docs` builds the Markdown in docs/ into _docs/, and
+# pages.yml deploys it under the coverage page, at /docs/. Without a `nav`, the menu follows the files in docs/.
+# Settings: https://zensical.org/docs/setup/basics/
+[project]
+site_name = "codemeta-drift"
+site_description = "Report where CodeMeta's context, definitions, property table, examples and crosswalks disagree, and export the crosswalks as a JSON mapping"
+site_url = "https://simonvanlierde.com/codemeta-drift/docs/"
+repo_url = "https://github.com/simonvanlierde/codemeta-drift"
+site_dir = "_docs"
+extra_css = ["assets/docs-tokens.css", "assets/docs.css"]
+extra_javascript = ["assets/docs.js"]
+# The social card's source and the ADR template are not pages.
+exclude_docs = """
+og-card.html
+decisions/0000-template.md
+"""
+
+[project.theme]
+font = false
+custom_dir = "docs-overrides"
+favicon = "assets/favicon.svg"
+
+# Follow the reader's light or dark setting, as the coverage page does; the toggle overrides it.
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle = { icon = "lucide/moon", name = "Switch to dark mode" }
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle = { icon = "lucide/sun", name = "Switch to light mode" }
+
+# docs-overrides/main.html reads og_image for the link-preview tags. `just og-card` renders the
+# image and puts its hash in this URL, since link previews cache by URL.
+[project.extra]
+og_image = "assets/og.png?v=908b2d0f"
+
+# Line anchors are empty links, which screen readers announce without a name.
+[project.markdown_extensions.pymdownx.highlight]
+anchor_linenums = false

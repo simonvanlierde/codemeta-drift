@@ -2,7 +2,7 @@
 
 This is a historical report, not a live status page. The last column refers to
 CodeMeta commit `e62eb75`, checked on 2026-10-13.
-With the [command installed](../README.md#try-it), check a current CodeMeta checkout to see what remains:
+With the [command installed](https://github.com/simonvanlierde/codemeta-drift/blob/main/README.md#try-it), check a current CodeMeta checkout to see what remains:
 
 ```sh
 codemeta-drift codemeta
@@ -40,7 +40,7 @@ counts once. The last column is the dated commit above:
 | `AGGREGATE_FORMAT` | 0 | 2 | 2 |
 
 3.1 has no definitions file, so those checks didn't run. The full output for 3.1 and 4.0 is
-in [`tests/fixtures/`](../tests/fixtures/).
+in [`tests/fixtures/`](https://github.com/simonvanlierde/codemeta-drift/tree/main/tests/fixtures/).
 
 Use the [finding reference](checks.md) to interpret each code. A correction to a
 crosswalk cell belongs in CodeMeta upstream or in a reviewed

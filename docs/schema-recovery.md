@@ -15,7 +15,7 @@ rename then produces one `PATH_NOT_IN_SCHEMA` finding and one schema-review draf
 Repeating the draft calculation with that title, open or closed, produces no duplicate.
 Without approval, `mapping.json` and its mapping hash retain the original bytes.
 
-Inspect the [synthetic approval record](../examples/schema-recovery-approval.json).
+Inspect the [synthetic approval record](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/schema-recovery-approval.json).
 It specifies the format, term, old path, new path and reason. Apply that reviewed
 example to a different new directory:
 

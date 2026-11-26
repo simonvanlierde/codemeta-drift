@@ -5,15 +5,15 @@ term sits in each metadata format. Tools that keep `CITATION.cff`, `codemeta.jso
 `.zenodo.json` and package manifests in step read it instead of parsing CodeMeta's crosswalk
 tables, whose cells are prose and sometimes wrong.
 
-The schema is [`src/codemeta_drift/mapping.schema.json`](../src/codemeta_drift/mapping.schema.json)
-(JSON Schema 2020-12). [`examples/mapping-3.1.json`](../examples/mapping-3.1.json) and
-[`examples/mapping-4.0.json`](../examples/mapping-4.0.json) are the exports for CodeMeta 3.1 and 4.0,
+The schema is [`src/codemeta_drift/mapping.schema.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/mapping.schema.json)
+(JSON Schema 2020-12). [`examples/mapping-3.1.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-3.1.json) and
+[`examples/mapping-4.0.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-4.0.json) are the exports for CodeMeta 3.1 and 4.0,
 written by `codemeta-drift export`.
 
 ## Export a mapping
 
 Install the command with `uv tool install codemeta-drift`. The examples use a CodeMeta
-checkout at `codemeta`, as in the [quick start](../README.md#try-it). It must contain
+checkout at `codemeta`, as in the [quick start](https://github.com/simonvanlierde/codemeta-drift/blob/main/README.md#try-it). It must contain
 the selected tag:
 
 ```sh
@@ -25,8 +25,8 @@ curated file can be exported; currently those are `3.1` and `4.0`. To check a di
 `export`, write `./export` so the CLI does not treat it as the subcommand.
 
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
-Other rows use `curated-<tag>.json` ([3.1](../src/codemeta_drift/curated-3.1.json),
-[4.0](../src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell and exits 1.
+Other rows use `curated-<tag>.json` ([3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-3.1.json),
+[4.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason. The exporter refuses an unresolved cell and exits 1.
 By default, it prints findings on standard error without writing output. With `--json`, it writes a findings report
 on standard output. A successful export exits 0;
 invalid arguments, such as a tag with no curated file, exit 2, and unreadable inputs exit 3. Without `--out`, JSON goes to standard output. `--json` makes the output a [JSON report](checks.md#read-json-output).
@@ -57,7 +57,7 @@ uv run codemeta-drift export ../codemeta --tag 4.0 \
 ```
 
 `--schemas DIR` adds `PATH_NOT_IN_SCHEMA` findings for paths absent from the format's
-schema. The bundled [schema snapshots and sources](../tests/fixtures/schemas/SOURCES)
+schema. The bundled [schema snapshots and sources](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/SOURCES)
 cover CFF 1.2.0, pyproject.toml, package.json and Cargo.toml. Zenodo uses a
 [verified structural subset](zenodo-schema.md), not a complete deposit validator.
 
