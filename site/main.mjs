@@ -11,7 +11,7 @@ const LABELS = {
   "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
   "setup-py": "setup.py", cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
   "ruby-gem": "Ruby gemspec", maven: "Maven pom.xml", "cpan-meta-2": "CPAN META.json", nuget: "NuGet .nuspec",
-  pubspec: "Dart pubspec", cabal: "Haskell Cabal", leiningen: "Leiningen project.clj", octave: "Octave DESCRIPTION",
+  pubspec: "Dart pubspec", cabal: "Haskell Cabal", debian: "Debian source", leiningen: "Leiningen project.clj", octave: "Octave DESCRIPTION",
   "publiccode-0.8": "publiccode.yml 0.8", typst: "typst.toml", quarto: "Quarto extension",
 };
 const label = (fmt) => LABELS[fmt] ?? fmt;

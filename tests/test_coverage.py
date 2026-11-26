@@ -46,11 +46,11 @@ def test_docs_page_is_generated_from_the_example(tag: str):
 def test_unreviewed_lists_every_other_crosswalk_by_shape(mapping: dict, tag_files: Path):
     data = unreviewed(read_dir(tag_files), mapping)
     names = [f["format"] for f in data["formats"]]
-    assert len(names) == 15  # both pinned tags leave the same crosswalks unreviewed
+    assert len(names) == 14  # both pinned tags leave the same crosswalks unreviewed
     assert "Zenodo" not in names
     assert "NodeJS" not in names
     found = {(c["format"], c["term"]): c["status"] for c in data["cells"]}
-    assert len(found) == 15 * 19
+    assert len(found) == 14 * 19
     assert found["ASCL", "name"] == "path"
     assert found["DCAT", "name"] == "path"  # dcterms:title, a prefixed key since schema 1.6
     assert found["MODS", "name"] == "prose"
@@ -89,7 +89,7 @@ def test_a_format_the_mapping_lacks_counts_as_not_reviewed(mapping: dict, tag_fi
 def test_cli_lists_unreviewed_crosswalks_from_the_tag(example: Path, repo: Path, capsys: pytest.CaptureFixture[str]):
     assert main(["hub", "coverage", str(example), "--json", "--codemeta", str(repo)]) == 0
     data = json.loads(capsys.readouterr().out)
-    assert len(data["unreviewed"]["formats"]) == 15
+    assert len(data["unreviewed"]["formats"]) == 14
 
 
 def test_cli_coverage_without_the_tag_exits_3(example: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]):
@@ -114,8 +114,8 @@ def test_known_cells_get_their_status(mapping: dict):
 def test_counts_for_the_crosswalks(mapping: dict):
     found = [s for (fmt, _), s in statuses(mapping).items() if FORMATS[fmt].crosswalk]
     expected = {
-        "3.1": {"as-is": 111, "corrected": 139, "added": 98, "no field": 195, "no term": 8},
-        "4.0": {"as-is": 120, "corrected": 149, "added": 99, "no field": 213, "no term": 8},
+        "3.1": {"as-is": 111, "corrected": 144, "added": 100, "no field": 207, "no term": 8},
+        "4.0": {"as-is": 120, "corrected": 154, "added": 101, "no field": 225, "no term": 8},
     }
     assert {s: found.count(s) for s in set(found)} == expected[mapping["codemeta_tag"]]
 
@@ -154,7 +154,7 @@ def test_cli_writes_json(mapping: dict, example: Path, capsys: pytest.CaptureFix
     assert main(["hub", "coverage", str(example), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == mapping["codemeta_tag"]
-    assert len(data["cells"]) == {"3.1": 36, "4.0": 38}[mapping["codemeta_tag"]] * 19
+    assert len(data["cells"]) == {"3.1": 37, "4.0": 39}[mapping["codemeta_tag"]] * 19
     assert "unreviewed" not in data  # only with --codemeta
 
 

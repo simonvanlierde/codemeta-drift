@@ -125,9 +125,10 @@ Each row:
   `endnote` (an EndNote tagged record with `%0 Computer Program`), `gitlab` (the GitLab REST API's
   project JSON), `code-json-2.0` (a code.json 2.0 file, the US federal source code metadata),
   `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`), `croissant` (a Croissant 1.0 or
-  1.1 `croissant.json`) or `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record). A format whose versions differ puts the version in the id. `pkg-info` to
+  1.1 `croissant.json`), `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record) or
+  `debian` (a Debian source tree's `debian/` directory). A format whose versions differ puts the version in the id. `pkg-info` to
   `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, `ris` to `code-json-2.0` in
-  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
+  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core` and `debian` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -223,6 +224,19 @@ them into one first. These cases need more than the grammar below says:
   compacted with a context that defines only the prefixes `dcat`, `dcterms`, `owl`, `foaf` and
   `doap`, so each key is a prefixed name such as `dcterms:title`. A property may hold one value or
   a list, a link is an object with `@id`, and a typed date may be an object with `@value`.
+- Debian: the paths address one source tree's `debian/` directory, read into one tree with the keys
+  `control` (the first stanza of `debian/control`, the source package), `packages` (its other stanzas,
+  one per binary package, as a list), `changelog` (the stanza `dpkg-parsechangelog` prints for the
+  newest entry of `debian/changelog`), `copyright` (the header stanza of a copyright-format 1.0
+  `debian/copyright`) and `upstream` (the `debian/upstream/metadata` YAML mapping, DEP-12). A missing
+  file leaves its key out. Field names in these deb822 files are case-insensitive (Policy 5.1); the
+  parser stores each in Policy's spelling, every hyphen-separated part capitalised, so `HomePage` is
+  read at `Homepage`. A line that starts with a space or tab continues the field before it: the parser
+  keeps the value's lines, each without that first space, and the consumer reads the first line of
+  `License` (the short name) and of `Description` (the synopsis). `License` names are
+  copyright-format's own (`Expat`, `GPL-2+`), not SPDX ids, and a version is
+  `[epoch:]upstream[-revision]`: the consumer maps the one and cuts the other. Never run
+  `debian/rules`; a parser of the newest changelog line gives the same `Version`.
 - Dublin Core comes as `oai_dc` XML, which every OAI-PMH repository serves, or as RDF. An `oai_dc`
   record is read as a tree rooted at `oai_dc:dc`: each child element is a key named by its prefixed
   name (`dc:title`) holding its trimmed text, and every key is a list, because every element may
@@ -281,7 +295,7 @@ A (format, term) pair appears at most once. The schema cannot enforce that, so t
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
-`croissant`, `dublin-core`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
+`croissant`, `dublin-core`, `debian`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
 `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`, `contributor.familyName`,
 `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`, `description`, `keywords`,
 `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
@@ -329,7 +343,7 @@ from the first alternative that yields any value. A consumer vendors the file wi
 every case through its own resolver.
 Its `schema_version` is the mapping schema whose grammar the cases need.
 Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate`,
-`croissant` or `oai_dc`) and its `text` is the source file content. Parse that text and compare the resulting tree
+`croissant`, `oai_dc` or `debian-control`) and its `text` is the source file content. Parse that text and compare the resulting tree
 to `document` before resolving `path`; a consumer that does not read that format skips the parse and
 still resolves `path` in `document`. The PKG-INFO cases cover comma separation, quoted names, company
 suffixes and `et al.`.
@@ -360,7 +374,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
-   that holds `v`. Schema 1.9 adds the `dublin-core` format id and changes no pattern, so a 1.9
+   that holds `v`. Schema 1.9 adds the `dublin-core` and `debian` format ids and changes no pattern, so a 1.9
    file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format

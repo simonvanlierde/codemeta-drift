@@ -112,6 +112,7 @@ FORMATS = {
     "ro-crate": Spoke(None),
     "croissant": Spoke(None),
     "dublin-core": Spoke("crosswalks/Dublin Core.csv", person_list=True),
+    "debian": Spoke("crosswalks/Debian Package.csv"),
 }
 
 PATH = re.compile(

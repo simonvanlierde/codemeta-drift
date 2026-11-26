@@ -1436,6 +1436,39 @@
    "expected": [
     "Carberry"
    ]
+  },
+  {
+   "name": "Debian parser: debian/control's first stanza is control, the others packages; field names in Policy's spelling",
+   "path": "control.Homepage",
+   "raw_input": {
+    "format": "debian-control",
+    "text": "Source: python-carberry\nMaintainer: Antonie van Leeuwenhoek <antonie@example.org>\nSection: python\nPriority: optional\nBuild-Depends: debhelper-compat (= 13), dh-sequence-python3, python3-all\nStandards-Version: 4.7.4\nHomePage: https://carberry.example.org/\nVcs-Browser: https://salsa.example.org/python-team/python-carberry\nVcs-Git: https://salsa.example.org/python-team/python-carberry.git\nRules-Requires-Root: no\n\nPackage: python3-carberry\nArchitecture: all\nDepends: ${misc:Depends}, ${python3:Depends}\nDescription: lab notes for psychoceramics research\n Carberry keeps readings and lab notes of the Psychoceramics Society\n in one place.\n .\n This package installs the library for Python 3.\n"
+   },
+   "document": {
+    "control": {
+     "Source": "python-carberry",
+     "Maintainer": "Antonie van Leeuwenhoek <antonie@example.org>",
+     "Section": "python",
+     "Priority": "optional",
+     "Build-Depends": "debhelper-compat (= 13), dh-sequence-python3, python3-all",
+     "Standards-Version": "4.7.4",
+     "Homepage": "https://carberry.example.org/",
+     "Vcs-Browser": "https://salsa.example.org/python-team/python-carberry",
+     "Vcs-Git": "https://salsa.example.org/python-team/python-carberry.git",
+     "Rules-Requires-Root": "no"
+    },
+    "packages": [
+     {
+      "Package": "python3-carberry",
+      "Architecture": "all",
+      "Depends": "${misc:Depends}, ${python3:Depends}",
+      "Description": "lab notes for psychoceramics research\nCarberry keeps readings and lab notes of the Psychoceramics Society\nin one place.\n.\nThis package installs the library for Python 3."
+     }
+    ]
+   },
+   "expected": [
+    "https://carberry.example.org/"
+   ]
   }
  ]
 }

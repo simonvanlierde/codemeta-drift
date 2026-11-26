@@ -1,6 +1,7 @@
 """The grammar vectors: each path fits the grammar, and resolves to the listed values in its document."""
 
 import json
+import re
 import xml.etree.ElementTree as ET
 from importlib import resources
 from typing import Any
@@ -170,3 +171,71 @@ def test_curated_dublin_core_rows_read_both_carriers(tag: str) -> None:
         assert resolve(oai, paths[term]) == from_oai, term
         assert resolve(rdf, paths[term]) == from_rdf, term
     assert {t for t, p in paths.items() if p is None} == {"version", "swhid", "codeRepository"}
+
+
+def read_deb822(text: str) -> list[dict[str, str]]:
+    """deb822 stanzas as docs/mapping-export.md reads them: names in Policy's spelling, continuations kept."""
+    stanzas = []
+    for block in re.split(r"\n\s*\n", text.strip("\n")):
+        stanza: dict[str, str] = {}
+        key = ""
+        for line in block.splitlines():
+            if line[:1] in (" ", "\t"):
+                stanza[key] += "\n" + line[1:]
+            else:
+                name, _, value = line.partition(":")
+                key = "-".join(part.capitalize() for part in name.split("-"))
+                stanza[key] = value.strip()
+        stanzas.append(stanza)
+    return stanzas
+
+
+def test_debian_control_parser_vector_matches_the_reading_rules() -> None:
+    case = raw_case("debian-control")
+    control, *packages = read_deb822(case["raw_input"]["text"])
+    assert {"control": control, "packages": packages} == case["document"]
+
+
+DEBIAN_COPYRIGHT = """\
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: carberry
+Upstream-Contact: Josiah Carberry <josiah@example.org>
+Source: https://carberry.example.org/releases/
+License: Expat
+"""
+DEBIAN_CHANGELOG = "python-carberry (1:2.4.0-1) unstable; urgency=medium"
+DEBIAN_UPSTREAM = """\
+Bug-Database: https://git.example.org/carberry/carberry/issues
+Repository: https://git.example.org/carberry/carberry.git
+Repository-Browse: https://git.example.org/carberry/carberry
+"""
+
+
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_curated_debian_rows_read_the_source_tree(tag: str) -> None:
+    paths = curated_paths(tag, "debian")
+    version = re.match(r"\S+ \((\S+)\)", DEBIAN_CHANGELOG)
+    assert version
+    upstream = dict(line.partition(": ")[::2] for line in DEBIAN_UPSTREAM.splitlines())
+    tree = {
+        **raw_case("debian-control")["document"],
+        "copyright": read_deb822(DEBIAN_COPYRIGHT)[0],
+        "changelog": {"Version": version[1]},
+        "upstream": upstream,
+    }
+    assert resolve(tree, paths["name"]) == ["carberry"]
+    assert resolve(tree, paths["version"]) == ["1:2.4.0-1"]
+    assert resolve(tree, paths["license"]) == ["Expat"]
+    assert resolve(tree, paths["codeRepository"]) == ["https://git.example.org/carberry/carberry.git"]
+    assert resolve({k: v for k, v in tree.items() if k != "upstream"}, paths["codeRepository"]) == [
+        "https://carberry.example.org/"
+    ]
+    [description] = resolve(tree, paths["description"])
+    assert description.startswith("lab notes for psychoceramics research\n")
+    assert {t for t, p in paths.items() if p is not None} == {
+        "name",
+        "version",
+        "license",
+        "codeRepository",
+        "description",
+    }

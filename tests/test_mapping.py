@@ -406,6 +406,8 @@ def test_example_null_rows():
         | {(f, t) for f in ("gitlab", "code-json-2.0") for t in ("identifier", "swhid", "datePublished", *contributor)}
         | {(f, t) for f in ("ro-crate", "croissant") for t in ("swhid", "codeRepository")}
         | {("dublin-core", t) for t in ("version", "swhid", "codeRepository")}
+        | {("debian", t) for t in ("author", "author.givenName", "author.familyName", "author.@id", *contributor)}
+        | {("debian", t) for t in ("identifier", "swhid", "keywords", "datePublished")}
         | {("gitlab", "version"), ("code-json-2.0", "author")}
     )
 

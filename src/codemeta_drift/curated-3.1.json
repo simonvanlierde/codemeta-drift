@@ -4091,6 +4091,143 @@
       "path": "dcterms:type | dc:type[]",
       "reason": "CodeMeta has no term for the resource type; Type is dcterms:type and dc:type, with the DCMI Type Vocabulary recommended (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#type, https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-type), whose Software class is dctype:Software (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Software, section 7)",
       "comment": "The value is an IRI or a string; for software a writer gives http://purl.org/dc/dcmitype/Software. Zenodo's oai_dc writes info:eu-repo/semantics/other for software, which does not say software."
+    },
+    {
+      "format": "debian",
+      "term": "name",
+      "path": "copyright.Upstream-Name | control.Source",
+      "cell": "",
+      "reason": "no cell; copyright-format 1.0 section 6.2 (https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/) makes Upstream-Name \"the name upstream uses for the software\", optional; Policy 5.6.1 Source is the Debian source package name, lower case only, and mandatory",
+      "comment": "control.Source may differ from the upstream name (python-carberry for carberry), so it is only the fallback."
+    },
+    {
+      "format": "debian",
+      "term": "version",
+      "path": "changelog.Version",
+      "cell": "numeric_version",
+      "reason": "the cell says numeric_version, which is no Debian field; debian/control has no Version (Policy 5.2), and the version comes from the newest debian/changelog entry (Policy 4.4, https://www.debian.org/doc/debian-policy/ch-source.html), as dpkg-parsechangelog prints it",
+      "comment": "The value is [epoch:]upstream_version[-debian_revision] (Policy 5.6.12). The consumer drops everything up to the first colon and from the last hyphen on, so 1:2.4.0-3 gives 2.4.0."
+    },
+    {
+      "format": "debian",
+      "term": "author",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; no Debian field names the authors: Maintainer and Uploaders are the Debian package's maintainers (Policy 5.6.2, 5.6.3, https://www.debian.org/doc/debian-policy/ch-controlfields.html), Copyright holds copyright statements (copyright-format 6.8) and Upstream-Contact is an address to reach the project (6.3)"
+    },
+    {
+      "format": "debian",
+      "term": "author.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell, and no author path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "author.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell, and no author path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "author.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell, and no author path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; Uploaders lists the co-maintainers of the Debian package (Policy 5.6.3), who are not contributors to the software"
+    },
+    {
+      "format": "debian",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell, and no contributor path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "no cell, and no contributor path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "no cell, and no contributor path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "license",
+      "path": "copyright.License",
+      "cell": "",
+      "reason": "no cell; in the debian/copyright header stanza License gives \"the license information for the package as a whole\" (copyright-format 1.0 section 6.7)",
+      "comment": "Read the first line only: a DEP-5 short name or expression (GPL-2+, Expat, GPL-1+ or Artistic), not SPDX; the consumer maps it. The header License is optional; without it, take the License of the Files stanza whose Files is * (section 5.2), which no path can select yet."
+    },
+    {
+      "format": "debian",
+      "term": "identifier",
+      "path": null,
+      "cell": "Package",
+      "reason": "the cell says Package, the binary package name (Policy 5.6.7); Debian has no DOI field, and DEP-12's Reference DOI is the DOI of a publication about the work, not of the software"
+    },
+    {
+      "format": "debian",
+      "term": "swhid",
+      "path": null,
+      "cell": "Package",
+      "reason": "the cell says Package, the binary package name (Policy 5.6.7); Debian has no SWHID field"
+    },
+    {
+      "format": "debian",
+      "term": "codeRepository",
+      "path": "upstream.Repository | control.Homepage",
+      "cell": "HomePage",
+      "reason": "the cell says HomePage; Policy 5.6.23 spells it Homepage, \"the URL of the web site for this package\", so it is the fallback after DEP-12's Repository, \"URL to a repository containing the upstream sources\" (https://dep-team.pages.debian.net/deps/dep12/)",
+      "comment": "Vcs-Git and Vcs-Browser are the repository of the Debian packaging (Policy 5.6.26), not upstream: never read them here. Homepage may be a project site rather than a repository."
+    },
+    {
+      "format": "debian",
+      "term": "description",
+      "path": "packages[].Description",
+      "cell": "Description",
+      "reason": "the cell says Description; Description sits in each binary package stanza of debian/control, not the source stanza (Policy 5.2, 5.6.13)",
+      "comment": "One value per binary package. The consumer takes the stanza whose Package equals control.Source, else the first. The first line is the synopsis; in the rest a line ' .' is an empty line."
+    },
+    {
+      "format": "debian",
+      "term": "keywords",
+      "path": null,
+      "cell": "",
+      "reason": "no cell; the only candidate, Section, is one archive section such as science or python (Policy 5.6.5), not a keyword list"
+    },
+    {
+      "format": "debian",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; the changelog Date is when the Debian package was \"built or last edited\" (Policy 5.6.15), not when the software was published"
+    },
+    {
+      "format": "debian",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; debian has no publisher field"
+    },
+    {
+      "format": "debian",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; debian has no field for it (Package-Type, Policy 5.6.28, is deb or udeb)"
     }
   ]
 }
