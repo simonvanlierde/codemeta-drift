@@ -34,6 +34,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   [Read each format's paths](docs/reading-formats.md), and SSSOM spokes on
   [the crosswalk hub page](docs/crosswalk-hub.md).
 - The docs site has a menu in reading order, previous and next links, and a footer with the project links.
+- Coverage page: the matrix is one tab stop with arrow, Home and End keys, a focused or pointed-at cell
+  names its term, and Follow a field hides terms neither format has.
+
+### Fixed
+
+- The coverage page's Upstream tab joins a crosswalk's `name` row on CodeMeta's main branch, where the
+  property table gained a third `name` row the crosswalks lack. It showed 34 cells as unmatched and
+  hid the GitHub `name` fix (codemeta/codemeta#505); it now shows that one cell as fixed. A property
+  whose counts differ joins only its first `schema:Thing` row, and only when the rows on either side
+  match the table's.
 
 ## [0.9.0] - 2026-11-26
 

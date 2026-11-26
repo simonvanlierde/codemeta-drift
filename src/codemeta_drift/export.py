@@ -148,20 +148,35 @@ def crosswalk_rows(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str, 
 
     The crosswalk has no type column, so a property listed under two types (``identifier`` under
     Thing and Person) is matched by its n-th occurrence in each file, never by line number. A
-    property whose count differs between the files gets no cell, since the match would be a guess.
+    property whose count differs between the files gets no cell, since the match would be a guess,
+    with one exception: when the table lists it first under ``schema:Thing`` and the crosswalk's
+    first occurrence has the same rows before and after it as the table's first, that one row joins.
+    On CodeMeta's main branch the table has a third ``name`` row (``schema:ContactPoint``) that
+    the crosswalks lack, and the software's own ``name`` still joins.
     """
+    table = [(row[0], row[1]) for _, row in table_rows(files)]
     parents: dict[str, list[str]] = {}
-    for _, row in table_rows(files):
-        parents.setdefault(row[1], []).append(row[0])
+    for parent, name in table:
+        parents.setdefault(name, []).append(parent)
     rows = [(line, row[0], row[1] if len(row) > 1 else "") for line, row in csv_rows(files[crosswalk])[1:]]
     counts = Counter(name for _, name, _ in rows)
     seen: Counter[str] = Counter()
     cells = {}
-    for line, name, cell in rows:
+    for i, (line, name, cell) in enumerate(rows):
         if counts[name] == len(parents.get(name, ())):
             cells[(parents[name][seen[name]], name)] = (line, cell)
+        elif seen[name] == 0 and parents.get(name, [""])[0] == "schema:Thing":
+            at = next(k for k, (_, n) in enumerate(table) if n == name)
+            pair = neighbours([n for _, n, _ in rows], i)
+            if None not in pair and pair == neighbours([n for _, n in table], at):
+                cells[("schema:Thing", name)] = (line, cell)
         seen[name] += 1
     return cells
+
+
+def neighbours(names: list[str], k: int) -> tuple[str | None, str | None]:
+    """The names just before and after position ``k``."""
+    return (names[k - 1] if k > 0 else None, names[k + 1] if k + 1 < len(names) else None)
 
 
 def identity(term: str) -> str:
