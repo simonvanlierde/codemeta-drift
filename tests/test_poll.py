@@ -2,6 +2,8 @@ import base64
 import hashlib
 import io
 import json
+import os
+import socket
 import subprocess
 from collections.abc import Callable
 from email.message import Message
@@ -259,6 +261,18 @@ def test_fetch_json_refuses_plain_http_before_any_request(monkeypatch: pytest.Mo
     monkeypatch.setattr(runner, "urlopen", lambda *_a, **_k: pytest.fail("must not open a plain-HTTP URL"))
     with pytest.raises(ValueError, match="HTTPS"):
         fetch_json("http://example.org/schema.json")
+
+
+def test_tests_run_without_a_github_login_or_network():
+    assert not {"GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN"} & os.environ.keys()
+    assert not any(Path(os.environ["GH_CONFIG_DIR"]).iterdir())
+    with pytest.raises(RuntimeError, match="only tests marked live"):
+        fetch_json("https://example.org/x")
+    # A socket given an IP address skips the name lookup, so these reach connect and connect_ex.
+    with socket.socket() as sock:
+        for connect in (sock.connect, sock.connect_ex):
+            with pytest.raises(RuntimeError, match="only tests marked live"):
+                connect(("127.0.0.1", 9))
 
 
 def test_fetch_json_parses_the_response_with_a_timeout(monkeypatch: pytest.MonkeyPatch):
