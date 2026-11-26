@@ -367,7 +367,7 @@ Each GitHub release carries `mapping-3.1.json`, `mapping-4.0.json` and a `SHA256
 so a consumer can pin an export without a CodeMeta checkout:
 
 ```bash
-v=0.10.0
+v=0.9.0
 curl -fsSLO "https://github.com/simonvanlierde/codemeta-drift/releases/download/v$v/mapping-4.0.json"
 curl -fsSLO "https://github.com/simonvanlierde/codemeta-drift/releases/download/v$v/SHA256SUMS"
 sha256sum -c --ignore-missing SHA256SUMS
