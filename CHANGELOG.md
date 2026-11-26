@@ -11,6 +11,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - The docs are a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>. The coverage page keeps its address.
 
+### Changed
+
+- The coverage page and the docs set body text at 18px and nothing under 14px, and each links to the other.
+
 ## [0.9.0] - 2026-11-20
 
 ### Upgrade
