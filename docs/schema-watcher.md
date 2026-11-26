@@ -14,9 +14,9 @@ codemeta-drift watch ../codemeta --tag 4.0 \
   --latest v0.9.0 --existing issue-titles.json
 ```
 
-Each directory needs the five files named in
+Only five of the export's formats have a schema check. Each directory needs their files, named in
 [`SCHEMA_FILES`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/conformance.py): CFF, pyproject, package.json and
-Cargo, plus the [verified Zenodo structural subset](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the curated
+Cargo, plus the [verified Zenodo structural subset](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/zenodo.json). Both snapshots must come from the same sources. The command reads the reviewed
 mapping from the selected CodeMeta tag, then checks its paths against the new schemas.
 It lists broken mapped paths and new declared properties that have no row. New tables under pyproject's `tool`
 need no row: they configure tools and hold no metadata. Local refs (including numeric array indices),
@@ -44,23 +44,9 @@ published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issu
 
 The weekly [schema watcher workflow](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/workflows/schema-watch.yml) polls the
 existing public schema sources, CFF's latest release, CodeMeta's tags, the latest stable
-codemeta-drift release and citesync's pin. One poll uploads the draft JSON as an artifact and publishes the drafts. The upload happens even when
-publishing fails. The live tests run first and can fail the run. To
-run the same read-only poll locally:
-
-```sh
-uv run python -m codemeta_drift.poll --out schema-watch.json
-```
-
-Publishing is opt-in. The workflow publishes only when the `MAPPING_WATCH_TOKEN` secret is set
-in the `schema-watch` environment, which allows deployments from `main` only and has no reviewers
-(`just watch-env` sets it up). Keep the token there, not as a repository secret, which every workflow on every branch can read. Without it a manual run prints a notice that publishing was
-skipped, and a scheduled run fails after uploading the drafts. A run started on another branch stops at the environment, so test a branch with the local poll above. Use a
-fine-grained token limited to simonvanlierde/codemeta-drift and simonvanlierde/citesync with
-only Issues: read and write; both repositories are public, so no Contents permission is needed.
-The poll reads all issue pages, including closed issues, before creating any missing drafts, and spaces
-issue creations one second apart. The workflow's concurrency group serializes runs. A local
-`--publish` run uses `gh` credentials and must not run beside another publisher.
+codemeta-drift release and citesync's pin. When publishing is set up, it opens the drafts as issues.
+[Development](development.md#schema-watcher-workflow) covers running the poll locally and
+publishing.
 
 Only the latest numeric CodeMeta tag gets a missing-export draft. The five bundled schema files
 stay the baseline until refreshed, and draft fingerprints suppress repeat reports against it.

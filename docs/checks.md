@@ -2,11 +2,11 @@
 description: "The finding codes codemeta-drift reports, the CodeMeta files it compares, its exit codes and its JSON output."
 ---
 
-# Understand the findings
+# Finding codes, exit codes and JSON output
 
-codemeta-drift compares the files that define CodeMeta and its crosswalks. It matches
-terms by name and checks row order, so a renamed term appears as one unexpected term and
-one missing term. A problem shared by several crosswalks is reported once, as a group.
+codemeta-drift compares the files that define CodeMeta and its crosswalks. It matches terms
+by name and checks row order. A renamed term therefore shows up twice: once as unexpected, once
+as missing. A problem shared by several crosswalks is reported once, as a group.
 
 ## The files it compares
 
@@ -57,18 +57,20 @@ CROSSWALK_ROWS crosswalks/*.csv (all 46): position: line 44 is not in properties
 EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
 ```
 
-A file label can name a group of files, as in the first line.
+A file label can name a group of files, as in the first line, which comes from CodeMeta commit
+`e62eb75`. The line number is the line in the checked file: each crosswalk has `position` on line
+44, and line 46 of `properties_description.csv` now holds `maintainer`.
 The checks test consistency between files. They do not validate every JSON-LD rule or metadata value.
 
 | Exit code | Meaning |
 | --- | --- |
 | 0 | No disagreements; optional files may produce `SKIPPED` notices |
 | 1 | The checker found disagreements |
-| 2 | Usage error: an unknown option, a missing argument, or an option value the command can't use (a `--tag` with no curated rows, a `--format`, `--from` or `--to` the mapping lacks) |
+| 2 | Usage error: an unknown option, a missing argument, or an option value the command can't use (a `--tag` with no reviewed rows, a `--format`, `--from` or `--to` the mapping lacks) |
 | 3 | The check could not run, for example because a required file is missing or unreadable, or its output can't be written, including a closed pipe |
 | 130 | Interrupted with Ctrl-C. The command ends by SIGINT, so a shell loop around it stops too; on Windows it exits 130 |
 
-Every `codemeta-drift` command uses these codes. For `export` and `watch`, findings are rows they can't make.
+Every `codemeta-drift` command uses these codes. For `export` and `watch`, a finding is a row they could not build.
 
 ## Read JSON output
 
@@ -100,10 +102,11 @@ label that can describe a group, and `detail` is text for a person.
 object with `message` and `help` (the next step, or `null`).
 [`report.schema.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/report.schema.json) is its JSON Schema.
 
-`export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` write the same `schema_version` and
-`errors`, and with `--json` an error, a usage error included, is an object in `errors` on standard output
-instead of a line on standard error. With `--out`, only a successful report goes to the file. A command line the parser refuses is an error too, with the usage line as
-its `help`, whenever `--json` is among the arguments (always for `watch`). Their other keys:
+`export --json`, `watch` and `hub pair|sssom|crosswalk|coverage --json` share `schema_version` and
+`errors`. With `--json`, every error goes to standard output as an object in `errors`, not to
+standard error. That includes a command line the parser refuses, with the usage line as its `help`.
+`watch` always works this way. With `--out`, only a successful report goes to the file. Their other
+keys:
 
 | Command | Keys besides `schema_version` and `errors` |
 | --- | --- |

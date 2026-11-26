@@ -15,7 +15,8 @@ uv run python examples/schema-recovery.py /tmp/codemeta-preview
 
 The example first validates the original mapping against its pinned schemas. The
 rename then produces one `PATH_NOT_IN_SCHEMA` finding and one schema-review draft.
-Repeating the draft calculation with that title, open or closed, produces no duplicate.
+It then drafts again with that title as an existing issue, open or closed, and gets no
+second draft.
 Without approval, `mapping.json` and its mapping hash retain the original bytes.
 
 Inspect the [synthetic approval record](https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/schema-recovery-approval.json).
@@ -28,7 +29,7 @@ uv run python examples/schema-recovery.py /tmp/codemeta-repaired \
 ```
 
 The repaired mapping passes its declared JSON Schema and the changed format
-schema. It has a curated source reason and an example-only generator label. The old
+schema. It records the approval's reason as its source and has an example-only generator label. The old
 mapping still passes the original schemas.
 
 Each output directory contains:
@@ -53,9 +54,8 @@ what a rename means for it, run its tests in a citesync worktree twice:
    The pin check fails, and so does every test that reads a PEP 621 `name`, because
    citesync's fixtures still use `project.name`.
 
-The second run gates a repin: the consumer's fixtures must change with the
-mapping. citesync's `check_mapping` accepts both outputs and refuses a `schema_version`
-with a major other than 1.
+citesync can only repin once its fixtures use the new path. Its `check_mapping` accepts both
+outputs and refuses a `schema_version` with a major other than 1.
 
 The pins in these files are demonstrations. Nothing here repins citesync, releases a package or
 publishes an issue.

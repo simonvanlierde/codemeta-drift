@@ -1,20 +1,26 @@
 # Documentation
 
-codemeta-drift checks CodeMeta's own files for disagreement between its context, definitions,
-property table, examples and crosswalks, and for crosswalk cells that are wrong or missing. It
-exports the reviewed crosswalks as a JSON mapping for tools such as
+codemeta-drift shows where CodeMeta's crosswalks to citation and package formats are wrong or
+missing: [see every cell](https://simonvanlierde.com/codemeta-drift/). It also checks CodeMeta's
+own files against each other, and exports a reviewed JSON field mapping for tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
 
-The [coverage page](https://simonvanlierde.com/codemeta-drift/) shows every cell. The
-[README](https://github.com/simonvanlierde/codemeta-drift#try-it) shows how to run the command.
+codemeta-drift is not part of the CodeMeta project and proposes no edits to CodeMeta's files. Its
+`identifier` column means the software's DOI, a narrower reading than CodeMeta's "any kind of
+identifier", so a cell that holds a package id or a UUID counts as corrected for citation use, not
+as a CodeMeta error.
 
-- [Checks](checks.md): finding codes, compared files, exit codes and JSON output.
+The [README](https://github.com/simonvanlierde/codemeta-drift#try-it) shows how to run the command.
+To compare two formats, read [Coverage](coverage.md), then [Crosswalk hub](crosswalk-hub.md).
+
+- [Coverage](coverage.md): the crosswalk matrix for each CodeMeta release, and what each count covers.
 - [Findings](findings.md): what the checks found in earlier CodeMeta snapshots.
-- [Coverage](coverage.md): the crosswalk matrix for each CodeMeta release.
-- [Mapping export](mapping-export.md): the JSON contract consumers pin.
-- [Crosswalk hub](crosswalk-hub.md): corresponding fields between two formats, and the SSSOM export.
-- [SSSOM compatibility](sssom-compatibility.md): validating the export and how it compares with CodeMeta's methodology.
-- [Schema watcher](schema-watcher.md): the weekly check of the format schemas, and [Zenodo path coverage](zenodo-schema.md).
-- [Schema recovery](schema-recovery.md): an offline rename, from the first finding to a reviewed fix.
-- [Development](development.md): tests, mutation testing and the site.
+- [Mapping export](mapping-export.md): the JSON contract consumers pin, and
+  [how to read each format's paths](reading-formats.md).
+- [Crosswalk hub](crosswalk-hub.md): corresponding fields between two formats, and the SSSOM export;
+  [SSSOM compatibility](sssom-compatibility.md) compares it with CodeMeta's methodology.
+- [Schema watcher](schema-watcher.md): previewing format schema changes, with
+  [Zenodo path coverage](zenodo-schema.md) and [a rename from finding to fix](schema-recovery.md).
+- [Checks reference](checks.md): finding codes, compared files, exit codes and JSON output.
+- [Development](development.md): tests, the site, the schema watcher's publishing and the social card.
 - [Decisions](decisions/README.md): records of project choices.

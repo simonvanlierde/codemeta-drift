@@ -4,8 +4,7 @@ description: "A dated report of where CodeMeta's context, definitions, property 
 
 # Findings in the checked CodeMeta snapshots
 
-This is a dated report, not a live status page. The last column is CodeMeta commit
-`e62eb75`, checked on 2026-10-13. To see what remains, with the [command installed](https://github.com/simonvanlierde/codemeta-drift/blob/main/README.md#try-it), check a current CodeMeta checkout:
+This is a dated report, not a live status page. To see what remains, with the [command installed](https://github.com/simonvanlierde/codemeta-drift/blob/main/README.md#try-it), check a current CodeMeta checkout:
 
 ```sh
 codemeta-drift codemeta
@@ -25,10 +24,18 @@ codemeta-drift codemeta
 - The combined table that the website shows has no column for the GitLab and code.json
   crosswalks.
 
+## Fixed upstream since `e62eb75`
+
+- The CodeMeta maintainers synced the property list with the vocabulary in
+  [`1941ca2`](https://github.com/codemeta/codemeta/commit/1941ca2) ([#508](https://github.com/codemeta/codemeta/issues/508)).
+  CodeMeta's main branch at `65899d8` has no `TABLE_NO_TERM` or `TERM_NO_ROW` findings.
+- [#505](https://github.com/codemeta/codemeta/pull/505) maps the GitHub crosswalk's `name` to the
+  API's `name`, in place of `full_name`.
+
 ## Counts by snapshot
 
-Counts are finding entries, not affected files. A finding shared by several crosswalks
-counts once.
+The last column is CodeMeta commit `e62eb75`, checked on 2026-10-13. Counts are finding entries,
+not affected files. A finding shared by several crosswalks counts once.
 
 | Check | 3.1 | 4.0 | `e62eb75` |
 | --- | --- | --- | --- |
@@ -45,6 +52,7 @@ counts once.
 3.1 has no definitions file, so those checks didn't run. The full output for 3.1 and 4.0 is
 in [`tests/fixtures/`](https://github.com/simonvanlierde/codemeta-drift/tree/main/tests/fixtures/).
 
-[Finding reference](checks.md) explains each code. The counts do not say which value is
-right: a crosswalk correction belongs upstream in CodeMeta or in a reviewed
-[curated mapping](mapping-export.md).
+The [checks reference](checks.md) explains each code. The counts do not say which value is
+right. Fix the cell in CodeMeta, or add a corrected row to
+[`curated-4.0.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-4.0.json)
+for the [mapping export](mapping-export.md).
