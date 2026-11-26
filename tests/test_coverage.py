@@ -5,8 +5,18 @@ from pathlib import Path
 import pytest
 
 from codemeta_drift.cli import main, read_dir
-from codemeta_drift.coverage import NOT_REVIEWED, coverage, markdown, unreviewed, upstream
-from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS, build_rows, curated_tags, latest_tag, read_curated
+from codemeta_drift.coverage import NOT_REVIEWED, STATUSES, coverage, markdown, unreviewed, upstream
+from codemeta_drift.export import (
+    FORMATS,
+    KINDS,
+    NO_PROPERTY,
+    PACKAGE,
+    TERMS,
+    build_rows,
+    curated_tags,
+    latest_tag,
+    read_curated,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -133,6 +143,32 @@ def test_an_unknown_kind_is_refused():
         build_rows({}, "4.0", [{"format": "cargo", "term": "name", "path": "x", "reason": "r", "kind": "typo"}])
 
 
+def test_an_unknown_kind_message_lists_the_kinds():
+    with pytest.raises(ValueError, match=r"not one of notation, scope$"):
+        build_rows({}, "4.0", [{"format": "cargo", "term": "name", "path": "x", "reason": "r", "kind": "typo"}])
+
+
+def test_a_kind_on_a_cell_the_crosswalk_leaves_empty_is_refused():
+    """status() reads a kind only off a non-empty cell, so the coverage page would show it as added."""
+    files = read_dir(ROOT / "tests/fixtures/4.0")
+    row = {"format": "cargo", "term": "description", "path": "package.description", "cell": "", "reason": "r"}
+    with pytest.raises(ValueError, match="cargo description row has kind 'scope', but its cell is empty"):
+        build_rows(files, "4.0", [row | {"kind": "scope"}])
+
+
+def test_the_kind_vocabulary_is_spelled_the_same_everywhere():
+    schema = json.loads((PACKAGE / "mapping.schema.json").read_text("utf-8"))
+    assert list(KINDS) == schema["$defs"]["row"]["properties"]["kind"]["enum"]
+    assert set(KINDS) <= STATUSES.keys()
+
+
+def test_a_scope_cell_with_no_path_is_one_the_meaning_admits(mapping: dict):
+    """Half the scope cells have no narrow field in the format; the meaning must not promise a path."""
+    cells = coverage(mapping)["cells"]
+    assert any(c["status"] == "scope" and c["path"] is None for c in cells)
+    assert STATUSES["scope"][1].endswith("the reviewed mapping gives the path, or says the format has none")
+
+
 def test_counts_for_the_crosswalks(mapping: dict):
     found = [s for (fmt, _), s in statuses(mapping).items() if FORMATS[fmt].crosswalk]
     expected = {
@@ -173,7 +209,7 @@ def test_readme_figures_match_the_counts():
         f" such as another case, no prefix or XPath."
         f" - {count['scope']} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly,"
         f" such as `identifier` as the software's DOI and `swhid` as a term of its own, or also reads another field,"
-        f" such as a fallback or a newer one."
+        f" such as a fallback or a newer one. The reviewed mapping gives the path, or says the format has none."
         f" - {count['corrected']} are wrong, ambiguous or prose."
         f" {null_corrected} of them name a field the format doesn't have."
         f" - {count['added']} are blank although the format has the field."
