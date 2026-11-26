@@ -4,9 +4,12 @@ description: "Links to the crosswalk coverage matrix for each CodeMeta release, 
 
 # Crosswalk coverage
 
-The coverage matrix has one page per CodeMeta tag:
+One matrix per CodeMeta tag: [4.0](coverage-4.0.md) and [3.1](coverage-3.1.md). The
+[web page](https://simonvanlierde.com/codemeta-drift/) shows the newest; `?tag=3.1` shows 3.1.
 
-- [CodeMeta 4.0](coverage-4.0.md)
-- [CodeMeta 3.1](coverage-3.1.md)
+## What the counts cover
 
-The [web page](https://simonvanlierde.com/codemeta-drift/) shows the newest tag; `?tag=3.1` shows 3.1.
+At CodeMeta 4.0, 13 terms and 6 person sub-terms make 19 columns. 18 have a CodeMeta property
+(`resourceType` has none). I reviewed 36 of CodeMeta's 46 crosswalks. The page shows 43 of the
+export's 44 formats (`codemeta.json` has no row), 7 of them with no CodeMeta crosswalk. The
+README's 648 cells are 36 crosswalks times 18 columns. The page's filters count all 817 cells.

@@ -5,6 +5,10 @@ tests/fixtures/3.1/ and tests/fixtures/4.0/ are unmodified copies of files from
 the CodeMeta repository (https://github.com/codemeta/codemeta) at tags 3.1 and
 4.0, licensed under the Apache License 2.0 by the CodeMeta contributors.
 
+examples/mapping-*.json, docs/coverage-*.md and the coverage page start from the crosswalks in
+the CodeMeta repository (crosswalks/*.csv), Apache License 2.0, by the CodeMeta contributors. The
+rows a reviewer changed or added say so in their source and reason.
+
 tests/fixtures/schemas/ holds unmodified copies of JSON Schemas; tests/fixtures/schemas/SOURCES
 gives each URL and checksum:
 
