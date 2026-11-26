@@ -304,6 +304,27 @@ select {
   gap: 8px 12px;
   margin-bottom: 12px;
 }
+.key {
+  max-width: 68ch;
+  margin-bottom: 16px;
+}
+.key summary {
+  padding-block: 10px;
+  cursor: pointer;
+}
+.key p {
+  margin: 12px 0 4px;
+  color: var(--faint);
+}
+.key dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 16px;
+  margin: 0;
+}
+.key dd {
+  margin: 0;
+}
 .legend-label {
   color: var(--faint);
 }

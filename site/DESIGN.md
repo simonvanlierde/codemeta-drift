@@ -32,6 +32,10 @@ the source of truth for values.
   running up the column. A cell holds only its mark; its path is in the detail panel. The last column
   counts the format's usable cells. The detail panel sits beside the table from 1360px, below it on
   smaller screens.
+- **Key and sources.** Under the filters, a note says when the filter counts take in formats the
+  headline leaves out, and a closed "What the marks mean" lists every mark in words. The detail panel
+  names the CodeMeta property behind a term and links the cell's line in CodeMeta's crosswalk file at
+  the tag; URLs in a reason are links.
 - **Not reviewed.** The other crosswalks follow the reviewed rows under an italic group label that
   carries their legend: • path, ¶ prose, ○ empty, ? unmatched. No wash: a mark says only the cell's
   shape, so prose and unmatched are red text and the rest faint. Their last column counts path cells.

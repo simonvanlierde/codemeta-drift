@@ -119,7 +119,8 @@ def test_readme_figures_match_the_counts():
     text = " ".join((ROOT / "README.md").read_text("utf-8").split())
     other, terms = len(cells) - count["no field"], len(TERMS) - len(NO_PROPERTY)
     assert (
-        f"have {len(cells)} cells for the {terms} terms citation tools need. {count['no field']} are for terms"
+        f"have {len(cells)} cells, one for each of the {terms} terms citation tools need."
+        f" {count['no field']} are for terms"
         f" the format has no field for. Of the other {other}, only {count['as-is']} can be used as written:"
         f" {count['corrected']} are wrong, ambiguous or prose ({null_corrected} of them fill a term the format has"
         f" no field for), and {count['added']} are blank"

@@ -54,11 +54,17 @@
   </div>
 
   <section role="tabpanel" id="panel-matrix" aria-labelledby="tab-matrix">
-    <p class="hint">Rows are formats, columns are CodeMeta terms.</p>
+    <p class="hint">Rows are formats. Columns are CodeMeta properties, named by where they sit:
+      <code>author.@id</code> is an author's identifier.</p>
     <div class="legend" role="group" aria-label="Show one status">
       <span class="legend-label">Show</span>
       <div id="filters"></div>
     </div>
+    <p class="hint" id="counts-note" hidden></p>
+    <details class="key">
+      <summary>What the marks mean</summary>
+      <div id="key"></div>
+    </details>
     <a class="skip-matrix" href="#after-matrix">Skip past the matrix</a>
     <div class="board">
       <div class="scroll" role="region" tabindex="0" aria-label="Coverage matrix, scrolls sideways">
@@ -89,7 +95,8 @@
   </section>
 </main>
 <footer class="wrap colophon">
-  <p>Built from the reviewed <a href="https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md">mapping export</a>.</p>
+  <p>Built from the reviewed <a href="https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md">mapping export</a><span id="schema"></span>:
+    <a id="export-file" href="https://github.com/simonvanlierde/codemeta-drift/blob/main/examples/mapping-4.0.json">mapping-4.0.json</a>.</p>
   <p class="mono"><span id="version">codemeta-drift</span> · Apache-2.0 ·
     <a href="https://simonvanlierde.com/codemeta-drift/docs/">documentation</a> ·
     <a href="https://github.com/simonvanlierde/codemeta-drift">source</a> ·
