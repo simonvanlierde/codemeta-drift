@@ -1,3 +1,7 @@
+---
+description: "The finding codes codemeta-drift reports, the CodeMeta files it compares, its exit codes and its JSON output."
+---
+
 # Understand the findings
 
 codemeta-drift checks the files that define CodeMeta and its crosswalks. It compares

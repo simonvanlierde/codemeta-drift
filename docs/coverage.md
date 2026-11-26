@@ -1,3 +1,7 @@
+---
+description: "Links to the crosswalk coverage matrix for each CodeMeta release, and to the web page that also checks CodeMeta's main branch."
+---
+
 # Crosswalk coverage
 
 The coverage matrix has one page per CodeMeta tag:

@@ -1,3 +1,7 @@
+---
+description: "Which .zenodo.json paths Zenodo's GitHub importer reads, checked against its schema code, and the limits of that check."
+---
+
 # Zenodo path coverage
 
 Zenodo's GitHub importer reads `.zenodo.json` through `LegacySchema`, then

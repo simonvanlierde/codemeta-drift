@@ -1,3 +1,7 @@
+---
+description: "The JSON mapping export: which formats it covers, its contract and schema, the curated corrections and how consumers pin it."
+---
+
 # Mapping export
 
 A mapping export is one JSON file, `mapping-<codemeta-tag>.json`, that says where each CodeMeta

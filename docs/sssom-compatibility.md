@@ -1,3 +1,7 @@
+---
+description: "Validate the hub's SSSOM export with the reference tool, and how it compares with CodeMeta's own SSSOM methodology."
+---
+
 # SSSOM validation and CodeMeta compatibility
 
 The hub writes a SSSOM table of field correspondences. Its identifiers sit under

@@ -1,3 +1,7 @@
+---
+description: "An offline example: a fictional PEP 621 rename gives one deduplicated review draft, and an explicit approval repairs the mapping."
+---
+
 # Run an offline schema change and recovery example
 
 This example renames PEP 621's `project.name` to a fictional `project.display_name`.

@@ -1,3 +1,7 @@
+---
+description: "Set up a codemeta-drift checkout: tests, git hooks, fixture updates, the coverage page, the docs site and mutation tests."
+---
+
 # Develop codemeta-drift
 
 You need Git, [uv](https://docs.astral.sh/uv/), [just](https://just.systems),

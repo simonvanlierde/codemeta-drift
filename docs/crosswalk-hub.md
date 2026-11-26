@@ -1,3 +1,7 @@
+---
+description: "Find which fields correspond between two metadata formats, write SSSOM spokes or a CodeMeta crosswalk CSV, and what the hub does not claim."
+---
+
 # Find corresponding fields in two formats
 
 The hub joins the curated mapping export by term. It tells you which fields correspond;

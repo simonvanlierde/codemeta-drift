@@ -1,3 +1,7 @@
+---
+description: "Records of the decisions that shape codemeta-drift: what was chosen, why, and what it costs."
+---
+
 # Decisions
 
 Each file here records one decision that shapes this project: what was chosen, why,
