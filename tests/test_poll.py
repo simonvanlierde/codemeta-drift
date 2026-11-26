@@ -398,3 +398,50 @@ def test_a_pinned_file_the_contents_api_sends_without_content_is_an_error():
 def test_poll_fetches_every_tracked_schema():
     """Each schema snapshot has an upstream source, so poll's before and after cover the same formats."""
     assert {*SCHEMA_URLS, *RELEASED_SCHEMAS, "zenodo"} == SCHEMA_FILES.keys()
+
+
+def test_a_tag_with_a_slash_is_quoted_in_every_url_that_carries_it():
+    seen = []
+
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        seen.append(target)
+        raise HTTPError(target, 404, "Not Found", Message(), None)
+
+    runner.stale_pin_hashes("sha256 abc local.json a.json\n", "release/1", fetch)
+    assert seen == [API + "simonvanlierde/codemeta-drift/contents/a.json?ref=release%2F1"]
+
+
+def _poll_with_codemeta_tags(tags: list[str]) -> list[dict[str, str]]:
+    before = {fmt: {"properties": {}} for fmt in SCHEMA_FILES}
+    before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
+    zenodo = before["zenodo"]["x-source"]
+    shas = {API + zenodo["repo"] + "/contents/" + p: {"sha": d} for p, d in zenodo["files"].items()}
+    raw = {"citation-file-format/citation-file-format": "release/1", "composer/composer": "2.11.2"}
+    responses = {
+        API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
+        API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
+            "content": base64.b64encode(b"tag v0.4.0\n").decode()
+        },
+        API + "codemeta/codemeta/tags?per_page=100": [{"name": tag} for tag in tags],
+        **{url: {"properties": {}} for url in SCHEMA_URLS.values()},
+        **{API + repo + "/releases/latest": {"tag_name": tag} for repo, tag in raw.items()},
+        **shas,
+    }
+
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        if target.startswith("https://raw.githubusercontent.com/"):
+            # The tag is one path segment, so a slash in it must arrive as %2F.
+            assert "/release%2F1/" in target or "/2.11.2/" in target
+            return {"properties": {}}
+        return responses[target]
+
+    return poll({"rows": []}, before, fetch)
+
+
+def test_the_newest_codemeta_tag_is_the_highest_number_with_an_optional_v():
+    plans = _poll_with_codemeta_tags(["v3.9", "v3.10", "V99.0", "99", "4.0.0.1", "v3.2-rc1"])
+    assert [(p["title"], p["body"]) for p in plans] == [
+        ("Review CodeMeta tag v3.10", "CodeMeta tag `v3.10` has no curated export. Review its terms and crosswalks.")
+    ]
+    assert [p["title"] for p in _poll_with_codemeta_tags(["99.0", "v3.10"])] == ["Review CodeMeta tag 99.0"]
+    assert _poll_with_codemeta_tags(["not-a-tag"]) == []
