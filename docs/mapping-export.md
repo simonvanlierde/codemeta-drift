@@ -436,7 +436,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`. Schema 1.9 adds six format ids, `dublin-core` to `iso-19115-1-2014`, and
-   changes no pattern, so a 1.9 file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
+   changes no pattern, so a 1.9 file passes the 1.8 schema, but the `hub` of 0.8.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format
    that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from
