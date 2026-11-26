@@ -155,6 +155,19 @@ a:hover {
 .slug b {
   color: var(--ink);
 }
+.side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 24px;
+}
+.side a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--serif);
+  font-size: 1.125rem;
+}
 .lead {
   display: flex;
   flex-wrap: wrap;

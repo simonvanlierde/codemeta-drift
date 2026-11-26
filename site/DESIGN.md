@@ -21,6 +21,8 @@ the source of truth for values.
 - **Releases.** Beside the slug's title sits one link per CodeMeta release with a reviewed export, styled like the
   filters, the shown one tinted with an ink bar. The newest is the bare page; an older one is `?tag=<tag>`, and a
   link keeps the open view's fragment. Upstream is shown with the newest release only.
+- **Docs.** The slug's right side and the colophon link the documentation at `docs/`; the docs'
+  logo links back here.
 - **Tabs.** Three views under the headline: Matrix (the default), Follow a field, and Upstream (CodeMeta's main branch)
   with the count of changed cells. One hairline row; the chosen tab is tinted with a 2px ink bar at its
   foot, like the chosen filter. `#route` and `#upstream` open their views; the SSSOM fragments open Matrix.
