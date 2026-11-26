@@ -1,11 +1,22 @@
 import json
+import re
 from collections import Counter
 from pathlib import Path
 
 import pytest
 
 from codemeta_drift.cli import main, read_dir
-from codemeta_drift.coverage import NOT_REVIEWED, STATUSES, coverage, markdown, unreviewed, upstream
+from codemeta_drift.coverage import (
+    NOT_REVIEWED,
+    SHAPES,
+    SHORT_LABELS,
+    STATUSES,
+    coverage,
+    markdown,
+    unreviewed,
+    unreviewed_markdown,
+    upstream,
+)
 from codemeta_drift.export import (
     FORMATS,
     KINDS,
@@ -318,3 +329,88 @@ def test_a_backtick_in_a_crosswalk_cell_keeps_the_code_span_closed(mapping: dict
     row = next(r for r in mapping["rows"] if r["source"].startswith("curated:"))
     row["crosswalk_cell"] = "a`@x "
     assert "crosswalk cell ``a`@x`` →" in markdown(mapping)
+
+
+def test_coverage_report_keys(mapping: dict):
+    """The site reads these keys by name."""
+    data = coverage(mapping)
+    assert list(data) == ["codemeta_tag", "generator", "formats", "terms", "statuses", "cells"]
+    assert (data["codemeta_tag"], data["generator"]) == (mapping["codemeta_tag"], mapping["generator"])
+    assert data["statuses"] == {name: {"mark": mark, "meaning": text} for name, (mark, text) in STATUSES.items()}
+
+
+def test_unreviewed_report_keys(mapping: dict, tag_files: Path):
+    data = unreviewed(read_dir(tag_files), mapping)
+    assert list(data) == ["codemeta_tag", "statuses", "formats", "cells"]
+    assert data["codemeta_tag"] == mapping["codemeta_tag"]
+    assert data["statuses"] == {name: {"mark": mark, "meaning": text} for name, (mark, text) in SHAPES.items()}
+    assert all(list(f) == ["format", "label", "crosswalk", "status", "reason", "url"] for f in data["formats"])
+    assert all(f["crosswalk"] == f"crosswalks/{f['format']}.csv" for f in data["formats"])
+    keys = ["format", "term", "status", "path", "cell", "crosswalk", "reason"]
+    assert all(list(c) == keys for c in data["cells"])
+    assert all(c["path"] is None and c["reason"] is None for c in data["cells"])
+    assert all(c["crosswalk"] == f"crosswalks/{c['format']}.csv" for c in data["cells"])
+    assert any(c["cell"] for c in data["cells"])
+    # Perl's crosswalk is reviewed, so only a mapping without its rows shows its short label.
+    mapping["rows"] = [row for row in mapping["rows"] if row["format"] != "cpan-meta-2"]
+    labels = {f["format"]: f["label"] for f in unreviewed(read_dir(tag_files), mapping)["formats"]}
+    assert {fmt: labels[fmt] for fmt in SHORT_LABELS} == SHORT_LABELS
+
+
+def test_a_bar_in_an_unreviewed_label_keeps_the_table_row(mapping: dict, tag_files: Path):
+    data = unreviewed(read_dir(tag_files), mapping)
+    data["formats"][0]["label"] = "a|b"
+    assert any(line.startswith("| a\\|b | ") for line in unreviewed_markdown(data, list(TERMS)))
+
+
+def test_a_missing_row_leaves_only_its_cell_empty(mapping: dict):
+    first, second = list(TERMS)[:2]
+    mapping["rows"] = [r for r in mapping["rows"] if (r["format"], r["term"]) != ("cargo", first)]
+    keys = {(c["format"], c["term"]) for c in coverage(mapping)["cells"]}
+    assert ("cargo", first) not in keys
+    assert ("cargo", second) in keys
+    formats = coverage(mapping)["formats"]
+    [line] = [x for x in markdown(mapping).splitlines() if x.startswith((f"| `{first}` |", f"| {first} |"))]
+    cells = [c.strip() for c in re.split(r"(?<!\\)\|", line)[1:-1]]
+    assert len(cells) == len(formats) + 1
+    assert cells[1 + formats.index("cargo")] == ""
+
+
+def test_a_reason_ends_in_one_full_stop(mapping: dict):
+    row = next(r for r in mapping["rows"] if r["source"].startswith("curated:"))
+    row["source"] = "curated:a.b, then a stop at X."
+    assert f"`{row['term']}` (" in markdown(mapping)
+    assert any(line.endswith(" A.b, then a stop at X.") for line in markdown(mapping).splitlines())
+
+
+def test_upstream_gives_each_cell_its_new_text(mapping: dict, tag_files: Path):
+    files = read_dir(tag_files)
+    cargo = "crosswalks/Cargo.csv"
+    files[cargo] = files[cargo].replace("keywords,package.keyword", "keywords,package.keywords")
+    [cell] = upstream(files, mapping)
+    assert (cell["now"], cell["state"]) == ("package.keywords", "fixed")
+    del files["crosswalks/Zenodo.csv"]
+    changed = upstream(files, mapping)
+    missing = [c for c in changed if c["state"] == "missing"]
+    assert {c["format"] for c in missing} == {"zenodo"}
+    assert len(missing) == len([c for c in coverage(mapping)["cells"] if c["format"] == "zenodo"])
+    assert all(c["now"] is None for c in missing)
+    assert ("cargo", "keywords") in {(c["format"], c["term"]) for c in changed}
+
+
+def test_an_as_is_cell_rewritten_as_its_own_path_is_not_a_fix(mapping: dict, tag_files: Path):
+    """CFF's person.given-names derives to authors[].given-names; the new text is that path, still as-is."""
+    files = read_dir(tag_files)
+    cff = "crosswalks/Citation File Format 1.2.0.csv"
+    files[cff] = files[cff].replace("\ngivenName,person.given-names", "\ngivenName,authors[].given-names", 1)
+    found = {(c["format"], c["term"]): c["state"] for c in upstream(files, mapping)}
+    assert found["cff-1.2.0", "author.givenName"] == "changed"
+
+
+def test_a_person_cell_for_a_list_the_format_lacks_is_never_a_fix(mapping: dict, tag_files: Path):
+    """CFF has no contributor list, so its contributor.givenName path is None, as derive() gives here."""
+    files = read_dir(tag_files)
+    cff = "crosswalks/Citation File Format 1.2.0.csv"
+    files[cff] = files[cff].replace("\ngivenName,person.given-names", "\ngivenName,person.first-name", 1)
+    found = {(c["format"], c["term"]): c["state"] for c in upstream(files, mapping)}
+    assert found["cff-1.2.0", "contributor.givenName"] == "changed"
