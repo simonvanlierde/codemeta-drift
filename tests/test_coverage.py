@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from codemeta_drift.cli import main, read_dir
-from codemeta_drift.coverage import coverage, markdown, unreviewed, upstream
+from codemeta_drift.coverage import NOT_REVIEWED, coverage, markdown, unreviewed, upstream
 from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS, curated_tags, latest_tag
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,6 +57,16 @@ def test_unreviewed_lists_every_other_crosswalk_by_shape(mapping: dict, tag_file
     assert found["ASCL", "version"] == "empty"
     assert {s for (_, term), s in found.items() if term == "resourceType"} == {"no-term"}
     assert {f["label"] for f in data["formats"] if f["format"] == "DCAT"} == {"DCAT-2"}
+
+
+def test_every_status_names_an_unreviewed_crosswalk(mapping: dict, tag_files: Path):
+    """A crosswalk that gets reviewed leaves NOT_REVIEWED, so no stale reason stays on the page."""
+    formats = {f["format"]: f for f in unreviewed(read_dir(tag_files), mapping)["formats"]}
+    assert NOT_REVIEWED.keys() <= formats.keys()
+    for name, (status, reason, url) in NOT_REVIEWED.items():
+        assert status in {"superseded", "registry", "niche"}
+        assert (formats[name]["status"], formats[name]["reason"], formats[name]["url"]) == (status, reason, url)
+        assert f"- {formats[name]['label']} ({status}): {reason}. <{url}>" in markdown(mapping, read_dir(tag_files))
 
 
 def test_unreviewed_marks_a_cell_it_cannot_join(mapping: dict, tag_files: Path):

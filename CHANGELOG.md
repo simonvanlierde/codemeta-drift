@@ -10,6 +10,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - The docs are a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>. The coverage page keeps its address.
+- The crosswalks nobody reviews say why, on the coverage pages and the site: superseded by a reviewed format
+  (DCAT 2, CodeMeta 1), a registry's own schema, or niche. `hub coverage --json` gives each one's `status`,
+  `reason` and `url`.
 
 ### Changed
 

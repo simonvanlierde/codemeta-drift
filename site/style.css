@@ -391,6 +391,13 @@ table {
   min-width: 11rem;
   vertical-align: middle;
 }
+/* Why a crosswalk is not reviewed, under its name. */
+#matrix tbody th .why {
+  display: block;
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--faint);
+}
 /* Term names run up the column, so seventeen columns fit beside the detail panel. */
 #matrix thead th.rot {
   vertical-align: bottom;

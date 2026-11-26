@@ -64,8 +64,8 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
   const body = el("tbody");
   if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
-  for (const { format, label: name } of formats) {
-    const row = el("tr", {}, el("th", { scope: "row" }, name));
+  for (const { format, label: name, status } of formats) {
+    const row = el("tr", {}, el("th", { scope: "row" }, name, status ? el("span", { class: "why" }, status) : null));
     const own = [];
     for (const term of terms) {
       const cell = byKey.get(`${format} ${term}`);
@@ -106,7 +106,7 @@ const pathTally = (cells, statuses) => [
   el("span", { class: "vh" }, " read as a path"),
 ];
 
-function detail(statuses, labels, coverage, upstream) {
+function detail(statuses, labels, coverage, upstream, skipped) {
   const reviewed = coverage.statuses;
   const box = document.getElementById("detail");
   const hint = box.firstElementChild;
@@ -129,6 +129,8 @@ function detail(statuses, labels, coverage, upstream) {
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", linked(cell.reason)]);
+    const why = skipped.get(cell.format);
+    if (why?.status) rows.push(["Not reviewed", el("span", {}, `${why.status}: ${why.reason}. `, el("a", { href: why.url }, why.url))]);
     const now = changes.get(`${cell.format} ${cell.term}`);
     if (now) {
       rows.push(["On main", el("span", {}, `The cell ${STATES[now.state]}`, now.now ? el("span", {}, ": ", code(now.now)) : null, ".")]);
@@ -379,7 +381,8 @@ async function start() {
   score(coverage);
   const labels = new Map([...coverage.formats.map((f) => [f, label(f)]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label])]);
   const statuses = { ...coverage.statuses, ...unreviewed?.statuses };
-  matrix(coverage, unreviewed, detail(statuses, labels, coverage, upstream));
+  const skipped = new Map((unreviewed?.formats ?? []).map((f) => [f.format, f]));
+  matrix(coverage, unreviewed, detail(statuses, labels, coverage, upstream, skipped));
   filters(coverage);
   markKey(coverage.statuses, unreviewed?.statuses);
   route(coverage);
