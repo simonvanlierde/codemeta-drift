@@ -26,17 +26,17 @@ It checks the CodeMeta standard's own files. To keep a project's `CITATION.cff`,
 
 ## How the crosswalks hold up
 
-At CodeMeta 4.0, the 30 crosswalks reviewed here, from CFF, Zenodo and DataCite to Maven, SPDX,
-Wikidata and GitLab, have 540 cells, one for each of the 18 terms citation tools need. 189 are for terms the
-format has no field for. Of the other 351, only 120 can be used as written: 140 are wrong,
-ambiguous or prose (30 of them fill a term the format has no field for), and 91 are blank although
+At CodeMeta 4.0, the 36 crosswalks reviewed here, from CFF, Zenodo and DataCite to Maven, SPDX,
+Wikidata and GitLab, have 648 cells, one for each of the 18 terms citation tools need. 212 are for terms the
+format has no field for. Of the other 436, only 123 can be used as written: 203 are wrong,
+ambiguous or prose (40 of them fill a term the format has no field for), and 110 are blank although
 the format has the field. The matrix's 19th column, `resourceType`, has no CodeMeta property, so no
 crosswalk has a cell for it. CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto
 extensions, RIS, EndNote, RO-Crate or Croissant at all.
 
 The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md)
-shows every cell and the reason for each correction, and lists the other 16 crosswalks by the
-shape of their cells. The [web page](https://simonvanlierde.com/codemeta-drift/) also checks
+shows every cell and the reason for each correction, and lists the other 10 crosswalks by the
+shape of their cells, with the reason none is reviewed. The [web page](https://simonvanlierde.com/codemeta-drift/) also checks
 CodeMeta's main branch each week. The
 [3.1 matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-3.1.md) has the earlier figures.
 
@@ -72,8 +72,8 @@ Export the reviewed mappings for CodeMeta 4.0 (or `3.1`):
 uvx codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
-The 4.0 export covers 38 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata,
-RO-Crate and Croissant. It records the field path for each term, with a reason for each curated
+The 4.0 export covers 44 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata,
+RO-Crate, MODS and ISO 19115-1. It records the field path for each term, with a reason for each curated
 correction. It does not convert field values. Only tags with curated mappings can be exported:
 `3.1` and `4.0`.
 

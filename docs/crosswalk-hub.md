@@ -33,7 +33,7 @@ reviewed: superseded by a reviewed format, a registry's own schema, or niche. In
 alternatives, order and selectors.
 
 `sssom` writes [SSSOM 1.0 TSV](https://mapping-commons.github.io/sssom/1.0/spec-formats-tsv/)
-with an embedded metadata block and explicit CURIE prefixes. It covers the 38 formats
+with an embedded metadata block and explicit CURIE prefixes. It covers the 44 formats
 in the 4.0 JSON export and `gomod`. The Go spoke has only `codeRepository`, corresponding
 to the `module` directive.
 
