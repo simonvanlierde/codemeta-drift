@@ -4144,6 +4144,849 @@
       "term": "resourceType",
       "path": "@type",
       "reason": "no Croissant crosswalk upstream; Croissant 1.1, https://docs.mlcommons.org/croissant/docs/croissant-spec-1.1.html, describes the dataset in the document's top object, an sc:Dataset; CodeMeta has no term for the resource type; the top object's @type is sc:Dataset"
+    },
+    {
+      "format": "dublin-core",
+      "term": "name",
+      "path": "dcterms:title | dc:title[]",
+      "cell": "title",
+      "reason": "the cell says title, right as written; Title is dcterms:title (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#title, section 2) and dc:title in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-title, section 3), so the path reads both with their prefix",
+      "comment": "Title is repeatable; a record with several titles gives the first as the name."
+    },
+    {
+      "format": "dublin-core",
+      "term": "version",
+      "path": null,
+      "cell": "dcterms:hasVersion",
+      "reason": "the cell says dcterms:hasVersion, which is wrong: it is a related resource that is a version of this one and 'is intended to be used with non-literal values' (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#hasVersion, section 2); DCMI Terms have no property for a version string",
+      "comment": "Zenodo's oai_dc records carry the version only inside a dc:relation URL (.../tree/v0.9.8), which no path reads."
+    },
+    {
+      "format": "dublin-core",
+      "term": "author",
+      "path": "dcterms:creator[] | dc:creator[]",
+      "cell": "creator",
+      "reason": "the cell says creator, right as written; Creator is dcterms:creator, range includes dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#creator), and dc:creator in oai_dc, a name string (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-creator)",
+      "comment": "An element is an agent node, an IRI or a name string; the consumer reads both keys as lists."
+    },
+    {
+      "format": "dublin-core",
+      "term": "author.givenName",
+      "path": "dcterms:creator[].foaf:givenName | dc:creator[]",
+      "cell": "",
+      "reason": "the cell is empty; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's given name is foaf:givenName and an oai_dc creator is the whole name string",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms."
+    },
+    {
+      "format": "dublin-core",
+      "term": "author.familyName",
+      "path": "dcterms:creator[].foaf:familyName | dc:creator[]",
+      "cell": "",
+      "reason": "the cell is empty; DCMI Terms define no name parts for dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Agent, section 6), so a dcterms agent node's family name is foaf:familyName and an oai_dc creator is the whole name string",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms."
+    },
+    {
+      "format": "dublin-core",
+      "term": "author.@id",
+      "path": "dcterms:creator[].@id | dc:creator[].@id",
+      "cell": "",
+      "reason": "the cell is empty; DCMI has no ORCID property, but recommends identifying the creator with a URI (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#creator), which JSON-LD keeps as the agent node's @id",
+      "comment": "oai_dc has no attributes or nested nodes, so only an RDF record whose agent node is named by its ORCID IRI has this; a ROR or blank-node @id is not an ORCID."
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor",
+      "path": "dcterms:contributor[] | dc:contributor[]",
+      "cell": "",
+      "reason": "the cell is empty, but Contributor is dcterms:contributor, range includes dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#contributor), and dc:contributor in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-contributor)",
+      "comment": "An element is an agent node, an IRI or a name string; the consumer reads both keys as lists."
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor.givenName",
+      "path": "dcterms:contributor[].foaf:givenName | dc:contributor[]",
+      "cell": "",
+      "reason": "same reasoning as author.givenName, under contributor",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms."
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor.familyName",
+      "path": "dcterms:contributor[].foaf:familyName | dc:contributor[]",
+      "cell": "",
+      "reason": "same reasoning as author.familyName, under contributor",
+      "comment": "An oai_dc creator is one string, usually 'Family, Given' as Zenodo writes it, and a dcterms agent node may give only foaf:name: the consumer then splits that name. DCMI defines no name parts for an agent; foaf:givenName and foaf:familyName are common practice, not DCMI terms."
+    },
+    {
+      "format": "dublin-core",
+      "term": "contributor.@id",
+      "path": "dcterms:contributor[].@id | dc:contributor[].@id",
+      "cell": "",
+      "reason": "same reasoning as author.@id, under contributor",
+      "comment": "oai_dc has no attributes or nested nodes, so only an RDF record whose agent node is named by its ORCID IRI has this; a ROR or blank-node @id is not an ORCID."
+    },
+    {
+      "format": "dublin-core",
+      "term": "license",
+      "path": "dcterms:license | dcterms:rights | dc:rights[]",
+      "cell": "license",
+      "reason": "the cell says license, right as written for dcterms:license (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#license, section 2); oai_dc has no license element, so the path falls back to Rights, of which License is a subproperty (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#rights, https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-rights)",
+      "comment": "Rights holds any rights statement: Zenodo writes info:eu-repo/semantics/openAccess, the licence name and the licence URL as three dc:rights. The consumer keeps the values it can convert to an SPDX id and skips the rest."
+    },
+    {
+      "format": "dublin-core",
+      "term": "identifier",
+      "path": "dcterms:identifier | dc:identifier[]",
+      "cell": "identifier",
+      "reason": "the cell says identifier, right as written; Identifier is dcterms:identifier, whose comment names the DOI and says persistent identifiers should be HTTP URIs (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#identifier), and dc:identifier in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-identifier)",
+      "comment": "Identifier is repeatable and untyped: Zenodo writes https://doi.org/10.5281/zenodo.N and oai:zenodo.org:N side by side. A DOI is told by its spelling."
+    },
+    {
+      "format": "dublin-core",
+      "term": "swhid",
+      "path": null,
+      "cell": "identifier",
+      "reason": "the cell says identifier, which holds the DOI; DCMI Terms have no property of their own for a SWHID (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/, section 2)",
+      "comment": "A record may still carry a SWHID as a second identifier; the consumer finds it by its swh:1: spelling."
+    },
+    {
+      "format": "dublin-core",
+      "term": "codeRepository",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and DCMI Terms have no repository property; dcterms:relation is any related resource (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#relation) and dcterms:source the resource this one is derived from (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#source)",
+      "comment": "Zenodo's oai_dc gives the GitHub release URL as one of several dc:relation values, beside DOIs; a consumer that wants it must pick it by host."
+    },
+    {
+      "format": "dublin-core",
+      "term": "description",
+      "path": "dcterms:description | dc:description[]",
+      "cell": "description",
+      "reason": "the cell says description, right as written; Description is dcterms:description (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#description) and dc:description in oai_dc (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-description)",
+      "comment": "Description is repeatable; Zenodo writes the abstract first and further notes after it, so the first value is the description."
+    },
+    {
+      "format": "dublin-core",
+      "term": "keywords",
+      "path": "dcterms:subject | dc:subject[]",
+      "cell": "",
+      "reason": "the cell is empty, but Subject is the topic of the resource, 'typically represented using keywords' (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-subject), as dcterms:subject (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#subject) and dc:subject",
+      "comment": "Each value is one keyword or a subject IRI; a subject IRI is not a keyword."
+    },
+    {
+      "format": "dublin-core",
+      "term": "datePublished",
+      "path": "dcterms:issued | dcterms:date | dc:date[]",
+      "cell": "date",
+      "reason": "the cell says date, which is any lifecycle date (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#date); dcterms:issued is the date of formal issuance (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#issued), so the path reads it first and falls back to date, the only date oai_dc has",
+      "comment": "A typed date may arrive as {\"@value\", \"@type\"}, and may be a year, a year and month, or a full date (W3CDTF)."
+    },
+    {
+      "format": "dublin-core",
+      "term": "publisher",
+      "path": "dcterms:publisher.foaf:name | dcterms:publisher | dc:publisher[]",
+      "cell": "publisher",
+      "reason": "the cell says publisher, right as written; dcterms:publisher's range includes dcterms:Agent (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#publisher), so a node's name is foaf:name, and dc:publisher in oai_dc is a name string (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-publisher)",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
+    },
+    {
+      "format": "dublin-core",
+      "term": "resourceType",
+      "path": "dcterms:type | dc:type[]",
+      "reason": "CodeMeta has no term for the resource type; Type is dcterms:type and dc:type, with the DCMI Type Vocabulary recommended (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#type, https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-type), whose Software class is dctype:Software (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#Software, section 7)",
+      "comment": "The value is an IRI or a string; for software a writer gives http://purl.org/dc/dcmitype/Software. Zenodo's oai_dc writes info:eu-repo/semantics/other for software, which does not say software."
+    },
+    {
+      "format": "debian",
+      "term": "name",
+      "path": "copyright.Upstream-Name | control.Source",
+      "cell": "",
+      "reason": "the cell is empty; copyright-format 1.0 section 6.2 (https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/) makes Upstream-Name \"the name upstream uses for the software\", optional; Policy 5.6.1 Source is the Debian source package name, lower case only, and mandatory",
+      "comment": "control.Source may differ from the upstream name (python-carberry for carberry), so it is only the fallback."
+    },
+    {
+      "format": "debian",
+      "term": "version",
+      "path": "changelog.Version",
+      "cell": "numeric_version",
+      "reason": "the cell says numeric_version, which is no Debian field; debian/control has no Version (Policy 5.2), and the version comes from the newest debian/changelog entry (Policy 4.4, https://www.debian.org/doc/debian-policy/ch-source.html), as dpkg-parsechangelog prints it",
+      "comment": "The value is [epoch:]upstream_version[-debian_revision] (Policy 5.6.12). The consumer drops everything up to the first colon and from the last hyphen on, so 1:2.4.0-3 gives 2.4.0."
+    },
+    {
+      "format": "debian",
+      "term": "author",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; no Debian field names the authors: Maintainer and Uploaders are the Debian package's maintainers (Policy 5.6.2, 5.6.3, https://www.debian.org/doc/debian-policy/ch-controlfields.html), Copyright holds copyright statements (copyright-format 6.8) and Upstream-Contact is an address to reach the project (6.3)"
+    },
+    {
+      "format": "debian",
+      "term": "author.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty, and no author path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "author.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty, and no author path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "author.@id",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty, and no author path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; Uploaders lists the co-maintainers of the Debian package (Policy 5.6.3), who are not contributors to the software"
+    },
+    {
+      "format": "debian",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty, and no contributor path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty, and no contributor path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty, and no contributor path to extend"
+    },
+    {
+      "format": "debian",
+      "term": "license",
+      "path": "copyright.License",
+      "cell": "",
+      "reason": "the cell is empty; in the debian/copyright header stanza License gives \"the license information for the package as a whole\" (copyright-format 1.0 section 6.7)",
+      "comment": "Read the first line only: a DEP-5 short name or expression (GPL-2+, Expat, GPL-1+ or Artistic), not SPDX; the consumer maps it. The header License is optional; without it, take the License of the Files stanza whose Files is * (section 5.2), which no path can select yet."
+    },
+    {
+      "format": "debian",
+      "term": "identifier",
+      "path": null,
+      "cell": "Package",
+      "reason": "the cell says Package, the binary package name (Policy 5.6.7); Debian has no DOI field, and DEP-12's Reference DOI is the DOI of a publication about the work, not of the software"
+    },
+    {
+      "format": "debian",
+      "term": "swhid",
+      "path": null,
+      "cell": "Package",
+      "reason": "the cell says Package, the binary package name (Policy 5.6.7); Debian has no SWHID field"
+    },
+    {
+      "format": "debian",
+      "term": "codeRepository",
+      "path": "upstream.Repository | control.Homepage",
+      "cell": "HomePage",
+      "reason": "the cell says HomePage; Policy 5.6.23 spells it Homepage, \"the URL of the web site for this package\", so it is the fallback after DEP-12's Repository, \"URL to a repository containing the upstream sources\" (https://dep-team.pages.debian.net/deps/dep12/)",
+      "comment": "Vcs-Git and Vcs-Browser are the repository of the Debian packaging (Policy 5.6.26), not upstream: never read them here. Homepage may be a project site rather than a repository."
+    },
+    {
+      "format": "debian",
+      "term": "description",
+      "path": "packages[].Description",
+      "cell": "Description",
+      "reason": "the cell says Description; Description sits in each binary package stanza of debian/control, not the source stanza (Policy 5.2, 5.6.13)",
+      "comment": "One value per binary package. The consumer takes the stanza whose Package equals control.Source, else the first. The first line is the synopsis; in the rest a line ' .' is an empty line."
+    },
+    {
+      "format": "debian",
+      "term": "keywords",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; the only candidate, Section, is one archive section such as science or python (Policy 5.6.5), not a keyword list"
+    },
+    {
+      "format": "debian",
+      "term": "datePublished",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; the changelog Date is when the Debian package was \"built or last edited\" (Policy 5.6.15), not when the software was published"
+    },
+    {
+      "format": "debian",
+      "term": "publisher",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; debian has no publisher field"
+    },
+    {
+      "format": "debian",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; debian has no field for it (Package-Type, Policy 5.6.28, is deb or udeb)"
+    },
+    {
+      "format": "mods",
+      "term": "name",
+      "path": "titleInfo[].title[]",
+      "cell": "titleInfo/title",
+      "reason": "the cell says titleInfo/title, an XPath; in the path grammar it is the title inside each titleInfo (MODS 3.8 Guidelines, titleInfo, https://www.loc.gov/standards/mods/userguide/titleinfo.html)",
+      "comment": "The guidelines say the primary title's titleInfo has no type attribute; skip a titleInfo with @type (abbreviated, translated, alternative, uniform). A leading article may sit apart in nonSort, and subTitle holds the subtitle."
+    },
+    {
+      "format": "mods",
+      "term": "version",
+      "path": "originInfo[].edition[]",
+      "cell": "originInfo/edition",
+      "reason": "the cell says originInfo/edition, an XPath; edition is \"information identifying the version of the resource\" (MODS 3.8 Guidelines, originInfo, edition, https://www.loc.gov/standards/mods/userguide/origininfo.html)"
+    },
+    {
+      "format": "mods",
+      "term": "author",
+      "path": "name[roleTerm=aut]",
+      "cell": "name/role/roleTerm[@type='code']/[.='aut']",
+      "reason": "the cell says name/role/roleTerm[@type='code']/[.='aut'], an XPath: a name whose MARC relator code is aut (MODS 3.8 Guidelines, name, role, https://www.loc.gov/standards/mods/userguide/name.html; relator codes, https://www.loc.gov/marc/relators/relacode.html)",
+      "comment": "The parser lifts the texts of a name's role.roleTerm elements into a roleTerm list on the name, so the filter can match them. Some records mark the main author with cre (creator), or a program's authors with prg (programmer) or swd (software developer), instead. Zotero's MODS export writes a computer program's programmers as ctb, not aut."
+    },
+    {
+      "format": "mods",
+      "term": "author.givenName",
+      "path": "name[roleTerm=aut].namePart[@type=given]",
+      "cell": "name/namePart[@type='given']",
+      "reason": "the cell says name/namePart[@type='given'], an XPath: the namePart typed given (MODS 3.8 Guidelines, name, namePart, https://www.loc.gov/standards/mods/userguide/name.html)",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart."
+    },
+    {
+      "format": "mods",
+      "term": "author.familyName",
+      "path": "name[roleTerm=aut].namePart[@type=family]",
+      "cell": "name/namePart[@type='family']",
+      "reason": "the cell says name/namePart[@type='family'], an XPath: the namePart typed family (MODS 3.8 Guidelines, name, namePart, https://www.loc.gov/standards/mods/userguide/name.html)",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart."
+    },
+    {
+      "format": "mods",
+      "term": "author.@id",
+      "path": "name[roleTerm=aut].nameIdentifier[@type=orcid]",
+      "cell": "identifier / name/nameIdentifier",
+      "reason": "the cell lists identifier / name/nameIdentifier; identifier is the record's own identifier, not a person's, and nameIdentifier holds every kind of name identifier, so the ORCID is the one typed orcid, a code in LC's Standard Identifier Source Codes (MODS 3.8 Guidelines, name, nameIdentifier, https://www.loc.gov/standards/mods/userguide/name.html; https://www.loc.gov/standards/sourcelist/standard-identifier.html)",
+      "comment": "nameIdentifier types are not controlled, and the value may be a bare ORCID or a URL. A name may instead carry the ORCID URI in its valueURI attribute."
+    },
+    {
+      "format": "mods",
+      "term": "contributor",
+      "path": "name[roleTerm=ctb]",
+      "cell": "name/role/roleTerm[@type='code']/[.='ctb']",
+      "reason": "the cell says name/role/roleTerm[@type='code']/[.='ctb'], an XPath: a name whose MARC relator code is ctb (MODS 3.8 Guidelines, name, role, https://www.loc.gov/standards/mods/userguide/name.html; relator codes, https://www.loc.gov/marc/relators/relacode.html)",
+      "comment": "The parser lifts the texts of a name's role.roleTerm elements into a roleTerm list on the name, as for author."
+    },
+    {
+      "format": "mods",
+      "term": "contributor.givenName",
+      "path": "name[roleTerm=ctb].namePart[@type=given]",
+      "cell": "name/namePart[@type='given']",
+      "reason": "same reasoning as author.givenName, under contributor",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart."
+    },
+    {
+      "format": "mods",
+      "term": "contributor.familyName",
+      "path": "name[roleTerm=ctb].namePart[@type=family]",
+      "cell": "name/namePart[@type='family']",
+      "reason": "same reasoning as author.familyName, under contributor",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart."
+    },
+    {
+      "format": "mods",
+      "term": "contributor.@id",
+      "path": "name[roleTerm=ctb].nameIdentifier[@type=orcid]",
+      "cell": "identifier / name/nameIdentifier",
+      "reason": "same reasoning as author.@id, under contributor"
+    },
+    {
+      "format": "mods",
+      "term": "license",
+      "path": "accessCondition[]",
+      "cell": "accessCondition[@type='use and reproduction']",
+      "reason": "the cell says accessCondition[@type='use and reproduction'], the right element in XPath: accessCondition holds rights statements, and the type use and reproduction marks a licence (https://www.loc.gov/standards/mods/userguide/accesscondition.html); a filter value cannot hold a space, so the path reads every accessCondition",
+      "comment": "The consumer keeps an accessCondition typed use and reproduction, or with no type as Zotero writes it, and skips restriction on access; the licence is its text, its xlink:href or its valueURI."
+    },
+    {
+      "format": "mods",
+      "term": "identifier",
+      "path": "identifier[@type=doi]",
+      "cell": "identifier",
+      "reason": "the cell says identifier, which holds every kind of identifier (ISBN, handle, URI and more); the DOI is the one typed doi (MODS 3.8 Guidelines, identifier, https://www.loc.gov/standards/mods/userguide/identifier.html)",
+      "comment": "The guidelines' own example writes doi:10.1006/jmbi.1995.0238; the consumer strips a doi: prefix or a resolver URL."
+    },
+    {
+      "format": "mods",
+      "term": "swhid",
+      "path": null,
+      "cell": "identifier",
+      "reason": "the cell says identifier, which holds the DOI; LC's Standard Identifier Source Codes, the suggested values for its type, have no code for a SWHID (https://www.loc.gov/standards/sourcelist/standard-identifier.html)",
+      "comment": "identifier types are not controlled, so a record may still carry a SWHID in an identifier; the consumer finds it by its swh:1: spelling."
+    },
+    {
+      "format": "mods",
+      "term": "codeRepository",
+      "path": null,
+      "cell": "location/url[@access='object in context']",
+      "reason": "the cell says location/url[@access='object in context'], which the guidelines define as a link to the object within its environment, such as a landing page, not a source repository (MODS 3.8 Guidelines, location, url, https://www.loc.gov/standards/mods/userguide/location.html); MODS has no repository field, and a filter value cannot hold the spaces anyway"
+    },
+    {
+      "format": "mods",
+      "term": "description",
+      "path": "abstract[]",
+      "cell": "abstract",
+      "reason": "the cell says abstract, the right element; abstract is repeatable, so the path reads each one (MODS 3.8 Guidelines, abstract, https://www.loc.gov/standards/mods/userguide/abstract.html)"
+    },
+    {
+      "format": "mods",
+      "term": "keywords",
+      "path": "subject[].topic[]",
+      "cell": "subject",
+      "reason": "the cell says subject, a container that also holds geographic, temporal, name and other subjects; a keyword is a topic inside it (MODS 3.8 Guidelines, subject, topic, https://www.loc.gov/standards/mods/userguide/subject.html)"
+    },
+    {
+      "format": "mods",
+      "term": "datePublished",
+      "path": "originInfo[].dateIssued[]",
+      "cell": "originInfo/dateIssued",
+      "reason": "the cell says originInfo/dateIssued, an XPath; dateIssued is \"the date that the resource was published, released, or issued\" (MODS 3.8 Guidelines, originInfo, dateIssued, https://www.loc.gov/standards/mods/userguide/origininfo.html)",
+      "comment": "A record may give several: prefer the one with keyDate yes. A structured date names its format in encoding (w3cdtf, iso8601, marc, temper or edtf); without it the date is text. point start and end mark a range."
+    },
+    {
+      "format": "mods",
+      "term": "publisher",
+      "path": "originInfo[].publisher[]",
+      "cell": "originInfo/publisher",
+      "reason": "the cell says originInfo/publisher, an XPath; publisher names the entity that published or issued the resource (MODS 3.8 Guidelines, originInfo, publisher, https://www.loc.gov/standards/mods/userguide/origininfo.html)",
+      "comment": "MODS 3.8 added originInfo/agent, a name with a role, for any agent of the event; this path does not read it."
+    },
+    {
+      "format": "mods",
+      "term": "resourceType",
+      "path": "typeOfResource[]",
+      "reason": "CodeMeta has no term for the resource type; MODS states it in typeOfResource (MODS 3.8 Guidelines, typeOfResource, https://www.loc.gov/standards/mods/userguide/typeofresource.html)",
+      "comment": "Before MODS 3.7 the value came from a fixed list whose software value is software, multimedia, which Zotero still writes. Since 3.7 the guidelines recommend the LC Resource Types Scheme (https://id.loc.gov/vocabulary/resourceTypes), which has no software type (it has Multimedia, Digital and Dataset)."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "name",
+      "path": "rdfs:label",
+      "cell": "label",
+      "reason": "the cell says label, which the crosswalk's first commit, https://github.com/codemeta/codemeta/commit/16f496a, gave as rdfs:label; the path names it with its prefix"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "version",
+      "path": "obo:ERO_0000072",
+      "cell": "version",
+      "reason": "the cell says version, the rdfs:label of obo:ERO_0000072 in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, a string property whose domain is Software (obo:ERO_0000071) or Database; the path names it by its IRI"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[]",
+      "cell": "relatedBy.relates",
+      "reason": "the cell says relatedBy.relates, which also reaches editorships and the work itself; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, links a work to its authors through a vivo:Authorship node that vivo:relates both the work and an agent, so the path keeps only Authorship nodes",
+      "comment": "Needs the VIVO parse rule in docs/mapping-export.md: Authorship is a context term, the parser drops the reference back to the record from each vivo:relates and sorts vivo:relatedBy by vivo:rank. An agent is a foaf:Person, a vcard:Individual (an author with no VIVO profile) or a foaf:Organization."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author.givenName",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].obo:ARG_2000028[].vcard:hasName.vcard:givenName + vivo:relatedBy[@type=Authorship].vivo:relates[].vcard:hasName.vcard:givenName",
+      "cell": "",
+      "reason": "the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, gives vcard:givenName the domain vcard:Name; a foaf:Person reaches its vcard:Individual through obo:ARG_2000028 (has contact info), and an author with no profile is a vcard:Individual itself, as VIVO 1.16.0's AddAuthorsToInformationResourceGenerator writes them",
+      "comment": "Read per author: obo:ARG_2000028[].vcard:hasName for a foaf:Person, vcard:hasName for a vcard:Individual. A middle name sits in vivo:middleName on the same vcard:Name. An agent with only rdfs:label has no given name here; the consumer then splits the label."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author.familyName",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].obo:ARG_2000028[].vcard:hasName.vcard:familyName + vivo:relatedBy[@type=Authorship].vivo:relates[].vcard:hasName.vcard:familyName",
+      "cell": "",
+      "reason": "the cell is empty; same as author.givenName, with vcard:familyName, which VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, also puts on vcard:Name",
+      "comment": "Read per author, as for author.givenName. An agent with only rdfs:label has no family name here; the consumer then splits the label."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author.@id",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].vivo:orcidId[].@id",
+      "cell": "relatedBy.relates.ORCID iD",
+      "reason": "the cell says relatedBy.relates.ORCID iD, the label of vivo:orcidId, and the crosswalk's first commit gave its range as a string; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, makes vivo:orcidId an object property on foaf:Person whose value is the ORCID IRI, so the path reads its @id",
+      "comment": "The spec allows several ORCID iDs for one person. A vcard:Individual author has no vivo:orcidId. The person's own @id is a VIVO IRI, not an ORCID."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, links people to a work only as authors (vivo:Authorship) or editors (vivo:Editorship) and declares dcterms:contributor only as the parent of bibo:performer and bibo:translator; vivo:contributingRole links a role (BFO_0000023), not a person, to a work"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO has no contributor, see contributor"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO has no contributor, see contributor"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "relatedBy.relates.ORCID iD",
+      "reason": "the cell repeats author's ORCID path, because the crosswalk has one Person identifier row; VIVO has no contributor, see contributor"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "license",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, has no licence property for a work; its vivo:License class is an official permission held as a credential, not a software licence"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "identifier",
+      "path": "bibo:doi",
+      "cell": "SWHID",
+      "reason": "the cell says SWHID, which is vivo:swhid and belongs to the swhid row; the DOI is bibo:doi, a sub-property of bibo:identifier with no domain in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl",
+      "comment": "A plain string; the consumer converts between a bare DOI and its https://doi.org/ form."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "swhid",
+      "path": "vivo:swhid",
+      "cell": "SWHID",
+      "reason": "the cell says SWHID, the rdfs:label of vivo:swhid, which the crosswalk's first commit, https://github.com/codemeta/codemeta/commit/16f496a, named; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, adds it as a sub-property of vivo:identifier with the domain Software (obo:ERO_0000071); the path names it with its prefix",
+      "comment": "vivo:swhid is new in VIVO ontology 1.8.0; a record written to 1.7.0 has no SWHID."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "codeRepository",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, has no repository property; its web links (obo:ARG_2000028 to vcard:hasURL), which the crosswalk gives for url, carry no kind",
+      "comment": "A record may list the repository among its vcard:URL nodes; only the URL's text tells it apart."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "description",
+      "path": "bibo:abstract",
+      "cell": "abstract",
+      "reason": "the cell says abstract, which the crosswalk's first commit gave as bibo:abstract; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, gives it the domain obo:IAO_0000030 (information content entity), Software's superclass; the path names it with its prefix"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "keywords",
+      "path": "vivo:freetextKeyword",
+      "cell": "freetextKeywords",
+      "reason": "the cell says freetextKeywords; the property in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, is vivo:freetextKeyword, singular, one keyword or phrase per statement",
+      "comment": "Repeatable: a single keyword may be a string rather than an array."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "datePublished",
+      "path": "vivo:dateTimeValue.vivo:dateTime",
+      "cell": "date/time value",
+      "reason": "the cell says date/time value, the label of vivo:dateTimeValue, whose value in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, is a vivo:DateTimeValue node, not a date; the date is that node's vivo:dateTime",
+      "comment": "vivo:dateTime is always an xsd:dateTime, possibly as {\"@value\", \"@type\"}; vivo:dateTimePrecision (yearPrecision, yearMonthPrecision, yearMonthDayPrecision, yearMonthDayTimePrecision) says how much of it holds, so the consumer cuts the value to that precision."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "publisher",
+      "path": "vivo:publisher.rdfs:label | vivo:publisher",
+      "cell": "",
+      "reason": "the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, has vivo:publisher with the range foaf:Organization and no domain, and VIVO 1.16.0's AddPublicationToPersonGenerator names the publisher with rdfs:label",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "resourceType",
+      "path": "@type",
+      "reason": "CodeMeta has no term for the resource type; VIVO states it in the node's rdf:type, and VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, types software as obo:ERO_0000071",
+      "comment": "@type may be a list; the consumer looks for obo:ERO_0000071 in it."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "name",
+      "path": "ResourceHeader.ResourceName",
+      "cell": "ResourceHeader/ResourceName",
+      "reason": "the cell says ResourceHeader/ResourceName, right as written with / for the element path; ResourceName is the resource's short name (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#ResourceName)",
+      "comment": "Real records often put the version in the name (FitsFlow v0.1.0)."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "version",
+      "path": "SoftwareVersion",
+      "cell": "",
+      "reason": "the cell is empty; the crosswalk maps softwareVersion to SoftwareVersion, a child of Software that describes the edition of the release (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software_SoftwareVersion)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author",
+      "path": "ResourceHeader.PublicationInfo.Authors",
+      "cell": "",
+      "reason": "the cell is empty; PublicationInfo.Authors names who made the resource, as one string (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "comment": "Authors is one string; the consumer splits it on semicolons and trims each name. A Contact with Role Author points to a Person record by PersonID instead, which a path cannot follow."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author.givenName",
+      "path": "ResourceHeader.PublicationInfo.Authors",
+      "cell": "",
+      "reason": "the cell is empty; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "comment": "The consumer splits on semicolons, then each name at its first comma into family and given name. A name with no comma is an organization or a name written in display order (India Jackson), and the consumer splits it as for Zenodo."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author.familyName",
+      "path": "ResourceHeader.PublicationInfo.Authors",
+      "cell": "",
+      "reason": "the cell is empty; Authors keeps every name in one string, a person written last, first [, middle] (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Authors)",
+      "comment": "The consumer splits on semicolons, then each name at its first comma into family and given name. A name with no comma is an organization or a name written in display order (India Jackson), and the consumer splits it as for Zenodo."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "author.@id",
+      "path": null,
+      "cell": "ResourceHeader/DOI",
+      "reason": "the cell says ResourceHeader/DOI, which is the resource's DOI, not a person's id; Authors is plain text, and an ORCID sits only in a separate Person record's ORCIdentifier (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor",
+      "path": "ResourceHeader.Contact[Role=Contributor]",
+      "cell": "",
+      "reason": "the cell is empty; a Contact names a person and the roles they hold, and the Role list has Contributor (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Contact)",
+      "comment": "Role repeats, so match a Contact whose roles include Contributor. A Contact holds only PersonID, the ResourceID of a Person record (spase://SMWG/Person/...); the name is in that record, so an element has no name sub-fields. Role also has Developer; a Contact whose only role is Developer is left out."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; a Contact holds only PersonID, and PersonName sits in the separate Person record, which a path cannot follow (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "ResourceHeader/DOI",
+      "reason": "the cell says ResourceHeader/DOI, which is the resource's DOI, not a person's id; a Contact's PersonID is a SPASE registry id, and the ORCID sits in the separate Person record's ORCIdentifier (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Person)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "license",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; 2.6.1 has no licence element, and AccessRights (Open, PartiallyRestricted, Restricted) says who may access the resource, not under which licence (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#AccessRights)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "identifier",
+      "path": "ResourceHeader.DOI",
+      "cell": "ResourceID",
+      "reason": "the cell says ResourceID, the spase:// URI that names the record in the SPASE registry, not a DOI; the DOI is ResourceHeader.DOI, which the crosswalk puts on the Person identifier row (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#DOI)",
+      "comment": "The schema types DOI as a plain string; real records write the URL form (https://doi.org/10.5281/zenodo.17069413)."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "swhid",
+      "path": null,
+      "cell": "ResourceID",
+      "reason": "the cell says ResourceID, a spase:// URI of the SPASE registry, not a Software Heritage id; SPASE has no place for one (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#ResourceID)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "codeRepository",
+      "path": "AccessInformation[].AccessURL[Style=Git].URL",
+      "cell": "AccessInformation/RepositoryID",
+      "reason": "the cell says AccessInformation/RepositoryID, which is the ResourceID of a SPASE Repository record (spase://NASA/Repository/NASA-GitHub), not a URL; the link is an AccessURL, and Style Git marks a Git one (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Style)",
+      "comment": "Style is optional, and real records often leave it out (Kamodo gives its GitHub URL with no Style). The consumer may then take an AccessURL whose URL is on a known code host."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "description",
+      "path": "ResourceHeader.Description",
+      "cell": "ResourceHeader/Description",
+      "reason": "the cell says ResourceHeader/Description, right as written with / for the element path (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#ResourceHeader)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "keywords",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; Software has no Keyword element, which 2.6.1 gives only to Catalog, data and model-run resources and Document (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software)"
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "datePublished",
+      "path": "ResourceHeader.PublicationInfo.PublicationDate",
+      "cell": "ResourceHeader/ReleaseDate",
+      "reason": "the cell says ResourceHeader/ReleaseDate, which the spec says should be the date the resource description was published; PublicationInfo.PublicationDate is the date the work was first issued (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#PublicationDate)",
+      "comment": "An xsd:dateTime (2025-09-06T00:00:00Z); the consumer keeps the date part."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "publisher",
+      "path": "ResourceHeader.PublicationInfo.PublishedBy",
+      "cell": "",
+      "reason": "the cell is empty; PublishedBy names the organization or person that issues the work (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#PublishedBy)",
+      "comment": "A name string (Zenodo), not an object."
+    },
+    {
+      "format": "spase-2.6.1",
+      "term": "resourceType",
+      "path": null,
+      "reason": "CodeMeta has no term for the resource type; SPASE 2.6.1 states it in the resource element's name (Software under Spase), which a path cannot reach (SPASE 2.6.1, https://spase-group.org/data/model/spase-2.6.1/spase-2_6_1_xsd.htm#Software)"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[] + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[] | identificationInfo.citation.citedResponsibleParty[role=originator].party[]",
+      "cell": "identificationInfo.citation.citedResponsibleParty[role='author'].party.name or identificationInfo.citation.citedResponsibleParty[role='originator'].party.name",
+      "reason": "the cell reads party.name, a string, quotes the filter values and joins with 'or'; the author is each party (1..*) of a CI_Responsibility whose role is author, else originator (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Responsibility_Type). coAuthor, 'party who jointly authors the resource', is added beside author (https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)",
+      "comment": "A party is a CI_Individual or a CI_Organisation; the parser keeps which in _class."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author.givenName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[].name + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[].name | identificationInfo.citation.citedResponsibleParty[role=originator].party[].name",
+      "cell": "party.name*",
+      "reason": "the cell says party.name, relative to the party: a party has one name string (0..1) and no given or family name apart (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, AbstractCI_Party_Type)",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author.familyName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[].name + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[].name | identificationInfo.citation.citedResponsibleParty[role=originator].party[].name",
+      "cell": "party.name*",
+      "reason": "the cell says party.name, relative to the party: a party has one name string (0..1) and no given or family name apart (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, AbstractCI_Party_Type)",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "author.@id",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=author].party[].partyIdentifier[].code + identificationInfo.citation.citedResponsibleParty[role=coAuthor].party[].partyIdentifier[].code | identificationInfo.citation.citedResponsibleParty[role=originator].party[].partyIdentifier[].code",
+      "cell": "identificationInfo.citation.identifier.code",
+      "reason": "the cell says identificationInfo.citation.identifier.code, the resource's own identifier, not a person's; Habermann's source table gives party.partyIdentifier.code (https://doi.org/10.6084/m9.figshare.7430282.v1). partyIdentifier (0..*), 'value uniquely identifying a party', came with Amd 1:2018 (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, AbstractCI_Party_Type)",
+      "comment": "partyIdentifier exists only in cit 2.0 records (namespace http://standards.iso.org/iso/19115/-3/cit/2.0); a cit 1.0 record has none. A party may carry several identifiers and codeSpace has no fixed spelling, so keep the code that reads as an ORCID iD, bare or as an https://orcid.org/ URL."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[] + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[]",
+      "cell": "identificationInfo.citation.citedResponsibleParty[not(role='author' or role='principalInvestigator' or role='originator')].party.name*",
+      "reason": "the cell takes every role but author, principalInvestigator and originator, which the grammar cannot negate and which also takes publisher, funder and pointOfContact; the 2014 role codes have contributor, 'party contributing to the resource', and collaborator, 'party who assists with the generation of the resource other than the principal investigator' (https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)",
+      "comment": "A party is a CI_Individual or a CI_Organisation; the parser keeps which in _class."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor.givenName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[].name + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[].name",
+      "cell": "party.name*",
+      "reason": "same reasoning as author.givenName, under contributor",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor.familyName",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[].name + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[].name",
+      "cell": "party.name*",
+      "reason": "same reasoning as author.familyName, under contributor",
+      "comment": "The consumer splits the name of a CI_Individual into given and family name; a CI_Organisation's name (_class tells them apart) stays whole and has no given or family name."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "contributor.@id",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=contributor].party[].partyIdentifier[].code + identificationInfo.citation.citedResponsibleParty[role=collaborator].party[].partyIdentifier[].code",
+      "cell": "identificationInfo.citation.identifier.code",
+      "reason": "same reasoning as author.@id, under contributor",
+      "comment": "partyIdentifier exists only in cit 2.0 records (namespace http://standards.iso.org/iso/19115/-3/cit/2.0); a cit 1.0 record has none. A party may carry several identifiers and codeSpace has no fixed spelling, so keep the code that reads as an ORCID iD, bare or as an https://orcid.org/ URL."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "license",
+      "path": "identificationInfo.resourceConstraints[].reference[].onlineResource[].linkage | identificationInfo.resourceConstraints[].reference[].title",
+      "cell": "identificationInfo.resourceConstraints.reference",
+      "reason": "the cell names reference, a CI_Citation object 'for the limitation or constraint, e.g. copyright statement, license agreement' (https://schemas.isotc211.org/19115/-3/mco/1.0/constraints.xsd, MD_Constraints_Type); the licence is that citation's link, else its title (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_OnlineResource_Type.linkage)",
+      "comment": "A reference can also cite a copyright statement or another constraint: keep those under an MD_LegalConstraints (_class) whose useConstraints holds licence, licenceUnrestricted, licenceEndUser or licenceDistributor (British spelling). The value is a URL or a licence title, not an SPDX id; the consumer converts it."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "identifier",
+      "path": "identificationInfo.citation.identifier[].code",
+      "cell": "identificationInfo.citation.identifier.code",
+      "reason": "the cell names identifier.code, but identifier repeats (0..*), so it is a list (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Citation_Type; https://schemas.isotc211.org/19115/-3/mcc/1.0/commonClasses.xsd, MD_Identifier_Type)",
+      "comment": "identifier is repeatable and codeSpace (doi.org, say) has no fixed spelling; a DOI is told from a SWHID by its spelling, bare or as an https://doi.org/ URL."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "swhid",
+      "path": null,
+      "cell": "identificationInfo.citation.identifier.code",
+      "reason": "the cell says identifier.code, which holds the DOI; ISO 19115-1 has no property or codeSpace of its own for a SWHID (https://schemas.isotc211.org/19115/-3/mcc/1.0/commonClasses.xsd, MD_Identifier_Type)",
+      "comment": "A record may still carry a SWHID as another citation identifier; the consumer finds it by its swh:1: spelling."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "codeRepository",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; CI_OnlineResource.function has no value for a source repository (download, information, offlineAccess, order, search, completeMetadata, browseGraphic, upload, emailService, browsing, fileAccess; https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd). Habermann's source table maps it to distribution download or information links (https://doi.org/10.6084/m9.figshare.7430282.v1), which are not the repository"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "keywords",
+      "path": "identificationInfo.descriptiveKeywords[type=theme].keyword[]",
+      "cell": "identificationInfo.descriptiveKeywords[type='theme'].keyword*",
+      "reason": "the cell quotes the filter value and keyword repeats (1..*) inside each MD_Keywords (https://schemas.isotc211.org/19115/-3/mri/1.0/identification.xsd, MD_Keywords_Type)",
+      "comment": "type is optional, so keywords with no type are not read; other types (place, temporal and so on) are not free keywords. A block with a thesaurusName holds terms of a controlled vocabulary."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "datePublished",
+      "path": "identificationInfo.citation.date[dateType=publication].date",
+      "cell": "identificationInfo.citation.date[dateType='publication'].date*",
+      "reason": "the cell quotes the filter value and date repeats (0..*); the publication date is the CI_Date whose dateType is publication, 'date identifies when the resource was issued' (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Date_Type)",
+      "comment": "date is a gco:Date (xs:date, gYearMonth or gYear) or a gco:DateTime."
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "publisher",
+      "path": "identificationInfo.citation.citedResponsibleParty[role=publisher].party[].name",
+      "cell": "identificationInfo.citation.citedResponsibleParty[role='publisher'].party.name*",
+      "reason": "the cell quotes the filter value, and party repeats (1..*) under each CI_Responsibility (https://schemas.isotc211.org/19115/-3/cit/2.0/citation.xsd, CI_Responsibility_Type; role publisher, https://schemas.isotc211.org/19115/resources/codelists/cit-2.0-codelists.xml#CI_RoleCode)"
+    },
+    {
+      "format": "iso-19115-1-2014",
+      "term": "resourceType",
+      "path": "metadataScope[].resourceScope",
+      "reason": "CodeMeta has no term for the resource type; MD_Metadata.metadataScope (0..*) gives the resourceScope, an MD_ScopeCode (https://schemas.isotc211.org/19115/-3/mdb/2.0/metadataBase.xsd, MD_MetadataScope_Type)",
+      "comment": "For software the value is software ('information applies to a computer program or routine'). A record with no metadataScope describes a dataset."
     }
   ]
 }

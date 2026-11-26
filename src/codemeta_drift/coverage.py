@@ -26,8 +26,62 @@ SHAPES = {
 }
 """What a cell of a crosswalk with no reviewed mapping shows: only its shape, from ``classify``."""
 
-SHORT_LABELS = {"ISO_19115-1": "ISO 19115-1", "Perl Module Description (CPAN::Meta)": "Perl (CPAN::Meta)"}
+SHORT_LABELS = {"Perl Module Description (CPAN::Meta)": "Perl (CPAN::Meta)"}
 """Shorter names for the crosswalks whose own header runs long, keyed by file name."""
+
+NOT_REVIEWED = {
+    "DCAT": (
+        "superseded",
+        "DCAT 2, which DCAT 3 replaced as the W3C Recommendation in 2024; the reviewed dcat-3 rows read that",
+        "https://www.w3.org/TR/vocab-dcat-3/",
+    ),
+    "codemeta-V1": (
+        "superseded",
+        "CodeMeta 1.0; the reviewed codemeta and codemeta-2 rows read the contexts that replaced it",
+        "https://codemeta.github.io/terms/",
+    ),
+    "ASCL": (
+        "registry",
+        "the Astrophysics Source Code Library's entry fields: a registry record, not a file a citation tool reads",
+        "https://ascl.net/",
+    ),
+    "SciCrunchRegistry": (
+        "registry",
+        "the SciCrunch Registry's resource fields, the records behind RRIDs",
+        "https://scicrunch.org/resources",
+    ),
+    "OntoSoft": (
+        "registry",
+        "the ontology of the OntoSoft software registry, whose code was last changed in 2023",
+        "https://github.com/KnowledgeCaptureAndDiscovery/ontosoft",
+    ),
+    "Software Ontology": (
+        "registry",
+        "an OWL ontology that classifies software tools in knowledge bases, not a metadata file",
+        "https://github.com/allysonlister/swo",
+    ),
+    "Software Discovery Index": (
+        "registry",
+        "the NIH BD2K software index proposed at a 2014 workshop; no index was launched",
+        "https://web.archive.org/web/20141207053849/http://softwarediscoveryindex.org/report/",
+    ),
+    "csdms": (
+        "registry",
+        "the model-description fields of the CSDMS model repository, a catalogue of earth-surface models",
+        "https://csdms.colorado.edu/wiki/Model_download_portal",
+    ),
+    "usgs-modelcatalog": (
+        "registry",
+        "the record fields of the USGS model catalog",
+        "https://data.usgs.gov/modelcatalog/",
+    ),
+    "Trove Software Map": (
+        "niche",
+        "Trove classifiers, a category vocabulary rather than a record format; a package's classifiers are in pkg-info",
+        "https://pypi.org/classifiers/",
+    ),
+}
+"""Why each crosswalk with no reviewed mapping stays so, keyed by file name: (status, reason, URL)."""
 
 COLUMNS = [fmt for fmt in FORMATS if fmt != "codemeta"]
 """The formats shown: codemeta.json is the hub every path is joined through, so it has no crosswalk to check."""
@@ -96,7 +150,8 @@ def unreviewed(files: Mapping[str, str], mapping: dict[str, Any]) -> dict[str, A
 
     ``files`` should be the mapping's own CodeMeta tag. A format is its crosswalk's file name without
     ``.csv``, not a mapping format id; its label is the header's second cell, or ``SHORT_LABELS``.
-    Formats are sorted by label. Cells have the keys of ``coverage``'s, with no path and no reason.
+    Formats are sorted by label; each has the ``status``, ``reason`` and ``url`` of ``NOT_REVIEWED``, all
+    None for a crosswalk it does not list. Cells have the keys of ``coverage``'s, with no path and no reason.
     """
     reviewed = {FORMATS[fmt].crosswalk for fmt in columns(mapping)}
     formats, cells = [], []
@@ -105,7 +160,10 @@ def unreviewed(files: Mapping[str, str], mapping: dict[str, Any]) -> dict[str, A
             continue
         fmt = path.removeprefix("crosswalks/").removesuffix(".csv")
         label = SHORT_LABELS.get(fmt) or format_name(files[path]).strip()
-        formats.append({"format": fmt, "label": label, "crosswalk": path})
+        status, reason, url = NOT_REVIEWED.get(fmt, (None, None, None))
+        formats.append(
+            {"format": fmt, "label": label, "crosswalk": path, "status": status, "reason": reason, "url": url}
+        )
         joined = crosswalk_cells(files, path)
         for term, key in TERMS.items():
             cell = joined.get(key)
@@ -224,6 +282,10 @@ def unreviewed_markdown(data: dict[str, Any], terms: list[str]) -> list[str]:
         row = " | ".join(marks[fmt["format"], term] for term in terms)
         lines.append(f"| {fmt['label'].replace('|', '\\|')} | {row} |")
     lines.append("")
+    if why := [fmt for fmt in data["formats"] if fmt["status"]]:
+        lines += ["Why each is not reviewed:", ""]
+        lines += [f"- {f['label']} ({f['status']}): {f['reason']}. <{f['url']}>" for f in why]
+        lines.append("")
     return lines
 
 

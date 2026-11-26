@@ -81,7 +81,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.8",
+  "schema_version": "1.9",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.9.0"},
   "context_terms": ["address", "affiliation", "applicationCategory", "..."],
@@ -124,10 +124,14 @@ Each row:
   `doap` (a DOAP project), `wikidata` (a Wikidata item), `ris` (a RIS record with `TY - COMP`),
   `endnote` (an EndNote tagged record with `%0 Computer Program`), `gitlab` (the GitLab REST API's
   project JSON), `code-json-2.0` (a code.json 2.0 file, the US federal source code metadata),
-  `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`) or `croissant` (a Croissant 1.0 or
-  1.1 `croissant.json`). A format whose versions differ puts the version in the id. `pkg-info` to
-  `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, `ris` to `code-json-2.0` in
-  1.7, and `ro-crate` and `croissant` in 1.8. `gitlab` and `code-json-2.0` have rows from the 4.0
+  `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`), `croissant` (a Croissant 1.0 or
+  1.1 `croissant.json`), `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record),
+  `debian` (a Debian source tree's `debian/` directory), `mods` (a MODS 3 record), `vivo-1.8` (a
+  VIVO 1.8 software individual), `spase-2.6.1` (a SPASE 2.6.1 Software resource) or
+  `iso-19115-1-2014` (an ISO 19115-1:2014 record in ISO 19115-3 XML). A format whose versions differ
+  puts the version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to
+  `wikidata` in 1.5, `ris` to `code-json-2.0` in 1.7, `ro-crate` and `croissant` in 1.8, and
+  `dublin-core` to `iso-19115-1-2014` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -204,6 +208,43 @@ them into one first. These cases need more than the grammar below says:
   `license`) is a list even when it occurs once, under its wrapper (`developers.developer[]`).
   An attribute is an `@` key (`repository.@url`), and an element with attributes reads its text
   at its own path. A Maven value with `${...}` may need resolving first.
+- MODS is XML too, read as xmltodict reads it. The tree starts at `mods`, with the namespace
+  ignored; in a `modsCollection` each `mods` element is its own record. Every element is a list
+  even when it occurs once, since nearly every MODS element may repeat. An attribute is an `@` key,
+  and `xlink:href` keeps its prefix (`@xlink:href`); `xsi:` attributes such as `xsi:schemaLocation`
+  are dropped. An element with attributes is an object that
+  holds its trimmed text under `#text`: a path that ends at one, such as `identifier[@type=doi]`,
+  gives that object, and the consumer takes its `#text`. The parser gives each `name` a `roleTerm`
+  key that lists the text of every `role.roleTerm` in it, so `name[roleTerm=aut]` selects the
+  authors, as `[role=aut]` does for R. A filter value cannot hold a space, so the `license` row
+  reads every `accessCondition`: the consumer keeps one typed `use and reproduction` or untyped.
+  The `name` row reads every `titleInfo`, alternative and translated titles too, and the consumer
+  keeps the first, which is normally the main title.
+- SPASE is XML. The tree is the content of `Spase.Software`, with the namespace ignored, so paths
+  start at its children (`ResourceHeader.ResourceName`); a document with several Software resources
+  is read at the first. Four elements the rows go through are lists even when they occur once:
+  `AccessInformation`, `AccessURL`, `Contact` and `Role`. So
+  `Contact[Role=Contributor]` matches a contact whose roles include Contributor. A Contact holds only
+  `PersonID`, the id of a Person record in another document, where the name and ORCID are; no path
+  follows it. `PublicationInfo.Authors` is one string, names separated by semicolons, each
+  `Family, Given`: the consumer splits it. Dates are xsd:dateTime; the consumer keeps the date.
+- ISO 19115-3 XML: CodeMeta's ISO cells are paths in the ISO 19115-1 model, while the XML puts a
+  class element between each property and its value (`citation/CI_Citation/title/gco:CharacterString`).
+  The consumer reads the record into the model's tree first. The tree starts at `MD_Metadata`, with
+  the namespace ignored, and each property is replaced by its one child's content: a class element
+  (`CI_Citation`, `CI_Individual`) becomes an object of its own properties, with the class name under
+  `_class`; a codelist element becomes its `codeListValue` (`role` reads `author`); a value element
+  (`gco:CharacterString`, `gcx:Anchor`, `gco:Date`) becomes its text, an Anchor's `xlink:href`
+  dropped; an empty property (`gco:nilReason`) is left out. A property its class lets repeat
+  (`maxOccurs="unbounded"`) is a list even when it occurs once, so `CI_Citation.date` is a list and
+  `CI_Date.date` is not. Only the first `identificationInfo` counts. `_class` tells a person from an
+  organisation and a licence from other constraints; no path reads it. A licence path reads every
+  `resourceConstraints` reference, and the consumer skips those that are not licences. ISO 19139
+  records (`gmd:MD_Metadata`) are another tree, which these rows do not read. A party has one
+  `name` string, so the given and family name rows both read it and the consumer splits it. The
+  `@id` rows read `partyIdentifier.code`, which is the bare id (`0000-0002-1825-0097`) once the
+  Anchor's `xlink:href` is dropped: `codeSpace` says it is an ORCID, and the consumer adds
+  `https://orcid.org/`.
 - A .cabal file: field names are lower case, and each top-level field is a key holding its text.
   A section is an element of a list named after it, with its first argument as `kind`, so
   `source-repository head` is read at `source-repository[kind=head].location`.
@@ -223,6 +264,49 @@ them into one first. These cases need more than the grammar below says:
   compacted with a context that defines only the prefixes `dcat`, `dcterms`, `owl`, `foaf` and
   `doap`, so each key is a prefixed name such as `dcterms:title`. A property may hold one value or
   a list, a link is an object with `@id`, and a typed date may be an object with `@value`.
+- Debian: the paths address one source tree's `debian/` directory, read into one tree with the keys
+  `control` (the first stanza of `debian/control`, the source package), `packages` (its other stanzas,
+  one per binary package, as a list), `changelog` (the stanza `dpkg-parsechangelog` prints for the
+  newest entry of `debian/changelog`), `copyright` (the header stanza of a copyright-format 1.0
+  `debian/copyright`) and `upstream` (the `debian/upstream/metadata` YAML mapping, DEP-12). A missing
+  file leaves its key out. Field names in these deb822 files are case-insensitive (Policy 5.1); the
+  parser stores each in Policy's spelling, every hyphen-separated part capitalised, so `HomePage` is
+  read at `Homepage`. A line that starts with a space or tab continues the field before it: the parser
+  keeps the value's lines, each without that first space, so a line of a space and a full stop,
+  which stands for an empty line of the value, stays `.`. A line in `debian/control` that starts with `#` is a comment, which the consumer
+  drops (Policy 5.1). The consumer reads the first line of
+  `License` (the short name) and of `Description` (the synopsis). `License` names are
+  copyright-format's own (`Expat`, `GPL-2+`), not SPDX ids, and a version is
+  `[epoch:]upstream[-revision]`: the consumer maps a licence name to its SPDX id (`Expat` is `MIT`)
+  and cuts a version to its upstream part. Never run
+  `debian/rules`; a parser of the newest changelog line gives the same `Version`.
+- VIVO is RDF held in a VIVO instance, not a file. One linked-data response does not name a
+  work's authors, so a consumer reads the merged graph of the software individual and its
+  `vivo:Authorship` nodes, their agents with their `vcard:Individual` and `vcard:Name`, its
+  `vivo:DateTimeValue` and its publisher (by fetching each IRI or by one SPARQL CONSTRUCT). It frames
+  that graph as JSON-LD on `"@type": "obo:ERO_0000071"` with `"@embed": "@always"`, with a context that
+  defines the prefixes `vivo` (`http://vivoweb.org/ontology/core#`), `obo`
+  (`http://purl.obolibrary.org/obo/`), `bibo` (`http://purl.org/ontology/bibo/`), `vcard`
+  (`http://www.w3.org/2006/vcard/ns#`) and `rdfs` (`http://www.w3.org/2000/01/rdf-schema#`), the term `Authorship` for
+  `vivo:Authorship`, and `"@container": "@set"` for `vivo:relatedBy`, `vivo:relates`, `vivo:orcidId`
+  and `obo:ARG_2000028`, so those are always lists. The parser then drops from each `vivo:relates` the
+  reference back to the root (an object whose only key is the root's `@id`) and sorts `vivo:relatedBy`
+  by `vivo:rank`, unranked last. Without the `Authorship` term the author filter matches nothing, so a
+  consumer that skips the rule reads no authors, never wrong ones. An author is a `foaf:Person`, whose
+  name sits under `obo:ARG_2000028`, or a bare `vcard:Individual`: the name rows join both with `+`,
+  so the consumer reads names per author element. `vivo:dateTime` is a full xsd:dateTime, which the
+  consumer cuts to the precision `vivo:dateTimePrecision` gives.
+- Dublin Core comes as `oai_dc` XML, which every OAI-PMH repository serves, or as RDF. An `oai_dc`
+  record is read as a tree rooted at `oai_dc:dc`: each child element is a key named by its prefixed
+  name (`dc:title`) holding its trimmed text, and every key is a list, because every element may
+  repeat. An RDF record is read like DCAT: JSON-LD rooted at the described resource's node, compacted
+  with a context that defines only `dc`, `dcterms` and `foaf`; there too every `dc:` key, and
+  `dcterms:creator` and `dcterms:contributor`, are lists. Each row reads `dcterms:` first and falls
+  back to `dc:`. DCMI defines no name parts or ORCID for an agent: a `dcterms` agent's name parts are
+  read at `foaf:givenName` and `foaf:familyName`, and an `oai_dc` creator is one string, which
+  Zenodo writes `Family, Given`, so both name sub-terms point at it and the consumer splits it at the
+  first comma. `dc:rights` mixes access statements, licence names and licence URLs, and
+  `dc:identifier` mixes a DOI with other ids: the consumer keeps the values it can convert.
 - RIS and EndNote tagged are line formats. A consumer reads one record into a tree: each tag is a
   key (RIS `TI`, EndNote `%T` as `T`, and `%7` as `_7`, since a key cannot start with a digit), the
   value is the text after the tag. `AU`, `A1`, `KW` and `UR` in RIS, and `%A` and `%K` in EndNote, are always lists,
@@ -270,7 +354,7 @@ A (format, term) pair appears at most once. The schema cannot enforce that, so t
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
-`croissant`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
+`croissant`, `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1`, `iso-19115-1-2014`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
 `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`, `contributor.familyName`,
 `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`, `description`, `keywords`,
 `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
@@ -317,10 +401,12 @@ and `expected`. `expected` is the list of values the path resolves to in `docume
 from the first alternative that yields any value. A consumer vendors the file with the schema and runs
 every case through its own resolver.
 Its `schema_version` is the mapping schema whose grammar the cases need.
-Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate` or
-`croissant`) and its `text` is the source file content. Parse that text and compare the resulting tree
+Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate`,
+`croissant`, `oai_dc`, `debian-control`, `mods`, `vivo`, `spase` or `iso-19115-3`) and its `text` is the source file content. Parse that text and compare the resulting tree
 to `document` before resolving `path`; a consumer that does not read that format skips the parse and
-still resolves `path` in `document`. The PKG-INFO cases cover comma separation, quoted names, company
+still resolves `path` in `document`. A release can add parser names, so a consumer skips the parse for
+a name it does not know. The `vivo` case gives Turtle as `raw_input` and the framed tree as `document`; this package's own tests
+resolve that tree but do not frame the Turtle. The PKG-INFO cases cover comma separation, quoted names, company
 suffixes and `et al.`.
 
 ## Compatibility
@@ -349,7 +435,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
-   that holds `v`.
+   that holds `v`. Schema 1.9 adds six format ids, `dublin-core` to `iso-19115-1-2014`, and
+   changes no pattern, so a 1.9 file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format
    that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from

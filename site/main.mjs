@@ -7,11 +7,11 @@ import { chosenTag, hubTerm, linkParts, pageTitle, parseFragment, releaseLinks, 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
   "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
-  github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", gitlab: "GitLab API", "code-json-2.0": "code.json 2.0", "ro-crate": "RO-Crate", croissant: "Croissant", "bio-tools": "bio.tools",
+  github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", gitlab: "GitLab API", "code-json-2.0": "code.json 2.0", "ro-crate": "RO-Crate", croissant: "Croissant", "dublin-core": "Dublin Core", "iso-19115-1-2014": "ISO 19115-1", "spase-2.6.1": "SPASE 2.6.1", "vivo-1.8": "VIVO 1.8", "mods": "MODS", "bio-tools": "bio.tools",
   "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
   "setup-py": "setup.py", cargo: "Cargo", npm: "npm", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
   "ruby-gem": "Ruby gemspec", maven: "Maven pom.xml", "cpan-meta-2": "CPAN META.json", nuget: "NuGet .nuspec",
-  pubspec: "Dart pubspec", cabal: "Haskell Cabal", leiningen: "Leiningen project.clj", octave: "Octave DESCRIPTION",
+  pubspec: "Dart pubspec", cabal: "Haskell Cabal", debian: "Debian source", leiningen: "Leiningen project.clj", octave: "Octave DESCRIPTION",
   "publiccode-0.8": "publiccode.yml 0.8", typst: "typst.toml", quarto: "Quarto extension",
 };
 const label = (fmt) => LABELS[fmt] ?? fmt;
@@ -64,8 +64,8 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
   const body = el("tbody");
   if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
-  for (const { format, label: name } of formats) {
-    const row = el("tr", {}, el("th", { scope: "row" }, name));
+  for (const { format, label: name, status } of formats) {
+    const row = el("tr", {}, el("th", { scope: "row" }, name, status ? el("span", { class: "why" }, status) : null));
     const own = [];
     for (const term of terms) {
       const cell = byKey.get(`${format} ${term}`);
@@ -106,7 +106,7 @@ const pathTally = (cells, statuses) => [
   el("span", { class: "vh" }, " read as a path"),
 ];
 
-function detail(statuses, labels, coverage, upstream) {
+function detail(statuses, formats, coverage, upstream) {
   const reviewed = coverage.statuses;
   const box = document.getElementById("detail");
   const hint = box.firstElementChild;
@@ -118,7 +118,8 @@ function detail(statuses, labels, coverage, upstream) {
     picked = button;
     const was = (cell.cell ?? "").trim();
     const { mark, meaning } = statuses[cell.status];
-    const name = labels.get(cell.format) ?? cell.format;
+    const format = formats.get(cell.format);
+    const name = format?.label ?? cell.format;
     const rows = [
       ["Status", `${mark} ${cell.status}: ${meaning}`],
       ["CodeMeta property", coverage.properties?.[cell.term] ? code(coverage.properties[cell.term]) : "none"],
@@ -129,6 +130,7 @@ function detail(statuses, labels, coverage, upstream) {
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", linked(cell.reason)]);
+    if (format?.status) rows.push(["Not reviewed", el("span", {}, `${format.status}: ${format.reason}. `, el("a", { href: format.url }, format.url))]);
     const now = changes.get(`${cell.format} ${cell.term}`);
     if (now) {
       rows.push(["On main", el("span", {}, `The cell ${STATES[now.state]}`, now.now ? el("span", {}, ": ", code(now.now)) : null, ".")]);
@@ -377,9 +379,10 @@ async function start() {
   if (coverage.schema_version) document.getElementById("schema").textContent = `, schema ${coverage.schema_version}`;
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
   score(coverage);
-  const labels = new Map([...coverage.formats.map((f) => [f, label(f)]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label])]);
+  // A format's label, and for an unreviewed crosswalk its status, reason and url.
+  const formats = new Map([...coverage.formats.map((f) => [f, { label: label(f) }]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f])]);
   const statuses = { ...coverage.statuses, ...unreviewed?.statuses };
-  matrix(coverage, unreviewed, detail(statuses, labels, coverage, upstream));
+  matrix(coverage, unreviewed, detail(statuses, formats, coverage, upstream));
   filters(coverage);
   markKey(coverage.statuses, unreviewed?.statuses);
   route(coverage);

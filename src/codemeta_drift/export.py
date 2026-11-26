@@ -20,7 +20,7 @@ PACKAGE = Path(__file__).parent
 """The installed package directory, which holds the schema and curated files: a plain path, cheaper than
 importlib.resources, which this wheel-only package does not need."""
 
-SCHEMA_VERSION = "1.8"
+SCHEMA_VERSION = "1.9"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -111,6 +111,12 @@ FORMATS = {
     "code-json-2.0": Spoke("crosswalks/code-json.csv", since="4.0"),
     "ro-crate": Spoke(None),
     "croissant": Spoke(None),
+    "dublin-core": Spoke("crosswalks/Dublin Core.csv", person_list=True),
+    "debian": Spoke("crosswalks/Debian Package.csv"),
+    "mods": Spoke("crosswalks/MODS.csv", person_list=True),
+    "vivo-1.8": Spoke("crosswalks/VIVO.csv", person_list=True),
+    "spase-2.6.1": Spoke("crosswalks/spase-v2.6.1.csv"),
+    "iso-19115-1-2014": Spoke("crosswalks/ISO_19115-1.csv", person_list=True, person_prefix="party."),
 }
 
 PATH = re.compile(
