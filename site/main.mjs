@@ -106,7 +106,7 @@ const pathTally = (cells, statuses) => [
   el("span", { class: "vh" }, " read as a path"),
 ];
 
-function detail(statuses, labels, coverage, upstream, skipped) {
+function detail(statuses, formats, coverage, upstream) {
   const reviewed = coverage.statuses;
   const box = document.getElementById("detail");
   const hint = box.firstElementChild;
@@ -118,7 +118,8 @@ function detail(statuses, labels, coverage, upstream, skipped) {
     picked = button;
     const was = (cell.cell ?? "").trim();
     const { mark, meaning } = statuses[cell.status];
-    const name = labels.get(cell.format) ?? cell.format;
+    const format = formats.get(cell.format);
+    const name = format?.label ?? cell.format;
     const rows = [
       ["Status", `${mark} ${cell.status}: ${meaning}`],
       ["CodeMeta property", coverage.properties?.[cell.term] ? code(coverage.properties[cell.term]) : "none"],
@@ -129,8 +130,7 @@ function detail(statuses, labels, coverage, upstream, skipped) {
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", linked(cell.reason)]);
-    const why = skipped.get(cell.format);
-    if (why?.status) rows.push(["Not reviewed", el("span", {}, `${why.status}: ${why.reason}. `, el("a", { href: why.url }, why.url))]);
+    if (format?.status) rows.push(["Not reviewed", el("span", {}, `${format.status}: ${format.reason}. `, el("a", { href: format.url }, format.url))]);
     const now = changes.get(`${cell.format} ${cell.term}`);
     if (now) {
       rows.push(["On main", el("span", {}, `The cell ${STATES[now.state]}`, now.now ? el("span", {}, ": ", code(now.now)) : null, ".")]);
@@ -379,10 +379,10 @@ async function start() {
   if (coverage.schema_version) document.getElementById("schema").textContent = `, schema ${coverage.schema_version}`;
   document.getElementById("version").textContent = `codemeta-drift ${coverage.generator.version}`;
   score(coverage);
-  const labels = new Map([...coverage.formats.map((f) => [f, label(f)]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f.label])]);
+  // A format's label, and for an unreviewed crosswalk its status, reason and url.
+  const formats = new Map([...coverage.formats.map((f) => [f, { label: label(f) }]), ...(unreviewed?.formats ?? []).map((f) => [f.format, f])]);
   const statuses = { ...coverage.statuses, ...unreviewed?.statuses };
-  const skipped = new Map((unreviewed?.formats ?? []).map((f) => [f.format, f]));
-  matrix(coverage, unreviewed, detail(statuses, labels, coverage, upstream, skipped));
+  matrix(coverage, unreviewed, detail(statuses, formats, coverage, upstream));
   filters(coverage);
   markKey(coverage.statuses, unreviewed?.statuses);
   route(coverage);
