@@ -5370,6 +5370,153 @@
       "path": null,
       "source": "curated:CodeMeta has no term for the resource type; debian has no field for it (Package-Type, Policy 5.6.28, is deb or udeb)",
       "crosswalk_cell": null
+    },
+    {
+      "format": "mods",
+      "term": "name",
+      "path": "titleInfo[].title[]",
+      "source": "curated:the cell says titleInfo/title, an XPath; in the path grammar it is the title inside each titleInfo (MODS 3.8 Guidelines, titleInfo, https://www.loc.gov/standards/mods/userguide/titleinfo.html)",
+      "comment": "The guidelines say the primary title's titleInfo has no type attribute; skip a titleInfo with @type (abbreviated, translated, alternative, uniform). A leading article may sit apart in nonSort, and subTitle holds the subtitle.",
+      "crosswalk_cell": "titleInfo/title"
+    },
+    {
+      "format": "mods",
+      "term": "version",
+      "path": "originInfo[].edition[]",
+      "source": "curated:the cell says originInfo/edition, an XPath; edition is \"information identifying the version of the resource\" (MODS 3.8 Guidelines, originInfo, edition, https://www.loc.gov/standards/mods/userguide/origininfo.html)",
+      "crosswalk_cell": "originInfo/edition"
+    },
+    {
+      "format": "mods",
+      "term": "author",
+      "path": "name[roleTerm=aut]",
+      "source": "curated:the cell says name/role/roleTerm[@type='code']/[.='aut'], an XPath: a name whose MARC relator code is aut (MODS 3.8 Guidelines, name, role, https://www.loc.gov/standards/mods/userguide/name.html; relator codes, https://www.loc.gov/marc/relators/relacode.html)",
+      "comment": "The parser lifts the texts of a name's role.roleTerm elements into a roleTerm list on the name, so the filter can match them. Some records mark the main author with cre (creator) instead. Zotero's MODS export writes a computer program's programmers as ctb, not aut.",
+      "crosswalk_cell": "name/role/roleTerm[@type='code']/[.='aut']"
+    },
+    {
+      "format": "mods",
+      "term": "author.givenName",
+      "path": "name[roleTerm=aut].namePart[@type=given]",
+      "source": "curated:the cell says name/namePart[@type='given'], an XPath: the namePart typed given (MODS 3.8 Guidelines, name, namePart, https://www.loc.gov/standards/mods/userguide/name.html)",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart.",
+      "crosswalk_cell": "name/namePart[@type='given']"
+    },
+    {
+      "format": "mods",
+      "term": "author.familyName",
+      "path": "name[roleTerm=aut].namePart[@type=family]",
+      "source": "curated:the cell says name/namePart[@type='family'], an XPath: the namePart typed family (MODS 3.8 Guidelines, name, namePart, https://www.loc.gov/standards/mods/userguide/name.html)",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart.",
+      "crosswalk_cell": "name/namePart[@type='family']"
+    },
+    {
+      "format": "mods",
+      "term": "author.@id",
+      "path": "name[roleTerm=aut].nameIdentifier[@type=orcid]",
+      "source": "curated:the cell lists identifier / name/nameIdentifier; identifier is the record's own identifier, not a person's, and nameIdentifier holds every kind of name identifier, so the ORCID is the one typed orcid, a code in LC's Standard Identifier Source Codes (MODS 3.8 Guidelines, name, nameIdentifier, https://www.loc.gov/standards/mods/userguide/name.html; https://www.loc.gov/standards/sourcelist/standard-identifier.html)",
+      "comment": "nameIdentifier types are not controlled, and the value may be a bare ORCID or a URL. A name may instead carry the ORCID URI in its valueURI attribute.",
+      "crosswalk_cell": "identifier / name/nameIdentifier"
+    },
+    {
+      "format": "mods",
+      "term": "contributor",
+      "path": "name[roleTerm=ctb]",
+      "source": "curated:the cell says name/role/roleTerm[@type='code']/[.='ctb'], an XPath: a name whose MARC relator code is ctb (MODS 3.8 Guidelines, name, role, https://www.loc.gov/standards/mods/userguide/name.html; relator codes, https://www.loc.gov/marc/relators/relacode.html)",
+      "comment": "The parser lifts the texts of a name's role.roleTerm elements into a roleTerm list on the name, as for author.",
+      "crosswalk_cell": "name/role/roleTerm[@type='code']/[.='ctb']"
+    },
+    {
+      "format": "mods",
+      "term": "contributor.givenName",
+      "path": "name[roleTerm=ctb].namePart[@type=given]",
+      "source": "curated:same reasoning as author.givenName, under contributor",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart.",
+      "crosswalk_cell": "name/namePart[@type='given']"
+    },
+    {
+      "format": "mods",
+      "term": "contributor.familyName",
+      "path": "name[roleTerm=ctb].namePart[@type=family]",
+      "source": "curated:same reasoning as author.familyName, under contributor",
+      "comment": "The guidelines allow the whole name in one namePart with no type, written family name first, then a comma, then given names; the consumer then splits that namePart.",
+      "crosswalk_cell": "name/namePart[@type='family']"
+    },
+    {
+      "format": "mods",
+      "term": "contributor.@id",
+      "path": "name[roleTerm=ctb].nameIdentifier[@type=orcid]",
+      "source": "curated:same reasoning as author.@id, under contributor",
+      "crosswalk_cell": "identifier / name/nameIdentifier"
+    },
+    {
+      "format": "mods",
+      "term": "license",
+      "path": "accessCondition[]",
+      "source": "curated:the cell says accessCondition[@type='use and reproduction'], the right element in XPath: accessCondition holds rights statements, and the type use and reproduction marks a licence (https://www.loc.gov/standards/mods/userguide/accesscondition.html); a filter value cannot hold a space, so the path reads every accessCondition",
+      "comment": "The consumer keeps an accessCondition typed use and reproduction, or with no type as Zotero writes it, and skips restriction on access; the licence is its text, its xlink:href or its valueURI.",
+      "crosswalk_cell": "accessCondition[@type='use and reproduction']"
+    },
+    {
+      "format": "mods",
+      "term": "identifier",
+      "path": "identifier[@type=doi]",
+      "source": "curated:the cell says identifier, which holds every kind of identifier (ISBN, handle, URI and more); the DOI is the one typed doi (MODS 3.8 Guidelines, identifier, https://www.loc.gov/standards/mods/userguide/identifier.html)",
+      "comment": "The guidelines' own example writes doi:10.1006/jmbi.1995.0238; the consumer strips a doi: prefix or a resolver URL.",
+      "crosswalk_cell": "identifier"
+    },
+    {
+      "format": "mods",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:the cell says identifier, which holds the DOI; LC's Standard Identifier Source Codes, the suggested values for its type, have no code for a SWHID (https://www.loc.gov/standards/sourcelist/standard-identifier.html)",
+      "comment": "identifier types are not controlled, so a record may still carry a SWHID in an identifier; the consumer finds it by its swh:1: spelling.",
+      "crosswalk_cell": "identifier"
+    },
+    {
+      "format": "mods",
+      "term": "codeRepository",
+      "path": null,
+      "source": "curated:the cell says location/url[@access='object in context'], which the guidelines define as a link to the object within its environment, such as a landing page, not a source repository (MODS 3.8 Guidelines, location, url, https://www.loc.gov/standards/mods/userguide/location.html); MODS has no repository field, and a filter value cannot hold the spaces anyway",
+      "crosswalk_cell": "location/url[@access='object in context']"
+    },
+    {
+      "format": "mods",
+      "term": "description",
+      "path": "abstract[]",
+      "source": "curated:the cell says abstract, the right element; abstract is repeatable, so the path reads each one (MODS 3.8 Guidelines, abstract, https://www.loc.gov/standards/mods/userguide/abstract.html)",
+      "crosswalk_cell": "abstract"
+    },
+    {
+      "format": "mods",
+      "term": "keywords",
+      "path": "subject[].topic[]",
+      "source": "curated:the cell says subject, a container that also holds geographic, temporal, name and other subjects; a keyword is a topic inside it (MODS 3.8 Guidelines, subject, topic, https://www.loc.gov/standards/mods/userguide/subject.html)",
+      "crosswalk_cell": "subject"
+    },
+    {
+      "format": "mods",
+      "term": "datePublished",
+      "path": "originInfo[].dateIssued[]",
+      "source": "curated:the cell says originInfo/dateIssued, an XPath; dateIssued is \"the date that the resource was published, released, or issued\" (MODS 3.8 Guidelines, originInfo, dateIssued, https://www.loc.gov/standards/mods/userguide/origininfo.html)",
+      "comment": "A record may give several: prefer the one with keyDate yes. A structured date names its format in encoding (w3cdtf, iso8601, marc, temper or edtf); without it the date is text. point start and end mark a range.",
+      "crosswalk_cell": "originInfo/dateIssued"
+    },
+    {
+      "format": "mods",
+      "term": "publisher",
+      "path": "originInfo[].publisher[]",
+      "source": "curated:the cell says originInfo/publisher, an XPath; publisher names the entity that published or issued the resource (MODS 3.8 Guidelines, originInfo, publisher, https://www.loc.gov/standards/mods/userguide/origininfo.html)",
+      "comment": "MODS 3.8 added originInfo/agent, a name with a role, for any agent of the event; this path does not read it.",
+      "crosswalk_cell": "originInfo/publisher"
+    },
+    {
+      "format": "mods",
+      "term": "resourceType",
+      "path": "typeOfResource[]",
+      "source": "curated:CodeMeta has no term for the resource type; MODS states it in typeOfResource (MODS 3.8 Guidelines, typeOfResource, https://www.loc.gov/standards/mods/userguide/typeofresource.html)",
+      "comment": "Before MODS 3.7 the value came from a fixed list whose software value is software, multimedia, which Zotero still writes. Since 3.7 the guidelines recommend the LC Resource Types Scheme (https://id.loc.gov/vocabulary/resourceTypes), which has no software type (it has Multimedia, Digital and Dataset).",
+      "crosswalk_cell": null
     }
   ]
 }

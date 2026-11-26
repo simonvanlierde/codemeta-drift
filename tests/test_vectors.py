@@ -239,3 +239,66 @@ def test_curated_debian_rows_read_the_source_tree(tag: str) -> None:
         "codeRepository",
         "description",
     }
+
+
+def read_xml(node: ET.Element) -> Any:  # noqa: ANN401 - a string or a tree
+    """An XML element as docs/mapping-export.md reads MODS: each child a list, attributes @ keys, text in #text."""
+    tree: dict[str, Any] = {
+        "@" + key.replace("{http://www.w3.org/1999/xlink}", "xlink:"): value
+        for key, value in node.attrib.items()
+        if not key.startswith("{http://www.w3.org/2001/XMLSchema-instance}")
+    }
+    for child in node:
+        tree.setdefault(child.tag.rpartition("}")[2], []).append(read_xml(child))
+    if len(node):
+        return tree
+    text = (node.text or "").strip()
+    return {**tree, "#text": text} if tree else text
+
+
+def read_mods(text: str) -> dict:
+    """The first mods record, with each name's role.roleTerm texts lifted into a roleTerm list."""
+    root = ET.fromstring(text.encode())  # noqa: S314 - the vectors ship in this package
+    record = read_xml(next(root.iter("{http://www.loc.gov/mods/v3}mods")))
+    for name in record.get("name", []):
+        terms = [term for role in name.get("role", []) for term in role.get("roleTerm", [])]
+        name["roleTerm"] = [term["#text"] if isinstance(term, dict) else term for term in terms]
+    return record
+
+
+def text_of(values: list) -> list:
+    """What a consumer takes from each value: an element with attributes gives its #text."""
+    return [v["#text"] if isinstance(v, dict) and "#text" in v else v for v in values]
+
+
+def test_mods_parser_vector_matches_the_reading_rules() -> None:
+    case = raw_case("mods")
+    assert read_mods(case["raw_input"]["text"]) == case["document"]
+
+
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_curated_mods_rows_read_the_vector_document(tag: str) -> None:
+    paths = curated_paths(tag, "mods")
+    document = raw_case("mods")["document"]
+    expected = {
+        "name": ["tidewater", "Tidewater toolkit"],
+        "version": ["2.1.0"],
+        "author.givenName": ["Ada"],
+        "author.familyName": ["Lovelace"],
+        "author.@id": ["https://orcid.org/0000-0002-1825-0097"],
+        "contributor.givenName": ["Grace"],
+        "contributor.familyName": ["Hopper"],
+        "contributor.@id": [],
+        "license": ["MIT License"],
+        "identifier": ["10.5281/zenodo.1234567"],
+        "description": ["Cleans and resamples tide-gauge records for coastal models."],
+        "keywords": ["oceanography", "time series"],
+        "datePublished": ["2024-03-14"],
+        "publisher": ["Zenodo"],
+        "resourceType": ["software, multimedia"],
+    }
+    for term, values in expected.items():
+        assert text_of(resolve(document, paths[term])) == values, term
+    assert [p["#text"] for a in resolve(document, paths["author"]) for p in a["namePart"]] == ["Ada", "Lovelace"]
+    assert [p["#text"] for c in resolve(document, paths["contributor"]) for p in c["namePart"]] == ["Grace", "Hopper"]
+    assert resolve(document, paths["license"])[0]["@xlink:href"] == "https://spdx.org/licenses/MIT.html"

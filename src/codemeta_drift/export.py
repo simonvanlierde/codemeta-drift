@@ -113,6 +113,7 @@ FORMATS = {
     "croissant": Spoke(None),
     "dublin-core": Spoke("crosswalks/Dublin Core.csv", person_list=True),
     "debian": Spoke("crosswalks/Debian Package.csv"),
+    "mods": Spoke("crosswalks/MODS.csv", person_list=True),
 }
 
 PATH = re.compile(

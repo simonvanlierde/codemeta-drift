@@ -1469,6 +1469,167 @@
    "expected": [
     "https://carberry.example.org/"
    ]
+  },
+  {
+   "name": "MODS parser: elements as lists, attributes as @ keys, text under #text, and each name's roleTerm texts lifted",
+   "path": "name[roleTerm=aut].namePart[@type=family]",
+   "raw_input": {
+    "format": "mods",
+    "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<modsCollection xmlns=\"http://www.loc.gov/mods/v3\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 https://www.loc.gov/standards/mods/v3/mods-3-8.xsd\">\n  <mods version=\"3.8\">\n    <titleInfo>\n      <title>tidewater</title>\n      <subTitle>tide-gauge cleaning for coastal models</subTitle>\n    </titleInfo>\n    <titleInfo type=\"alternative\">\n      <title>Tidewater toolkit</title>\n    </titleInfo>\n    <typeOfResource>software, multimedia</typeOfResource>\n    <name type=\"personal\">\n      <namePart type=\"given\">Ada</namePart>\n      <namePart type=\"family\">Lovelace</namePart>\n      <nameIdentifier type=\"orcid\">https://orcid.org/0000-0002-1825-0097</nameIdentifier>\n      <role>\n        <roleTerm type=\"code\" authority=\"marcrelator\">aut</roleTerm>\n      </role>\n    </name>\n    <name type=\"personal\">\n      <namePart type=\"given\">Grace</namePart>\n      <namePart type=\"family\">Hopper</namePart>\n      <role>\n        <roleTerm type=\"code\" authority=\"marcrelator\">ctb</roleTerm>\n        <roleTerm type=\"text\" authority=\"marcrelator\">contributor</roleTerm>\n      </role>\n    </name>\n    <originInfo eventType=\"publication\">\n      <publisher>Zenodo</publisher>\n      <dateIssued encoding=\"w3cdtf\" keyDate=\"yes\">2024-03-14</dateIssued>\n      <edition>2.1.0</edition>\n    </originInfo>\n    <abstract>Cleans and resamples tide-gauge records for coastal models.</abstract>\n    <subject>\n      <topic>oceanography</topic>\n      <topic>time series</topic>\n    </subject>\n    <identifier type=\"doi\">10.5281/zenodo.1234567</identifier>\n    <identifier type=\"uri\">swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505</identifier>\n    <location>\n      <url access=\"object in context\" usage=\"primary\">https://zenodo.org/records/1234567</url>\n    </location>\n    <accessCondition type=\"use and reproduction\" xlink:href=\"https://spdx.org/licenses/MIT.html\">MIT License</accessCondition>\n  </mods>\n</modsCollection>\n"
+   },
+   "document": {
+    "@version": "3.8",
+    "titleInfo": [
+     {
+      "title": [
+       "tidewater"
+      ],
+      "subTitle": [
+       "tide-gauge cleaning for coastal models"
+      ]
+     },
+     {
+      "@type": "alternative",
+      "title": [
+       "Tidewater toolkit"
+      ]
+     }
+    ],
+    "typeOfResource": [
+     "software, multimedia"
+    ],
+    "name": [
+     {
+      "@type": "personal",
+      "namePart": [
+       {
+        "@type": "given",
+        "#text": "Ada"
+       },
+       {
+        "@type": "family",
+        "#text": "Lovelace"
+       }
+      ],
+      "nameIdentifier": [
+       {
+        "@type": "orcid",
+        "#text": "https://orcid.org/0000-0002-1825-0097"
+       }
+      ],
+      "role": [
+       {
+        "roleTerm": [
+         {
+          "@type": "code",
+          "@authority": "marcrelator",
+          "#text": "aut"
+         }
+        ]
+       }
+      ],
+      "roleTerm": [
+       "aut"
+      ]
+     },
+     {
+      "@type": "personal",
+      "namePart": [
+       {
+        "@type": "given",
+        "#text": "Grace"
+       },
+       {
+        "@type": "family",
+        "#text": "Hopper"
+       }
+      ],
+      "role": [
+       {
+        "roleTerm": [
+         {
+          "@type": "code",
+          "@authority": "marcrelator",
+          "#text": "ctb"
+         },
+         {
+          "@type": "text",
+          "@authority": "marcrelator",
+          "#text": "contributor"
+         }
+        ]
+       }
+      ],
+      "roleTerm": [
+       "ctb",
+       "contributor"
+      ]
+     }
+    ],
+    "originInfo": [
+     {
+      "@eventType": "publication",
+      "publisher": [
+       "Zenodo"
+      ],
+      "dateIssued": [
+       {
+        "@encoding": "w3cdtf",
+        "@keyDate": "yes",
+        "#text": "2024-03-14"
+       }
+      ],
+      "edition": [
+       "2.1.0"
+      ]
+     }
+    ],
+    "abstract": [
+     "Cleans and resamples tide-gauge records for coastal models."
+    ],
+    "subject": [
+     {
+      "topic": [
+       "oceanography",
+       "time series"
+      ]
+     }
+    ],
+    "identifier": [
+     {
+      "@type": "doi",
+      "#text": "10.5281/zenodo.1234567"
+     },
+     {
+      "@type": "uri",
+      "#text": "swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505"
+     }
+    ],
+    "location": [
+     {
+      "url": [
+       {
+        "@access": "object in context",
+        "@usage": "primary",
+        "#text": "https://zenodo.org/records/1234567"
+       }
+      ]
+     }
+    ],
+    "accessCondition": [
+     {
+      "@type": "use and reproduction",
+      "@xlink:href": "https://spdx.org/licenses/MIT.html",
+      "#text": "MIT License"
+     }
+    ]
+   },
+   "expected": [
+    {
+     "@type": "family",
+     "#text": "Lovelace"
+    }
+   ]
   }
  ]
 }

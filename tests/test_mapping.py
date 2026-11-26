@@ -132,6 +132,7 @@ PUBLISHER = {
     "ro-crate",
     "croissant",
     "dublin-core",
+    "mods",
 }
 RESOURCE_TYPE = {
     "codemeta",
@@ -147,6 +148,7 @@ RESOURCE_TYPE = {
     "ro-crate",
     "croissant",
     "dublin-core",
+    "mods",
 }
 
 
@@ -408,6 +410,7 @@ def test_example_null_rows():
         | {("dublin-core", t) for t in ("version", "swhid", "codeRepository")}
         | {("debian", t) for t in ("author", "author.givenName", "author.familyName", "author.@id", *contributor)}
         | {("debian", t) for t in ("identifier", "swhid", "keywords", "datePublished")}
+        | {("mods", t) for t in ("swhid", "codeRepository")}
         | {("gitlab", "version"), ("code-json-2.0", "author")}
     )
 
