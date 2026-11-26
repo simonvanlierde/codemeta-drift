@@ -11,6 +11,7 @@ from urllib.parse import unquote
 
 import pytest
 
+from codemeta_drift.coverage import STATUSES, coverage
 from codemeta_drift.export import FORMATS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,6 +24,26 @@ def build(out: Path, *args: str) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         text=True,
     )
+
+
+def test_every_status_has_its_filter_and_bar_style():
+    css = (ROOT / "site/style.css").read_text("utf-8")
+    for name in STATUSES:
+        s = name.replace(" ", "-")
+        assert f'data-only="{s}"' in css
+        assert name in {"no field", "no term"} or f".bar .s-{s} " in css
+
+
+def test_og_card_rows_match_the_coverage():
+    """The card's hand-copied rows, in its comment's format order; run `just og-card` after changing them."""
+    html = (ROOT / "docs/og-card.html").read_text("utf-8")
+    rows = json.loads(html.partition("const rows = ")[2].partition(";")[0])
+    formats = ["cff-1.2.0", "zenodo", "datacite", "bibtex", "pep621"]
+    formats += ["pkg-info", "cargo", "npm", "r-description", "julia"]
+    letter = dict(zip(STATUSES, "osqxp--", strict=True))
+    data = coverage(json.loads((ROOT / "examples/mapping-4.0.json").read_text("utf-8")))
+    found = {(c["format"], c["term"]): letter[c["status"]] for c in data["cells"]}
+    assert rows == ["".join(found[fmt, term] for term in data["terms"]) for fmt in formats]
 
 
 def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):

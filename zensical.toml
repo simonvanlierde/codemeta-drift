@@ -36,7 +36,7 @@ toggle = { icon = "lucide/sun", name = "Switch to light mode" }
 [project.extra]
 # The logo goes back to the coverage page, which the docs sit under.
 homepage = "https://simonvanlierde.com/codemeta-drift/"
-og_image = "assets/og.png?v=5e65fb70"
+og_image = "assets/og.png?v=1d9bf357"
 
 # Line anchors are empty links, which screen readers announce without a name.
 [project.markdown_extensions.pymdownx.highlight]

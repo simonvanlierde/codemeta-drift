@@ -839,7 +839,7 @@
       "cell": "nameIdentifier",
       "reason": "the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme (ORCID, ISNI or ROR, DataCite 4.6 property 2.4), and the ORCID is the one whose scheme is ORCID",
       "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
-      "kind": "scope"
+      "kind": "notation"
     },
     {
       "format": "datacite",
@@ -857,7 +857,7 @@
       "cell": "nameIdentifier",
       "reason": "the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme (ORCID, ISNI or ROR, DataCite 4.6 property 7.4), and the ORCID is the one whose scheme is ORCID",
       "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
-      "kind": "scope"
+      "kind": "notation"
     },
     {
       "format": "datacite",

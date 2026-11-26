@@ -327,7 +327,7 @@ function score(data) {
   const count = (status) => fields.filter((c) => c.status === status).length;
   const formats = new Set(crosswalk.map((c) => c.format)).size;
   const bar = el("div", { class: "bar", "aria-hidden": "true" });
-  for (const status of ["as-is", "scope", "notation", "corrected", "added"]) {
+  for (const status of Object.keys(data.statuses).filter((s) => s !== "no field" && s !== "no term")) {
     const part = el("span", { class: `s-${status}` });
     part.style.flexGrow = String(count(status));
     bar.append(part);
@@ -337,7 +337,7 @@ function score(data) {
     bar,
     el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written. `
       + `${count("corrected")} are wrong, ambiguous or prose, ${count("notation")} need only a notation change, `
-      + `${count("scope")} differ only in how this page reads the term or in a field it adds, `
+      + `${count("scope")} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly or also reads another field, `
       + `and ${count("added")} are blank where the format has a field.`),
   );
 }

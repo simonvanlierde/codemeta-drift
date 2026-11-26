@@ -121,6 +121,13 @@ def test_every_kind_marks_a_cell_that_would_be_corrected(mapping: dict):
     assert {key: found[key] for key in kinds} == kinds
 
 
+def test_kind_comes_from_the_mapping_row(mapping: dict):
+    """A hand-edited export or one from another release gets the statuses its own rows say."""
+    row = next(r for r in mapping["rows"] if (r["format"], r["term"]) == ("zenodo", "author.@id"))
+    assert row.pop("kind", None) == "notation"
+    assert statuses(mapping)["zenodo", "author.@id"] == "corrected"
+
+
 def test_an_unknown_kind_is_refused():
     with pytest.raises(ValueError, match="row 1 has kind 'typo'"):
         build_rows({}, "4.0", [{"format": "cargo", "term": "name", "path": "x", "reason": "r", "kind": "typo"}])
@@ -131,8 +138,8 @@ def test_counts_for_the_crosswalks(mapping: dict):
     expected = {
         "3.1": {
             "as-is": 114,
-            "scope": 42,
-            "notation": 77,
+            "scope": 40,
+            "notation": 79,
             "corrected": 74,
             "added": 109,
             "no field": 219,
@@ -140,8 +147,8 @@ def test_counts_for_the_crosswalks(mapping: dict):
         },
         "4.0": {
             "as-is": 123,
-            "scope": 44,
-            "notation": 77,
+            "scope": 42,
+            "notation": 79,
             "corrected": 82,
             "added": 110,
             "no field": 237,

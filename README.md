@@ -28,8 +28,8 @@ It checks the CodeMeta standard's own files. To keep a project's `CITATION.cff`,
 
 At CodeMeta 4.0, the 36 crosswalks reviewed here, from CFF, Zenodo and DataCite to Maven, SPDX,
 Wikidata and GitLab, have 648 cells, one for each of the 18 terms citation tools need. 212 are for terms the
-format has no field for. Of the other 436, 123 can be used as written. 77 name the right field
-in a form a tool can't use as a path, such as another case, no prefix or XPath. 44 are right by
+format has no field for. Of the other 436, 123 can be used as written. 79 name the right field
+in a form a tool can't use as a path, such as another case, no prefix or XPath. 42 are right by
 CodeMeta's definition, but codemeta-drift reads the term more narrowly, such as `identifier` as the
 software's DOI and `swhid` as a term of its own, or also reads another field, such as a fallback
 or a newer one. 82 are wrong, ambiguous or prose (19 of them fill a term the format has no

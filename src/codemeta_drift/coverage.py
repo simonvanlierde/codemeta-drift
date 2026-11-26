@@ -12,9 +12,7 @@ from codemeta_drift.export import (
     TERMS,
     classify,
     crosswalk_cells,
-    curated_tags,
     derive,
-    read_curated,
 )
 from codemeta_drift.hub import validate_mapping
 
@@ -43,7 +41,8 @@ STATUSES = {
 }
 """Each cell status, its mark and what it means. The order is the legend's.
 
-A curated row's ``kind`` (scope or notation) names a cell that would otherwise be corrected.
+A row's ``kind`` (scope or notation) names a cell that would otherwise be corrected.
+When a cell has both a notation gap and a scope gap, notation wins.
 """
 
 SHAPES = {
@@ -125,7 +124,7 @@ def columns(mapping: dict[str, Any]) -> list[str]:
 def status(row: dict[str, Any], parents: dict[str, str | None], kind: str | None = None) -> str:
     """One export row's status; ``parents`` holds the format's people paths (author, contributor).
 
-    ``kind`` is the curated row's, which turns a corrected cell into scope or notation.
+    ``kind`` is the row's own, which turns a corrected cell into scope or notation.
     """
     if row["source"].startswith("crosswalk:"):
         return "as-is"
@@ -148,10 +147,6 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
     """Every (format, term) cell of a mapping export with its status, path, original cell and reason."""
     validate_mapping(mapping)
     rows = {(row["format"], row["term"]): row for row in mapping["rows"]}
-    tag = mapping["codemeta_tag"]
-    # The export leaves kind out, so it is read from the tag's curated file; another tag's cells stay corrected.
-    curated = read_curated(tag) if tag in curated_tags() else []
-    kinds = {(c["format"], c["term"]): c.get("kind") for c in curated}
     cells = []
     for fmt in columns(mapping):
         parents = {term: rows[fmt, term]["path"] for term in ("author", "contributor") if (fmt, term) in rows}
@@ -164,7 +159,7 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
                 {
                     "format": fmt,
                     "term": term,
-                    "status": status(row, parents, kinds.get((fmt, term))),
+                    "status": status(row, parents, row.get("kind")),
                     "path": row["path"],
                     "cell": row.get("crosswalk_cell"),
                     "crosswalk": FORMATS[fmt].crosswalk,

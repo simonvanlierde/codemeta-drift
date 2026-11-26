@@ -11,19 +11,20 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `hub coverage --json` gives two more cell statuses, `scope` and `notation`, for cells it called
   `corrected` before. A consumer that counts corrected cells adds them back, or reads `statuses` for
-  every name.
+  every name. Read `statuses` and `cells[].status` by name, not by position: the order now puts
+  scope and notation before corrected.
+- The CFF `license` row may now give a licence URL from `license-url`, not only an SPDX id.
 
 ### Changed
 
 - The coverage pages and the site stop counting every curated cell as wrong. Of the 203 corrected
-  cells at 4.0, 77 now count as `notation` (≈): the cell names the right field in a form a tool
-  can't use as a path, such as Zenodo's `ORCID` for the key `orcid` or MODS's XPath. 44 count as
+  cells at 4.0, 79 now count as `notation` (≈): the cell names the right field in a form a tool
+  can't use as a path, such as Zenodo's `ORCID` for the key `orcid` or MODS's XPath. 42 count as
   `scope` (⊂): the cell is right by CodeMeta's definition, but codemeta-drift reads the term more
   narrowly (`identifier` as the software's DOI, a person's `@id` as their ORCID, `publisher` as its
-  name, `swhid` as a term of its own) or also reads another field, such as Maven's fallback `parent.version` or PKG-INFO's newer
-  `License-Expression`. 82 stay
-  `corrected`. A curated row's optional `kind` holds the split; the export leaves it out, so the
-  mapping schema stays at 1.9.
+  name, `swhid` as a term of its own) or also reads another field, such as Maven's fallback
+  `parent.version` or PKG-INFO's newer `License-Expression`. 82 stay `corrected`. A curated row's
+  optional `kind` holds the split, and the export gives it as an optional row field.
 - The page's title is "Where CodeMeta's crosswalk cells work as written, and where they don't".
 - The CFF `license` row reads `license | license-url`: CFF 1.2.0 puts the URL of a licence that is
   not on the SPDX list in `license-url`, and the export already gives licence URLs for Maven, NuGet

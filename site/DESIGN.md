@@ -28,7 +28,7 @@ the source of truth for values.
   with the count of changed cells. One hairline row; the chosen tab is tinted with a 2px ink bar at its
   foot, like the chosen filter. `#route` and `#upstream` open their views; the SSSOM fragments open Matrix.
 - **Headline.** Beside the intro from 1000px: the count of crosswalk cells usable as written, a bar of
-  as-is, scope, notation, corrected and added in the cells' own colours, and one caption that counts each. It stacks below on smaller screens.
+  as-is (ink), scope (faint ink), notation (red outline), corrected (red) and added (red wash), and one caption that counts each. It stacks below on smaller screens.
 - **Matrix.** Formats down, citation files first, then package manifests; terms across, their names
   running up the column. A cell holds only its mark; its path is in the detail panel. The last column
   counts the format's usable cells. The detail panel sits beside the table from 1360px, below it on

@@ -31,6 +31,10 @@ curated file can be exported: `3.1` and `4.0`. To pass a directory named `export
 A path-shaped crosswalk cell, such as `package.version`, supplies the mapping directly.
 Other rows use `curated-<tag>.json` ([3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-3.1.json),
 [4.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-4.0.json)), which records the replacement path and reason.
+A row whose cell is not wrong may also set `kind`: `notation` when the cell names the right field
+in a form a tool can't use as a path, `scope` when it is right by CodeMeta's definition but the
+path reads the term more narrowly or also reads another field. A row without `kind` counts as
+corrected. The export copies it onto the row, and only `hub coverage` reads it.
 
 The exporter exits 0 on success. A finding, such as an unresolved cell, makes it exit 1 and write no
 mapping. It prints the findings on standard error, or with `--json` as a
@@ -163,6 +167,8 @@ Each row:
   `null` means no cell could be joined, including formats without an upstream crosswalk.
   New exports emit it on every row. An older export without this field does not supply the
   original cell; a consumer must not infer it from `path` or `source`.
+- `kind` (optional, added in schema 1.9) is `notation` or `scope` on a curated row whose
+  crosswalk cell is not wrong, as in the curated file. `hub coverage` reads it; a resolver ignores it.
 - `see_also` (optional) is the upstream issue or pull request about the cell the row departs from.
 - `comment` (optional) is a note for people. Never read it in code.
 
@@ -435,8 +441,9 @@ They come with a new codemeta tag or a new codemeta-drift release.
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
-   that holds `v`. Schema 1.9 adds six format ids, `dublin-core` to `iso-19115-1-2014`, and
-   changes no pattern, so a 1.9 file passes the 1.8 schema, but the `hub` of 0.8.0 refuses it.
+   that holds `v`. Schema 1.9 adds six format ids, `dublin-core` to `iso-19115-1-2014`, and the
+   optional row field `kind`, and changes no pattern, so a 1.9 file passes the 1.8 schema, but the
+   `hub` of 0.8.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format
    that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from
