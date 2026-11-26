@@ -94,6 +94,10 @@ def stale_pin_hashes(source: str, tag: str, fetch: Callable[[str], Any]) -> list
                 }
             )
             continue
+        # The contents API sends no content for a file over 1 MB; hashing "" would report a false stale pin.
+        if not published.get("content"):
+            msg = f"the contents API sent no content for {path} at {tag}"
+            raise ValueError(msg)
         current = hashlib.sha256(base64.b64decode(published["content"])).hexdigest()
         if current != digest:
             plans.append(

@@ -3,8 +3,12 @@
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
 import {
-  chosenTag, crosswalkFormats, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseLinks, sourceHref, splitByCrosswalk, upstreamLines,
+  cellWords, chosenTag, crosswalkFormats, hubTerm, linkParts, matrixKey, needed, pageTitle, parseFragment, releaseLinks, scoreCaption,
+  sourceHref, splitByCrosswalk, tabStop, upstreamLines,
 } from "./fragment.mjs";
+
+// Lets the stylesheet hide the controls that do nothing without this script.
+document.documentElement.classList.add("js");
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -105,12 +109,12 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
   return body;
 }
 
-// The matrix is one tab stop, the cell last focused; arrows, Home and End move between cells (see nextCell).
+// The matrix is one tab stop, the cell last focused; arrows, Home and End move between cells (see matrixKey).
 // Hovering or focusing a cell marks its column's header.
 function roving(table) {
-  const cells = table.querySelectorAll(".cell");
-  for (const cell of cells) cell.tabIndex = -1;
-  cells[0].tabIndex = 0;
+  const cells = [...table.querySelectorAll(".cell")];
+  const stop = tabStop(cells.map(() => true), -1);
+  for (const [i, cell] of cells.entries()) cell.tabIndex = i === stop ? 0 : -1;
   const heads = table.querySelectorAll("thead th");
   let marked = null;
   const mark = (cell) => {
@@ -135,21 +139,13 @@ function roving(table) {
       event.target.dataset.quiet = "";
       return;
     }
-    if (!/^(Arrow(Up|Down|Left|Right)|Home|End)$/.test(event.key)) return;
-    // Alt+Arrow is the browser's Back and Forward; only Ctrl+Home and Ctrl+End mean something here.
-    if (event.altKey || event.shiftKey || ((event.ctrlKey || event.metaKey) && !/^(Home|End)$/.test(event.key))) return;
-    event.preventDefault();
     const rows = [...table.querySelectorAll("tbody tr:not(.group)")].map((tr) => [...tr.querySelectorAll("td:not(.tally)")]);
     const td = event.target.parentElement;
     const r = rows.findIndex((row) => row.includes(td));
-    const open = rows.map((row) => row.map((d) => !d.inert && d.firstElementChild !== null));
-    const at = nextCell(open, [r, rows[r].indexOf(td)], event.key, event.ctrlKey || event.metaKey);
-    if (at) rows[at[0]][at[1]].firstElementChild.focus();
+    const cells = rows.map((row) => row.map((d) => d.firstElementChild && { open: !d.inert, focus: () => d.firstElementChild.focus() }));
+    matrixKey(event, cells, [r, rows[r].indexOf(td)]);
   });
 }
-
-// The crosswalk cells a person had to judge: not 'no field', and not 'no term', which no crosswalk can have. The tally and the headline count these.
-const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no field" && c.status !== "no term");
 
 const usableTally = (cells) => {
   if (!cells[0]?.crosswalk) return ["–", el("span", { class: "vh" }, " no CodeMeta crosswalk")];
@@ -182,9 +178,9 @@ function detail(statuses, formats, coverage, upstream) {
       ["Status", `${mark} ${cell.status}: ${meaning}`],
       ["CodeMeta property", coverage.properties?.[cell.term] ? code(coverage.properties[cell.term]) : "none"],
       ["CodeMeta's cell", cell.crosswalk
-        ? el("span", {}, was ? code(was) : cell.cell === null ? "can't be matched to its property" : "empty",
+        ? el("span", {}, cellWords(cell) ?? code(was),
           cell.line ? el("span", {}, " in ", source(coverage.codemeta_tag, cell.crosswalk, cell.line)) : null)
-        : "no CodeMeta crosswalk for this format"],
+        : cellWords(cell)],
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", linked(cell.reason)]);
@@ -245,11 +241,12 @@ function filters(data) {
         td.inert = name !== "all" && cell?.dataset.status !== name;
       }
       // The matrix's one tab stop moves to the first shown cell when the filter hides it.
-      const stop = table.querySelector('.cell[tabindex="0"]');
-      if (!stop || stop.closest("[inert]")) {
-        if (stop) stop.tabIndex = -1;
-        const first = table.querySelector("td:not([inert]) > .cell");
-        if (first) first.tabIndex = 0;
+      const cells = [...table.querySelectorAll(".cell")];
+      const now = cells.findIndex((c) => c.tabIndex === 0);
+      const next = tabStop(cells.map((c) => !c.closest("[inert]")), now);
+      if (next !== now) {
+        if (now >= 0) cells[now].tabIndex = -1;
+        if (next >= 0) cells[next].tabIndex = 0;
       }
     });
     buttons.push(button);
@@ -265,7 +262,7 @@ function filters(data) {
 function route(data) {
   const from = document.getElementById("from");
   const to = document.getElementById("to");
-  const list = document.getElementById("route");
+  const list = document.getElementById("route-list");
   const formats = [...data.formats].sort((a, b) => rank(a) - rank(b));
   for (const select of [from, to]) for (const fmt of formats) select.append(el("option", { value: fmt }, label(fmt)));
   from.value = "pep621";
@@ -296,7 +293,8 @@ function upstreamSection(upstream, tag) {
   const tab = document.getElementById("tab-upstream");
   tab.hidden = false;
   const date = upstream.date.slice(0, 10);
-  document.getElementById("checked").textContent = `upstream main checked ${date} at ${upstream.commit.slice(0, 7)}`;
+  // The build's own day: a quiet upstream keeps its commit date, but the check still ran.
+  document.getElementById("checked").textContent = `upstream main checked ${upstream.checked} at ${upstream.commit.slice(0, 7)}`;
   const intro = document.getElementById("upstream-intro");
   intro.append(`CodeMeta's main branch at commit `, el("a", { href: `https://github.com/codemeta/codemeta/commit/${upstream.commit}` },
     upstream.commit.slice(0, 7)), `, ${date}. `,
@@ -361,6 +359,11 @@ function follow(hub) {
   if (!target) return;
   if (target.tab) {
     if (target.tab === "route" || !document.getElementById("tab-upstream").hidden) showTab(target.tab);
+    else {
+      // An older release has no Upstream tab, so drop the fragment its links would carry.
+      history.replaceState(null, "", location.search || ".");
+      drawReleases();
+    }
     return;
   }
   const match = {
@@ -384,7 +387,7 @@ function follow(hub) {
 function score(data) {
   const fields = needed(data.cells);
   const count = (status) => fields.filter((c) => c.status === status).length;
-  const formats = crosswalkFormats(data.cells).size;
+  const { asIs, of, formats, parts } = scoreCaption(data.cells);
   const bar = el("div", { class: "bar", "aria-hidden": "true" });
   for (const status of Object.keys(data.statuses).filter((s) => s !== "no field" && s !== "no term")) {
     const part = el("span", { class: `s-${status}` });
@@ -392,14 +395,11 @@ function score(data) {
     bar.append(part);
   }
   document.getElementById("score").append(
-    el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${fields.length}`)),
+    el("p", { class: "big" }, String(asIs), el("span", {}, ` of ${of}`)),
     bar,
     el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written`,
-      el("span", { "aria-hidden": "true" }, " (✓)"), ". ", el("span", { "aria-hidden": "true" }, "✎ "),
-      `${count("corrected")} are wrong, ambiguous or prose, `, el("span", { "aria-hidden": "true" }, "≈ "),
-      `${count("notation")} need only a notation change, `, el("span", { "aria-hidden": "true" }, "⊂ "),
-      `${count("scope")} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly or also reads another field, and `,
-      el("span", { "aria-hidden": "true" }, "+ "), `${count("added")} are blank where the format has a field.`),
+      el("span", { "aria-hidden": "true" }, " (✓)"), ". ",
+      ...parts.flatMap(([mark, words]) => [el("span", { "aria-hidden": "true" }, mark), words])),
   );
 }
 
@@ -431,7 +431,9 @@ async function start() {
   releases(latest.tags, tag);
   // Only the newest release is compared with CodeMeta's main branch.
   const { coverage, hub, unreviewed, upstream } = tag === newest ? latest : { ...(await load(`data-${tag}.json`)), upstream: null };
-  if (!upstream && latest.upstream) document.getElementById("checked").textContent = `upstream main is compared with ${newest} only`;
+  const checked = document.getElementById("checked");
+  if (!latest.upstream) checked.textContent = "upstream not checked in this build";
+  else if (!upstream) checked.textContent = `upstream main is compared with ${newest} only`;
   document.getElementById("tag").textContent = coverage.codemeta_tag;
   document.title = pageTitle(document.title, coverage.codemeta_tag);
   const matrixLink = document.getElementById("matrix-md");

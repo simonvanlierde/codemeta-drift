@@ -21,6 +21,7 @@ from codemeta_drift.export import (
     curated_tags,
     derive,
     export,
+    neighbours,
     read_curated,
     shared_paths,
 )
@@ -119,6 +120,19 @@ TABLE = "Parent Type,Property,Type,Description\n" + "".join(
         ("schema:ContactPoint", "name"),
     ]
 )
+
+
+@pytest.mark.parametrize(
+    ("names", "k", "pair"),
+    [
+        (["a", "b", "c"], 0, (None, "b")),
+        (["a", "b", "c"], 1, ("a", "c")),
+        (["a", "b", "c"], 2, ("b", None)),
+        (["a"], 0, (None, None)),
+    ],
+)
+def test_neighbours_stops_at_both_ends(names: list[str], k: int, pair: tuple[str | None, str | None]):
+    assert neighbours(names, k) == pair
 
 
 @pytest.mark.parametrize(

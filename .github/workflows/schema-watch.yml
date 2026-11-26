@@ -13,7 +13,23 @@ env:
   UV_MALWARE_CHECK: "1"
   UV_PREVIEW_FEATURES: malware-check
 jobs:
+  # The dev packages run here, on a runner that never sees the token.
+  live-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.6"
+          python-version: "3.14"
+      - run: uv sync --locked
+      - run: uv run pytest -m live tests/test_poll.py
+
   compare:
+    needs: live-tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # The token is an environment secret, which only runs from main can read.
@@ -26,18 +42,18 @@ jobs:
         with:
           version: "0.13.6"
           python-version: "3.14"
-      - run: uv sync --locked
-      - run: uv run pytest -m live tests/test_poll.py
+      # The package alone: it has no dependencies, so no third-party code runs beside the token.
+      - run: uv sync --locked --no-dev
       # One poll: the issues published are exactly the drafts uploaded, and the unauthenticated API calls run once.
       - name: Poll, and publish missing issues when configured
         env:
           GH_TOKEN: ${{ secrets.MAPPING_WATCH_TOKEN }}
         run: |-
           if [ -n "$GH_TOKEN" ]; then
-            uv run python -m codemeta_drift.poll --out schema-watch.json --publish
+            uv run --no-dev python -m codemeta_drift.poll --out schema-watch.json --publish
           else
             echo "::notice::Publishing skipped: the MAPPING_WATCH_TOKEN secret is not set, so drafts are only in the artifact."
-            uv run python -m codemeta_drift.poll --out schema-watch.json
+            uv run --no-dev python -m codemeta_drift.poll --out schema-watch.json
             # A scheduled run nobody reads must not go green while publishing nothing; the drafts still upload.
             if [ "$GITHUB_EVENT_NAME" = schedule ]; then
               echo "::error::MAPPING_WATCH_TOKEN is not set in the schema-watch environment."
@@ -50,3 +66,16 @@ jobs:
         with:
           name: schema-watch
           path: schema-watch.json
+
+  notify:
+    # Scheduled runs only. Opens one issue, or comments on the open one, when the poll fails.
+    # The only job that may write issues.
+    name: "schema watcher: report failure"
+    needs: [live-tests, compare]
+    # A job that runs past timeout-minutes ends cancelled, not failed.
+    if: always() && github.event_name == 'schedule' && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
+    permissions:
+      issues: write # opens or comments on the failure issue
+    uses: $/.github/workflows/report-failure.yml
+    with:
+      title: Weekly schema watch failed

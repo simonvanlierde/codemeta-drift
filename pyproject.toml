@@ -30,7 +30,7 @@ codemeta-drift = "codemeta_drift.cli:entry"
 
 [project.urls]
 Homepage = "https://github.com/simonvanlierde/codemeta-drift"
-Documentation = "https://simonvanlierde.com/codemeta-drift/"
+Documentation = "https://simonvanlierde.com/codemeta-drift/docs/"
 Source = "https://github.com/simonvanlierde/codemeta-drift"
 Issues = "https://github.com/simonvanlierde/codemeta-drift/issues"
 DOI = "https://doi.org/10.5281/zenodo.23774728"
@@ -139,10 +139,19 @@ PC902 = "the hooks run in CI's checks workflow, not on pre-commit.ci"
 PC903 = "the hooks run in CI's checks workflow, not on pre-commit.ci"
 GH212 = "dependabot.yml groups the actions with the hook revs under multi-ecosystem-groups, which this check does not read"
 
-# `just mutation` grades the whole test suite against checks.py and the export modules.
-# cli.py is left out: most of its mutants change help text.
+# `just mutation` grades the whole test suite against the modules below. Lines of help text, and the
+# "utf-8" spelling (UTF-8, or the locale's, on every host this runs on), are not mutated. A skipped
+# argparse line also loses its required= and type= mutants.
 [tool.mutmut]
 source_paths = ["src/codemeta_drift"]
-only_mutate = ["src/codemeta_drift/checks.py", "src/codemeta_drift/export.py", "src/codemeta_drift/conformance.py", "src/codemeta_drift/paths.py"]
+only_mutate = [
+  "src/codemeta_drift/checks.py",
+  "src/codemeta_drift/cli.py",
+  "src/codemeta_drift/conformance.py",
+  "src/codemeta_drift/coverage.py",
+  "src/codemeta_drift/export.py",
+  "src/codemeta_drift/paths.py",
+]
+do_not_mutate_patterns = ['help=', 'description=', 'command_parser\(', '--help for ', '"utf-8"']
 pytest_add_cli_args_test_selection = ["tests"]
-also_copy = ["README.md", "docs", "examples", "site", ".github"]
+also_copy = ["README.md", "docs", "docs-overrides", "examples", "site", ".github", "zensical.toml"]

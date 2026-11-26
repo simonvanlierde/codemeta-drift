@@ -41,7 +41,8 @@ and term:
   or XPath.
 - 42 are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly, such as
   `identifier` as the software's DOI and `swhid` as a term of its own, or also reads another
-  field, such as a fallback or a newer one.
+  field, such as a fallback or a newer one. The reviewed mapping gives the path, or says the
+  format has none.
 - 82 are wrong, ambiguous or prose. 19 of them name a field the format doesn't have.
 - 110 are blank although the format has the field.
 - 212 are for a term the format has no field for.

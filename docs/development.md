@@ -73,7 +73,8 @@ does the same for the page. A test fails while the hash is stale.
 
 The weekly [schema watcher workflow](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/workflows/schema-watch.yml)
 runs the live tests, then one poll that uploads the draft JSON as an artifact and publishes the
-drafts. To run the same read-only poll locally:
+drafts. The poll job holds the token and installs no dev packages. A failed scheduled run opens a
+"Weekly schema watch failed" issue. To run the same read-only poll locally:
 
 ```sh
 uv run python -m codemeta_drift.poll --out schema-watch.json

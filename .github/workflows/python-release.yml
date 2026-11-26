@@ -215,7 +215,7 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |-
           set -euo pipefail
-          code=$(curl -sS -A "codemeta-drift release workflow" -o "$RUNNER_TEMP/pypi.json" -w '%{http_code}' "https://pypi.org/pypi/codemeta-drift/${TAG#v}/json")
+          code=$(curl -sS --retry 3 --retry-all-errors --max-time 30 -A "codemeta-drift release workflow" -o "$RUNNER_TEMP/pypi.json" -w '%{http_code}' "https://pypi.org/pypi/codemeta-drift/${TAG#v}/json")
           case $code in
             404) exit 0 ;;
             200) ;;

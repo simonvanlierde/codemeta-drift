@@ -109,10 +109,15 @@ def command_parser(name: str, prog: str, description: str) -> JsonParser:
 
 def read_text(path: Path) -> str:
     """A file's text, or standard input for ``-``."""
-    if str(path) == "-" and sys.stdin is None:
+    if str(path) != "-":
+        return path.read_text("utf-8")
+    if sys.stdin is None:
         msg = "standard input is closed"
         raise OSError(msg)
-    return sys.stdin.read() if str(path) == "-" else path.read_text("utf-8")
+    if not (text := sys.stdin.read()):
+        msg = "standard input is empty"
+        raise OSError(msg)
+    return text
 
 
 def fail(code: int, message: str, *, as_json: bool, help_: str | None = None, **fields: object) -> int:
@@ -193,16 +198,15 @@ def export_main(argv: list[str]) -> int:
     parser.add_argument("--schemas", type=Path, help="check every path against the format schemas in this directory")
     parser.add_argument("--json", action="store_true", help="write a JSON report (mapping, findings, errors)")
     args = parser.parse_args(argv)
-    kind = {"as_json": args.json}
 
     if args.tag not in curated_tags():
-        return fail(EXIT_USAGE, f"no curated rows for {args.tag}; have {', '.join(curated_tags())}", **kind)
+        return fail(EXIT_USAGE, f"no curated rows for {args.tag}; have {', '.join(curated_tags())}", as_json=args.json)
     # Each step names what it failed on: the checkout, a schema file or the output file.
     target: object = f"{args.checkout} at tag {args.tag}"
     try:
         files = read_ref(args.checkout, f"refs/tags/{args.tag}")
         if missing := [p for p in (CONTEXT, TABLE) if p not in files]:
-            return fail(EXIT_CANNOT_RUN, f"{target} has no {' or '.join(missing)}", **kind)
+            return fail(EXIT_CANNOT_RUN, f"{target} has no {' or '.join(missing)}", as_json=args.json)
         mapping, findings = export(files, args.tag)
         if args.schemas:
             schemas = {}
@@ -211,7 +215,7 @@ def export_main(argv: list[str]) -> int:
                 schemas[fmt] = json.loads(target.read_text("utf-8"))
             findings += conform(mapping["rows"], schemas)
         if findings:
-            return found(findings, mapping=None, **kind)
+            return found(findings, mapping=None, as_json=args.json)
         text = (
             json_report({"mapping": mapping, "findings": []})
             if args.json
@@ -221,9 +225,9 @@ def export_main(argv: list[str]) -> int:
             target = args.out
             args.out.write_text(text, encoding="utf-8")
     except subprocess.CalledProcessError as err:
-        return fail(EXIT_CANNOT_RUN, f"cannot read {target}: {err.stderr.decode().strip()}", **kind)
+        return fail(EXIT_CANNOT_RUN, f"cannot read {target}: {err.stderr.decode().strip()}", as_json=args.json)
     except READ_ERRORS as err:
-        return fail(EXIT_CANNOT_RUN, f"cannot read or write {target}: {type(err).__name__}: {err}", **kind)
+        return fail(EXIT_CANNOT_RUN, f"cannot read or write {target}: {type(err).__name__}: {err}", as_json=args.json)
     # Outside the try, as in every subcommand: a stdout that fails is entry()'s to report, quietly for a closed pipe.
     if not args.out:
         print(text, end="")

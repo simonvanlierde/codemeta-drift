@@ -1,3 +1,4 @@
+import contextlib
 import io
 import json
 import shutil
@@ -11,8 +12,9 @@ import jsonschema
 import pytest
 
 from codemeta_drift.checks import Finding
-from codemeta_drift.cli import is_input, main, read_dir, read_ref
+from codemeta_drift.cli import found, is_input, json_report, main, read_dir, read_ref
 from codemeta_drift.conformance import SCHEMA_FILES
+from codemeta_drift.export import curated_tags, formats
 
 FIXTURES = Path(__file__).parent / "fixtures"
 ROOT = Path(__file__).resolve().parents[1]
@@ -429,6 +431,12 @@ def test_closed_standard_input_is_a_json_error():
     assert "standard input" in json.loads(result.stdout)["errors"][0]["message"]
 
 
+def test_empty_standard_input_is_an_input_error(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
+    monkeypatch.setattr("sys.stdin", io.StringIO(""))
+    assert main(["hub", "sssom", "-"]) == 3
+    assert capsys.readouterr().err == "codemeta-drift: standard input is empty\n"
+
+
 INTERRUPT = (
     "from codemeta_drift import cli\ndef stop(argv): raise KeyboardInterrupt\ncli.check_main = stop\ncli.entry()"
 )
@@ -521,3 +529,150 @@ def test_startup_loads_neither_importlib_metadata_nor_resources():
     loaded = subprocess.run([sys.executable, "-c", code], check=True, capture_output=True, text=True).stdout
     assert "importlib.metadata" not in loaded
     assert "importlib.resources" not in loaded
+
+
+def test_json_report_layout():
+    """Two-space indent and UTF-8 kept as is, the layout every --json report shares."""
+    report = json_report({"name": "é"}, [{"message": "m", "help": None}])
+    assert report == (
+        '{\n  "schema_version": 1,\n  "name": "é",\n  "errors": [\n    {\n      "message": "m",\n'
+        '      "help": null\n    }\n  ]\n}\n'
+    )
+
+
+def _one_line_end(text: str) -> bool:
+    return text.endswith("}\n") and not text.endswith("\n\n")
+
+
+def test_every_json_report_ends_in_one_newline(
+    repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    runs = [
+        ([str(repo), "--json"], 1),  # check's findings
+        (["export", str(repo), "--tag", "9.9", "--json"], 2),  # fail()
+        (["hub", "pair", "--json"], 2),  # a usage error from a hub subcommand parser
+        (_watch_args(tmp_path, repo), 0),
+    ]
+    for argv, code in runs:
+        with contextlib.suppress(SystemExit):
+            assert main(argv) == code
+        assert _one_line_end(capsys.readouterr().out), argv
+    finding = Finding("CURATED_DUPLICATE", "GitLab", "name", "second row for gitlab")
+    monkeypatch.setattr("codemeta_drift.cli.export", lambda *_: ({"rows": []}, [finding, finding]))
+    assert main(["export", str(repo), "--tag", "4.0", "--json"]) == 1
+    assert _one_line_end(capsys.readouterr().out)
+
+
+def test_text_findings_are_one_per_line(capsys: pytest.CaptureFixture[str]):
+    first, second = Finding("A", "f", "t", "d"), Finding("B", "f", "t", "d")
+    assert found([first, second], as_json=False) == 1
+    assert capsys.readouterr().err == f"{first}\n{second}\n"
+
+
+def test_check_names_the_files_a_checkout_lacks(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    assert main([str(tmp_path), "--json"]) == 3
+    [error] = json.loads(capsys.readouterr().out)["errors"]
+    assert error == {
+        "message": f"{tmp_path} has no codemeta.jsonld or properties_description.csv",
+        "help": "pass the root of a codemeta clone",
+    }
+
+
+def test_check_names_the_error_type_of_an_unreadable_file(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    (tmp_path / "codemeta.jsonld").write_text("not json", "utf-8")
+    (tmp_path / "properties_description.csv").write_text("Parent Type,Property\n", "utf-8")
+    assert main([str(tmp_path)]) == 3
+    assert capsys.readouterr().err.startswith(f"codemeta-drift: cannot read {tmp_path}: JSONDecodeError: ")
+
+
+def test_export_names_the_files_a_tag_lacks_in_the_json_report(
+    tagged: Callable[[dict[str, str]], Path], capsys: pytest.CaptureFixture[str]
+):
+    root = tagged({"README": "x"})
+    assert main(["export", str(root), "--tag", "3.1", "--json"]) == 3
+    captured = capsys.readouterr()
+    assert captured.err == ""
+    [error] = json.loads(captured.out)["errors"]
+    assert error["message"] == f"{root} at tag 3.1 has no codemeta.jsonld or properties_description.csv"
+
+
+def test_hub_json_gives_text_for_commands_without_rows(capsys: pytest.CaptureFixture[str]):
+    assert main(["hub", "sssom", str(ROOT / "examples/mapping-4.0.json"), "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert set(report) == {"schema_version", "text", "errors"}
+    assert report["text"].startswith("# ")
+
+
+def test_hub_help_ends_with_every_format_id(capsys: pytest.CaptureFixture[str]):
+    ids = sorted({*(fmt for tag in curated_tags() for fmt in formats(tag)), "gomod"})
+    with pytest.raises(SystemExit):
+        main(["hub", "--help"])
+    assert f"formats for --format, --from and --to: {', '.join(ids)}\n" in capsys.readouterr().out
+
+
+def test_hub_needs_a_subcommand_and_its_errors_are_json(capsys: pytest.CaptureFixture[str]):
+    with pytest.raises(SystemExit) as exit_:
+        main(["hub"])
+    assert exit_.value.code == 2
+    assert "the following arguments are required: command" in capsys.readouterr().err
+    with pytest.raises(SystemExit) as exit_:
+        main(["hub", "pair", "--json"])
+    assert exit_.value.code == 2
+    report = json.loads(capsys.readouterr().out)
+    assert set(report) == {"schema_version", "errors"}  # no check fields outside check
+    assert "required" in report["errors"][0]["message"]
+
+
+def test_coverage_markdown_with_a_checkout_lists_the_unreviewed_crosswalks(
+    repo: Path, capsys: pytest.CaptureFixture[str]
+):
+    assert main(["hub", "coverage", str(ROOT / "examples/mapping-4.0.json"), "--codemeta", str(repo)]) == 0
+    assert "\n## Not reviewed\n" in capsys.readouterr().out
+
+
+def test_an_interrupt_with_an_unwritable_stderr_still_exits_130(monkeypatch: pytest.MonkeyPatch):
+    class Full(io.StringIO):
+        def write(self, _text: str) -> int:
+            raise OSError(28, "No space left on device")
+
+    def stop(_argv: list[str]) -> int:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr("codemeta_drift.cli.check_main", stop)
+    monkeypatch.setattr("sys.stderr", Full())
+    assert main([]) == 130
+
+
+def test_an_interrupt_says_so(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
+    def stop(_argv: list[str]) -> int:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr("codemeta_drift.cli.check_main", stop)
+    assert main([]) == 130
+    assert capsys.readouterr().err == "codemeta-drift: interrupted\n"
+
+
+def test_closed_standard_input_says_so(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]):
+    monkeypatch.setattr("sys.stdin", None)
+    assert main(["hub", "sssom", "-"]) == 3
+    assert capsys.readouterr().err == "codemeta-drift: standard input is closed\n"
+
+
+def test_read_ref_keeps_a_tab_in_a_file_name(tagged: Callable[[dict[str, str]], Path]):
+    root = tagged({"crosswalks/a\tb.csv": "x\n", "crosswalks/c.csv": "y\n"})
+    assert read_ref(root, "3.1") == {"crosswalks/a\tb.csv": "x\n", "crosswalks/c.csv": "y\n"}
+
+
+def test_watch_needs_existing_and_names_a_bad_list(
+    repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    args = _watch_args(tmp_path, repo)
+    with pytest.raises(SystemExit) as exit_:
+        main(args[: args.index("--existing")])
+    assert exit_.value.code == 2
+    assert "--existing" in _watch_report(capsys)["errors"][0]["message"]
+    args[args.index("--existing") + 1] = "-"
+    monkeypatch.setattr("sys.stdin", io.StringIO("{}"))
+    assert main(args) == 3
+    [error] = _watch_report(capsys)["errors"]
+    assert error["message"] == "ValueError: existing issues must be a JSON list of titles"

@@ -27,7 +27,7 @@ mutation:
     export LC_ALL=C
     # mutmut reuses results from mutants/ even after the tests change, so start clean.
     rm -rf mutants
-    uv run mutmut run >/dev/null
+    uv run mutmut run
     survivors=$(uv run mutmut results | sed -n 's/^ *\(.*\): survived$/\1/p' | sort)
     listed=$(grep -v '^#' tests/mutation-baseline.txt | awk '{ print $1 }' | sort)
     new=$(comm -23 <(echo "$survivors" | sed '/^$/d') <(echo "$listed"))

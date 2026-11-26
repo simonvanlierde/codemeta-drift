@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tomllib
 from collections.abc import Callable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -59,6 +60,8 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert "SKIPPED" not in codes
     assert data["upstream"]["cells"] == []
     assert len(data["upstream"]["commit"]) == 40
+    # The header's "checked" day is the build's, not main's last commit's.
+    assert data["upstream"]["checked"] == datetime.now(UTC).date().isoformat()
     # The crosswalks nobody reviewed are read at the export's tag.
     assert data["unreviewed"]["codemeta_tag"] == "4.0"
     assert {fmt["format"] for fmt in data["unreviewed"]["formats"]} == {
@@ -297,3 +300,17 @@ def test_every_docs_page_is_in_the_menu():
 
     nav = tomllib.loads((ROOT / "zensical.toml").read_text("utf-8"))["project"]["nav"]
     assert set(pages(nav)) == {p.name for p in (ROOT / "docs").glob("*.md")}
+
+
+def test_docs_description_is_the_package_description():
+    docs = tomllib.loads((ROOT / "zensical.toml").read_text("utf-8"))["project"]["site_description"]
+    assert docs == tomllib.loads((ROOT / "pyproject.toml").read_text("utf-8"))["project"]["description"]
+
+
+def test_docs_and_page_describe_the_same_card():
+    def alt(path: str) -> str:
+        found = re.search(r'<meta property="og:image:alt" content="([^"]*)"', (ROOT / path).read_text("utf-8"))
+        assert found, path
+        return found[1]
+
+    assert alt("docs-overrides/main.html") == alt("site/index.html")

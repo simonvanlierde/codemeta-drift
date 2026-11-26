@@ -47,7 +47,7 @@ def test_pair_rejects_missing_format(mapping: dict, fmt: str):
         pair_rows(mapping, fmt, "cargo")
 
 
-@pytest.mark.parametrize("change", ["version", "duplicate", "path", "type", "source", "rows", "generator"])
+@pytest.mark.parametrize("change", ["version", "duplicate", "path", "type", "source", "rows", "generator", "kind"])
 def test_mapping_rejects_invalid_input(mapping: dict, change: str):
     data = mapping
     if change == "version":
@@ -62,10 +62,23 @@ def test_mapping_rejects_invalid_input(mapping: dict, change: str):
         del data["rows"][0]["source"]
     elif change == "generator":
         data["generator"] = {"name": 1, "version": None}
+    elif change == "kind":
+        data["rows"][0]["kind"] = "bogus"
     else:
         data["rows"] = None
     with pytest.raises(ValueError, match="mapping"):
         validate_mapping(data)
+
+
+def test_coverage_of_a_row_with_an_unknown_kind_exits_3(
+    mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+):
+    """Not a KeyError (exit 1, as if it were findings) and not a status the report does not list."""
+    mapping["rows"][0]["kind"] = "bogus"
+    path = tmp_path / "mapping.json"
+    path.write_text(json.dumps(mapping), "utf-8")
+    assert main(["hub", "coverage", str(path)]) == 3
+    assert "invalid or unsupported mapping row 1" in capsys.readouterr().err
 
 
 def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict):
@@ -229,7 +242,7 @@ def test_cli_coverage_prints_markdown_and_json_on_request(
 ):
     assert main(["hub", "coverage", str(example)]) == 0
     text = capsys.readouterr().out
-    assert text.startswith(f"# Crosswalk coverage at CodeMeta {mapping['codemeta_tag']}\n")
+    assert f"\n# Crosswalk coverage at CodeMeta {mapping['codemeta_tag']}\n" in text
     assert "| Mark | Status | Meaning |" in text
     assert main(["hub", "coverage", str(example), "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["codemeta_tag"] == mapping["codemeta_tag"]

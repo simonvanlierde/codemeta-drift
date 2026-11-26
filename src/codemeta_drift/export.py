@@ -223,7 +223,8 @@ def build_rows(
     """Export rows for every format and term, and a finding for each row it cannot make.
 
     Rows that can be made are returned even when there are findings, so the raw crosswalk can be
-    checked on its own (``curated=[]``). Raises ValueError for a curated row without a required key.
+    checked on its own (``curated=[]``). Raises ValueError for a curated row without a required key, or
+    one ``make_row`` refuses.
     """
     name = f"curated-{tag}.json"
     overrides: dict[tuple[str, str], dict[str, Any]] = {}
@@ -302,7 +303,10 @@ def make_row(
     override: dict[str, Any] | None,
     tag: str,
 ) -> tuple[dict[str, Any] | None, Finding | None]:
-    """One export row, from the curated row if there is one, else from the cell."""
+    """One export row, from the curated row if there is one, else from the cell.
+
+    Raises ValueError for a curated row with a kind on a cell the crosswalk leaves empty.
+    """
     label = spoke.crosswalk or fmt
     derived = None
     if cell is not None and classify(cell) == "path":
@@ -310,6 +314,10 @@ def make_row(
     if override:
         if finding := curated_finding(label, term, cell, derived, override):
             return None, finding
+        # The coverage status reads a kind only off a cell the row corrects; elsewhere it would be lost.
+        if "kind" in override and not (cell or "").strip():
+            msg = f"curated-{tag}.json: the {fmt} {term} row has kind {override['kind']!r}, but its cell is empty"
+            raise ValueError(msg)
         row = {"format": fmt, "term": term, "path": override["path"], "source": f"curated:{override['reason']}"}
         return row | {k: override[k] for k in ("kind", "see_also", "comment") if k in override}, None
     if finding := cell_finding(spoke, label, term, cell, derived):
