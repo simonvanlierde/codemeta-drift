@@ -126,13 +126,13 @@ def test_readme_figures_match_the_counts():
     count = Counter(c["status"] for c in cells)
     null_corrected = sum(c["status"] == "corrected" and c["path"] is None for c in cells)
     text = " ".join((ROOT / "README.md").read_text("utf-8").split())
-    other, terms = len(cells) - count["no field"], len(TERMS) - len(NO_PROPERTY)
+    terms = len(TERMS) - len(NO_PROPERTY)
     assert (
-        f"have {len(cells)} cells, one for each of the {terms} terms citation tools need."
-        f" {count['no field']} are for terms"
-        f" the format has no field for. Of the other {other}, only {count['as-is']} can be used as written:"
-        f" {count['corrected']} are wrong, ambiguous or prose ({null_corrected} of them fill a term the format has"
-        f" no field for), and {count['added']} are blank"
+        f"for the {terms} terms citation tools need. That gives {len(cells)} cells, one per crosswalk and term:"
+        f" - {count['as-is']} can be used as written. - {count['corrected']} are wrong, ambiguous or prose."
+        f" {null_corrected} of them name a field the format doesn't have."
+        f" - {count['added']} are blank although the format has the field."
+        f" - {count['no field']} are for a term the format has no field for."
     ) in text
 
 

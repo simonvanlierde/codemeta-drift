@@ -11,7 +11,7 @@ The [current help example](https://help.zenodo.org/docs/github/describe-software
 confirms `version`, creators, typed contributors and related identifiers.
 
 The [bundled structural subset](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/zenodo.json) is locally
-authored. It records the field paths the curated mapping uses and their array
+authored. It records the field paths the reviewed mapping uses and their array
 structure. Its `x-source` names the reviewed commit and the Git blob hashes
 of the importer and deserializer files. The [snapshot manifest](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/fixtures/schemas/SOURCES)
 records the subset's SHA-256 hash.
@@ -19,12 +19,12 @@ records the subset's SHA-256 hash.
 This is not an official Zenodo JSON Schema or a deposit validator.
 It does not check required deposit fields, ORCID checksums, licences, contributor
 vocabularies or every field the service accepts. Read the importer source before
-mapping a field outside this subset. The related-identifier `scheme` field is
-a consumer-side selector; the importer infers the scheme from the identifier value.
+mapping a field outside this subset. The mapping filters related identifiers by `scheme`. Zenodo
+ignores that field and infers the scheme from the value.
 The poller reads the importer source; it never runs or copies it.
 
 Path checks detect the old crosswalk's uppercase `creators[].ORCID`, bare `id`
-and `related_identifiers.isSupplementTo` paths. The curated mapping already uses
+and `related_identifiers.isSupplementTo` paths. The reviewed mapping already uses
 `creators[].orcid`, `doi` and filtered related-identifier lists.
 
 The poller checks the three upstream blob hashes. A changed file produces a

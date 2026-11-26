@@ -24,7 +24,7 @@ fmt:
 hooks:
     prek run -a
 
-# Needs Chromium: `pnpm dlx playwright@1.64.1 install chromium`. Check the result at 300 px wide and cropped to the centre square (docs/hosting.md#social-card).
+# Needs Chromium: `pnpm dlx playwright@1.64.1 install chromium`. Check the result at 300 px wide and cropped to the centre square (docs/development.md#social-card).
 
 # Render docs/og-card.html to the 1200x630 social card image, in each place the page serves it from.
 og-card:
