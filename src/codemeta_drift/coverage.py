@@ -160,8 +160,10 @@ def unreviewed(files: Mapping[str, str], mapping: dict[str, Any]) -> dict[str, A
             continue
         fmt = path.removeprefix("crosswalks/").removesuffix(".csv")
         label = SHORT_LABELS.get(fmt) or format_name(files[path]).strip()
-        why = dict(zip(("status", "reason", "url"), NOT_REVIEWED.get(fmt, (None, None, None)), strict=True))
-        formats.append({"format": fmt, "label": label, "crosswalk": path, **why})
+        status, reason, url = NOT_REVIEWED.get(fmt, (None, None, None))
+        formats.append(
+            {"format": fmt, "label": label, "crosswalk": path, "status": status, "reason": reason, "url": url}
+        )
         joined = crosswalk_cells(files, path)
         for term, key in TERMS.items():
             cell = joined.get(key)

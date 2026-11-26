@@ -211,15 +211,19 @@ them into one first. These cases need more than the grammar below says:
 - MODS is XML too, read as xmltodict reads it. The tree starts at `mods`, with the namespace
   ignored; in a `modsCollection` each `mods` element is its own record. Every element is a list
   even when it occurs once, since nearly every MODS element may repeat. An attribute is an `@` key,
-  and `xlink:href` keeps its prefix (`@xlink:href`). An element with attributes is an object that
+  and `xlink:href` keeps its prefix (`@xlink:href`); `xsi:` attributes such as `xsi:schemaLocation`
+  are dropped. An element with attributes is an object that
   holds its trimmed text under `#text`: a path that ends at one, such as `identifier[@type=doi]`,
   gives that object, and the consumer takes its `#text`. The parser gives each `name` a `roleTerm`
   key that lists the text of every `role.roleTerm` in it, so `name[roleTerm=aut]` selects the
   authors, as `[role=aut]` does for R. A filter value cannot hold a space, so the `license` row
   reads every `accessCondition`: the consumer keeps one typed `use and reproduction` or untyped.
-- SPASE is XML. The tree starts at `Spase.Software`, with the namespace ignored; a document with
-  several Software resources is read at the first. An element the schema lets repeat
-  (`AccessInformation`, `AccessURL`, `Contact`, `Role`) is a list even when it occurs once, so
+  The `name` row reads every `titleInfo`, alternative and translated titles too, and the consumer
+  keeps the first, which is normally the main title.
+- SPASE is XML. The tree is the content of `Spase.Software`, with the namespace ignored, so paths
+  start at its children (`ResourceHeader.ResourceName`); a document with several Software resources
+  is read at the first. Four elements the rows go through are lists even when they occur once:
+  `AccessInformation`, `AccessURL`, `Contact` and `Role`. So
   `Contact[Role=Contributor]` matches a contact whose roles include Contributor. A Contact holds only
   `PersonID`, the id of a Person record in another document, where the name and ORCID are; no path
   follows it. `PublicationInfo.Authors` is one string, names separated by semicolons, each
@@ -236,7 +240,11 @@ them into one first. These cases need more than the grammar below says:
   `CI_Date.date` is not. Only the first `identificationInfo` counts. `_class` tells a person from an
   organisation and a licence from other constraints; no path reads it. A licence path reads every
   `resourceConstraints` reference, and the consumer skips those that are not licences. ISO 19139
-  records (`gmd:MD_Metadata`) are another tree, which these rows do not read.
+  records (`gmd:MD_Metadata`) are another tree, which these rows do not read. A party has one
+  `name` string, so the given and family name rows both read it and the consumer splits it. The
+  `@id` rows read `partyIdentifier.code`, which is the bare id (`0000-0002-1825-0097`) once the
+  Anchor's `xlink:href` is dropped: `codeSpace` says it is an ORCID, and the consumer adds
+  `https://orcid.org/`.
 - A .cabal file: field names are lower case, and each top-level field is a key holding its text.
   A section is an element of a list named after it, with its first argument as `kind`, so
   `source-repository head` is read at `source-repository[kind=head].location`.
@@ -264,17 +272,22 @@ them into one first. These cases need more than the grammar below says:
   file leaves its key out. Field names in these deb822 files are case-insensitive (Policy 5.1); the
   parser stores each in Policy's spelling, every hyphen-separated part capitalised, so `HomePage` is
   read at `Homepage`. A line that starts with a space or tab continues the field before it: the parser
-  keeps the value's lines, each without that first space, and the consumer reads the first line of
+  keeps the value's lines, each without that first space, so a line of a space and a full stop,
+  which stands for an empty line of the value, stays `.`. A line in `debian/control` that starts with `#` is a comment, which the consumer
+  drops (Policy 5.1). The consumer reads the first line of
   `License` (the short name) and of `Description` (the synopsis). `License` names are
   copyright-format's own (`Expat`, `GPL-2+`), not SPDX ids, and a version is
-  `[epoch:]upstream[-revision]`: the consumer maps the one and cuts the other. Never run
+  `[epoch:]upstream[-revision]`: the consumer maps a licence name to its SPDX id (`Expat` is `MIT`)
+  and cuts a version to its upstream part. Never run
   `debian/rules`; a parser of the newest changelog line gives the same `Version`.
 - VIVO is RDF held in a VIVO instance, not a file. One linked-data response does not name a
   work's authors, so a consumer reads the merged graph of the software individual and its
   `vivo:Authorship` nodes, their agents with their `vcard:Individual` and `vcard:Name`, its
   `vivo:DateTimeValue` and its publisher (by fetching each IRI or by one SPARQL CONSTRUCT). It frames
   that graph as JSON-LD on `"@type": "obo:ERO_0000071"` with `"@embed": "@always"`, with a context that
-  defines the prefixes `vivo`, `obo`, `bibo`, `vcard` and `rdfs`, the term `Authorship` for
+  defines the prefixes `vivo` (`http://vivoweb.org/ontology/core#`), `obo`
+  (`http://purl.obolibrary.org/obo/`), `bibo` (`http://purl.org/ontology/bibo/`), `vcard`
+  (`http://www.w3.org/2006/vcard/ns#`) and `rdfs` (`http://www.w3.org/2000/01/rdf-schema#`), the term `Authorship` for
   `vivo:Authorship`, and `"@container": "@set"` for `vivo:relatedBy`, `vivo:relates`, `vivo:orcidId`
   and `obo:ARG_2000028`, so those are always lists. The parser then drops from each `vivo:relates` the
   reference back to the root (an object whose only key is the root's `@id`) and sorts `vivo:relatedBy`
@@ -391,7 +404,8 @@ Its `schema_version` is the mapping schema whose grammar the cases need.
 Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate`,
 `croissant`, `oai_dc`, `debian-control`, `mods`, `vivo`, `spase` or `iso-19115-3`) and its `text` is the source file content. Parse that text and compare the resulting tree
 to `document` before resolving `path`; a consumer that does not read that format skips the parse and
-still resolves `path` in `document`. The `vivo` case gives Turtle as `raw_input` and the framed tree as `document`; this package's own tests
+still resolves `path` in `document`. A release can add parser names, so a consumer skips the parse for
+a name it does not know. The `vivo` case gives Turtle as `raw_input` and the framed tree as `document`; this package's own tests
 resolve that tree but do not frame the Turtle. The PKG-INFO cases cover comma separation, quoted names, company
 suffixes and `et al.`.
 

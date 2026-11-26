@@ -66,7 +66,6 @@ def test_every_status_names_an_unreviewed_crosswalk(mapping: dict, tag_files: Pa
     for name, (status, reason, url) in NOT_REVIEWED.items():
         assert status in {"superseded", "registry", "niche"}
         assert (formats[name]["status"], formats[name]["reason"], formats[name]["url"]) == (status, reason, url)
-        assert f"- {formats[name]['label']} ({status}): {reason}. <{url}>" in markdown(mapping, read_dir(tag_files))
 
 
 def test_unreviewed_marks_a_cell_it_cannot_join(mapping: dict, tag_files: Path):

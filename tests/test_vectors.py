@@ -97,8 +97,7 @@ EXPECTED = {
 @pytest.mark.parametrize("tag", ["3.1", "4.0"])
 @pytest.mark.parametrize("fmt", ["ro-crate", "croissant"])
 def test_curated_json_ld_rows_read_the_vector_documents(fmt: str, tag: str) -> None:
-    rows = json.loads(PACKAGE.joinpath(f"curated-{tag}.json").read_text("utf-8"))["rows"]
-    paths = {r["term"]: r["path"] for r in rows if r["format"] == fmt}
+    paths = curated_paths(tag, fmt)
     document = JSON_LD[fmt]["document"]
     for term, values in EXPECTED.items():
         assert resolve(document, paths[term]) == values, term
@@ -118,8 +117,7 @@ def test_curated_json_ld_rows_read_the_vector_documents(fmt: str, tag: str) -> N
 @pytest.mark.parametrize("tag", ["3.1", "4.0"])
 @pytest.mark.parametrize("fmt", ["ro-crate", "croissant"])
 def test_curated_identifier_keeps_a_string_doi_after_an_object(fmt: str, tag: str) -> None:
-    rows = json.loads(PACKAGE.joinpath(f"curated-{tag}.json").read_text("utf-8"))["rows"]
-    path = next(r["path"] for r in rows if r["format"] == fmt and r["term"] == "identifier")
+    path = curated_paths(tag, fmt)["identifier"]
     ids = [{"@id": "#isbn", "@type": "PropertyValue", "value": "978-0-306-40615-7"}, "https://doi.org/10.5555/x"]
     document = {"@graph": [{"@id": "./", "identifier": ids}]} if fmt == "ro-crate" else {"identifier": ids}
     assert "https://doi.org/10.5555/x" in resolve(document, path)

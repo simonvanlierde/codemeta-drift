@@ -7,6 +7,12 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Upgrade
+
+- Vendor the 1.9 `mapping.schema.json` and `mapping-vectors.json` with a 1.9 export, and update a
+  pinned `codemeta-drift hub`: the 0.9.0 hub refuses 1.9 files. A consumer that reads only some
+  formats skips the rows of a format id it does not know.
+
 ### Added
 
 - Mapping schema 1.9: rows for six more formats in the 3.1 and 4.0 exports: `dublin-core` (an `oai_dc`
@@ -14,7 +20,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   record), `vivo-1.8` (a VIVO software individual), `spase-2.6.1` (a SPASE Software resource) and
   `iso-19115-1-2014` (an ISO 19115-3 record). No pattern changes, so a 1.9 file passes the 1.8 schema;
   the `hub` of 0.9.0 refuses it. The [export guide](docs/mapping-export.md) gives each format's reading
-  rules, and `mapping-vectors.json` has a parser case for each.
+  rules, and `mapping-vectors.json` has a parser case for each. The SSSOM files gain their rows too.
 - The docs are a searchable site at <https://simonvanlierde.com/codemeta-drift/docs/>. The coverage page keeps its address.
 - The crosswalks nobody reviews say why, on the coverage pages and the site: superseded by a reviewed format
   (DCAT 2, CodeMeta 1), a registry's own schema, or niche. `hub coverage --json` gives each one's `status`,

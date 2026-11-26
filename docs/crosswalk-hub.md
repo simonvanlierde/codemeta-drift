@@ -26,7 +26,8 @@ for the newest CodeMeta release and, with `?tag=3.1`, for each older one.
 `--codemeta <checkout>` also lists the CodeMeta crosswalks nobody has reviewed, read at the
 export's tag, each cell marked by its shape (path, prose, empty or unmatched), and why each is not
 reviewed: superseded by a reviewed format, a registry's own schema, or niche. In `--json` they are under
-`unreviewed`, each format with its `status`, `reason` and `url`.
+`unreviewed`, each format with its `status`, `reason` and `url`, all three `null` for a crosswalk
+with no reason listed yet.
 
 `pair` writes CSV columns `term,source,target`. It skips a term when either format has
 `path: null` or no row, and rejects an unknown source or target format. Paths keep their
