@@ -337,7 +337,7 @@ function score(data) {
     bar,
     el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written. `
       + `${count("corrected")} are wrong, ambiguous or prose, ${count("notation")} need only a notation change, `
-      + `${count("scope")} differ only in how this page reads identifier and swhid, `
+      + `${count("scope")} differ only in how this page reads the term or add a fallback, `
       + `and ${count("added")} are blank where the format has a field.`),
   );
 }

@@ -160,8 +160,8 @@
     {
       "format": "cff-1.2.0",
       "term": "license",
-      "path": "license",
-      "source": "curated:the cell lists license / license-url; license-url holds a licence URL, not an SPDX id",
+      "path": "license | license-url",
+      "source": "curated:the cell lists license / license-url; license holds SPDX ids, and license-url the URL of a licence that is not on the SPDX list (CFF 1.2.0 schema), so the path falls back to it",
       "crosswalk_cell": "license / license-url"
     },
     {
@@ -1479,7 +1479,7 @@
       "format": "datacite",
       "term": "author.@id",
       "path": "creators[].nameIdentifiers[nameIdentifierScheme=ORCID].nameIdentifier",
-      "source": "curated:the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme, and the ORCID is the one whose scheme is ORCID",
+      "source": "curated:the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme (ORCID, ISNI or ROR, DataCite 4.6 property 2.4), and the ORCID is the one whose scheme is ORCID",
       "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
       "crosswalk_cell": "nameIdentifier"
     },
@@ -1511,7 +1511,7 @@
       "format": "datacite",
       "term": "contributor.@id",
       "path": "contributors[].nameIdentifiers[nameIdentifierScheme=ORCID].nameIdentifier",
-      "source": "curated:the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme, and the ORCID is the one whose scheme is ORCID",
+      "source": "curated:the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme (ORCID, ISNI or ROR, DataCite 4.6 property 7.4), and the ORCID is the one whose scheme is ORCID",
       "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
       "crosswalk_cell": "nameIdentifier"
     },

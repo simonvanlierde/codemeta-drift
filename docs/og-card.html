@@ -17,7 +17,8 @@
   html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--paper); color: var(--ink); }
   /* One tile per matrix cell, placed by its row and term. Glyphs are about 55% of the tile. */
   .c { position: absolute; display: grid; place-items: center; font: 400 var(--g)/1 var(--serif); }
-  .o { background: var(--asis); color: #9a938a; }
+  .o, .s { background: var(--asis); color: #9a938a; }
+  .q { color: var(--mark); }
   .x { background: var(--mark); color: var(--paper); }
   .p { border: 3px solid var(--mark); color: var(--mark); }
   main { position: absolute; z-index: 1; left: 285px; top: 0; width: 630px; height: 630px; }
@@ -26,29 +27,29 @@
   .url { position: absolute; font: 400 32px/1 var(--mono); color: var(--faint); letter-spacing: -0.03em; }
   .url::before { content: ""; display: block; width: 96px; border-top: 2px dashed var(--link); margin-bottom: 22px; }
   :root { --g: 30px; }
-  h1 { top: 108px; } .job { top: 198px; } .url { top: 330px; }  .n { border: 2px dashed #cfc9c0; color: #cfc9c0; }
+  h1 { top: 88px; } .job { top: 178px; } .url { top: 336px; }  .n { border: 2px dashed #cfc9c0; color: #cfc9c0; }
 
 </style>
 </head>
 <body>
 <!-- Cells are CodeMeta 4.0's crosswalk status for CFF, Zenodo, DataCite, BibTeX, pyproject.toml, PKG-INFO, Cargo, npm,
      R DESCRIPTION and Julia (rows) by the 19 terms of the page's matrix, from codemeta_drift.coverage on
-     examples/mapping-4.0.json. o = works as written, x = wrong, p = missing, - = no field. Each tile keeps its
+     examples/mapping-4.0.json. o = works as written, s = scope, q = notation, x = wrong, p = missing, - = no field. Each tile keeps its
      matrix row and term order; a layout only chooses which cells to show. -->
 <div id="m"></div>
 <main>
   <h1>codemeta-drift</h1>
-  <p class="job">Where CodeMeta's crosswalks are wrong or missing.</p>
+  <p class="job">Where CodeMeta's crosswalk cells work as written, and where they don't.</p>
   <p class="url">simonvanlierde.com/codemeta-drift</p>
 </main>
 <script>
-  const rows = ["ooooox----xxxoooo--", "oooppxpppxoxxxooo--", "xooooxxooxxxxpxxxx-", "opopp-----oxxxopxo-", "ppppp-----p--ppp---", "ooxpp-----x--pxo---", "xoopp-x---o--opx---", "ooopp-xpp-oxxooo---", "xoxxxpxxxpoxxoo-o--", "oppppp-----xx------"];
+  const rows = ["ooooox----qxsoooo--", "oooppqpppqossqooo--", "qoooosqoosxqspqqxq-", "opopp-----osssopqo-", "ppppp-----p--ppp---", "ooxpp-----x--pxo---", "xoopp-x---o--opx---", "ooopp-qpp-ossooo---", "xoxxxpxxxpossoo-o--", "oppppp-----ss------"];
   // Top band: DataCite across all 19 terms. Staircase: rows (0, 1, 2, 3, 4, 5, 7, 8), terms 4-15 (the 12 consecutive terms with the fewest no-field cells), snug to the right edge; row i keeps its last k terms.
   const P = 63, W = 56, H = 56, cols = 12, c0 = 4, sub = [0, 1, 2, 3, 4, 5, 7, 8], ks = [1, 2, 2, 3, 3, 6, 7, 9];
   const cells = [];
   for (let c = 0; c < 19; c++) cells.push([2, c, 3 + c * P, 14]);
   ks.forEach((k, i) => { for (let j = cols - k; j < cols; j++) cells.push([sub[i], c0 + j, 3 + (7 + j) * P, 90 + i * P]); });
-  const mark = { o: "✓", x: "✎", p: "+", "-": "–" };
+  const mark = { o: "✓", s: "⊂", q: "≈", x: "✎", p: "+", "-": "–" };
   document.getElementById("m").innerHTML = cells.map(([r, c, x, y]) => {
     const s = rows[r][c];
     return `<div class="c ${s === "-" ? "n" : s}" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px">${mark[s]}</div>`;

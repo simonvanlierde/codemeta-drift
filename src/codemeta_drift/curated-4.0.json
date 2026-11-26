@@ -1,5 +1,5 @@
 {
-  "description": "Rows of the CodeMeta 4.0 mapping export that do not read their crosswalk cell: the cell is prose, empty, wrong, or the format has no crosswalk. 'cell' is the crosswalk cell the row was written for, left out when the format has no crosswalk; when the cell changes the row is reported as CURATED_STALE. 'reason' becomes the row's source as curated:<reason>. 'kind' (optional) sorts a row whose cell is not wrong: notation when the cell names the right field in a form a tool cannot use as a path (case, prefix, XPath), scope when the cell is right by CodeMeta's definition but the hub reads the term more narrowly (identifier as the DOI, swhid as a term of its own). The coverage pages show it; the export leaves it out. Format: docs/mapping-export.md.",
+  "description": "Rows of the CodeMeta 4.0 mapping export that do not read their crosswalk cell: the cell is prose, empty, wrong, or the format has no crosswalk. 'cell' is the crosswalk cell the row was written for, left out when the format has no crosswalk; when the cell changes the row is reported as CURATED_STALE. 'reason' becomes the row's source as curated:<reason>. 'kind' (optional) sorts a row whose cell is not wrong: notation when the cell names the right field in a form a tool cannot use as a path (case, prefix, XPath), scope when the cell is right by CodeMeta's definition but the hub reads the term more narrowly (identifier as the DOI, a person's @id as the ORCID, publisher as its name, swhid as a term of its own) or adds a fallback field. The coverage pages show it; the export leaves it out. Format: docs/mapping-export.md.",
   "codemeta_tag": "4.0",
   "rows": [
     {
@@ -12,9 +12,10 @@
     {
       "format": "cff-1.2.0",
       "term": "license",
-      "path": "license",
+      "path": "license | license-url",
       "cell": "license / license-url",
-      "reason": "the cell lists license / license-url; license-url holds a licence URL, not an SPDX id"
+      "reason": "the cell lists license / license-url; license holds SPDX ids, and license-url the URL of a licence that is not on the SPDX list (CFF 1.2.0 schema), so the path falls back to it",
+      "kind": "notation"
     },
     {
       "format": "cff-1.2.0",
@@ -803,7 +804,8 @@
       "term": "codeRepository",
       "path": "repository | url",
       "cell": "repository",
-      "reason": "the cell says repository, which biblatex-software adds; plain BibTeX styles print only url, so the path falls back to it"
+      "reason": "the cell says repository, which biblatex-software adds; plain BibTeX styles print only url, so the path falls back to it",
+      "kind": "scope"
     },
     {
       "format": "bibtex",
@@ -817,7 +819,8 @@
       "term": "datePublished",
       "path": "date | year",
       "cell": "date / (year) / (month)",
-      "reason": "the cell lists date / (year) / (month); biblatex writes the release date in date, and classic BibTeX gives only year and month"
+      "reason": "the cell lists date / (year) / (month); biblatex writes the release date in date, and classic BibTeX gives only year and month",
+      "kind": "notation"
     },
     {
       "format": "datacite",
@@ -833,8 +836,9 @@
       "term": "author.@id",
       "path": "creators[].nameIdentifiers[nameIdentifierScheme=ORCID].nameIdentifier",
       "cell": "nameIdentifier",
-      "reason": "the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme, and the ORCID is the one whose scheme is ORCID",
-      "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both."
+      "reason": "the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme (ORCID, ISNI or ROR, DataCite 4.6 property 2.4), and the ORCID is the one whose scheme is ORCID",
+      "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
+      "kind": "scope"
     },
     {
       "format": "datacite",
@@ -850,8 +854,9 @@
       "term": "contributor.@id",
       "path": "contributors[].nameIdentifiers[nameIdentifierScheme=ORCID].nameIdentifier",
       "cell": "nameIdentifier",
-      "reason": "the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme, and the ORCID is the one whose scheme is ORCID",
-      "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both."
+      "reason": "the cell says nameIdentifier, the XML element; in the REST JSON identifiers sit in nameIdentifiers, each with a nameIdentifierScheme (ORCID, ISNI or ROR, DataCite 4.6 property 7.4), and the ORCID is the one whose scheme is ORCID",
+      "comment": "The value may be a bare ORCID iD or the https://orcid.org/ URL (DataCite's own examples use both, bolognese normalises to the URL); the consumer handles both.",
+      "kind": "scope"
     },
     {
       "format": "datacite",
@@ -1023,7 +1028,8 @@
       "path": "authors[]",
       "cell": "author/authors",
       "reason": "the cell says author/authors, two alternatives; in a loaded Gem::Specification the singular author= writes into authors, which is the list that holds every author",
-      "comment": "spec.author = 'X' and spec.authors = ['X'] both give authors == ['X'], so read authors."
+      "comment": "spec.author = 'X' and spec.authors = ['X'] both give authors == ['X'], so read authors.",
+      "kind": "notation"
     },
     {
       "format": "ruby-gem",
@@ -1082,7 +1088,8 @@
       "path": "licenses[]",
       "cell": "license/licenses",
       "reason": "the cell says license/licenses, two alternatives; in a loaded Gem::Specification license= writes into licenses, so licenses holds every entry",
-      "comment": "Each entry is one SPDX identifier. RubyGems has no compound expression: a dual-licensed gem lists two entries, and the list does not say whether they combine with OR or AND."
+      "comment": "Each entry is one SPDX identifier. RubyGems has no compound expression: a dual-licensed gem lists two entries, and the list does not say whether they combine with OR or AND.",
+      "kind": "notation"
     },
     {
       "format": "ruby-gem",
@@ -1124,7 +1131,8 @@
       "term": "version",
       "path": "version | parent.version",
       "cell": "version",
-      "reason": "the cell says version; a pom may leave version out and inherit it from its parent, so parent.version is the fallback; swh-indexer and codemetapy read only version"
+      "reason": "the cell says version; a pom may leave version out and inherit it from its parent, so parent.version is the fallback; swh-indexer and codemetapy read only version",
+      "kind": "scope"
     },
     {
       "format": "maven",
@@ -2002,7 +2010,8 @@
       "path": "authors[].orcid_id",
       "cell": "ORCID",
       "reason": "the cell says ORCID; the author key is orcid_id",
-      "comment": "orcid_id is a bare ORCID (0000-0002-1825-0097), not a URL, and an empty string when the author has none."
+      "comment": "orcid_id is a bare ORCID (0000-0002-1825-0097), not a URL, and an empty string when the author has none.",
+      "kind": "notation"
     },
     {
       "format": "figshare",
@@ -2257,7 +2266,8 @@
       "path": "license.url | licence.url | licenses[].url | licences[].url",
       "cell": "license.url",
       "reason": "the cell says license.url; Leiningen's pom writer also reads the spelling licence and the seqs licenses and licences, so those are the fallbacks",
-      "comment": "A licence map has :name (free text, not an SPDX id), :url, :distribution and :comments. The consumer maps the url or the name to an SPDX id."
+      "comment": "A licence map has :name (free text, not an SPDX id), :url, :distribution and :comments. The consumer maps the url or the name to an SPDX id.",
+      "kind": "scope"
     },
     {
       "format": "leiningen",
@@ -2617,7 +2627,8 @@
       "path": "packages[].originator | packages[].supplier",
       "cell": "PackageOriginator",
       "reason": "the cell is the tag-value field PackageOriginator; the JSON key is originator, one agent string. The spec fills originator only when it differs from the supplier, so supplier is the fallback",
-      "comment": "The value is NOASSERTION, 'Person: Name (email)' or 'Organization: Name (email)'. The consumer drops the prefix and the email, and reads an Organization as an organisation author, not a person. NOASSERTION is no value."
+      "comment": "The value is NOASSERTION, 'Person: Name (email)' or 'Organization: Name (email)'. The consumer drops the prefix and the email, and reads an Organization as an organisation author, not a person. NOASSERTION is no value.",
+      "kind": "notation"
     },
     {
       "format": "spdx-2.3",
@@ -2748,7 +2759,8 @@
       "term": "version",
       "path": "dcat:version | owl:versionInfo",
       "cell": "dcat:version",
-      "reason": "the cell says dcat:version, which DCAT 3 added for the version name or identifier of a resource; owl:versionInfo comes after it, which Zenodo's DCAT export writes"
+      "reason": "the cell says dcat:version, which DCAT 3 added for the version name or identifier of a resource; owl:versionInfo comes after it, which Zenodo's DCAT export writes",
+      "kind": "scope"
     },
     {
       "format": "dcat-3",
@@ -2801,7 +2813,8 @@
       "path": "dcterms:license | dcat:distribution[].dcterms:license",
       "cell": "dcterms:license",
       "reason": "the cell says dcterms:license, which DCAT allows on the dataset and on each distribution; the path reads the dataset's, else a distribution's",
-      "comment": "The value is a dcterms:LicenseDocument, usually an IRI; the consumer converts between IRI and SPDX id. Zenodo's software records give the licence only on the distribution, as dct:rights with an SPDX adms:identifier, which this path does not read."
+      "comment": "The value is a dcterms:LicenseDocument, usually an IRI; the consumer converts between IRI and SPDX id. Zenodo's software records give the licence only on the distribution, as dct:rights with an SPDX adms:identifier, which this path does not read.",
+      "kind": "scope"
     },
     {
       "format": "dcat-3",
@@ -2832,7 +2845,8 @@
       "term": "author",
       "path": "doap:developer[] | doap:maintainer[]",
       "cell": "developer",
-      "reason": "the cell says developer, but most DOAP files (Apache's, GNOME's) list only maintainer, so the path falls back to it"
+      "reason": "the cell says developer, but most DOAP files (Apache's, GNOME's) list only maintainer, so the path falls back to it",
+      "kind": "notation"
     },
     {
       "format": "doap",
@@ -2943,7 +2957,8 @@
       "path": "claims.P50[] | claims.P178[]",
       "cell": "P50",
       "reason": "the cell says P50, which is not a key of the entity JSON: statements sit under claims, and each statement is a list entry; software items mostly use P178 (developer) instead, so it is the fallback",
-      "comment": "The value is an item, so mainsnak.datavalue.value.id is a Q id and the person's or organisation's name is in that item's own record. P178 often names an organisation. P2093 (author name string) holds an author with no item; not mapped here."
+      "comment": "The value is an item, so mainsnak.datavalue.value.id is a Q id and the person's or organisation's name is in that item's own record. P178 often names an organisation. P2093 (author name string) holds an author with no item; not mapped here.",
+      "kind": "notation"
     },
     {
       "format": "wikidata",
@@ -3504,7 +3519,8 @@
       "path": "publisher.name | publisher",
       "cell": "publisher",
       "reason": "CodeMeta's publisher is an Organization or Person, so a bare publisher is an object and its name is the publisher's name; a string, which is also legal, is read as the name",
-      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty.",
+      "kind": "scope"
     },
     {
       "format": "dcat-3",
@@ -3512,7 +3528,8 @@
       "path": "dcterms:publisher.foaf:name | dcterms:publisher",
       "cell": "dcterms:publisher",
       "reason": "the cell says dcterms:publisher, whose value is an agent (usually a foaf:Agent), so its name is foaf:name; an IRI value has no name sub-field",
-      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty.",
+      "kind": "scope"
     },
     {
       "format": "ris",
@@ -4296,7 +4313,8 @@
       "path": "dcterms:license | dcterms:rights | dc:rights[]",
       "cell": "license",
       "reason": "the cell says license, right as written for dcterms:license (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#license, section 2); oai_dc has no license element, so the path falls back to Rights, of which License is a subproperty (https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#rights, https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#elements11-rights)",
-      "comment": "Rights holds any rights statement: Zenodo writes info:eu-repo/semantics/openAccess, the licence name and the licence URL as three dc:rights. The consumer keeps the values it can convert to an SPDX id and skips the rest."
+      "comment": "Rights holds any rights statement: Zenodo writes info:eu-repo/semantics/openAccess, the licence name and the licence URL as three dc:rights. The consumer keeps the values it can convert to an SPDX id and skips the rest.",
+      "kind": "notation"
     },
     {
       "format": "dublin-core",

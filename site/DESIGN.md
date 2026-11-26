@@ -6,7 +6,7 @@ the source of truth for values.
 - **Paper and ink, one red.** Warm paper `#fbf9f6`, ink `#211f24`, faint `#5c5a60`. Red (`--mark`, `#b3261e`) marks only
   what a crosswalk gets wrong (a strong wash) or leaves out (a light wash); a cell that names the right field in
   another notation gets the red mark with no wash. Cells that work stay ink, and so do cells that are right by
-  CodeMeta's definition but not by the page's narrower reading; a format with no field is a faint dash. Dark mode keeps the roles on a near-black paper with a lighter red (`#ff948b`).
+  CodeMeta's definition but not by the page's narrower reading, or that need only a fallback; a format with no field is a faint dash. Dark mode keeps the roles on a near-black paper with a lighter red (`#ff948b`).
 - **Navy is for links.** `--link` (`#2f4b7c`, `#9fb9ec` in dark mode) colours the text links and the card's dashed rule, and
   nothing else: it never marks a cell, a state or a filter. The tabs, filters and releases stay ink.
 - **Contrast.** Every text pair clears AA: ink 15.5:1, faint 6.5:1, red 6.2:1 on paper and 5.0:1 on its strong
