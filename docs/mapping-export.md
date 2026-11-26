@@ -364,14 +364,18 @@ release changes the bytes even when no row changes. A consumer must not depend o
 ### Pin a release's export
 
 Each GitHub release carries `mapping-3.1.json`, `mapping-4.0.json` and a `SHA256SUMS` file covering them,
-so a consumer can pin an export without a CodeMeta checkout:
+so a consumer can pin an export without a CodeMeta checkout. Check a download against the release,
+then record its sha256 and compare later downloads with that value:
 
 ```bash
 v=0.9.0
 curl -fsSLO "https://github.com/simonvanlierde/codemeta-drift/releases/download/v$v/mapping-4.0.json"
 curl -fsSLO "https://github.com/simonvanlierde/codemeta-drift/releases/download/v$v/SHA256SUMS"
-sha256sum -c --ignore-missing SHA256SUMS
+gh attestation verify mapping-4.0.json --repo simonvanlierde/codemeta-drift
+grep ' mapping-4.0.json$' SHA256SUMS | sha256sum -c -
 ```
+
+On macOS, use `shasum -a 256 -c -` in place of `sha256sum -c -`.
 
 ## Path grammar
 
