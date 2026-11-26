@@ -48,4 +48,4 @@ in [`tests/fixtures/`](https://github.com/simonvanlierde/codemeta-drift/tree/mai
 
 Use the [finding reference](checks.md) to interpret each code. A correction to a
 crosswalk cell belongs in CodeMeta upstream or in a reviewed
-[curated mapping](mapping-export.md); counts alone do not tell you which value is right.
+[curated mapping](mapping-export.md); counts do not say which value is right.

@@ -4,9 +4,8 @@ description: "An offline example: a fictional PEP 621 rename gives one deduplica
 
 # Run an offline schema change and recovery example
 
-This example renames PEP 621's `project.name` to a fictional `project.display_name`.
-It does not claim that PEP 621 changed. It runs entirely offline and never edits
-installed mappings, consumer files or remote issues.
+This example renames PEP 621's `project.name` to a fictional `project.display_name`. It runs offline
+and edits no installed mapping, consumer file or remote issue.
 
 From a development checkout, preview the change in a new output directory:
 
@@ -30,7 +29,7 @@ uv run python examples/schema-recovery.py /tmp/codemeta-repaired \
 
 The repaired mapping passes both its declared JSON Schema and the changed format
 schema. It has a curated source reason and an example-only generator label. The old
-mapping still passes its original schemas; no installed consumer is forced to upgrade.
+mapping still passes its original schemas.
 
 Each output directory contains:
 
@@ -39,10 +38,10 @@ Each output directory contains:
 - `mapping.json`: the original or explicitly repaired mapping;
 - `pin.json`: the mapping and contract SHA-256 hashes, CodeMeta tag and generator version.
 
-The example refuses to overwrite an output directory. Use a fresh path for another run.
-A missing or malformed approval file produces a CLI error without creating output.
-The test runs both modes and checks hashes, deduplication, validation and preservation
-of the original mapping. It also rejects an approval for a different change.
+The example refuses to overwrite an output directory, so use a fresh path for each run. A missing or
+malformed approval file is a CLI error and creates no output. The test runs both modes and checks hashes,
+deduplication, validation and that the original mapping is kept. It also rejects an approval for a
+different change.
 
 ## Check a pinned consumer
 
@@ -58,6 +57,5 @@ The second run is the gate before a repin: the consumer's fixtures must change w
 mapping. citesync's `check_mapping` accepts both outputs and refuses a `schema_version`
 with a major other than 1.
 
-These pins are demonstration artifacts. This does not repin citesync, release a package
-or enable live issue publication. A real update still needs review of the field's
-meaning, a released artifact and the consumer's tests.
+The pins in these files are demonstrations. Nothing here repins citesync, releases a package or
+publishes an issue.

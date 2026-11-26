@@ -220,7 +220,7 @@ def test_no_crosswalk_sentence_needs_a_format_without_one(mapping: dict):
     mapping["rows"] = [r for r in mapping["rows"] if FORMATS[r["format"]].crosswalk]
     page = markdown(mapping)
     assert "have no CodeMeta crosswalk" not in page
-    assert "(mapping-export.md). This page shows the pinned tag" in page
+    assert "(mapping-export.md). The [web page]" in page
 
 
 def test_a_backtick_in_a_crosswalk_cell_keeps_the_code_span_closed(mapping: dict):

@@ -5,9 +5,8 @@ examples and crosswalks disagree, and which crosswalk cells are wrong or missing
 exports the reviewed crosswalks as a JSON mapping for tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
 
-These pages are for people who maintain CodeMeta's crosswalks or build on the mapping. The
-[coverage page](https://simonvanlierde.com/codemeta-drift/) shows every cell; to install and
-run the command, start with the [README](https://github.com/simonvanlierde/codemeta-drift#try-it).
+The [coverage page](https://simonvanlierde.com/codemeta-drift/) shows every cell. To install and
+run the command, see the [README](https://github.com/simonvanlierde/codemeta-drift#try-it).
 
 - [Checks](checks.md): finding codes, compared files, exit codes and JSON output.
 - [Findings](findings.md): what the checks found in earlier CodeMeta snapshots.

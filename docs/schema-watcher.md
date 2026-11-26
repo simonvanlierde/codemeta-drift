@@ -28,13 +28,12 @@ finite list of new field names, so this preview does not enumerate them.
 `issue-titles.json` is a JSON list of titles from both destination repositories, including
 closed issues, or `-` for standard input. Supply `[]` for the first preview. Each draft has `repo`, `title` and `body`.
 Schema findings get a stable fingerprint in the title. A second preview with the same
-findings and existing titles emits no duplicate. Closed titles also suppress a draft;
-closing an issue must not make the next run reopen it.
+findings and existing titles emits no duplicate, and a closed title suppresses a draft too.
 
 The pin check reads the `tag` line in citesync's `MAPPING_SOURCE`. It drafts a citesync
 issue when that stable release tag is older than `--latest`. Equal and newer pins get
-no issue. Release tags must use `vMAJOR.MINOR.PATCH` or `MAJOR.MINOR.PATCH`; arbitrary refs
-and prereleases are errors because this preview cannot infer their release order.
+no issue. Release tags must use `vMAJOR.MINOR.PATCH` or `MAJOR.MINOR.PATCH`. Other refs and
+prereleases are errors, because their release order is unknown.
 
 The poll also compares each `sha256` line of `MAPPING_SOURCE` with the hash of that file as
 published in codemeta-drift at the pinned tag. A mismatch drafts a citesync issue titled
@@ -67,12 +66,11 @@ one second apart. The workflow's concurrency group serializes runs. A local
 `--publish` run uses `gh` credentials and must not run beside another publisher.
 
 Only the latest numeric CodeMeta tag gets a missing-export draft; older unsupported tags
-do not each open an issue. The five bundled schema files remain the baseline until they
-are deliberately refreshed. Draft fingerprints suppress repeat reports against that baseline.
+do not each open an issue. The five bundled schema files stay the baseline until they
+are refreshed, and draft fingerprints suppress repeat reports against it.
 
-Zenodo uses [verified structural path coverage](zenodo-schema.md), not a complete
-public JSON Schema. Changes to the importer source produce review drafts; they do
-not automatically modify that subset or the mapping.
+Zenodo has no complete public JSON Schema, so the watcher uses [verified structural path coverage](zenodo-schema.md).
+A change to the importer source produces a review draft and does not modify that subset or the mapping.
 
-Run the [offline change-and-recovery example](schema-recovery.md) to induce a rename,
-deduplicate its review and apply an explicit synthetic approval without changing a real pin.
+The [offline change-and-recovery example](schema-recovery.md) induces a rename, deduplicates its review
+and applies a synthetic approval without changing a real pin.

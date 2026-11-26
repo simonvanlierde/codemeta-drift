@@ -9,19 +9,19 @@ from codemeta_drift.export import FORMATS, NO_PROPERTY, PEOPLE, TERMS, classify,
 from codemeta_drift.hub import validate_mapping
 
 STATUSES = {
-    "as-is": ("✓", "CodeMeta's crosswalk cell is the path, used unchanged"),
+    "as-is": ("✓", "CodeMeta's crosswalk cell is the path"),
     "corrected": ("✎", "the crosswalk cell is wrong, ambiguous or prose; a curated row replaces it"),
     "added": ("+", "the format has the field but the crosswalk has no cell for it; a curated row adds it"),
     "no field": ("–", "the format has no field for this term"),  # noqa: RUF001 - an en dash, as in the docs
-    "no term": ("∅", "CodeMeta has no property for this term, so no crosswalk can have a cell; a curated row adds it"),
+    "no term": ("∅", "CodeMeta has no property for this term; a curated row adds it"),
 }
 """Each cell status, its mark and what it means. The order is the legend's."""
 
 SHAPES = {
-    "path": ("•", "the cell reads as a path, but nobody has checked that it is right"),
+    "path": ("•", "the cell looks like one path; not checked"),
     "prose": ("¶", "the cell is prose or a list, not one path"),
     "empty": ("○", "the cell is empty: the format may have no field, or the crosswalk leaves it out"),
-    "no-term": ("∅", "CodeMeta's property table has no row for this term, so no crosswalk has a cell"),
+    "no-term": ("∅", "CodeMeta's property table has no row for this term"),
     "unmatched": ("?", "the crosswalk and the property table list this property a different number of times"),
 }
 """What a cell of a crosswalk with no reviewed mapping shows: only its shape, from ``classify``."""
@@ -149,8 +149,7 @@ def markdown(mapping: dict[str, Any], files: Mapping[str, str] | None = None) ->
             f"How CodeMeta's {tag} crosswalks map {len(data['terms'])} CodeMeta terms in {len(formats)} formats, "
             "read from the reviewed [mapping export](mapping-export.md). "
             + (owns if own else "")
-            + "This page shows the pinned tag; the "
-            "[web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch "
+            + "The [web page](https://simonvanlierde.com/codemeta-drift/) also checks CodeMeta's main branch "
             "against the newest tag each week."
         ),
         "",
@@ -212,10 +211,7 @@ def unreviewed_markdown(data: dict[str, Any], terms: list[str]) -> list[str]:
     lines = [
         "## Not reviewed",
         "",
-        (
-            f"CodeMeta has {len(data['formats'])} more crosswalks with no reviewed mapping. A mark here says only "
-            "what the cell looks like, not whether it is right."
-        ),
+        f"CodeMeta has {len(data['formats'])} more crosswalks with no reviewed mapping.",
         "",
         "| Mark | Shape | Meaning |",
         "| --- | --- | --- |",

@@ -1,7 +1,6 @@
 # Contributing
 
-Thank you for your interest in codemeta-drift. Bug reports, feature requests and pull
-requests are welcome. Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first, and
+Please read the [Code of Conduct](CODE_OF_CONDUCT.md) first, and
 report vulnerabilities as [SECURITY.md](SECURITY.md) describes, not in a public issue.
 
 ## Report a bug or ask for a feature
@@ -67,16 +66,14 @@ To add it to commits you already made, run `git fetch origin`, then
 `git rebase --signoff origin/main`. That works in a clone of this repository, where `origin`
 is the only remote. If you work from a fork, use the remote that points at this repository
 (often `upstream`) in place of `origin`. If you have not pushed the branch yet, that is all.
-If you pushed it already, update it with `git push --force-with-lease`, which refuses to
-overwrite work you have not seen. Do not use a plain `git push --force`.
+If you pushed it already, update it with `git push --force-with-lease`. Do not use a plain `git push --force`.
 
 The `dco` workflow checks pull requests from forks and fails on a commit without a sign-off.
-Pull requests from this repository skip that check because pushing already required write
-access. Every commit still needs a sign-off.
+Pull requests from this repository skip that check, but every commit still needs a sign-off.
 
 ## Who maintains this
 
 Simon van Lierde reviews pull requests, merges them and makes releases. The repository
 belongs to [simonvanlierde](https://github.com/simonvanlierde) on GitHub. Only maintainers can merge to `main`. An existing maintainer adds a new
 maintainer by name in this section. If no maintainer can continue, the repository is
-archived with a note in the README. Anyone may fork it under its license.
+archived with a note in the README.

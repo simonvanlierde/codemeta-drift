@@ -17,7 +17,7 @@ reviewed field mappings for citation tools such as
 versions and repository URLs. Its **crosswalks** map fields in other formats to CodeMeta
 terms. For example, the Citation File Format (CFF) uses `title` where CodeMeta uses `name`.
 
-These files need to agree. In one checked snapshot, the property list replaced `position`
+In one checked snapshot, the property list replaced `position`
 with `maintainer`, while the crosswalks kept `position`. Joining the tables by row number
 would attach a field to the wrong term. codemeta-drift compares names and reports the mismatch.
 
@@ -104,14 +104,13 @@ also checks citesync's mapping pin. Publishing requires a configured token.
 ## Social card
 
 [`docs/assets/og.png`](docs/assets/og.png) is the 1200x630 card shown when the coverage page or the docs are shared. It is rendered from
-[`docs/og-card.html`](docs/og-card.html), which draws the page's coverage matrix for CodeMeta 4.0 at full size: ten
-formats by 19 terms, with the wrong crosswalk cells filled and the missing ones outlined. Edit the HTML, then run:
+[`docs/og-card.html`](docs/og-card.html). Edit the HTML, then run:
 
 ```sh
 just og-card
 ```
 
-`site/build.py` copies the card into the built page and adds the PNG's hash to the `og:image` URL in `site/index.html` (`?v=`), because link previews are cached by image URL. `just og-card` writes a hash of the PNG into `zensical.toml` for the docs; a test fails if it is stale.
+`site/build.py` copies the card into the built page and adds the PNG's hash to the `og:image` URL (`?v=`). `just og-card` writes a hash of the PNG into `zensical.toml` for the docs; a test fails if it is stale.
 
 ## Development
 

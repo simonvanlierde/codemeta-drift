@@ -5,8 +5,7 @@ description: "Validate the hub's SSSOM export with the reference tool, and how i
 # SSSOM validation and CodeMeta compatibility
 
 The hub writes a SSSOM table of field correspondences. Its identifiers sit under
-`https://w3id.org/codemeta-drift/`, and every relation is `skos:relatedMatch`; it does not
-assert that field values can be copied unchanged.
+`https://w3id.org/codemeta-drift/`, and every relation is `skos:relatedMatch`.
 
 ## Validate an export
 
@@ -21,14 +20,14 @@ The recipe writes each bundled mapping (CodeMeta 3.1 and 4.0) to a temporary fil
 [SSSOM Python reference tool](https://mapping-commons.github.io/sssom-py/cli/commands/#sssom-validate)
 (`uvx --python 3.13 --from sssom==0.4.21 sssom validate`) in a separate tool environment.
 It checks the JSON schema, prefix-map completeness and CURIE syntax, and needs network
-access for `uvx`. It does not require a runtime dependency in codemeta-drift.
+access for `uvx`.
 
-The parser rejects an export whose `field:` and `format:` prefixes have the same URI base.
-The hub's `field:` and `format:` prefixes expand to `https://w3id.org/codemeta-drift/#field/` and
-`#format/`, and a regression test keeps them apart. See the [crosswalk hub](crosswalk-hub.md).
+The reference parser rejects an export whose `field:` and `format:` prefixes share a URI base.
+The hub's prefixes expand to `https://w3id.org/codemeta-drift/#field/` and `#format/`, and a
+regression test keeps them apart. See the [crosswalk hub](crosswalk-hub.md).
 
-This check establishes that this reference tool can read the export. It does not validate
-the meaning of a mapping or certify conformance with CodeMeta's methodology.
+A pass means the reference tool can read the export. It says nothing about whether a mapping is right or
+whether the export follows CodeMeta's methodology.
 
 ## Compare with CodeMeta's methodology
 
@@ -47,18 +46,15 @@ contains a CSV authoring sheet and separate YAML metadata.
 | Combined fields | A formula extension describes how source terms combine | Paths identify fields; parsers and normalization handle values elsewhere |
 | Mapping-set metadata | Template includes date, description, provider, license and a proposed w3id | Set id, title, description, version, curator ORCID, provider, Apache-2.0 license and explicit CURIE map, all under the w3id base `https://w3id.org/codemeta-drift/` |
 
-The files serve related purposes, but the hub output cannot be used as a replacement
-for the upstream authoring sheet without translation and semantic review. Inverting
-a row does not turn its local hub term into an official CodeMeta vocabulary identifier.
+The hub output cannot replace the upstream authoring sheet without translation and review. Its local
+hub terms are not CodeMeta vocabulary identifiers, even when a row is inverted.
 
-## Remaining work before an upstream offer
+## Open points
 
-1. Review a small overlapping crosswalk with maintainers. Agree how local compound terms
-   and format paths should map to their identifiers and hierarchy.
-2. Preserve the distinction between field correspondence and value conversion. Any
-   stronger relationship or combined-field rule needs evidence for that particular row.
+1. Review a small overlapping crosswalk with the CodeMeta maintainers, and agree how the hub's
+   compound terms and format paths map to their identifiers and hierarchy.
+2. Give a stronger relation or a combined-field rule only with evidence for that row.
 
-The discussion in [CodeMeta #487](https://github.com/codemeta/codemeta/issues/487)
-considers separating crosswalk maintenance. It does not establish adoption of this hub
-or agreement to replace the existing methodology. The CSV crosswalk export remains
-available for consumers of CodeMeta's existing table layout.
+[CodeMeta #487](https://github.com/codemeta/codemeta/issues/487) discusses separating crosswalk
+maintenance. It has not adopted this hub or agreed to replace the existing methodology. The CSV
+crosswalk export still follows CodeMeta's existing table layout.

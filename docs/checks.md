@@ -19,8 +19,7 @@ and one missing term. When several crosswalks share a problem, the report groups
 | `crosswalks/*.csv` | One translation table per format, listing the same terms in the same order |
 | `crosswalk.csv` | All crosswalks combined into one table, which the website shows |
 
-Other example files use a different context or are intentionally invalid, so their terms
-are not checked. The vocabulary and property list are required; a missing file exits 3. A symbolic link, to
+Other example files are not checked: they use a different context or are invalid. The vocabulary and property list are required; a missing file exits 3. A symbolic link, to
 a file or to a folder such as `crosswalks/`, is never followed: the file counts as missing.
 
 ## Every check
@@ -40,8 +39,8 @@ a file or to a folder such as `crosswalks/`, is never followed: the file counts 
 | `AGGREGATE_FORMAT` | A crosswalk missing from the combined table, or a column with no crosswalk |
 | `SKIPPED` | A file this version doesn't have; the checks that need it don't run, and it doesn't count as a problem |
 
-The checks live in [`checks.py`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/checks.py). That module uses only
-the Python standard library, so another repository can include it in its own CI.
+The checks live in [`checks.py`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/checks.py), which uses only
+the Python standard library.
 
 ## Read the output
 
@@ -58,8 +57,7 @@ CROSSWALK_ROWS crosswalks/*.csv (all 46): position: line 44 is not in properties
 EXAMPLE_NO_TERM examples/codemeta.json: softwareSuggestions: not a term of codemeta.jsonld
 ```
 
-A file label can name a group of files, as in the first line. A finding tells you where
-to investigate. Compare the named files before changing a term or mapping.
+A file label can name a group of files, as in the first line. Compare the named files before changing a term or mapping.
 These are consistency checks; they do not validate every JSON-LD rule or metadata value.
 
 | Exit code | Meaning |
@@ -71,8 +69,6 @@ These are consistency checks; they do not validate every JSON-LD rule or metadat
 | 130 | Interrupted with Ctrl-C. The command then ends by SIGINT, so a shell loop around it stops too; on Windows it exits 130 |
 
 Every `codemeta-drift` command uses these codes. For `export` and `watch`, findings are rows they can't make.
-
-A missing optional file produces `SKIPPED`, which does not make the command fail.
 
 ## Read JSON output
 

@@ -59,9 +59,9 @@ link or any other warning.
 ## Mutation tests
 
 `just mutation` tests modified copies of `checks.py`, `export.py`, `conformance.py` and `paths.py`.
-It leaves the source files unchanged and fails when the tests miss a changed behaviour.
+It fails when the tests miss a changed behaviour.
 A mutation that cannot alter behaviour belongs in [`tests/mutation-baseline.txt`](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/mutation-baseline.txt), with its reason.
-The command also fails when tests catch a listed mutation, so the baseline stays current.
+The command also fails when tests catch a listed mutation.
 CI does not run this command.
 
 ## Update expected findings
@@ -79,7 +79,7 @@ When you intentionally change that output:
    ```
 
    This updates the 4.0 fixture; use `3.1` in both paths for the other snapshot.
-   Exit code 1 is expected: both snapshots contain disagreements.
+   Exit code 1 is expected.
 3. Review the diff before committing the expected file.
 
 See [CONTRIBUTING.md](https://github.com/simonvanlierde/codemeta-drift/blob/main/.github/CONTRIBUTING.md) for commit and sign-off rules.
