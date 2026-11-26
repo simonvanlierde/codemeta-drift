@@ -327,7 +327,7 @@ function score(data) {
   const count = (status) => fields.filter((c) => c.status === status).length;
   const formats = new Set(crosswalk.map((c) => c.format)).size;
   const bar = el("div", { class: "bar", "aria-hidden": "true" });
-  for (const status of ["as-is", "corrected", "added"]) {
+  for (const status of ["as-is", "scope", "notation", "corrected", "added"]) {
     const part = el("span", { class: `s-${status}` });
     part.style.flexGrow = String(count(status));
     bar.append(part);
@@ -336,7 +336,9 @@ function score(data) {
     el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${fields.length}`)),
     bar,
     el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written. `
-      + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank where the format has a field.`),
+      + `${count("corrected")} are wrong, ambiguous or prose, ${count("notation")} need only a notation change, `
+      + `${count("scope")} differ only in how this page reads identifier and swhid, `
+      + `and ${count("added")} are blank where the format has a field.`),
   );
 }
 

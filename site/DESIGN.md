@@ -4,13 +4,14 @@ A proofreader's pass over the crosswalks: the sheet is paper and ink, and a red 
 the source of truth for values.
 
 - **Paper and ink, one red.** Warm paper `#fbf9f6`, ink `#211f24`, faint `#5c5a60`. Red (`--mark`, `#b3261e`) marks only
-  what a crosswalk gets wrong (a strong wash) or leaves out (a light wash). Cells that work stay ink; a format with
-  no field is a faint dash. Dark mode keeps the roles on a near-black paper with a lighter red (`#ff948b`).
+  what a crosswalk gets wrong (a strong wash) or leaves out (a light wash); a cell that names the right field in
+  another notation gets the red mark with no wash. Cells that work stay ink, and so do cells that are right by
+  CodeMeta's definition but not by the page's narrower reading; a format with no field is a faint dash. Dark mode keeps the roles on a near-black paper with a lighter red (`#ff948b`).
 - **Navy is for links.** `--link` (`#2f4b7c`, `#9fb9ec` in dark mode) colours the text links and the card's dashed rule, and
   nothing else: it never marks a cell, a state or a filter. The tabs, filters and releases stay ink.
 - **Contrast.** Every text pair clears AA: ink 15.5:1, faint 6.5:1, red 6.2:1 on paper and 5.0:1 on its strong
   wash, navy 8.3:1 (dark mode: red 8.3:1 and 6.4:1, light navy 8.9:1).
-- **Marks and words, not colour alone.** ✓ as-is, ✎ corrected, + added, – no field. The legend doubles as
+- **Marks and words, not colour alone.** ✓ as-is, ⊂ scope, ≈ notation, ✎ corrected, + added, – no field. The legend doubles as
   the filter, with counts.
 - **Type.** Newsreader for prose and JetBrains Mono for every path, term and check code, both OFL and self-hosted as
   latin woff2 in `fonts/` (Newsreader 400 and italic; JetBrains Mono 400 and 700), with the licence texts beside them. The CSP
@@ -27,7 +28,7 @@ the source of truth for values.
   with the count of changed cells. One hairline row; the chosen tab is tinted with a 2px ink bar at its
   foot, like the chosen filter. `#route` and `#upstream` open their views; the SSSOM fragments open Matrix.
 - **Headline.** Beside the intro from 1000px: the count of crosswalk cells usable as written, a bar of
-  as-is, corrected and added in the cells' own colours, and one caption. It stacks below on smaller screens.
+  as-is, scope, notation, corrected and added in the cells' own colours, and one caption that counts each. It stacks below on smaller screens.
 - **Matrix.** Formats down, citation files first, then package manifests; terms across, their names
   running up the column. A cell holds only its mark; its path is in the detail panel. The last column
   counts the format's usable cells. The detail panel sits beside the table from 1360px, below it on

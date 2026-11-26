@@ -7,6 +7,22 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Upgrade
+
+- `hub coverage --json` gives two more cell statuses, `scope` and `notation`, for cells it called
+  `corrected` before. A consumer that counts corrected cells adds them back, or reads `statuses` for
+  every name.
+
+### Changed
+
+- The coverage pages and the site stop counting every curated cell as wrong. Of the 203 corrected
+  cells at 4.0, 68 now count as `notation` (≈): the cell names the right field in a form a tool
+  can't use as a path, such as Zenodo's `ORCID` for the key `orcid` or MODS's XPath. 32 count as
+  `scope` (⊂): the cell is right by CodeMeta's definition, but codemeta-drift reads `identifier` as
+  the software's DOI and keeps `swhid` as a term of its own. 103 stay `corrected`. A curated row's
+  optional `kind` holds the split; the export leaves it out, so the mapping schema stays at 1.9.
+- The page's title is "Where CodeMeta's crosswalk cells work as written, and where they don't".
+
 ## [0.9.0] - 2026-11-26
 
 ### Upgrade

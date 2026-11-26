@@ -5,17 +5,44 @@ from collections.abc import Mapping
 from typing import Any
 
 from codemeta_drift.checks import TABLE, code_span, crosswalk_paths, format_name
-from codemeta_drift.export import FORMATS, NO_PROPERTY, PEOPLE, TERMS, classify, crosswalk_cells, derive
+from codemeta_drift.export import (
+    FORMATS,
+    NO_PROPERTY,
+    PEOPLE,
+    TERMS,
+    classify,
+    crosswalk_cells,
+    curated_tags,
+    derive,
+    read_curated,
+)
 from codemeta_drift.hub import validate_mapping
 
 STATUSES = {
     "as-is": ("✓", "CodeMeta's crosswalk cell is the path"),
-    "corrected": ("✎", "the crosswalk cell is wrong, ambiguous or prose; a curated row replaces it"),
-    "added": ("+", "the format has the field but the crosswalk has no cell for it; a curated row adds it"),
+    "scope": (
+        "⊂",
+        (
+            "the crosswalk cell is right by CodeMeta's definition, but codemeta-drift reads the term more narrowly:"
+            " identifier as the software's DOI, and swhid as a term of its own; the reviewed mapping gives the path"
+        ),
+    ),
+    "notation": (
+        "≈",
+        (
+            "the crosswalk cell names the right field, but in a form a tool can't use as a path, such as another"
+            " case, no prefix or XPath; the reviewed mapping gives the path"
+        ),
+    ),
+    "corrected": ("✎", "the crosswalk cell is wrong, ambiguous or prose; the reviewed mapping gives the path"),
+    "added": ("+", "the format has the field but the crosswalk has no cell for it; the reviewed mapping adds the path"),
     "no field": ("–", "the format has no field for this term"),  # noqa: RUF001 - an en dash, as in the docs
-    "no term": ("∅", "CodeMeta has no property for this term; a curated row adds it"),
+    "no term": ("∅", "CodeMeta has no property for this term; the reviewed mapping adds the path"),
 }
-"""Each cell status, its mark and what it means. The order is the legend's."""
+"""Each cell status, its mark and what it means. The order is the legend's.
+
+A curated row's ``kind`` (scope or notation) names a cell that would otherwise be corrected.
+"""
 
 SHAPES = {
     "path": ("•", "the cell looks like one path; nobody has checked it"),
@@ -93,8 +120,11 @@ def columns(mapping: dict[str, Any]) -> list[str]:
     return [fmt for fmt in COLUMNS if fmt in present]
 
 
-def status(row: dict[str, Any], parents: dict[str, str | None]) -> str:
-    """One export row's status; ``parents`` holds the format's people paths (author, contributor)."""
+def status(row: dict[str, Any], parents: dict[str, str | None], kind: str | None = None) -> str:
+    """One export row's status; ``parents`` holds the format's people paths (author, contributor).
+
+    ``kind`` is the curated row's, which turns a corrected cell into scope or notation.
+    """
     if row["source"].startswith("crosswalk:"):
         return "as-is"
     if row["term"] in NO_PROPERTY and row["path"] is not None:
@@ -104,7 +134,7 @@ def status(row: dict[str, Any], parents: dict[str, str | None]) -> str:
     # A person sub-term reads the shared Person row, so its cell says nothing when its list has no field.
     if row["path"] is None and (not cell or (parent != row["term"] and parents.get(parent) is None)):
         return "no field"
-    return "corrected" if cell else "added"
+    return (kind or "corrected") if cell else "added"
 
 
 def anchor(fmt: str) -> str:
@@ -116,6 +146,10 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
     """Every (format, term) cell of a mapping export with its status, path, original cell and reason."""
     validate_mapping(mapping)
     rows = {(row["format"], row["term"]): row for row in mapping["rows"]}
+    tag = mapping["codemeta_tag"]
+    # The export leaves kind out, so it is read from the tag's curated file; another tag's cells stay corrected.
+    curated = read_curated(tag) if tag in curated_tags() else []
+    kinds = {(c["format"], c["term"]): c.get("kind") for c in curated}
     cells = []
     for fmt in columns(mapping):
         parents = {term: rows[fmt, term]["path"] for term in ("author", "contributor") if (fmt, term) in rows}
@@ -128,7 +162,7 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
                 {
                     "format": fmt,
                     "term": term,
-                    "status": status(row, parents),
+                    "status": status(row, parents, kinds.get((fmt, term))),
                     "path": row["path"],
                     "cell": row.get("crosswalk_cell"),
                     "crosswalk": FORMATS[fmt].crosswalk,
