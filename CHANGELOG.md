@@ -7,6 +7,14 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- The coverage page's Upstream tab joins a crosswalk's `name` row on CodeMeta's main branch, where the
+  property table gained a third `name` row the crosswalks lack. It showed 34 cells as unmatched and
+  hid the GitHub `name` fix (codemeta/codemeta#505); it now shows that one cell as fixed. A property
+  whose counts differ joins only its first `schema:Thing` row, and only when the rows on either side
+  match the table's.
+
 ## [0.9.0] - 2026-11-26
 
 ### Upgrade

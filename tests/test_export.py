@@ -84,9 +84,24 @@ def test_third_repeat_and_one_column_rows():
 
 def test_property_counts_that_differ_get_no_cell():
     files = read_dir(FIXTURE)
-    text = files[CFF].replace("identifier,person.orcid / identifiers / doi\n", "")
+    # The Thing row is gone, so the Person row is first: its neighbours differ, and it must not join as Thing.
+    text = files[CFF].replace("identifier,identifiers / person.orcid / doi\n", "")
     cells = crosswalk_cells({**files, CFF: text}, CFF)
     assert not {k for k in cells if k[1] == "identifier"}
+
+
+def test_a_first_thing_row_with_its_neighbours_joins_when_counts_differ():
+    files = read_dir(FIXTURE)
+    # CodeMeta's main branch: the table gains a ContactPoint name row the crosswalks lack.
+    files["properties_description.csv"] += "schema:ContactPoint,name,Text,The name of the contact point\n"
+    cells = crosswalk_cells(files, CFF)
+    assert cells[("schema:Thing", "name")] == "title"
+    assert ("schema:Person", "name") not in cells
+    # The Person row is gone instead: the Thing row still has its neighbours, so it joins alone.
+    text = read_dir(FIXTURE)[CFF].replace("identifier,person.orcid / identifiers / doi\n", "")
+    cells = crosswalk_cells({**read_dir(FIXTURE), CFF: text}, CFF)
+    assert cells[("schema:Thing", "identifier")] == "identifiers / person.orcid / doi"
+    assert ("schema:Person", "identifier") not in cells
     assert cells[("schema:Person", "givenName")] == "person.given-names"
 
 
