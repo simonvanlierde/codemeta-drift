@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.9",
+  "schema_version": "1.10",
   "codemeta_tag": "3.1",
   "generator": {
     "name": "codemeta-drift",
@@ -884,6 +884,139 @@
       "term": "resourceType",
       "path": null,
       "source": "curated:CodeMeta has no term for the resource type; npm has no field for it",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "name",
+      "path": "name",
+      "source": "curated:No Composer crosswalk upstream. Composer's manifest schema at https://getcomposer.org/schema.json gives the package name as vendor/package",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "version",
+      "path": "version",
+      "source": "curated:No Composer crosswalk upstream. Version is optional because Composer commonly infers it from a VCS tag",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "author",
+      "path": "authors[]",
+      "source": "curated:No Composer crosswalk upstream. Composer lists package authors as objects in the authors array",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "author.givenName",
+      "path": "authors[].name",
+      "source": "curated:No Composer crosswalk upstream. Composer gives each author one full name, which the consumer splits",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "author.familyName",
+      "path": "authors[].name",
+      "source": "curated:No Composer crosswalk upstream. Composer gives each author one full name, which the consumer splits",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "author.@id",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer has no ORCID field for authors",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "contributor",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer lists authors and their optional roles, but has no separate contributor list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "contributor.givenName",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer has no separate contributor list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "contributor.familyName",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer has no separate contributor list",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "contributor.@id",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer has no separate contributor list or ORCID field",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "license",
+      "path": "license",
+      "source": "curated:No Composer crosswalk upstream. Composer stores one licence string or an array of alternatives in license",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "identifier",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer has no DOI field. The name holds the vendor/package identifier",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "swhid",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer has no Software Heritage identifier field",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "codeRepository",
+      "path": "source.url",
+      "source": "curated:No Composer crosswalk upstream. Composer gives the VCS URL in source.url. A project homepage or support source can point outside the repository",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "description",
+      "path": "description",
+      "source": "curated:No Composer crosswalk upstream. Composer gives the short package description in description",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "keywords",
+      "path": "keywords[]",
+      "source": "curated:No Composer crosswalk upstream. Composer lists search keywords in an array",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "datePublished",
+      "path": "time",
+      "source": "curated:No Composer crosswalk upstream. Composer records a version's release date or UTC release time in time",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "publisher",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer's vendor prefix names a package namespace and supplies no publisher field",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "composer",
+      "term": "resourceType",
+      "path": null,
+      "source": "curated:No Composer crosswalk upstream. Composer's type selects how the package is installed. Composer has no CodeMeta resource type field",
       "crosswalk_cell": null
     },
     {

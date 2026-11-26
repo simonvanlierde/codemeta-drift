@@ -32,7 +32,7 @@ format has no field for. Of the other 436, only 123 can be used as written: 203 
 ambiguous or prose (40 of them fill a term the format has no field for), and 110 are blank although
 the format has the field. The matrix's 19th column, `resourceType`, has no CodeMeta property, so no
 crosswalk has a cell for it. CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto
-extensions, RIS, EndNote, RO-Crate or Croissant at all.
+extensions, Composer, RIS, EndNote, RO-Crate or Croissant.
 
 The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md)
 shows every cell and the reason for each correction, and lists the other 10 crosswalks by the
@@ -72,7 +72,7 @@ Export the reviewed mappings for CodeMeta 4.0 (or `3.1`):
 uvx codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
-The 4.0 export covers 44 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata,
+The 4.0 export covers 45 formats, from CFF, Zenodo and `pyproject.toml` to DCAT 3, Wikidata,
 RO-Crate, MODS and ISO 19115-1. It records the field path for each term, with a reason for each curated
 correction. It does not convert field values. Only tags with curated mappings can be exported:
 `3.1` and `4.0`.

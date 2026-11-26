@@ -153,7 +153,7 @@ def test_cli_writes_json(mapping: dict, example: Path, capsys: pytest.CaptureFix
     assert main(["hub", "coverage", str(example), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == mapping["codemeta_tag"]
-    assert len(data["cells"]) == {"3.1": 41, "4.0": 43}[mapping["codemeta_tag"]] * 19
+    assert len(data["cells"]) == {"3.1": 42, "4.0": 44}[mapping["codemeta_tag"]] * 19
     assert "unreviewed" not in data  # only with --codemeta
 
 

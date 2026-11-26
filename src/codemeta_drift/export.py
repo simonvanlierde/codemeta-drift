@@ -20,7 +20,7 @@ PACKAGE = Path(__file__).parent
 """The installed package directory, which holds the schema and curated files: a plain path, cheaper than
 importlib.resources, which this wheel-only package does not need."""
 
-SCHEMA_VERSION = "1.9"
+SCHEMA_VERSION = "1.10"
 
 TERMS = {
     "name": ("schema:Thing", "name"),
@@ -79,6 +79,7 @@ FORMATS = {
     "pep621": Spoke(None),
     "cargo": Spoke("crosswalks/Cargo.csv", person_list=True),
     "npm": Spoke("crosswalks/NodeJS.csv"),
+    "composer": Spoke(None),
     "pkg-info": Spoke("crosswalks/Python PKG-INFO.csv"),
     "r-description": Spoke("crosswalks/R Package Description.csv"),
     "julia": Spoke("crosswalks/Julia Project.csv", person_list=True),

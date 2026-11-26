@@ -7,6 +7,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Mapping schema 1.10 adds [Composer package metadata](docs/mapping-export.md#composer) to the
+  CodeMeta 3.1 and 4.0 exports. Its paths read both forms of Composer's licence field.
+
 ## [0.9.0] - 2026-11-26
 
 ### Upgrade

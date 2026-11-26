@@ -81,7 +81,7 @@ and `repository`, which may be strings or objects.
 
 ```json
 {
-  "schema_version": "1.9",
+  "schema_version": "1.10",
   "codemeta_tag": "3.1",
   "generator": {"name": "codemeta-drift", "version": "0.9.0"},
   "context_terms": ["address", "affiliation", "applicationCategory", "..."],
@@ -111,7 +111,8 @@ The header:
 
 Each row:
 
-- `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo`, `npm`, `pkg-info`
+- `format` is a stable id: `cff-1.2.0`, `codemeta`, `zenodo`, `pep621`, `cargo`, `npm`,
+  `composer` (root composer.json), `pkg-info`
   (Python core metadata), `r-description` (R's DESCRIPTION), `julia` (Julia's Project.toml),
   `bibtex` (a biblatex-software entry), `datacite` (the DataCite REST API's JSON), `setup-py`
   (setup.py's `setup()` arguments), `ruby-gem` (a Gem::Specification), `maven` (pom.xml),
@@ -131,8 +132,8 @@ Each row:
   `iso-19115-1-2014` (an ISO 19115-1:2014 record in ISO 19115-3 XML). A format whose versions differ
   puts the version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to
   `wikidata` in 1.5, `ris` to `code-json-2.0` in 1.7, `ro-crate` and `croissant` in 1.8, and
-  `dublin-core` to `iso-19115-1-2014` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
-  export on, because their crosswalks first came with CodeMeta 4.0.
+  `dublin-core` to `iso-19115-1-2014` in 1.9, and `composer` in 1.10. `gitlab` and `code-json-2.0`
+  have rows from the 4.0 export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
   `resourceType`, or a person sub-term of `author` or `contributor`: `.givenName`, `.familyName` and `.@id` (the ORCID). A
@@ -350,7 +351,7 @@ them into one first. These cases need more than the grammar below says:
 A (format, term) pair appears at most once. The schema cannot enforce that, so the consumer checks it.
 
 `codemeta-drift export` writes the rows by format, in the order `cff-1.2.0`, `codemeta`, `zenodo`,
-`pep621`, `cargo`, `npm`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`,
+`pep621`, `cargo`, `npm`, `composer`, `pkg-info`, `r-description`, `julia`, `bibtex`, `datacite`, `setup-py`,
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
@@ -360,6 +361,18 @@ A (format, term) pair appears at most once. The schema cannot enforce that, so t
 `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
 pin the file's sha256. `generator.version` is one of the inputs: a new codemeta-drift
 release changes the bytes even when no row changes. A consumer must not depend on the row order.
+
+## Composer
+
+Read the root object of [composer.json](https://getcomposer.org/doc/04-schema.md) as JSON.
+The name includes the vendor prefix. An author has one full name, which the consumer splits
+if it needs name parts. An array of licences offers alternatives. A string may contain an SPDX
+expression. The path reads the field as one string or one array.
+
+The package registry or VCS often supplies the version and source URL. The mapping reads
+only the values in the supplied object and uses `source.url` for the repository. The
+project homepage and support links are separate. A consumer that needs a date converts the
+UTC release time in `time`.
 
 ## Path grammar
 
@@ -437,6 +450,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
    that holds `v`. Schema 1.9 adds six format ids, `dublin-core` to `iso-19115-1-2014`, and
    changes no pattern, so a 1.9 file passes the 1.8 schema, but the `hub` of 0.8.0 refuses it.
+   Schema 1.10 adds Composer and passes the 1.9 schema. Use a `hub` that supports 1.10 to read it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format
    that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from
