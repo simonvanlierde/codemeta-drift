@@ -88,7 +88,7 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
         const button = el(
           "button",
           { type: "button", class: `cell s-${cell.status.replace(" ", "-")}`, "data-status": cell.status,
-            "data-format": format, "data-term": term, "data-path": cell.path ?? "", title: term,
+            "data-format": format, "data-term": term, "data-path": cell.path ?? "",
             "aria-label": `${name}, ${term}: ${cell.status}${cell.path ? `, ${cell.path}` : ""}${note}` },
           el("span", { class: "mark", "aria-hidden": "true" }, data.statuses[cell.status].mark),
         );

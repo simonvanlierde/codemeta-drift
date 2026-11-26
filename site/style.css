@@ -643,6 +643,7 @@ table[data-only="no-term"] td:has(.cell[data-status="no-term"]) {
     width: 7rem;
     min-width: 7rem;
     overflow-wrap: anywhere;
+    hyphens: auto;
   }
   .scroll {
     scroll-padding-left: 7rem;
