@@ -6,15 +6,16 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/simonvanlierde/codemeta-drift/blob/main/LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23774728.svg)](https://doi.org/10.5281/zenodo.23774728)
 
-codemeta-drift shows where CodeMeta's crosswalks to citation and package formats are wrong or
-missing: [see every cell](https://simonvanlierde.com/codemeta-drift/). It also checks CodeMeta's
-own files against each other, and exports a reviewed JSON field mapping for tools such as
+codemeta-drift shows where CodeMeta's crosswalk cells for citation and package formats work as
+written and where they don't: [see every cell](https://simonvanlierde.com/codemeta-drift/). It
+also checks CodeMeta's own files against each other, and exports a reviewed JSON field mapping for
+tools such as
 [citesync](https://github.com/simonvanlierde/citesync).
 
 codemeta-drift is not part of the CodeMeta project and proposes no edits to CodeMeta's files. Its
 `identifier` column means the software's DOI, a narrower reading than CodeMeta's "any kind of
-identifier", so a cell that holds a package id or a UUID counts as corrected for citation use, not
-as a CodeMeta error.
+identifier", so a cell that holds a package id or a UUID counts as scope (right by CodeMeta's
+definition, read more narrowly here), not as a CodeMeta error.
 
 ## Why this exists
 
@@ -36,7 +37,12 @@ Wikidata and GitLab, for the 18 terms citation tools need. That gives 648 cells,
 and term:
 
 - 123 can be used as written.
-- 203 are wrong, ambiguous or prose. 40 of them name a field the format doesn't have.
+- 79 name the right field in a form a tool can't use as a path, such as another case, no prefix
+  or XPath.
+- 42 are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly, such as
+  `identifier` as the software's DOI and `swhid` as a term of its own, or also reads another
+  field, such as a fallback or a newer one.
+- 82 are wrong, ambiguous or prose. 19 of them name a field the format doesn't have.
 - 110 are blank although the format has the field.
 - 212 are for a term the format has no field for.
 

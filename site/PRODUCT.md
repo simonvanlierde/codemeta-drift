@@ -16,8 +16,8 @@ main and every Monday.
 ## Users and purpose
 
 Show CodeMeta maintainers and citation-tool authors which crosswalk cells work as written, which
-are wrong, and which are missing, for the formats citation tools read. Each cell shows CodeMeta's
-text, the reviewed path and the reason. Each CodeMeta release with a reviewed export has its own
+name the right field in another notation or scope, which are wrong, and which are missing, for the
+formats citation tools read. Each cell shows CodeMeta's text, the reviewed path and the reason. Each CodeMeta release with a reviewed export has its own
 matrix, the newest by default. A second tab follows one field between two formats through its
 CodeMeta term. A third, checked weekly, shows what changed on CodeMeta's main branch.
 

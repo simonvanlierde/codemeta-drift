@@ -29,6 +29,10 @@ A path-shaped crosswalk cell, such as `package.version`, supplies the mapping di
 come from `curated-<tag>.json`
 ([3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-3.1.json),
 [4.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-4.0.json)).
+A row whose cell is not wrong may also set `kind`: `notation` when the cell names the right field
+in a form a tool can't use as a path, `scope` when it is right by CodeMeta's definition but the
+path reads the term more narrowly or also reads another field. A row without `kind` counts as
+corrected. The export copies it onto the row, and only `hub coverage` reads it.
 
 The mapping goes to `--out`, or to standard output. A finding writes no mapping and exits 1, with
 the [usual codes](checks.md#read-the-output). The findings go to standard error, or with `--json` as
@@ -106,10 +110,12 @@ Each row has:
   no place for it (Cargo has no DOI).
 - `source` is `crosswalk:<file>@<tag>` (`crosswalk:crosswalks/Zenodo.csv@3.1`) when the path is the
   cell, expanded: `authors` becomes `authors[]`, CFF's `person.given-names` `authors[].given-names`.
-  It is `curated:<reason>` when the row replaces a wrong cell, picks a path out of prose, or fills
+  It is `curated:<reason>` when the row replaces the cell, picks a path out of prose, or fills
   an empty cell. An empty cell never means `null`.
 - `crosswalk_cell` (optional) is the original cell, untrimmed and unexpanded. `""` means it was
   empty, `null` that no cell was joined. If a file lacks it, don't infer it from `path` or `source`.
+- `kind` (optional, added in schema 1.9) is `notation` or `scope` on a curated row whose
+  crosswalk cell is not wrong, as in the curated file. `hub coverage` reads it; a resolver ignores it.
 - `see_also` (optional) is the upstream issue or pull request about the cell.
 - `comment` (optional) is for people. Never read it in code.
 

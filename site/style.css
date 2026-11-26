@@ -230,7 +230,7 @@ h1 {
 .score figcaption {
   font-size: 1.0625rem;
 }
-/* as-is in ink, corrected and added in the two red washes, as in the matrix cells. */
+/* as-is in ink, scope in faint ink, notation as a red outline, corrected and added in the two red washes, as in the matrix cells. */
 .bar {
   display: flex;
   height: 10px;
@@ -242,6 +242,12 @@ h1 {
 }
 .bar .s-as-is {
   background: var(--ink);
+}
+.bar .s-scope {
+  background: var(--faint);
+}
+.bar .s-notation {
+  box-shadow: inset 0 0 0 1px var(--mark);
 }
 .bar .s-corrected {
   background: var(--mark);
@@ -479,6 +485,8 @@ table {
   background: var(--tint);
   box-shadow: inset 0 -2px 0 var(--ink);
 }
+/* A notation cell names the right field, so it gets the red pen but no wash; a scope cell is right by CodeMeta and stays ink. */
+.s-notation,
 .s-corrected,
 .s-added {
   color: var(--mark);
@@ -529,6 +537,8 @@ table {
   color: var(--ink);
 }
 table[data-only="as-is"] td:has(.cell:not(.s-as-is)),
+table[data-only="scope"] td:has(.cell:not(.s-scope)),
+table[data-only="notation"] td:has(.cell:not(.s-notation)),
 table[data-only="corrected"] td:has(.cell:not(.s-corrected)),
 table[data-only="added"] td:has(.cell:not(.s-added)),
 table[data-only="no-field"] td:has(.cell:not(.s-no-field)),
@@ -742,6 +752,7 @@ table[data-only="no-term"] td:has(.cell[data-status="no-term"]) {
   .tags [aria-current="page"]:focus-visible {
     outline-offset: 2px;
   }
+  .s-notation,
   .s-corrected,
   .s-added {
     color: Highlight;

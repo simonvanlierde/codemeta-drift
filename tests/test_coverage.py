@@ -6,7 +6,7 @@ import pytest
 
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.coverage import NOT_REVIEWED, coverage, markdown, unreviewed, upstream
-from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS, curated_tags, latest_tag
+from codemeta_drift.export import FORMATS, NO_PROPERTY, TERMS, build_rows, curated_tags, latest_tag, read_curated
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -100,7 +100,9 @@ def test_known_cells_get_their_status(mapping: dict):
     found = statuses(mapping)
     assert found["cff-1.2.0", "name"] == "as-is"
     assert found["cargo", "name"] == "corrected"  # the cell says package.authors
-    assert found["npm", "identifier"] == "corrected"  # the cell says name, and npm has no DOI field
+    assert found["npm", "identifier"] == "scope"  # the cell says name, an identifier but not a DOI
+    assert found["npm", "swhid"] == "scope"  # the same cell, read again for the hub's own swhid term
+    assert found["zenodo", "author.@id"] == "notation"  # the cell says ORCID, the key is orcid
     assert found["cargo", "description"] == "added"  # no cell, though Cargo has package.description
     assert found["cargo", "datePublished"] == "no field"
     # The contributor person rows reuse the Person cells, but CFF has no contributor list to hold them.
@@ -110,11 +112,48 @@ def test_known_cells_get_their_status(mapping: dict):
     assert not any(fmt == "codemeta" for fmt, _ in found)
 
 
+def test_every_kind_marks_a_cell_that_would_be_corrected(mapping: dict):
+    """A kind on a row the crosswalk reads, or on an added cell, would be dropped without a word."""
+    tag = mapping["codemeta_tag"]
+    found = statuses(mapping)
+    kinds = {(r["format"], r["term"]): r["kind"] for r in read_curated(tag) if "kind" in r}
+    assert kinds
+    assert {key: found[key] for key in kinds} == kinds
+
+
+def test_kind_comes_from_the_mapping_row(mapping: dict):
+    """A hand-edited export or one from another release gets the statuses its own rows say."""
+    row = next(r for r in mapping["rows"] if (r["format"], r["term"]) == ("zenodo", "author.@id"))
+    assert row.pop("kind", None) == "notation"
+    assert statuses(mapping)["zenodo", "author.@id"] == "corrected"
+
+
+def test_an_unknown_kind_is_refused():
+    with pytest.raises(ValueError, match="row 1 has kind 'typo'"):
+        build_rows({}, "4.0", [{"format": "cargo", "term": "name", "path": "x", "reason": "r", "kind": "typo"}])
+
+
 def test_counts_for_the_crosswalks(mapping: dict):
     found = [s for (fmt, _), s in statuses(mapping).items() if FORMATS[fmt].crosswalk]
     expected = {
-        "3.1": {"as-is": 114, "corrected": 193, "added": 109, "no field": 219, "no term": 11},
-        "4.0": {"as-is": 123, "corrected": 203, "added": 110, "no field": 237, "no term": 11},
+        "3.1": {
+            "as-is": 114,
+            "scope": 40,
+            "notation": 79,
+            "corrected": 74,
+            "added": 109,
+            "no field": 219,
+            "no term": 11,
+        },
+        "4.0": {
+            "as-is": 123,
+            "scope": 42,
+            "notation": 79,
+            "corrected": 82,
+            "added": 110,
+            "no field": 237,
+            "no term": 11,
+        },
     }
     assert {s: found.count(s) for s in set(found)} == expected[mapping["codemeta_tag"]]
 
@@ -129,7 +168,13 @@ def test_readme_figures_match_the_counts():
     terms = len(TERMS) - len(NO_PROPERTY)
     assert (
         f"for the {terms} terms citation tools need. That gives {len(cells)} cells, one per crosswalk and term:"
-        f" - {count['as-is']} can be used as written. - {count['corrected']} are wrong, ambiguous or prose."
+        f" - {count['as-is']} can be used as written."
+        f" - {count['notation']} name the right field in a form a tool can't use as a path,"
+        f" such as another case, no prefix or XPath."
+        f" - {count['scope']} are right by CodeMeta's definition, but codemeta-drift reads the term more narrowly,"
+        f" such as `identifier` as the software's DOI and `swhid` as a term of its own, or also reads another field,"
+        f" such as a fallback or a newer one."
+        f" - {count['corrected']} are wrong, ambiguous or prose."
         f" {null_corrected} of them name a field the format doesn't have."
         f" - {count['added']} are blank although the format has the field."
         f" - {count['no field']} are for a term the format has no field for."

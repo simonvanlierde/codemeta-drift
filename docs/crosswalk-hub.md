@@ -21,8 +21,8 @@ subcommand's `--help` ends with an example and the exit codes. A mapping `-` is 
 `--json` to `pair`, `sssom` or `crosswalk` for a [JSON report](checks.md#read-json-output) in place of the text.
 
 `coverage` writes the [coverage matrix](coverage-4.0.md): each term and format with its status
-(as-is, meaning CodeMeta's cell is already the path; corrected; added; no field; or no term) and
-the reason for every reviewed cell. Add `--json` for the cells as data, which the
+(as-is, meaning CodeMeta's cell is already the path; scope; notation; corrected; added; no field;
+or no term) and the reason for every reviewed cell. Add `--json` for the cells as data, which the
 [coverage page](https://simonvanlierde.com/codemeta-drift/) reads: the newest release at its
 bare address, an older one at `?tag=3.1`. With `--codemeta <checkout>`,
 it also lists the crosswalks nobody has reviewed, read at the export's tag, under `unreviewed` in

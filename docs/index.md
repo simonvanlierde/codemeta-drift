@@ -1,9 +1,9 @@
 # Documentation
 
-codemeta-drift shows where CodeMeta's crosswalks to citation and package formats are wrong or
-missing: [see every cell](https://simonvanlierde.com/codemeta-drift/). It also checks CodeMeta's
-own files against each other, and exports a reviewed JSON field mapping for tools such as
-[citesync](https://github.com/simonvanlierde/citesync).
+codemeta-drift shows where CodeMeta's crosswalk cells for citation and package formats work as
+written and where they don't: [see every cell](https://simonvanlierde.com/codemeta-drift/). It
+also checks CodeMeta's own files against each other, and exports a reviewed JSON field mapping for
+tools such as [citesync](https://github.com/simonvanlierde/citesync).
 
 It is not part of the CodeMeta project. Its `identifier` column means the software's DOI, narrower
 than CodeMeta's "any kind of identifier". The [README](https://github.com/simonvanlierde/codemeta-drift#try-it)
