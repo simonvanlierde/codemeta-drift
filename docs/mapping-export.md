@@ -125,12 +125,13 @@ Each row:
   `endnote` (an EndNote tagged record with `%0 Computer Program`), `gitlab` (the GitLab REST API's
   project JSON), `code-json-2.0` (a code.json 2.0 file, the US federal source code metadata),
   `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`), `croissant` (a Croissant 1.0 or
-  1.1 `croissant.json`), `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record) ,
-  `debian` (a Debian source tree's `debian/` directory), `mods` (a MODS 3 record) ,
-  `vivo-1.8` (a VIVO 1.8 software individual) , `spase-2.6.1` (a SPASE 2.6.1 Software resource)
-  or `iso-19115-1-2014` (an ISO 19115-1:2014 record in ISO 19115-3 XML). A format whose versions differ puts the version in the id. `pkg-info` to
-  `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, `ris` to `code-json-2.0` in
-  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1` and `iso-19115-1-2014` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
+  1.1 `croissant.json`), `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record),
+  `debian` (a Debian source tree's `debian/` directory), `mods` (a MODS 3 record), `vivo-1.8` (a
+  VIVO 1.8 software individual), `spase-2.6.1` (a SPASE 2.6.1 Software resource) or
+  `iso-19115-1-2014` (an ISO 19115-1:2014 record in ISO 19115-3 XML). A format whose versions differ
+  puts the version in the id. `pkg-info` to `bibtex` were added in schema 1.4, `datacite` to
+  `wikidata` in 1.5, `ris` to `code-json-2.0` in 1.7, `ro-crate` and `croissant` in 1.8, and
+  `dublin-core` to `iso-19115-1-2014` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -420,8 +421,8 @@ They come with a new codemeta tag or a new codemeta-drift release.
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
-   that holds `v`. Schema 1.9 adds the `dublin-core`, `debian`, `mods`, `vivo-1.8`, `spase-2.6.1` and `iso-19115-1-2014` format ids and changes no pattern, so a 1.9
-   file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
+   that holds `v`. Schema 1.9 adds six format ids, `dublin-core` to `iso-19115-1-2014`, and
+   changes no pattern, so a 1.9 file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format
    that starts at a later tag, such as `gitlab` from 4.0, has no rows in an older tag's file: read it from
