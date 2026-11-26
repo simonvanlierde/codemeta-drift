@@ -380,3 +380,9 @@ def test_a_backtick_in_a_pin_line_keeps_the_code_span_closed():
 def test_a_backtick_in_a_stale_pin_keeps_every_code_span_closed():
     plans = runner.stale_pin_hashes("sha256 d`@x a`@y b`@z\n", "v0.5.0", lambda _: {"content": "eA=="})
     assert plans[0]["body"].startswith("The sha256 of ``a`@y`` in MAPPING_SOURCE is ``d`@x``, but ``b`@z`` at v0.5.0")
+
+
+def test_a_pinned_file_the_contents_api_sends_without_content_is_an_error():
+    """For a file over 1 MB the API sends empty content; hashing it would report a false stale pin."""
+    with pytest.raises(ValueError, match=r"sent no content for b at v0\.5\.0"):
+        runner.stale_pin_hashes("sha256 d a b\n", "v0.5.0", lambda _: {"content": "", "encoding": "none"})
