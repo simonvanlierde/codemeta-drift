@@ -361,6 +361,18 @@ A (format, term) pair appears at most once. The schema cannot enforce that, so t
 pin the file's sha256. `generator.version` is one of the inputs: a new codemeta-drift
 release changes the bytes even when no row changes. A consumer must not depend on the row order.
 
+### Pin a release's export
+
+Each GitHub release carries `mapping-3.1.json`, `mapping-4.0.json` and a `SHA256SUMS` file covering them,
+so a consumer can pin an export without a CodeMeta checkout:
+
+```bash
+v=0.10.0
+curl -fsSLO "https://github.com/simonvanlierde/codemeta-drift/releases/download/v$v/mapping-4.0.json"
+curl -fsSLO "https://github.com/simonvanlierde/codemeta-drift/releases/download/v$v/SHA256SUMS"
+sha256sum -c --ignore-missing SHA256SUMS
+```
+
 ## Path grammar
 
 A path is a list of steps joined by `.`. A step is a key, optionally followed by one selector:
