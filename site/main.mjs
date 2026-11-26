@@ -2,7 +2,9 @@
 // or an older release's matrix from data-<tag>.json.
 // Every string goes in through textContent: cells and reasons come from crosswalk files.
 
-import { chosenTag, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseLinks, sourceHref } from "./fragment.mjs";
+import {
+  chosenTag, crosswalkFormats, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseLinks, sourceHref, splitByCrosswalk, upstreamLines,
+} from "./fragment.mjs";
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
@@ -18,10 +20,16 @@ const label = (fmt) => LABELS[fmt] ?? fmt;
 const ORDER = Object.keys(LABELS);
 const rank = (fmt) => (ORDER.includes(fmt) ? ORDER.indexOf(fmt) : ORDER.length);
 
+// Terms whose column reads differently from CodeMeta's own property, said in the detail panel.
+const TERM_NOTES = {
+  identifier: "This page reads identifier as the software's DOI. CodeMeta's own definition takes any identifier.",
+  swhid: "CodeMeta has no SWHID term; it keeps one in identifier. This column is the page's own.",
+};
+
 // What each upstream state says about a cell on CodeMeta's main branch.
 const STATES = {
   missing: "has no crosswalk file or property table on main",
-  unmatched: "can't be joined: the crosswalk and the property table list this property a different number of times",
+  unmatched: "can't be compared: on main, CodeMeta's property table and this crosswalk list the property a different number of times",
   fixed: "now says what the reviewed mapping says, so the correction can go",
   changed: "has new text",
 };
@@ -52,8 +60,13 @@ function matrix(data, unreviewed, onPick) {
   head.append(el("th", { scope: "col", class: "rot" }, el("span", {}, "as written")));
   table.append(el("thead", {}, head));
   const formats = [...data.formats].sort((a, b) => rank(a) - rank(b)).map((format) => ({ format, label: label(format) }));
-  const legend = unreviewed && el("span", {}, "Reviewed crosswalks. Choose a changed cell to see why.");
-  table.append(group(data.terms, formats, data, onPick, { legend, tally: usableTally }));
+  const { own, added } = splitByCrosswalk(formats, data.cells);
+  const legend = (unreviewed || added.length) && el("span", {}, "Reviewed crosswalks. Choose a changed cell to see why.");
+  table.append(group(data.terms, own, data, onPick, { legend, tally: usableTally }));
+  if (added.length) {
+    const none = el("span", {}, "No CodeMeta crosswalk. The reviewed mapping adds these formats.");
+    table.append(group(data.terms, added, data, onPick, { legend: none, tally: usableTally }));
+  }
   if (!unreviewed) return;
   const shapes = el("span", {}, "Not reviewed yet. A mark shows only what CodeMeta's cell holds, and the last column counts path cells.");
   table.append(group(data.terms, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed" }));
@@ -167,12 +180,13 @@ function detail(statuses, formats, coverage, upstream) {
       ["Status", `${mark} ${cell.status}: ${meaning}`],
       ["CodeMeta property", coverage.properties?.[cell.term] ? code(coverage.properties[cell.term]) : "none"],
       ["CodeMeta's cell", cell.crosswalk
-        ? el("span", {}, was ? code(was) : cell.cell === null ? "can't be joined" : "empty",
+        ? el("span", {}, was ? code(was) : cell.cell === null ? "can't be matched to its property" : "empty",
           cell.line ? el("span", {}, " in ", source(coverage.codemeta_tag, cell.crosswalk, cell.line)) : null)
         : "no CodeMeta crosswalk for this format"],
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", linked(cell.reason)]);
+    if (TERM_NOTES[cell.term]) rows.push(["Note", TERM_NOTES[cell.term]]);
     if (format?.status) rows.push(["Not reviewed", el("span", {}, `${format.status}: ${format.reason}. `, el("a", { href: format.url }, format.url))]);
     const now = changes.get(`${cell.format} ${cell.term}`);
     if (now) {
@@ -240,10 +254,10 @@ function filters(data) {
     box.append(button);
   }
   // The headline counts CodeMeta's crosswalks only; the filters count every row of the matrix.
-  const withCrosswalk = new Set(data.cells.filter((c) => c.crosswalk).map((c) => c.format)).size;
+  const withCrosswalk = crosswalkFormats(data.cells).size;
   const note = document.getElementById("counts-note");
   note.hidden = withCrosswalk === data.formats.length;
-  note.textContent = `These counts take in all ${data.formats.length} formats. The headline counts only the ${withCrosswalk} that have a CodeMeta crosswalk.`;
+  note.textContent = `The filter counts take in all ${data.formats.length} formats. The headline counts only the ${withCrosswalk} with a CodeMeta crosswalk.`;
 }
 
 function route(data) {
@@ -279,7 +293,6 @@ function upstreamSection(upstream, tag) {
   if (!upstream) return;
   const tab = document.getElementById("tab-upstream");
   tab.hidden = false;
-  document.getElementById("upstream-count").textContent = String(upstream.cells.length);
   const date = upstream.date.slice(0, 10);
   document.getElementById("checked").textContent = `upstream main checked ${date} at ${upstream.commit.slice(0, 7)}`;
   const intro = document.getElementById("upstream-intro");
@@ -288,23 +301,14 @@ function upstreamSection(upstream, tag) {
     upstream.cells.length ? `Compared with ${tag}, main changes ${upstream.cells.length} of the matrix's cells:`
       : `Every cell in the matrix reads the same there as at ${tag}.`);
   const list = document.getElementById("upstream-cells");
-  // A cell with no new text has one cause per term and state, such as a property CodeMeta added to the
-  // table but not to the crosswalks, so those cells share a line.
-  const groups = new Map();
-  for (const c of upstream.cells) {
-    if (c.now !== null) {
-      list.append(el("li", {}, code(c.term), ` in ${label(c.format)} ${STATES[c.state]}: `, code(c.now)));
-      continue;
-    }
-    const key = `${c.state} ${c.term}`;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(c);
-  }
-  for (const cells of groups.values()) {
-    const names = cells.map((c) => label(c.format));
+  const lines = upstreamLines(upstream.cells);
+  for (const { term, state, now, formats } of lines) {
+    const names = formats.map(label);
     const where = names.length === 1 ? names[0] : `${names.length} formats (${names.join(", ")})`;
-    list.append(el("li", {}, code(cells[0].term), ` in ${where} ${STATES[cells[0].state]}`));
+    list.append(el("li", {}, code(term), ` in ${where} ${STATES[state]}`, ...(now === null ? [] : [": ", code(now)])));
   }
+  // One line per cause: 34 cells that share one cause are one thing to look at.
+  document.getElementById("upstream-count").textContent = String(lines.length);
   const counts = new Map();
   for (const f of upstream.drift) counts.set(f.code, (counts.get(f.code) ?? 0) + 1);
   const table = document.getElementById("drift");
@@ -376,10 +380,9 @@ function follow(hub) {
 
 // The headline: of the crosswalk cells for a field the format has, how many work as written, as a figure and a bar.
 function score(data) {
-  const crosswalk = data.cells.filter((c) => c.crosswalk);
   const fields = needed(data.cells);
   const count = (status) => fields.filter((c) => c.status === status).length;
-  const formats = new Set(crosswalk.map((c) => c.format)).size;
+  const formats = crosswalkFormats(data.cells).size;
   const bar = el("div", { class: "bar", "aria-hidden": "true" });
   for (const status of ["as-is", "corrected", "added"]) {
     const part = el("span", { class: `s-${status}` });
@@ -389,8 +392,10 @@ function score(data) {
   document.getElementById("score").append(
     el("p", { class: "big" }, String(count("as-is")), el("span", {}, ` of ${fields.length}`)),
     bar,
-    el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written. `
-      + `${count("corrected")} are wrong, ambiguous or prose, and ${count("added")} are blank where the format has a field.`),
+    el("figcaption", {}, `cells in ${formats} CodeMeta crosswalks work as written`,
+      el("span", { "aria-hidden": "true" }, " (✓)"), ". ", el("span", { "aria-hidden": "true" }, "✎ "),
+      `${count("corrected")} are wrong, ambiguous or prose, and `, el("span", { "aria-hidden": "true" }, "+ "),
+      `${count("added")} are blank where the format has a field.`),
   );
 }
 

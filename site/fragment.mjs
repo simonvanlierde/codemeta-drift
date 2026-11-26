@@ -87,3 +87,24 @@ export function nextCell(rows, [r, c], key, ctrl = false) {
   if (key === "ArrowUp") return down(-1);
   return null;
 }
+
+export const crosswalkFormats = (cells) => new Set(cells.filter((c) => c.crosswalk).map((c) => c.format));
+
+// The matrix's two format groups: those with a CodeMeta crosswalk, and those the reviewed mapping adds.
+export function splitByCrosswalk(formats, cells) {
+  const has = crosswalkFormats(cells);
+  return { own: formats.filter((f) => has.has(f.format)), added: formats.filter((f) => !has.has(f.format)) };
+}
+
+// The upstream list: a line per cell with new text, then one per state and term for the cells with none,
+// such as a property CodeMeta added to the table but not to the crosswalks.
+export function upstreamLines(cells) {
+  const lines = cells.filter((c) => c.now !== null).map(({ term, state, now, format }) => ({ term, state, now, formats: [format] }));
+  const groups = new Map();
+  for (const c of cells.filter((c) => c.now === null)) {
+    const key = `${c.state} ${c.term}`;
+    if (!groups.has(key)) groups.set(key, { term: c.term, state: c.state, now: null, formats: [] });
+    groups.get(key).formats.push(c.format);
+  }
+  return [...lines, ...groups.values()];
+}

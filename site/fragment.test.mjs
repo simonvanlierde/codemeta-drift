@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseHref, releaseLinks, sourceHref } from "./fragment.mjs";
+import { chosenTag, hubTerm, linkParts, nextCell, pageTitle, parseFragment, releaseHref, releaseLinks, sourceHref, splitByCrosswalk, upstreamLines } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -136,4 +136,23 @@ test("Home and End stay in the row; with Ctrl they go to the first and last cell
 
 test("other keys move nowhere", () => {
   assert.equal(nextCell(grid, [0, 1], "Enter"), null);
+});
+
+test("formats with a crosswalk come first; the rest are the ones the mapping adds", () => {
+  const cells = [{ format: "cff", crosswalk: "x" }, { format: "ris", crosswalk: null }];
+  assert.deepEqual(splitByCrosswalk([{ format: "cff" }, { format: "ris" }], cells), {
+    own: [{ format: "cff" }],
+    added: [{ format: "ris" }],
+  });
+});
+
+test("upstream cells with no new text share a line per state and term", () => {
+  const lines = upstreamLines([
+    { format: "cff", term: "name", state: "missing", now: null },
+    { format: "npm", term: "name", state: "missing", now: null },
+    { format: "ris", term: "url", state: "changed", now: "x" },
+  ]);
+  assert.equal(lines.length, 2);
+  assert.deepEqual(lines[0], { term: "url", state: "changed", now: "x", formats: ["ris"] });
+  assert.deepEqual(lines[1], { term: "name", state: "missing", now: null, formats: ["cff", "npm"] });
 });
