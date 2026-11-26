@@ -126,9 +126,10 @@ Each row:
   project JSON), `code-json-2.0` (a code.json 2.0 file, the US federal source code metadata),
   `ro-crate` (an RO-Crate 1.1 to 1.3 `ro-crate-metadata.json`), `croissant` (a Croissant 1.0 or
   1.1 `croissant.json`), `dublin-core` (an OAI-PMH `oai_dc` record or a DCMI Terms RDF record) ,
-  `debian` (a Debian source tree's `debian/` directory) or `mods` (a MODS 3 record). A format whose versions differ puts the version in the id. `pkg-info` to
+  `debian` (a Debian source tree's `debian/` directory), `mods` (a MODS 3 record) or
+  `vivo-1.8` (a VIVO 1.8 software individual). A format whose versions differ puts the version in the id. `pkg-info` to
   `bibtex` were added in schema 1.4, `datacite` to `wikidata` in 1.5, `ris` to `code-json-2.0` in
-  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core`, `debian` and `mods` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
+  1.7, `ro-crate` and `croissant` in 1.8, and `dublin-core`, `debian`, `mods` and `vivo-1.8` in 1.9. `gitlab` and `code-json-2.0` have rows from the 4.0
   export on, because their crosswalks first came with CodeMeta 4.0.
 - `term` is one of the thirteen terms `name`, `version`, `author`, `contributor`, `license`,
   `identifier`, `swhid`, `codeRepository`, `description`, `keywords`, `datePublished`, `publisher` and
@@ -246,6 +247,20 @@ them into one first. These cases need more than the grammar below says:
   copyright-format's own (`Expat`, `GPL-2+`), not SPDX ids, and a version is
   `[epoch:]upstream[-revision]`: the consumer maps the one and cuts the other. Never run
   `debian/rules`; a parser of the newest changelog line gives the same `Version`.
+- VIVO is RDF held in a VIVO instance, not a file. One linked-data response does not name a
+  work's authors, so a consumer reads the merged graph of the software individual and its
+  `vivo:Authorship` nodes, their agents with their `vcard:Individual` and `vcard:Name`, its
+  `vivo:DateTimeValue` and its publisher (by fetching each IRI or by one SPARQL CONSTRUCT). It frames
+  that graph as JSON-LD on `"@type": "obo:ERO_0000071"` with `"@embed": "@always"`, with a context that
+  defines the prefixes `vivo`, `obo`, `bibo`, `vcard` and `rdfs`, the term `Authorship` for
+  `vivo:Authorship`, and `"@container": "@set"` for `vivo:relatedBy`, `vivo:relates`, `vivo:orcidId`
+  and `obo:ARG_2000028`, so those are always lists. The parser then drops from each `vivo:relates` the
+  reference back to the root (an object whose only key is the root's `@id`) and sorts `vivo:relatedBy`
+  by `vivo:rank`, unranked last. Without the `Authorship` term the author filter matches nothing, so a
+  consumer that skips the rule reads no authors, never wrong ones. An author is a `foaf:Person`, whose
+  name sits under `obo:ARG_2000028`, or a bare `vcard:Individual`: the name rows join both with `+`,
+  so the consumer reads names per author element. `vivo:dateTime` is a full xsd:dateTime, which the
+  consumer cuts to the precision `vivo:dateTimePrecision` gives.
 - Dublin Core comes as `oai_dc` XML, which every OAI-PMH repository serves, or as RDF. An `oai_dc`
   record is read as a tree rooted at `oai_dc:dc`: each child element is a key named by its prefixed
   name (`dc:title`) holding its trimmed text, and every key is a list, because every element may
@@ -304,7 +319,7 @@ A (format, term) pair appears at most once. The schema cannot enforce that, so t
 `ruby-gem`, `maven`, `cpan-meta-2`, `nuget`, `pubspec`, `cabal`, `typst`, `quarto`, `github`,
 `figshare`, `bio-tools`, `leiningen`, `octave`, `publiccode-0.8`, `swmath`, `spdx-2.3`,
 `codemeta-2`, `dcat-3`, `doap`, `wikidata`, `ris`, `endnote`, `gitlab`, `code-json-2.0`, `ro-crate`,
-`croissant`, `dublin-core`, `debian`, `mods`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
+`croissant`, `dublin-core`, `debian`, `mods`, `vivo-1.8`, and within a format in the order `name`, `version`, `author`, `author.givenName`,
 `author.familyName`, `author.@id`, `contributor`, `contributor.givenName`, `contributor.familyName`,
 `contributor.@id`, `license`, `identifier`, `swhid`, `codeRepository`, `description`, `keywords`,
 `datePublished`, `publisher`, `resourceType`. The same inputs give the same bytes, so a consumer can
@@ -352,9 +367,10 @@ from the first alternative that yields any value. A consumer vendors the file wi
 every case through its own resolver.
 Its `schema_version` is the mapping schema whose grammar the cases need.
 Cases with `raw_input` also test parsing: its `format` names the parser (`pkg-info`, `ro-crate`,
-`croissant`, `oai_dc`, `debian-control` or `mods`) and its `text` is the source file content. Parse that text and compare the resulting tree
+`croissant`, `oai_dc`, `debian-control`, `mods` or `vivo`) and its `text` is the source file content. Parse that text and compare the resulting tree
 to `document` before resolving `path`; a consumer that does not read that format skips the parse and
-still resolves `path` in `document`. The PKG-INFO cases cover comma separation, quoted names, company
+still resolves `path` in `document`. The `vivo` case gives Turtle as `raw_input` and the framed tree as `document`; this package's own tests
+resolve that tree but do not frame the Turtle. The PKG-INFO cases cover comma separation, quoted names, company
 suffixes and `et al.`.
 
 ## Compatibility
@@ -383,7 +399,7 @@ They come with a new codemeta tag or a new codemeta-drift release.
    the parser must keep both as lists. Schema 1.8 adds the `ro-crate` and `croissant` format ids and
    lets a filter value hold `/`, so a 1.8 file fails the 1.7 schema, and the `hub` of 0.7.2 refuses it. Update the
    resolver too, and run `mapping-vectors.json` through it: since 1.6, `[k=v]` also matches a list
-   that holds `v`. Schema 1.9 adds the `dublin-core`, `debian` and `mods` format ids and changes no pattern, so a 1.9
+   that holds `v`. Schema 1.9 adds the `dublin-core`, `debian`, `mods` and `vivo-1.8` format ids and changes no pattern, so a 1.9
    file passes the 1.8 schema, but the `hub` of 0.9.0 refuses it.
 3. Ignore rows for formats and terms it doesn't use, and fields it doesn't know.
 4. For each format it reads, a missing row for a term it uses is an error (citesync exits 3). A format

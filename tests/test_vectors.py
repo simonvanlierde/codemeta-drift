@@ -302,3 +302,28 @@ def test_curated_mods_rows_read_the_vector_document(tag: str) -> None:
     assert [p["#text"] for a in resolve(document, paths["author"]) for p in a["namePart"]] == ["Ada", "Lovelace"]
     assert [p["#text"] for c in resolve(document, paths["contributor"]) for p in c["namePart"]] == ["Grace", "Hopper"]
     assert resolve(document, paths["license"])[0]["@xlink:href"] == "https://spdx.org/licenses/MIT.html"
+
+
+@pytest.mark.parametrize("tag", ["3.1", "4.0"])
+def test_curated_vivo_rows_read_the_framed_graph(tag: str) -> None:
+    # The suite has no RDF parser: the vector's document is the framing pyld and rdflib give its Turtle.
+    paths = curated_paths(tag, "vivo-1.8")
+    document = raw_case("vivo")["document"]
+    expected = {
+        "name": ["Animalcule Counter"],
+        "version": ["2.1.0"],
+        "author.givenName": ["Antonie", "Luogeng"],
+        "author.familyName": ["van Leeuwenhoek", "Hua"],
+        "author.@id": ["https://orcid.org/0000-0002-1825-0097"],
+        "identifier": ["10.5555/animalcule.2.1.0"],
+        "swhid": ["swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505"],
+        "description": ["Counts animalcules in microscope images."],
+        "keywords": [["microscopy", "image analysis"]],
+        "publisher": ["Carberry Institute"],
+        "resourceType": ["obo:ERO_0000071"],
+    }
+    for term, values in expected.items():
+        assert resolve(document, paths[term]) == values, term
+    # Ranked: the first Authorship is rank 1, though the graph lists it second.
+    assert [a["rdfs:label"] for a in resolve(document, paths["author"])] == ["van Leeuwenhoek, Antonie", "Hua, Luogeng"]
+    assert [d["@value"] for d in resolve(document, paths["datePublished"])] == ["2025-03-14T00:00:00"]

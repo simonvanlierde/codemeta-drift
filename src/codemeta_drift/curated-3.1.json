@@ -4374,6 +4374,149 @@
       "path": "typeOfResource[]",
       "reason": "CodeMeta has no term for the resource type; MODS states it in typeOfResource (MODS 3.8 Guidelines, typeOfResource, https://www.loc.gov/standards/mods/userguide/typeofresource.html)",
       "comment": "Before MODS 3.7 the value came from a fixed list whose software value is software, multimedia, which Zotero still writes. Since 3.7 the guidelines recommend the LC Resource Types Scheme (https://id.loc.gov/vocabulary/resourceTypes), which has no software type (it has Multimedia, Digital and Dataset)."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "name",
+      "path": "rdfs:label",
+      "cell": "label",
+      "reason": "the cell says label, which the crosswalk's first commit, https://github.com/codemeta/codemeta/commit/16f496a, gave as rdfs:label; the path names it with its prefix"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "version",
+      "path": "obo:ERO_0000072",
+      "cell": "version",
+      "reason": "the cell says version, the rdfs:label of obo:ERO_0000072 in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, a string property whose domain is Software (obo:ERO_0000071) or Database; the path names it by its IRI"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[]",
+      "cell": "relatedBy.relates",
+      "reason": "the cell says relatedBy.relates, which also reaches editorships and the work itself; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, links a work to its authors through a vivo:Authorship node that vivo:relates both the work and an agent, so the path keeps only Authorship nodes",
+      "comment": "Needs the VIVO parse rule in docs/mapping-export.md: Authorship is a context term, the parser drops the reference back to the record from each vivo:relates and sorts vivo:relatedBy by vivo:rank. An agent is a foaf:Person, a vcard:Individual (an author with no VIVO profile) or a foaf:Organization."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author.givenName",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].obo:ARG_2000028[].vcard:hasName.vcard:givenName + vivo:relatedBy[@type=Authorship].vivo:relates[].vcard:hasName.vcard:givenName",
+      "cell": "",
+      "reason": "no cell; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, gives vcard:givenName the domain vcard:Name; a foaf:Person reaches its vcard:Individual through obo:ARG_2000028 (has contact info), and an author with no profile is a vcard:Individual itself, as VIVO 1.16.0's AddAuthorsToInformationResourceGenerator writes them",
+      "comment": "Read per author: obo:ARG_2000028[].vcard:hasName for a foaf:Person, vcard:hasName for a vcard:Individual. A middle name sits in vivo:middleName on the same vcard:Name. An agent with only rdfs:label has no given name here; the consumer then splits the label."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author.familyName",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].obo:ARG_2000028[].vcard:hasName.vcard:familyName + vivo:relatedBy[@type=Authorship].vivo:relates[].vcard:hasName.vcard:familyName",
+      "cell": "",
+      "reason": "no cell; same as author.givenName, with vcard:familyName, which VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, also puts on vcard:Name",
+      "comment": "Read per author, as for author.givenName. An agent with only rdfs:label has no family name here; the consumer then splits the label."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "author.@id",
+      "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].vivo:orcidId[].@id",
+      "cell": "relatedBy.relates.ORCID iD",
+      "reason": "the cell says relatedBy.relates.ORCID iD, the label of vivo:orcidId, and the crosswalk's first commit gave its range as a string; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, makes vivo:orcidId an object property on foaf:Person whose value is the ORCID IRI, so the path reads its @id",
+      "comment": "The spec allows several ORCID iDs for one person. A vcard:Individual author has no vivo:orcidId. The person's own @id is a VIVO IRI, not an ORCID."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, links people to a work only as authors (vivo:Authorship) or editors (vivo:Editorship) and declares dcterms:contributor only as the parent of bibo:performer and bibo:translator"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor.givenName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO has no contributor, see contributor"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor.familyName",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO has no contributor, see contributor"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "contributor.@id",
+      "path": null,
+      "cell": "relatedBy.relates.ORCID iD",
+      "reason": "the cell repeats author's ORCID path, because the crosswalk has one Person identifier row; VIVO has no contributor, see contributor"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "license",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, has no licence property for a work; its vivo:License class is an official permission held as a credential, not a software licence"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "identifier",
+      "path": "bibo:doi",
+      "cell": "SWHID",
+      "reason": "the cell says SWHID, which is vivo:swhid and belongs to the swhid row; the DOI is bibo:doi, a sub-property of bibo:identifier with no domain in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl",
+      "comment": "A plain string; the consumer converts between a bare DOI and its https://doi.org/ form."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "swhid",
+      "path": "vivo:swhid",
+      "cell": "SWHID",
+      "reason": "the cell says SWHID, the rdfs:label of vivo:swhid, which the crosswalk's first commit, https://github.com/codemeta/codemeta/commit/16f496a, named; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, adds it as a sub-property of vivo:identifier with the domain Software (obo:ERO_0000071); the path names it with its prefix",
+      "comment": "vivo:swhid is new in VIVO ontology 1.8.0; a record written to 1.7.0 has no SWHID."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "codeRepository",
+      "path": null,
+      "cell": "",
+      "reason": "the cell is empty and VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, has no repository property; its web links (obo:ARG_2000028 to vcard:hasURL), which the crosswalk gives for url, carry no kind",
+      "comment": "A record may list the repository among its vcard:URL nodes; only the URL's text tells it apart."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "description",
+      "path": "bibo:abstract",
+      "cell": "abstract",
+      "reason": "the cell says abstract, which the crosswalk's first commit gave as bibo:abstract; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, gives it the domain obo:IAO_0000030 (information content entity), Software's superclass; the path names it with its prefix"
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "keywords",
+      "path": "vivo:freetextKeyword",
+      "cell": "freetextKeywords",
+      "reason": "the cell says freetextKeywords; the property in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, is vivo:freetextKeyword, singular, one keyword or phrase per statement",
+      "comment": "Repeatable: a single keyword may be a string rather than an array."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "datePublished",
+      "path": "vivo:dateTimeValue.vivo:dateTime",
+      "cell": "date/time value",
+      "reason": "the cell says date/time value, the label of vivo:dateTimeValue, whose value in VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, is a vivo:DateTimeValue node, not a date; the date is that node's vivo:dateTime",
+      "comment": "vivo:dateTime is always an xsd:dateTime, possibly as {\"@value\", \"@type\"}; vivo:dateTimePrecision (yearPrecision, yearMonthPrecision, yearMonthDayPrecision, yearMonthDayTimePrecision) says how much of it holds, so the consumer cuts the value to that precision."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "publisher",
+      "path": "vivo:publisher.rdfs:label | vivo:publisher",
+      "cell": "",
+      "reason": "the cell is empty; VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, has vivo:publisher with the range foaf:Organization and no domain, and VIVO 1.16.0's AddPublicationToPersonGenerator names the publisher with rdfs:label",
+      "comment": "A publisher given only by reference (an object with @id and no name) falls through to that object, which is not a name: the consumer takes its @id or leaves the name empty."
+    },
+    {
+      "format": "vivo-1.8",
+      "term": "resourceType",
+      "path": "@type",
+      "reason": "CodeMeta has no term for the resource type; VIVO states it in the node's rdf:type, and VIVO 1.8.0 vivo.owl, https://github.com/vivo-ontologies/vivo-ontology/blob/vivo-ontology-1.8.0/vivo.owl, types software as obo:ERO_0000071",
+      "comment": "@type may be a list; the consumer looks for obo:ERO_0000071 in it."
     }
   ]
 }

@@ -1630,6 +1630,117 @@
      "#text": "Lovelace"
     }
    ]
+  },
+  {
+   "name": "VIVO: an Authorship's agents, framed on the software, ranked, without the reference back to it",
+   "path": "vivo:relatedBy[@type=Authorship].vivo:relates[].vivo:orcidId[].@id",
+   "raw_input": {
+    "format": "vivo",
+    "text": "@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .\n@prefix foaf:  <http://xmlns.com/foaf/0.1/> .\n@prefix obo:   <http://purl.obolibrary.org/obo/> .\n@prefix bibo:  <http://purl.org/ontology/bibo/> .\n@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .\n@prefix vivo:  <http://vivoweb.org/ontology/core#> .\n\n<https://vivo.example.org/individual/sw1>\n    a obo:ERO_0000071 ;\n    rdfs:label \"Animalcule Counter\" ;\n    obo:ERO_0000072 \"2.1.0\" ;\n    bibo:abstract \"Counts animalcules in microscope images.\" ;\n    bibo:doi \"10.5555/animalcule.2.1.0\" ;\n    vivo:swhid \"swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505\" ;\n    vivo:freetextKeyword \"microscopy\", \"image analysis\" ;\n    vivo:dateTimeValue <https://vivo.example.org/individual/dt1> ;\n    vivo:publisher <https://vivo.example.org/individual/org1> ;\n    vivo:relatedBy <https://vivo.example.org/individual/as2>, <https://vivo.example.org/individual/as1> .\n\n<https://vivo.example.org/individual/dt1>\n    a vivo:DateTimeValue ;\n    vivo:dateTime \"2025-03-14T00:00:00\"^^xsd:dateTime ;\n    vivo:dateTimePrecision vivo:yearMonthDayPrecision .\n\n<https://vivo.example.org/individual/org1>\n    a foaf:Organization ;\n    rdfs:label \"Carberry Institute\" ;\n    vivo:publisherOf <https://vivo.example.org/individual/sw1> .\n\n<https://vivo.example.org/individual/as1>\n    a vivo:Authorship ;\n    vivo:rank \"1\"^^xsd:int ;\n    vivo:relates <https://vivo.example.org/individual/sw1>, <https://vivo.example.org/individual/p1> .\n\n<https://vivo.example.org/individual/as2>\n    a vivo:Authorship ;\n    vivo:rank \"2\"^^xsd:int ;\n    vivo:relates <https://vivo.example.org/individual/sw1>, <https://vivo.example.org/individual/vc2> .\n\n<https://vivo.example.org/individual/p1>\n    a foaf:Person ;\n    rdfs:label \"van Leeuwenhoek, Antonie\" ;\n    vivo:orcidId <https://orcid.org/0000-0002-1825-0097> ;\n    vivo:relatedBy <https://vivo.example.org/individual/as1> ;\n    obo:ARG_2000028 <https://vivo.example.org/individual/p1-vcard> .\n\n<https://vivo.example.org/individual/p1-vcard>\n    a vcard:Individual ;\n    obo:ARG_2000029 <https://vivo.example.org/individual/p1> ;\n    vcard:hasName <https://vivo.example.org/individual/p1-name> .\n\n<https://vivo.example.org/individual/p1-name>\n    a vcard:Name ;\n    vcard:givenName \"Antonie\" ;\n    vcard:familyName \"van Leeuwenhoek\" .\n\n<https://vivo.example.org/individual/vc2>\n    a vcard:Individual ;\n    rdfs:label \"Hua, Luogeng\" ;\n    vivo:relatedBy <https://vivo.example.org/individual/as2> ;\n    vcard:hasName <https://vivo.example.org/individual/vc2-name> .\n\n<https://vivo.example.org/individual/vc2-name>\n    a vcard:Name ;\n    vcard:givenName \"Luogeng\" ;\n    vcard:familyName \"Hua\" .\n"
+   },
+   "document": {
+    "@id": "https://vivo.example.org/individual/sw1",
+    "@type": "obo:ERO_0000071",
+    "obo:ERO_0000072": "2.1.0",
+    "bibo:abstract": "Counts animalcules in microscope images.",
+    "bibo:doi": "10.5555/animalcule.2.1.0",
+    "vivo:dateTimeValue": {
+     "@id": "https://vivo.example.org/individual/dt1",
+     "@type": "vivo:DateTimeValue",
+     "vivo:dateTime": {
+      "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+      "@value": "2025-03-14T00:00:00"
+     },
+     "vivo:dateTimePrecision": {
+      "@id": "vivo:yearMonthDayPrecision"
+     }
+    },
+    "vivo:freetextKeyword": [
+     "microscopy",
+     "image analysis"
+    ],
+    "vivo:publisher": {
+     "@id": "https://vivo.example.org/individual/org1",
+     "@type": "http://xmlns.com/foaf/0.1/Organization",
+     "vivo:publisherOf": {
+      "@id": "https://vivo.example.org/individual/sw1"
+     },
+     "rdfs:label": "Carberry Institute"
+    },
+    "vivo:relatedBy": [
+     {
+      "@id": "https://vivo.example.org/individual/as1",
+      "@type": "Authorship",
+      "vivo:rank": {
+       "@type": "http://www.w3.org/2001/XMLSchema#int",
+       "@value": "1"
+      },
+      "vivo:relates": [
+       {
+        "@id": "https://vivo.example.org/individual/p1",
+        "@type": "http://xmlns.com/foaf/0.1/Person",
+        "obo:ARG_2000028": [
+         {
+          "@id": "https://vivo.example.org/individual/p1-vcard",
+          "@type": "vcard:Individual",
+          "obo:ARG_2000029": {
+           "@id": "https://vivo.example.org/individual/p1"
+          },
+          "vcard:hasName": {
+           "@id": "https://vivo.example.org/individual/p1-name",
+           "@type": "vcard:Name",
+           "vcard:familyName": "van Leeuwenhoek",
+           "vcard:givenName": "Antonie"
+          }
+         }
+        ],
+        "vivo:orcidId": [
+         {
+          "@id": "https://orcid.org/0000-0002-1825-0097"
+         }
+        ],
+        "vivo:relatedBy": [
+         {
+          "@id": "https://vivo.example.org/individual/as1"
+         }
+        ],
+        "rdfs:label": "van Leeuwenhoek, Antonie"
+       }
+      ]
+     },
+     {
+      "@id": "https://vivo.example.org/individual/as2",
+      "@type": "Authorship",
+      "vivo:rank": {
+       "@type": "http://www.w3.org/2001/XMLSchema#int",
+       "@value": "2"
+      },
+      "vivo:relates": [
+       {
+        "@id": "https://vivo.example.org/individual/vc2",
+        "@type": "vcard:Individual",
+        "vivo:relatedBy": [
+         {
+          "@id": "https://vivo.example.org/individual/as2"
+         }
+        ],
+        "rdfs:label": "Hua, Luogeng",
+        "vcard:hasName": {
+         "@id": "https://vivo.example.org/individual/vc2-name",
+         "@type": "vcard:Name",
+         "vcard:familyName": "Hua",
+         "vcard:givenName": "Luogeng"
+        }
+       }
+      ]
+     }
+    ],
+    "vivo:swhid": "swh:1:dir:d198bc9d7a6bcf6db04f476d29314f157507d505",
+    "rdfs:label": "Animalcule Counter"
+   },
+   "expected": [
+    "https://orcid.org/0000-0002-1825-0097"
+   ]
   }
  ]
 }

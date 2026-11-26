@@ -52,7 +52,6 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
         "spase-v2.6.1",
         "Trove Software Map",
         "usgs-modelcatalog",
-        "VIVO",
     }
     # A cell's line is its row in the crosswalk at that tag; a cell with no crosswalk row has none.
     for cell in data["coverage"]["cells"] + data["unreviewed"]["cells"]:
