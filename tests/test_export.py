@@ -16,6 +16,7 @@ from codemeta_drift.export import (
     build_rows,
     classify,
     crosswalk_cells,
+    crosswalk_rows,
     curated_tags,
     derive,
     export,
@@ -87,6 +88,17 @@ def test_property_counts_that_differ_get_no_cell():
     cells = crosswalk_cells({**files, CFF: text}, CFF)
     assert not {k for k in cells if k[1] == "identifier"}
     assert cells[("schema:Person", "givenName")] == "person.given-names"
+
+
+def test_crosswalk_rows_give_each_cell_its_first_line():
+    files = read_dir(FIXTURE)
+    text = 'Property,CFF\nname,"title\nand more"\nidentifier,first\nname,person\nidentifier,second\n'
+    rows = crosswalk_rows({**files, CFF: text}, CFF)
+    assert rows[("schema:Thing", "name")] == (2, "title\nand more")
+    # The row after a two-line cell starts on line 4, and a repeated name keeps its own line.
+    assert rows[("schema:Thing", "identifier")] == (4, "first")
+    assert rows[("schema:Person", "name")] == (5, "person")
+    assert rows[("schema:Person", "identifier")] == (6, "second")
 
 
 @pytest.mark.parametrize("tag", curated_tags())

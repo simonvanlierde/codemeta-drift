@@ -5,7 +5,8 @@
 data.json is the newest tag's matrix and lists every tag with an export; data-<tag>.json holds each
 older tag's matrix. With ``--codemeta``, data.json also holds that checkout's HEAD: its drift
 findings and the crosswalk cells that read differently there than at the newest tag. Every
-matrix also holds the crosswalks nobody has reviewed, read at its tag, so the clone needs the tags.
+matrix also holds the crosswalks nobody has reviewed, read at its tag, so the clone needs the tags,
+and each cell's line in its crosswalk file, so the page can link it.
 """
 
 # ruff: noqa: INP001
@@ -22,7 +23,7 @@ from typing import Any
 from codemeta_drift.checks import check
 from codemeta_drift.cli import READ_ERRORS, read_ref
 from codemeta_drift.coverage import coverage, unreviewed, upstream
-from codemeta_drift.export import curated_tags
+from codemeta_drift.export import NO_PROPERTY, TERMS, crosswalk_rows, curated_tags
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -49,6 +50,39 @@ def upstream_data(checkout: Path, mapping: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def add_lines(files: dict[str, str], cells: list[dict[str, Any]]) -> None:
+    """Sets each cell's line in its crosswalk file; None when the cell can't be joined or has no crosswalk."""
+    rows: dict[str, dict[tuple[str, str], tuple[int, str]]] = {}
+    for cell in cells:
+        path = cell["crosswalk"]
+        if path not in files:
+            cell["line"] = None
+            continue
+        if path not in rows:
+            rows[path] = crosswalk_rows(files, path)
+        cell["line"] = rows[path].get(TERMS[cell["term"]], (None,))[0]
+
+
+def matrix(mapping: dict[str, Any], files: dict[str, str] | None) -> dict[str, Any]:
+    """One tag's page data; ``files`` is CodeMeta at that tag, or None without a clone."""
+    data = coverage(mapping)
+    data["schema_version"] = mapping["schema_version"]
+    # A term names where a CodeMeta property sits (author.@id is a Person's identifier).
+    data["properties"] = {t: None if t in NO_PROPERTY else " ".join(TERMS[t]) for t in data["terms"]}
+    others = None
+    if files is not None:
+        others = unreviewed(files, mapping)
+        add_lines(files, data["cells"])
+        add_lines(files, others["cells"])
+    return {
+        "coverage": data,
+        # The hub's rows have no cells; the page opens a codemeta field id (an SSSOM object id) at its term.
+        # Reversed, so a path two rows share (identifier, also swhid's) opens the first row's term.
+        "hub": {r["path"]: r["term"] for r in reversed(mapping["rows"]) if r["format"] == "codemeta"},
+        "unreviewed": others,
+    }
+
+
 def main() -> None:
     """Copy the page and write its data."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -58,21 +92,15 @@ def main() -> None:
     tags = curated_tags()
     mappings = {tag: json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8")) for tag in tags}
 
-    def matrix(tag: str) -> dict[str, Any]:
-        return {
-            "coverage": coverage(mappings[tag]),
-            # The hub's rows have no cells; the page opens a codemeta field id (an SSSOM object id) at its term.
-            # Reversed, so a path two rows share (identifier, also swhid's) opens the first row's term.
-            "hub": {r["path"]: r["term"] for r in reversed(mappings[tag]["rows"]) if r["format"] == "codemeta"},
-            "unreviewed": unreviewed(read_ref(args.codemeta, tag), mappings[tag]) if args.codemeta else None,
-        }
+    def tag_matrix(tag: str) -> dict[str, Any]:
+        return matrix(mappings[tag], read_ref(args.codemeta, tag) if args.codemeta else None)
 
     newest = tags[-1]
     # Every file is computed before --out is touched, so a failure leaves the last build in place.
     try:
         head = upstream_data(args.codemeta, mappings[newest]) if args.codemeta else None
-        data = {"data.json": {"tags": tags, **matrix(newest), "upstream": head}}
-        data |= {f"data-{tag}.json": matrix(tag) for tag in tags[:-1]}
+        data = {"data.json": {"tags": tags, **tag_matrix(newest), "upstream": head}}
+        data |= {f"data-{tag}.json": tag_matrix(tag) for tag in tags[:-1]}
         files = {name: json.dumps(value, indent=1, ensure_ascii=False) + "\n" for name, value in data.items()}
         # The SSSOM export's mapping_set_id points here, for every tag with an export, so an older set's id resolves.
         files |= {f"spokes-{tag}.sssom.tsv": sssom(mappings[tag]) for tag in tags}

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenTag, hubTerm, pageTitle, parseFragment, releaseHref, releaseLinks } from "./fragment.mjs";
+import { chosenTag, hubTerm, linkParts, pageTitle, parseFragment, releaseHref, releaseLinks, sourceHref } from "./fragment.mjs";
 
 test("route and upstream open their tabs", () => {
   assert.deepEqual(parseFragment("#route"), { tab: "route" });
@@ -81,4 +81,24 @@ test("a codemeta field id opens its row's term from the hub map", () => {
   // A JSON key named __proto__ is the data's own; an inherited one is not.
   assert.equal(hubTerm(parseFragment("#field/codemeta/__proto__"), JSON.parse('{"__proto__": "x"}')), "x");
   assert.equal(hubTerm(parseFragment("#field/codemeta/__proto__"), hub), undefined);
+});
+
+test("a reason's URLs become links and trailing punctuation stays text", () => {
+  assert.deepEqual(linkParts("see https://example.org/a. Or https://example.org/b, then"), [
+    "see ",
+    { url: "https://example.org/a" },
+    ".",
+    " Or ",
+    { url: "https://example.org/b" },
+    ",",
+    " then",
+  ]);
+  assert.deepEqual(linkParts("no link"), ["no link"]);
+});
+
+test("a source link encodes each path segment and opens the line", () => {
+  assert.equal(
+    sourceHref("4.0", "crosswalks/Citation File Format 1.2.0.csv", 46),
+    "https://github.com/codemeta/codemeta/blob/4.0/crosswalks/Citation%20File%20Format%201.2.0.csv?plain=1#L46",
+  );
 });

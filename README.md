@@ -17,8 +17,8 @@ reviewed field mappings for citation tools such as
 versions and repository URLs. Its **crosswalks** map fields in other formats to CodeMeta
 terms. For example, the Citation File Format (CFF) uses `title` where CodeMeta uses `name`.
 
-In one snapshot, the property list replaced `position` with `maintainer`, while the
-crosswalks kept `position`. Joining the tables by row number attaches a field to the wrong
+At CodeMeta commit `e62eb75`, line 46 of the property list changed from `position` to
+`maintainer`, while the crosswalks kept `position`. Joining the tables by row number attaches a field to the wrong
 term. codemeta-drift compares names and reports the mismatch.
 
 It checks the CodeMeta standard's own files. To keep a project's `CITATION.cff`,
@@ -27,11 +27,11 @@ It checks the CodeMeta standard's own files. To keep a project's `CITATION.cff`,
 ## How the crosswalks hold up
 
 At CodeMeta 4.0, the 30 crosswalks reviewed here, from CFF, Zenodo and DataCite to Maven, SPDX,
-Wikidata and GitLab, have 540 cells for the 18 terms citation tools need. 189 are for terms the
+Wikidata and GitLab, have 540 cells, one for each of the 18 terms citation tools need. 189 are for terms the
 format has no field for. Of the other 351, only 120 can be used as written: 140 are wrong,
 ambiguous or prose (30 of them fill a term the format has no field for), and 91 are blank although
-the format has the field. The 19th term, `resourceType`, has no CodeMeta property, so no crosswalk
-can have its cell. CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto
+the format has the field. The matrix's 19th column, `resourceType`, has no CodeMeta property, so no
+crosswalk has a cell for it. CodeMeta has no crosswalk for `pyproject.toml`, `typst.toml`, Quarto
 extensions, RIS, EndNote, RO-Crate or Croissant at all.
 
 The [coverage matrix](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/coverage-4.0.md)

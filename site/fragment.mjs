@@ -1,4 +1,4 @@
-// Reads the page's #fragment and ?tag. Kept free of the DOM so node --test can import it.
+// Reads the page's #fragment and ?tag, and builds its outside links. Kept free of the DOM so node --test can import it.
 
 // The CodeMeta tag that ?tag= names, if data.json lists it; otherwise the newest, the last in tags.
 // Only a listed tag picks a file to fetch.
@@ -44,3 +44,16 @@ export function hubTerm(target, hub) {
     return undefined;
   return hub[target.path];
 }
+
+// A reason split into text and {url} parts; a full stop, comma, colon or semicolon after a URL stays text.
+export function linkParts(text) {
+  return text.split(/(https?:\/\/[^\s)]+)/).flatMap((part, i) => {
+    if (i % 2 === 0) return part ? [part] : [];
+    const [, url, tail] = part.match(/^(.*?)([.,;:]?)$/);
+    return tail ? [{ url }, tail] : [{ url }];
+  });
+}
+
+// A crosswalk file at a CodeMeta tag, opened at one 1-based line.
+export const sourceHref = (tag, path, line) =>
+  `https://github.com/codemeta/codemeta/blob/${tag}/${path.split("/").map(encodeURIComponent).join("/")}?plain=1#L${line}`;

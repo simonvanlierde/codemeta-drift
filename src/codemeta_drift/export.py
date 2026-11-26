@@ -130,7 +130,14 @@ def classify(cell: str) -> str:
 
 
 def crosswalk_cells(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str, str], str]:
-    """Maps (parent type, property) of the property table to the crosswalk's cell for it.
+    """Maps (parent type, property) of the property table to the crosswalk's cell for it."""
+    return {key: cell for key, (_, cell) in crosswalk_rows(files, crosswalk).items()}
+
+
+def crosswalk_rows(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str, str], tuple[int, str]]:
+    """Maps (parent type, property) of the property table to the crosswalk's line and cell for it.
+
+    The line is 1-based: the first physical line of the cell's record, as a quoted cell may span several.
 
     The crosswalk has no type column, so a property listed under two types (``identifier`` under
     Thing and Person) is matched by its n-th occurrence in each file, never by line number. A
@@ -139,13 +146,13 @@ def crosswalk_cells(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str,
     parents: dict[str, list[str]] = {}
     for _, row in table_rows(files):
         parents.setdefault(row[1], []).append(row[0])
-    rows = [(row[0], row[1] if len(row) > 1 else "") for _, row in csv_rows(files[crosswalk])[1:]]
-    counts = Counter(name for name, _ in rows)
+    rows = [(line, row[0], row[1] if len(row) > 1 else "") for line, row in csv_rows(files[crosswalk])[1:]]
+    counts = Counter(name for _, name, _ in rows)
     seen: Counter[str] = Counter()
     cells = {}
-    for name, cell in rows:
+    for line, name, cell in rows:
         if counts[name] == len(parents.get(name, ())):
-            cells[(parents[name][seen[name]], name)] = cell
+            cells[(parents[name][seen[name]], name)] = (line, cell)
         seen[name] += 1
     return cells
 
