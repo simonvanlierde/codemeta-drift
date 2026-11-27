@@ -8,8 +8,8 @@ import pytest
 import yaml
 
 from codemeta_drift.cli import main
-from codemeta_drift.export import SCHEMA_VERSION, curated_tags
-from codemeta_drift.hub import PREDICATES, pair_rows, sssom, validate_mapping
+from codemeta_drift.export import ALL_TERMS, SCHEMA_VERSION, curated_tags
+from codemeta_drift.hub import PREDICATES, codemeta_id, pair_rows, sssom, validate_mapping
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -59,6 +59,13 @@ def test_coverage_of_a_row_with_an_unknown_kind_exits_3(
     assert "invalid or unsupported mapping row 1" in capsys.readouterr().err
 
 
+# CodeMeta's context prefixes at each tag: 4.0 moved schema.org to https and its own terms to w3id.
+CONTEXT_PREFIXES = {
+    "3.1": {"schema": "http://schema.org/", "codemeta": "https://codemeta.github.io/terms/"},
+    "4.0": {"schema": "https://schema.org/", "codemeta": "https://w3id.org/codemeta/terms/"},
+}
+
+
 def test_sssom_header_names_the_set_and_its_prefixes(mapping: dict):
     text = sssom(mapping)
     # The metadata block is YAML behind "# ", as SSSOM readers parse it.
@@ -81,11 +88,7 @@ def test_sssom_header_names_the_set_and_its_prefixes(mapping: dict):
             "orcid": "https://orcid.org/",
             "skos": "http://www.w3.org/2004/02/skos/core#",
             "semapv": "https://w3id.org/semapv/vocab/",
-            # CodeMeta's context prefix at the tag: 4.0 moved schema.org to https.
-            "schema": "http://schema.org/" if mapping["codemeta_tag"] == "3.1" else "https://schema.org/",
-            "codemeta": "https://codemeta.github.io/terms/"
-            if mapping["codemeta_tag"] == "3.1"
-            else "https://w3id.org/codemeta/terms/",
+            **CONTEXT_PREFIXES[mapping["codemeta_tag"]],
         },
     }
     assert "may need conversion" in header["mapping_set_description"]
@@ -190,21 +193,21 @@ def _predicates(rows: dict[str, dict[str, str]]) -> dict[str, set[str]]:
 
 
 def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
-    """Subjects are format fields and objects CodeMeta terms; a person sub-term's object is its own property.
+    """Subjects are format fields and objects CodeMeta terms; a person sub-term's object is its hub term.
 
-    exactMatch or closeMatch only where CodeMeta's DataCite sheet relates the same field so; a hub term only
-    where CodeMeta has none.
+    exactMatch or closeMatch only where CodeMeta's DataCite sheet relates the same field so; a hub term where
+    CodeMeta has no property, or for a person sub-term.
     """
     rows = _rows(mapping, "datacite")
     exact = {
         "name": "schema:name",
         "version": "schema:version",
         "author": "schema:author",
-        "author.givenName": "schema:givenName",
-        "author.familyName": "schema:familyName",
+        "author.givenName": "term:author.givenName",
+        "author.familyName": "term:author.familyName",
         "contributor": "schema:contributor",
-        "contributor.givenName": "schema:givenName",
-        "contributor.familyName": "schema:familyName",
+        "contributor.givenName": "term:contributor.givenName",
+        "contributor.familyName": "term:contributor.familyName",
         "identifier": "schema:identifier",
         "keywords": "schema:keywords",
     }
@@ -219,7 +222,7 @@ def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
         "publisher": "schema:publisher",
         "resourceType": "term:resourceType",
         # Citation terms: a property where the property table has one, else the hub's own id.
-        "author.name": "schema:name",
+        "author.name": "term:author.name",
         "url": "schema:url",
         "contributor.name": "term:contributor.name",
         "author.resourceType": "term:author.resourceType",
@@ -237,6 +240,13 @@ def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
     assert rows["license"]["see_also"] == rows["version"]["see_also"]
     assert rows["author.givenName"]["subject_id"] == "field:datacite/creators%5B%5D.givenName"
     assert rows["author.givenName"]["subject_label"] == "creators[].givenName"
+    # The comment column is the row's source, then its comment when it has one.
+    source = {r["term"]: r for r in mapping["rows"] if r["format"] == "datacite"}
+    assert rows["version"]["comment"] == "crosswalk:crosswalks/DataCite.csv@" + mapping["codemeta_tag"]
+    assert (
+        rows["identifier"]["comment"]
+        == f"{source['identifier']['source']}; doi is a bare DOI, without https://doi.org/."
+    )
 
 
 @pytest.mark.parametrize(
@@ -290,6 +300,11 @@ def test_sssom_objects_are_terms_of_the_tags_context(mapping: dict):
     text = "\n".join(line for line in sssom(mapping).splitlines() if not line.startswith("#"))
     objects = {row["object_id"] for row in csv.DictReader(io.StringIO(text), delimiter="\t")}
     assert {o for o in objects if not o.startswith("term:")} <= ids
+
+
+def test_every_hub_term_has_its_own_object():
+    """Joining spokes on object_id gives the same pairs as joining them on term."""
+    assert len({codemeta_id(term) for term in ALL_TERMS}) == len(ALL_TERMS)
 
 
 def test_a_citation_term_on_a_codemeta_property_gets_its_codemeta_id(mapping: dict):

@@ -92,12 +92,14 @@ CODEMETA_PROPERTIES = {"referencePublication"}
 def codemeta_id(term: str) -> str:
     """The CodeMeta term's IRI as CodeMeta's context gives it, or the hub's own id where CodeMeta has no term.
 
-    A person sub-term is its own property (``author.givenName`` is ``schema:givenName``), and a citation term with
-    a property row is that property (``preferredCitation`` is ``codemeta:referencePublication``). A test checks
-    every object against the context at each tag.
+    Every person sub-term keeps its hub id (``author.givenName`` is ``term:author.givenName``), since its property
+    is shared with other terms (``contributor.givenName``, or ``name`` for ``author.name``) and CodeMeta has no IRI
+    for the path yet. A citation term with a property row is that property (``preferredCitation`` is
+    ``codemeta:referencePublication``). Every hub term gets its own object, and a test checks every ``schema:`` and
+    ``codemeta:`` object against the context at each tag.
     """
     key = ALL_TERMS[term]
-    if key is None or term == "swhid" or term in NO_PROPERTY or term.endswith(".@id"):
+    if key is None or term == "swhid" or term in NO_PROPERTY or "." in term:
         return f"term:{quote(term, safe='')}"
     return f"{'codemeta' if key[1] in CODEMETA_PROPERTIES else 'schema'}:{key[1]}"
 
@@ -232,24 +234,7 @@ def sssom(mapping: dict[str, Any]) -> str:
         f"#   schema: {schema}\n"
         f"#   codemeta: {codemeta}\n"
     )
-    mappings = [
-        {
-            "subject_id": f"field:{row['format']}/{quote(row['path'], safe='')}",
-            "subject_label": row["path"],
-            "predicate_id": PREDICATES[relation(row)] if relation(row) else "skos:relatedMatch",
-            "object_id": codemeta_id(row["term"]),
-            "object_label": row["term"],
-            "mapping_justification": "semapv:ManualMappingCuration",
-            "subject_source": f"format:{row['format']}",
-            # Only a CodeMeta term comes from CodeMeta's context; a hub term has no source to version.
-            "object_source": "" if codemeta_id(row["term"]).startswith("term:") else f"https://w3id.org/codemeta/{tag}",
-            "object_source_version": "" if codemeta_id(row["term"]).startswith("term:") else tag,
-            "see_also": SHEETS[row["format"]] if relation(row) else "",
-            "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
-        }
-        for row in rows
-        if row["path"] is not None
-    ]
+    mappings = [_sssom_row(row, tag) for row in rows if row["path"] is not None]
     return metadata + table(
         mappings,
         [
@@ -267,6 +252,26 @@ def sssom(mapping: dict[str, Any]) -> str:
         ],
         "\t",
     )
+
+
+def _sssom_row(row: Mapping[str, Any], tag: str) -> dict[str, str]:
+    """One spoke row: the field as subject, the CodeMeta term (or hub term) as object."""
+    found, obj = relation(row), codemeta_id(row["term"])
+    # Only a CodeMeta term comes from CodeMeta's context; a hub term has no source to version.
+    hub_term = obj.startswith("term:")
+    return {
+        "subject_id": f"field:{row['format']}/{quote(row['path'], safe='')}",
+        "subject_label": row["path"],
+        "predicate_id": PREDICATES[found] if found else "skos:relatedMatch",
+        "object_id": obj,
+        "object_label": row["term"],
+        "mapping_justification": "semapv:ManualMappingCuration",
+        "subject_source": f"format:{row['format']}",
+        "object_source": "" if hub_term else f"https://w3id.org/codemeta/{tag}",
+        "object_source_version": "" if hub_term else tag,
+        "see_also": SHEETS[row["format"]] if found else "",
+        "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
+    }
 
 
 def crosswalk(mapping: dict[str, Any], files: Mapping[str, str], fmt: str) -> str:

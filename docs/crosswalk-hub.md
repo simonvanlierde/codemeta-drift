@@ -41,7 +41,7 @@ metadata block and explicit CURIE prefixes. It covers the 48 formats in the 4.0 
 Each row runs from a format's field (the subject) to a CodeMeta term (the object), the direction
 CodeMeta's [SSSOM methodology](sssom-compatibility.md#compare-with-codemetas-methodology) uses.
 `subject_label` holds the path as the export writes it, and `object_label` the hub term, such as
-`author.givenName` for the object `schema:givenName`. A CodeMeta term's `object_source` is CodeMeta's
+`version` for the object `schema:version`. A CodeMeta term's `object_source` is CodeMeta's
 context at the export's tag, such as `https://w3id.org/codemeta/4.0`; a hub term has none.
 
 A row gets a stronger predicate than `skos:relatedMatch` only where one of CodeMeta's own SSSOM sheets
@@ -57,10 +57,16 @@ stored in one string, SPDX identifiers stored as URLs, and Go module paths.
 | Prefix | Holds | Example |
 | --- | --- | --- |
 | `field:` | A format and its complete path, percent-encoded | `field:cargo/package.name` |
-| `schema:` | A CodeMeta term, at the schema.org IRI CodeMeta's context gives it. A person sub-term is its own property | `schema:name`, `schema:givenName` |
+| `schema:` | A CodeMeta term, at the schema.org IRI CodeMeta's context gives it | `schema:name`, `schema:author` |
 | `codemeta:` | A term CodeMeta's context defines itself, for the citation term `preferredCitation` | `codemeta:referencePublication` |
-| `term:` | A hub term CodeMeta has no term for: `swhid`, `resourceType`, the person `@id`s and the citation terms with no property | `term:swhid` |
+| `term:` | A hub term: terms with no CodeMeta property, and every person sub-term, such as `swhid`, `resourceType`, `author.givenName` and `contributor.@id` | `term:swhid`, `term:author.givenName` |
 | `format:` | The format itself, in `subject_source` | `format:cargo` |
+
+A person sub-term keeps its `term:` id because its property is shared: `author.givenName` and
+`contributor.givenName` are both schema.org's `givenName`, and `author.name` is the software's `name`.
+So every hub term has its own object, and joining spokes on `object_id` gives the same pairs as `hub pair`.
+The hub keeps these ids until CodeMeta says how such a term expands to an IRI
+([open point 1](sssom-compatibility.md#open-points)).
 
 `schema:` and `codemeta:` take the prefixes of CodeMeta's context at the export's tag: `https://schema.org/`
 and `https://w3id.org/codemeta/terms/` from 4.0, `http://schema.org/` and `https://codemeta.github.io/terms/`

@@ -42,7 +42,7 @@ contains a CSV authoring sheet and separate YAML metadata.
 | Aspect | CodeMeta methodology | This hub |
 | --- | --- | --- |
 | Input | CSV authoring sheet and separate YAML metadata | Validated reviewed mapping JSON |
-| Direction and identifiers | Source vocabulary terms to CodeMeta terms; hierarchy uses `/` | The same direction: format fields to CodeMeta terms. A person sub-term's object is its own property, with the person in `object_label`. A subject keeps the format's complete path, with arrays, filters and alternatives |
+| Direction and identifiers | Source vocabulary terms to CodeMeta terms; hierarchy uses `/` | The same direction: format fields to CodeMeta terms. A person sub-term's object is the hub's `term:` id, such as `term:author.givenName` (open point 1). A subject keeps the format's complete path, with arrays, filters and alternatives |
 | Relationships | Curator selects exact, close, broader, narrower or part-of relationships | The sheet's relation as a SKOS mapping predicate where the hub reads the same field (see [Relations](#relations)); `skos:relatedMatch` otherwise |
 | Combined fields | A formula extension describes how source terms combine | A path joins the fields with ` + `; parsers and normalization handle values elsewhere |
 | Mapping-set metadata | Template includes date, description, provider, license and a proposed w3id | Set id, title, description, version, curator ORCID, provider, Apache-2.0 license and explicit CURIE map, all under the w3id base `https://w3id.org/codemeta-drift/` |
@@ -51,7 +51,8 @@ The hub output cannot replace the upstream authoring sheet without translation a
 DataCite subjects are the DataCite REST API's JSON keys, such as `creators[].givenName`, where
 CodeMeta's DataCite sheet names the elements of the
 [kernel 4.6 XML schema](https://schema.datacite.org/meta/kernel-4.6/metadata.xsd), such as `givenName`.
-Where CodeMeta has no term (`swhid`, `resourceType`, the person `@id`s), the object stays a hub term.
+For terms with no CodeMeta property, and every person sub-term, such as `swhid`, `resourceType` and
+`author.givenName`, the object stays a hub term.
 
 ### Relations
 
@@ -84,7 +85,8 @@ The Zenodo sheet names keys of a record in Zenodo's REST API, such as `metadata/
 ## Open points
 
 1. Agree with the CodeMeta maintainers how a hierarchical CodeMeta term such as `author/name`
-   expands to an IRI, and which identifiers to use for fields with no CodeMeta term.
+   expands to an IRI, and which identifiers to use for fields with no CodeMeta term. Until they say,
+   the hub keeps its own `term:` id for every person sub-term, such as `term:author.name`.
 2. Settle the rows where this hub and CodeMeta's sheets differ, such as DataCite's `publicationYear`
    for `datePublished` and BibTeX's `version` for `softwareVersion`, before giving them a stronger
    relation.
