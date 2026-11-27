@@ -33,3 +33,7 @@ test("codemeta field ids are looked up through hubTerm with the shown release's 
   assert.match(source, /^function follow\(hub\) \{/m);
   assert.match(source, /const \{ coverage, hub, unreviewed, upstream \} = tag === newest \? latest : \{ \.\.\.\(await load\(`data-\$\{tag\}\.json`\)\)/);
 });
+
+test("the route distinguishes an absent citation row from a null path", () => {
+  assert.match(source, /const path = paths\.get\(.*\);\n\s*if \(path\).*\n\s*const gap = path === null \? `no usable .* path` : "no reviewed path";/);
+});

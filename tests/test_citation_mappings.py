@@ -20,11 +20,22 @@ def test_crosswalks_for_citation_providers(tag: str) -> None:
         "published": {"date-parts": [[2026, 11, 26]]},
         "container-title": ["Proceedings of the Imaginary Lens Society"],
         "author": [{"name": "Imaginary Lens Society"}, {"given": "Magda", "family": "Moon"}],
+        "contributor": [{"given": "Ada", "family": "Valence", "ORCID": "https://orcid.org/0000-0002-1825-0097"}],
+        "editor": [{"family": "Asher"}],
+        "license": [
+            {"content-version": "am", "URL": "https://creativecommons.org/licenses/by/4.0/"},
+            {"content-version": "tdm", "URL": "https://example.org/tdm"},
+        ],
     }
     assert resolve(crossref, rows["crossref", "identifier"]) == ["10.5555/paper"]
     assert resolve(crossref, rows["crossref", "datePublished"]) == [[[2026, 11, 26]]]
     assert resolve(crossref, rows["crossref", "containerTitle"]) == ["Proceedings of the Imaginary Lens Society"]
     assert resolve(crossref, rows["crossref", "author.name"]) == ["Imaginary Lens Society"]
+    assert resolve(crossref, rows["crossref", "contributor"]) == crossref["contributor"]
+    assert resolve(crossref, rows["crossref", "contributor.givenName"]) == ["Ada"]
+    assert resolve(crossref, rows["crossref", "contributor.familyName"]) == ["Valence"]
+    assert resolve(crossref, rows["crossref", "contributor.@id"]) == ["https://orcid.org/0000-0002-1825-0097"]
+    assert rows["crossref", "license"] is None
 
     arxiv = {
         "id": "https://arxiv.org/abs/2611.23456",

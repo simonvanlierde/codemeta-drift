@@ -40,32 +40,32 @@
     {
       "format": "crossref",
       "term": "contributor",
-      "path": null,
-      "reason": "the Crossref REST work record has no dedicated contributor field in this mapping"
+      "path": "contributor[]",
+      "reason": "Crossref REST lists other contributors separately from authors and editors"
     },
     {
       "format": "crossref",
       "term": "contributor.givenName",
-      "path": null,
-      "reason": "the Crossref REST work record has no dedicated contributor.givenName field in this mapping"
+      "path": "contributor[].given",
+      "reason": "Crossref REST uses given for the contributor's given name"
     },
     {
       "format": "crossref",
       "term": "contributor.familyName",
-      "path": null,
-      "reason": "the Crossref REST work record has no dedicated contributor.familyName field in this mapping"
+      "path": "contributor[].family",
+      "reason": "Crossref REST uses family for the contributor's family name"
     },
     {
       "format": "crossref",
       "term": "contributor.@id",
-      "path": null,
-      "reason": "the Crossref REST work record has no dedicated contributor.@id field in this mapping"
+      "path": "contributor[].ORCID",
+      "reason": "Crossref REST uses ORCID for the contributor's ORCID URL"
     },
     {
       "format": "crossref",
       "term": "license",
       "path": null,
-      "reason": "the Crossref REST work record has no dedicated license field in this mapping"
+      "reason": "Crossref REST gives licences by content version and start date, so no single work licence is selected"
     },
     {
       "format": "crossref",

@@ -432,7 +432,7 @@ def test_example_null_rows():
         | {("iso-19115-1-2014", t) for t in ("swhid", "codeRepository")}
         | {("spase-2.6.1", t) for t in ("author.@id", "license", "swhid", "keywords", *contributor[1:])}
         | {("gitlab", "version"), ("code-json-2.0", "author")}
-        | {(fmt, t) for fmt in ("crossref", "arxiv", "cff-preferred") for t in contributor}
+        | {(fmt, t) for fmt in ("arxiv", "cff-preferred") for t in contributor}
         | {
             (fmt, t)
             for fmt in ("crossref", "arxiv")

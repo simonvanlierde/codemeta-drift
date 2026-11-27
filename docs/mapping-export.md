@@ -29,6 +29,8 @@ A path-shaped crosswalk cell, such as `package.version`, supplies the mapping di
 come from `curated-<tag>.json`
 ([3.1](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-3.1.json),
 [4.0](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/curated-4.0.json)).
+Citation rows shared by both exports come from
+[`citation-crosswalks.json`](https://github.com/simonvanlierde/codemeta-drift/blob/main/src/codemeta_drift/citation-crosswalks.json).
 A row whose cell is not wrong may also set `kind`: `notation` when the cell names the right field
 in a form a tool can't use as a path, `scope` when it is right by CodeMeta's definition but the
 path reads the term more narrowly or also reads another field. A row without `kind` counts as
@@ -106,8 +108,10 @@ Each row has:
 
 - `format` is an id from the [format table](#format-ids).
 - `term` is a term from the [term table](#terms), or a person sub-term.
-- `path` is where the value sits, in the [path grammar](#path-grammar). `null` means the format has
-  no place for it (Cargo has no DOI).
+- `path` is where the value sits, in the [path grammar](#path-grammar). A `null` path means
+  there is no usable mapping for that term. The row's `source` gives the reason for a reviewed
+  mapping, such as Cargo having no DOI or Crossref supplying several scoped licences.
+  A missing citation row means no mapping for that format and term was reviewed.
 - `source` is `crosswalk:<file>@<tag>` (`crosswalk:crosswalks/Zenodo.csv@3.1`) when the path is the
   cell, expanded: `authors` becomes `authors[]`, CFF's `person.given-names` `authors[].given-names`.
   It is `curated:<reason>` when the row replaces the cell, picks a path out of prose, or fills
@@ -180,6 +184,23 @@ Pass the value at the root `preferredCitation` path to the `cff-preferred` rows.
 | `datePublished` | its publication date | `publisher` | its publisher, as schema.org defines it |
 | `resourceType` | the kind of resource |  |  |
 
+The 1.10 exports also include these curated citation terms where a mapping was reviewed.
+
+| Term | Meaning |
+| --- | --- |
+| `author.name`, `contributor.name` | a full person or organisation name |
+| `author.resourceType`, `contributor.resourceType` | the provider's person or organisation type |
+| `url` | the work's landing URL |
+| `containerTitle`, `volume`, `issue`, `pagination` | the containing publication and where the work appears in it |
+| `preferredCitation` | the CFF reference to cite when preferred |
+| `arxivId`, `primaryCategory` | the arXiv entry's identifier and primary subject |
+| `relatedDoi` | the DOI of the related publication |
+| `isVersionOf`, `hasVersion` | the DOI relations to the version series or a specific version |
+
+Crossref licences apply to a content version from a stated date. The crosswalk leaves the
+work-level `license` path empty. Consumers that need a licence must decide which version and
+date apply before using an entry.
+
 - `identifier` means only the DOI here, though CodeMeta allows any identifier.
 - `swhid` is not a CodeMeta term: codemeta.json holds it in `identifier` beside the DOI, so both
   rows of `codemeta` and `codemeta-2` have the path `identifier`. Tell them apart by syntax.
@@ -237,10 +258,14 @@ skips the parse and still resolves `path`. This package's tests don't frame the 
 
 ## Compatibility
 
-A **minor** version (1.0 to 1.1) only adds: an optional field, a format id, a term or sub-term, or a
-relaxed path pattern. A 1.0 reader reads a 1.1 file, and the file passes the 1.0 schema unless it
-relaxes a path pattern. A **major** version (2.0) is anything else: a renamed or removed field, a
-new required field, a changed meaning, or a grammar change an old reader would misread.
+A **minor** version (1.0 to 1.1) can add optional fields, format IDs, terms or sub-terms, or relax
+a path pattern. A consumer can read a newer minor by skipping rows it does not use. The older
+JSON Schema still validates the file unless it uses a relaxed path pattern. The
+[hub commands](crosswalk-hub.md) check every term and format ID, so update the hub CLI when
+pinning an export with new IDs.
+
+A **major** version (2.0) changes the contract in other ways, such as removing a field, adding a
+required field, changing a meaning, or changing how a reader interprets the path grammar.
 
 ## What a consumer does
 

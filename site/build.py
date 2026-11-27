@@ -71,7 +71,15 @@ def matrix(mapping: dict[str, Any], files: dict[str, str] | None) -> dict[str, A
     data = coverage(mapping)
     data["schema_version"] = mapping["schema_version"]
     # A term names where a CodeMeta property sits (author.@id is a Person's identifier).
-    data["properties"] = {t: " ".join(TERMS[t]) if t in TERMS and t not in NO_PROPERTY else None for t in data["terms"]}
+    properties = TERMS | {
+        "url": ("schema:Thing", "url"),
+        "author.name": ("schema:Person", "name"),
+        "contributor.name": ("schema:Person", "name"),
+    }
+    data["properties"] = {
+        term: " ".join(properties[term]) if term in properties and term not in NO_PROPERTY else None
+        for term in data["terms"]
+    }
     others = None
     if files is not None:
         others = unreviewed(files, mapping)

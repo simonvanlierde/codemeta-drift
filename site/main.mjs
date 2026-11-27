@@ -162,6 +162,7 @@ const pathTally = (cells, statuses) => [
 
 function detail(statuses, formats, coverage, upstream) {
   const reviewed = coverage.statuses;
+  const withCrosswalk = crosswalkFormats(coverage.cells);
   const box = document.getElementById("detail");
   const hint = box.firstElementChild;
   const changes = new Map((upstream?.cells ?? []).map((c) => [`${c.format} ${c.term}`, c]));
@@ -180,7 +181,7 @@ function detail(statuses, formats, coverage, upstream) {
       ["CodeMeta's cell", cell.crosswalk
         ? el("span", {}, cellWords(cell) ?? code(was),
           cell.line ? el("span", {}, " in ", source(coverage.codemeta_tag, cell.crosswalk, cell.line)) : null)
-        : cellWords(cell)],
+        : withCrosswalk.has(cell.format) ? "no upstream cell reviewed for this term" : cellWords(cell)],
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", linked(cell.reason)]);
@@ -270,7 +271,9 @@ function route(data) {
   const paths = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c.path]));
   const end = (fmt, term) => {
     const path = paths.get(`${fmt} ${term}`);
-    return path ? el("span", { class: "stop" }, code(path)) : el("span", { class: "stop gap" }, `no ${label(fmt)} field`);
+    if (path) return el("span", { class: "stop" }, code(path));
+    const gap = path === null ? `no usable ${label(fmt)} path` : "no reviewed path";
+    return el("span", { class: "stop gap" }, gap);
   };
   const hide = document.getElementById("hide-none");
   const draw = () => {

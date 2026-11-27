@@ -233,7 +233,7 @@ def read_curated(tag: str) -> list[dict[str, Any]]:
     if tag not in curated_tags():
         raise KeyError(tag)
     tagged = json.loads((PACKAGE / f"curated-{tag}.json").read_text("utf-8"))["rows"]
-    citation = json.loads((PACKAGE / "curated-citation.json").read_text("utf-8"))["rows"]
+    citation = json.loads((PACKAGE / "citation-crosswalks.json").read_text("utf-8"))["rows"]
     return [*tagged, *citation]
 
 

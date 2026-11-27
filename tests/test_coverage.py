@@ -192,7 +192,7 @@ def test_a_scope_cell_with_no_path_is_one_the_meaning_admits(mapping: dict):
 
 
 def test_counts_for_the_crosswalks(mapping: dict):
-    found = [s for (fmt, term), s in statuses(mapping).items() if FORMATS[fmt].crosswalk and term in TERMS]
+    found = [c["status"] for c in coverage(mapping)["cells"] if c["crosswalk"]]
     expected = {
         "3.1": {
             "as-is": 114,
@@ -219,7 +219,7 @@ def test_counts_for_the_crosswalks(mapping: dict):
 def test_readme_figures_match_the_counts():
     mapping = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
     # resourceType has no CodeMeta property row, so no crosswalk could have its cell.
-    cells = [c for c in coverage(mapping)["cells"] if c["crosswalk"] and c["term"] in TERMS.keys() - NO_PROPERTY]
+    cells = [c for c in coverage(mapping)["cells"] if c["crosswalk"] and c["term"] not in NO_PROPERTY]
     count = Counter(c["status"] for c in cells)
     null_corrected = sum(c["status"] == "corrected" and c["path"] is None for c in cells)
     text = " ".join((ROOT / "README.md").read_text("utf-8").split())

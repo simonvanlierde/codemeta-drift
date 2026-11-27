@@ -36,8 +36,8 @@ STATUSES = {
         ),
     ),
     "corrected": ("✎", "the crosswalk cell is wrong, ambiguous or prose; the reviewed mapping gives the path"),
-    "added": ("+", "the format has the field but the crosswalk has no cell for it; the reviewed mapping adds the path"),
-    "no field": ("–", "the format has no field for this term"),  # noqa: RUF001 - an en dash, as in the docs
+    "added": ("+", "the reviewed mapping gives a path where no upstream cell supplies one"),
+    "no field": ("–", "the review found no usable path for this term"),  # noqa: RUF001 - an en dash, as in the docs
     "no term": ("∅", "CodeMeta has no property for this term; the reviewed mapping adds the path"),
 }
 """Each cell status, its mark and what it means. The order is the legend's.
@@ -165,7 +165,7 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
                     "status": status(row, parents, row.get("kind")),
                     "path": row["path"],
                     "cell": row.get("crosswalk_cell"),
-                    "crosswalk": FORMATS[fmt].crosswalk,
+                    "crosswalk": FORMATS[fmt].crosswalk if term in TERMS else None,
                     "reason": source.removeprefix("curated:") if source.startswith("curated:") else None,
                 }
             )

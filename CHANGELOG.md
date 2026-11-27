@@ -7,6 +7,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Upgrade
+
+- Update the hub CLI when pinning a 1.10 mapping. Older versions reject the new format and term
+  IDs. See [mapping compatibility](docs/mapping-export.md#compatibility).
+
+### Added
+
+- Both mapping exports now include Crossref REST, arXiv Atom and CFF preferred citations, along
+  with selected citation fields for DataCite. See [mapping terms](docs/mapping-export.md#terms).
+
 ## [0.9.0] - 2026-11-26
 
 ### Upgrade
