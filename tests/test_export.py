@@ -11,6 +11,7 @@ from codemeta_drift import export as export_module
 from codemeta_drift.checks import table_rows
 from codemeta_drift.cli import main, read_dir
 from codemeta_drift.export import (
+    CITATION_TERMS,
     FORMATS,
     NO_PROPERTY,
     TERMS,
@@ -262,7 +263,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == len(EXAMPLE["rows"]) - 2
+    assert len(rows) == 896
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():
@@ -293,6 +294,16 @@ def test_unknown_and_duplicate_curated_rows_are_reported():
         "CURATED_DUPLICATE curated-3.1.json: author.@id: second row for cff-1.2.0",
         "CURATED_UNUSED curated-3.1.json: author.@ID: no cff-1.2.0 row has this term",
     ]
+
+
+def test_a_citation_row_is_named_by_its_own_file_and_index():
+    curated = read_curated("3.1")
+    citation = [c for c in curated if c.get("file") == "citation-crosswalks.json"]
+    _, findings = build_rows(read_dir(FIXTURE), "3.1", [*curated, citation[0]])
+    assert [str(f) for f in findings] == ["CURATED_DUPLICATE citation-crosswalks.json: name: second row for crossref"]
+    broken = [{k: v for k, v in c.items() if k != "reason"} if c is citation[1] else c for c in curated]
+    with pytest.raises(ValueError, match=r"^citation-crosswalks\.json: row 2 has no reason$"):
+        build_rows(read_dir(FIXTURE), "3.1", broken)
 
 
 @pytest.mark.parametrize("path", ["project/description", "!!!", "a | b |"])
@@ -534,6 +545,13 @@ def test_curated_tags_ignore_a_stray_file(monkeypatch: pytest.MonkeyPatch, tmp_p
         (tmp_path / name).write_text("{}")
     monkeypatch.setattr(export_module, "PACKAGE", tmp_path)
     assert export_module.curated_tags() == ["4.0"]
+
+
+def test_the_guide_defines_every_citation_term():
+    docs = (ROOT / "docs/mapping-export.md").read_text("utf-8")
+    table = docs.partition("curated citation terms where a mapping was reviewed.\n\n")[2].partition("\n\n")[0]
+    first = [line.split(" | ")[0] for line in table.splitlines()[2:]]
+    assert {term for cell in first for term in re.findall(r"`([^`]+)`", cell)} == set(CITATION_TERMS)
 
 
 def test_format_lists_match_the_formats():

@@ -16,6 +16,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Both mapping exports now include Crossref REST, arXiv Atom and CFF preferred citations, along
   with selected citation fields for DataCite. See [mapping terms](docs/mapping-export.md#terms).
+- A citation field with a CodeMeta property (`url`, `author.name`, `preferredCitation`) joins that
+  property's crosswalk cell, so coverage and `hub crosswalk` read CFF's `preferred-citation` as
+  written and DataCite's `creatorName` as notation.
 
 ## [0.9.0] - 2026-11-26
 

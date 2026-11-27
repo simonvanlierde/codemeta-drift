@@ -6,6 +6,7 @@ from typing import Any
 
 from codemeta_drift.checks import TABLE, code_span, crosswalk_paths, format_name
 from codemeta_drift.export import (
+    ALL_TERMS,
     CITATION_TERMS,
     FORMATS,
     NO_PROPERTY,
@@ -148,8 +149,8 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
     """Every (format, term) cell of a mapping export with its status, path, original cell and reason."""
     validate_mapping(mapping)
     rows = {(row["format"], row["term"]): row for row in mapping["rows"]}
-    extra = {term for _, term in rows}
-    terms = [*TERMS, *(term for term in CITATION_TERMS if term in extra)]
+    present = {term for _, term in rows}
+    terms = [*TERMS, *(term for term in CITATION_TERMS if term in present)]
     cells = []
     for fmt in columns(mapping):
         parents = {term: rows[fmt, term]["path"] for term in PEOPLE if (fmt, term) in rows}
@@ -165,7 +166,7 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
                     "status": status(row, parents, row.get("kind")),
                     "path": row["path"],
                     "cell": row.get("crosswalk_cell"),
-                    "crosswalk": FORMATS[fmt].crosswalk if term in TERMS else None,
+                    "crosswalk": FORMATS[fmt].crosswalk if ALL_TERMS[term] else None,
                     "reason": source.removeprefix("curated:") if source.startswith("curated:") else None,
                 }
             )
@@ -343,14 +344,14 @@ def upstream(files: Mapping[str, str], mapping: dict[str, Any]) -> list[dict[str
     changed = []
     for c in coverage(mapping)["cells"]:
         crosswalk = c["crosswalk"]
-        if crosswalk is None or c["term"] not in TERMS:
+        if crosswalk is None:
             continue
         if crosswalk not in files or TABLE not in files:
             changed.append({**c, "now": None, "state": "missing"})
             continue
         if crosswalk not in cells:
             cells[crosswalk] = crosswalk_cells(files, crosswalk)
-        now = cells[crosswalk].get(TERMS[c["term"]])
+        now = cells[crosswalk].get(ALL_TERMS[c["term"]])
         if (now or "").strip() == (c["cell"] or "").strip():
             continue
         if now is None:

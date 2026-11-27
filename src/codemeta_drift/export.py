@@ -49,24 +49,27 @@ TERMS = {
 NO_PROPERTY = frozenset({"resourceType"})
 """Terms with no property table row (resourceType): their key in ``TERMS`` is a placeholder no cell joins to."""
 
-CITATION_TERMS = (
-    "author.name",
-    "author.resourceType",
-    "contributor.name",
-    "contributor.resourceType",
-    "url",
-    "containerTitle",
-    "volume",
-    "issue",
-    "pagination",
-    "preferredCitation",
-    "arxivId",
-    "primaryCategory",
-    "relatedDoi",
-    "isVersionOf",
-    "hasVersion",
-)
-"""Citation terms exported only where a curated row supplies a path."""
+CITATION_TERMS: dict[str, tuple[str, str] | None] = {
+    "author.name": ("schema:Person", "name"),
+    "author.resourceType": None,
+    # The property table's Person rows describe creators (see hub.crosswalk), so a contributor's name joins no cell.
+    "contributor.name": None,
+    "contributor.resourceType": None,
+    "url": ("schema:Thing", "url"),
+    "containerTitle": None,
+    "volume": None,
+    "issue": None,
+    "pagination": None,
+    "preferredCitation": ("codemeta:SoftwareSourceCode", "referencePublication"),
+    "arxivId": None,
+    "primaryCategory": None,
+    "relatedDoi": None,
+    "isVersionOf": None,
+    "hasVersion": None,
+}
+"""Citation terms, exported only where a curated row reviews them, and the property table row of their cell, if any."""
+ALL_TERMS = TERMS | CITATION_TERMS
+"""Every term an export row may have, and its property table row (None for a citation term with none)."""
 PEOPLE = ("author", "contributor")
 """The terms that hold people; each has the person sub-terms ``<term>.givenName``, ``.familyName`` and ``.@id``."""
 
@@ -228,13 +231,17 @@ def latest_tag() -> str:
     return curated_tags()[-1]
 
 
+CITATION_FILE = "citation-crosswalks.json"
+"""The curated rows every tag shares; ``read_curated`` marks each with this name under ``file``."""
+
+
 def read_curated(tag: str) -> list[dict[str, Any]]:
-    """The curated rows for a CodeMeta tag. Raises KeyError for a tag with no file."""
+    """The curated rows for a CodeMeta tag, then the shared citation rows. Raises KeyError for a tag with no file."""
     if tag not in curated_tags():
         raise KeyError(tag)
     tagged = json.loads((PACKAGE / f"curated-{tag}.json").read_text("utf-8"))["rows"]
-    citation = json.loads((PACKAGE / "citation-crosswalks.json").read_text("utf-8"))["rows"]
-    return [*tagged, *citation]
+    citation = json.loads((PACKAGE / CITATION_FILE).read_text("utf-8"))["rows"]
+    return [*tagged, *(row | {"file": CITATION_FILE} for row in citation)]
 
 
 KINDS = ("notation", "scope")
@@ -250,32 +257,14 @@ def build_rows(
     checked on its own (``curated=[]``). Raises ValueError for a curated row without a required key, or
     one ``make_row`` refuses.
     """
-    name = f"curated-{tag}.json"
-    overrides: dict[tuple[str, str], dict[str, Any]] = {}
-    rows, findings = [], []
-    for i, c in enumerate(curated, 1):
-        if missing := sorted({"format", "term", "path", "reason"} - c.keys()):
-            msg = f"{name}: row {i} has no {', '.join(missing)}"
-            raise ValueError(msg)
-        if c.get("kind") not in (None, *KINDS):
-            msg = f"{name}: row {i} has kind {c['kind']!r}, not one of {', '.join(KINDS)}"
-            raise ValueError(msg)
-        if (c["format"], c["term"]) in overrides:
-            findings.append(Finding("CURATED_DUPLICATE", name, c["term"], f"second row for {c['format']}"))
-        overrides[c["format"], c["term"]] = c
-    findings += [
-        Finding("CURATED_UNUSED", name, term, f"no {fmt} row has this term")
-        for fmt, term in overrides
-        if fmt not in formats(tag) or (term not in TERMS and term not in CITATION_TERMS)
-    ]
+    overrides, findings = index_curated(tag, curated)
+    rows = []
     for fmt, spoke in formats(tag).items():
         cells = crosswalk_cells(files, spoke.crosswalk) if spoke.crosswalk and spoke.crosswalk in files else {}
         made: dict[str, str | None] = {}
-        extras = dict.fromkeys(
-            (term for term in CITATION_TERMS if (fmt, term) in overrides),
-            ("", ""),
-        )
-        for term, key in (TERMS | extras).items():
+        for term, key in ALL_TERMS.items():
+            if term in CITATION_TERMS and (fmt, term) not in overrides:
+                continue
             override = overrides.get((fmt, term))
             if fmt == "codemeta" and not override:
                 override = {"path": identity(term), "reason": "codemeta's own term"}
@@ -288,6 +277,42 @@ def build_rows(
                 rows.append(row)
         findings += shared_paths(spoke.crosswalk or fmt, fmt, [r for r in rows if r["format"] == fmt])
     return rows, findings
+
+
+def curated_file(row: Mapping[str, Any], tag: str) -> str:
+    """The file a curated row came from, for messages: ``read_curated`` marks the shared citation rows."""
+    return row.get("file", f"curated-{tag}.json")
+
+
+def index_curated(
+    tag: str, curated: list[dict[str, Any]]
+) -> tuple[dict[tuple[str, str], dict[str, Any]], list[Finding]]:
+    """The curated rows by (format, term), and a finding for each duplicate or unused one.
+
+    Raises ValueError for a row without a required key or with an unknown kind; its index counts rows of its own file.
+    """
+    overrides: dict[tuple[str, str], dict[str, Any]] = {}
+    findings = []
+    counted: Counter[str] = Counter()
+    for c in curated:
+        name = curated_file(c, tag)
+        counted[name] += 1
+        i = counted[name]
+        if missing := sorted({"format", "term", "path", "reason"} - c.keys()):
+            msg = f"{name}: row {i} has no {', '.join(missing)}"
+            raise ValueError(msg)
+        if c.get("kind") not in (None, *KINDS):
+            msg = f"{name}: row {i} has kind {c['kind']!r}, not one of {', '.join(KINDS)}"
+            raise ValueError(msg)
+        if (c["format"], c["term"]) in overrides:
+            findings.append(Finding("CURATED_DUPLICATE", name, c["term"], f"second row for {c['format']}"))
+        overrides[c["format"], c["term"]] = c
+    findings += [
+        Finding("CURATED_UNUSED", curated_file(c, tag), term, f"no {fmt} row has this term")
+        for (fmt, term), c in overrides.items()
+        if fmt not in formats(tag) or term not in ALL_TERMS
+    ]
+    return overrides, findings
 
 
 # Equal paths by design: CodeMeta keeps DOI and SWHID together, and DataCite may give a repository as its landing URL.
@@ -339,12 +364,14 @@ def make_row(
     derived = None
     if cell is not None and classify(cell) == "path":
         derived = derive(spoke, term, cell.strip(), made)
-    if override:
+    # A citation row is how a term is reviewed for a format; one whose path is its cell's says the cell is right.
+    if override and not (term in CITATION_TERMS and derived is not None and derived == override["path"]):
         if finding := curated_finding(label, term, cell, derived, override):
             return None, finding
         # The coverage status reads a kind only off a cell the row corrects; elsewhere it would be lost.
         if "kind" in override and not (cell or "").strip():
-            msg = f"curated-{tag}.json: the {fmt} {term} row has kind {override['kind']!r}, but its cell is empty"
+            msg = f"{curated_file(override, tag)}: the {fmt} {term} row has kind {override['kind']!r}"
+            msg += ", but its cell is empty"
             raise ValueError(msg)
         row = {"format": fmt, "term": term, "path": override["path"], "source": f"curated:{override['reason']}"}
         return row | {k: override[k] for k in ("kind", "see_also", "comment") if k in override}, None

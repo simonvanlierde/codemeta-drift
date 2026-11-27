@@ -22,7 +22,7 @@ How CodeMeta's 3.1 crosswalks map 34 terms in 45 formats, read from the reviewed
 
 | Format | Crosswalk | as-is | scope | notation | corrected | added | no field | no term |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| cff-1.2.0 | `Citation File Format 1.2.0.csv` | 9 | 1 | 1 | 2 | 1 | 5 | 1 |
+| cff-1.2.0 | `Citation File Format 1.2.0.csv` | 10 | 1 | 1 | 2 | 0 | 5 | 1 |
 | crossref | none | 0 | 0 | 0 | 0 | 19 | 5 | 1 |
 | arxiv | none | 0 | 0 | 0 | 0 | 8 | 15 | 0 |
 | cff-preferred | none | 0 | 0 | 0 | 0 | 20 | 4 | 1 |
@@ -35,7 +35,7 @@ How CodeMeta's 3.1 crosswalks map 34 terms in 45 formats, read from the reviewed
 | r-description | `R Package Description.csv` | 5 | 2 | 0 | 7 | 2 | 3 | 0 |
 | julia | `Julia Project.csv` | 1 | 2 | 0 | 0 | 5 | 11 | 0 |
 | bibtex | `BibTeX.csv` | 5 | 3 | 1 | 0 | 4 | 6 | 0 |
-| datacite | `DataCite.csv` | 6 | 2 | 8 | 1 | 8 | 0 | 1 |
+| datacite | `DataCite.csv` | 6 | 2 | 9 | 1 | 7 | 0 | 1 |
 | setup-py | `Python Distutils (PyPI).csv` | 3 | 1 | 1 | 1 | 3 | 10 | 0 |
 | ruby-gem | `Ruby Gem.csv` | 3 | 0 | 2 | 1 | 2 | 11 | 0 |
 | maven | `Java (Maven).csv` | 2 | 3 | 4 | 0 | 4 | 6 | 0 |
@@ -91,7 +91,7 @@ How CodeMeta's 3.1 crosswalks map 34 terms in 45 formats, read from the reviewed
 | `datePublished` | ✓ `date-released` | [+](#crossref) `published.date-parts \| issued.date-parts` | [+](#arxiv) `published` | [+](#cff-preferred) `date-published \| date-released \| year` | ✓ `publication_date` | [–](#pep621) | [–](#cargo) | [–](#npm) | [+](#composer) `time` | [–](#pkg-info) | ✓ `Date` | [–](#julia) | [≈](#bibtex) `date \| year` | [⊂](#datacite) `dates[dateType=Issued].date \| publicationYear` | [–](#setup-py) | [–](#ruby-gem) | [–](#maven) | [–](#cpan-meta-2) | [–](#nuget) | [–](#pubspec) | [–](#cabal) | [–](#typst) | [–](#quarto) | [–](#github) | [✎](#figshare) `published_date` | [–](#bio-tools) | [–](#leiningen) | [≈](#octave) `date` | ✓ `releaseDate` | [–](#swmath) | [≈](#spdx-23) `packages[].releaseDate` | ✓ `datePublished` | ✓ `dcterms:issued` | [+](#doap) `doap:release[].doap:created` | [≈](#wikidata) `claims.P577[].mainsnak.datavalue.value.time` | [+](#ris) `PY \| Y1` | [+](#endnote) `D` | [+](#ro-crate) `@graph[@id=./].datePublished` | [+](#croissant) `datePublished` | [✎](#dublin-core) `dcterms:issued \| dcterms:date \| dc:date[]` | [–](#debian) | [≈](#mods) `originInfo[].dateIssued[]` | [✎](#vivo-18) `vivo:dateTimeValue.vivo:dateTime` | [✎](#spase-261) `ResourceHeader.PublicationInfo.PublicationDate` | [≈](#iso-19115-1-2014) `identificationInfo.citation.date[dateType=publication].date` |
 | `publisher` | [–](#cff-120) | [+](#crossref) `publisher` | [–](#arxiv) | [+](#cff-preferred) `publisher.name` | [–](#zenodo) | [–](#pep621) | [–](#cargo) | [–](#npm) | [–](#composer) | [–](#pkg-info) | [–](#r-description) | [–](#julia) | ✓ `publisher` | [≈](#datacite) `publisher.name \| publisher` | [–](#setup-py) | [–](#ruby-gem) | [–](#maven) | [–](#cpan-meta-2) | [–](#nuget) | [–](#pubspec) | [–](#cabal) | [–](#typst) | [–](#quarto) | [–](#github) | [–](#figshare) | [–](#bio-tools) | [–](#leiningen) | [–](#octave) | [–](#publiccode-08) | [–](#swmath) | [–](#spdx-23) | [⊂](#codemeta-2) `publisher.name \| publisher` | [⊂](#dcat-3) `dcterms:publisher.foaf:name \| dcterms:publisher` | [≈](#doap) `doap:vendor.foaf:name \| doap:vendor` | [≈](#wikidata) `claims.P123[].mainsnak.datavalue.value.id` | [+](#ris) `PB` | [+](#endnote) `I` | [+](#ro-crate) `@graph[@id=./].publisher[].name \| @graph[@id=./].publisher[]` | [+](#croissant) `publisher[].name \| publisher[]` | [≈](#dublin-core) `dcterms:publisher.foaf:name \| dcterms:publisher \| dc:publisher[]` | [–](#debian) | [≈](#mods) `originInfo[].publisher[]` | [+](#vivo-18) `vivo:publisher.rdfs:label \| vivo:publisher` | [+](#spase-261) `ResourceHeader.PublicationInfo.PublishedBy` | [≈](#iso-19115-1-2014) `identificationInfo.citation.citedResponsibleParty[role=publisher].party[].name` |
 | `resourceType` | [∅](#cff-120) `type` | [∅](#crossref) `type` | [–](#arxiv) | [∅](#cff-preferred) `type` | [∅](#zenodo) `upload_type` | [–](#pep621) | [–](#cargo) | [–](#npm) | [–](#composer) | [–](#pkg-info) | [–](#r-description) | [–](#julia) | [–](#bibtex) | [∅](#datacite) `types.resourceTypeGeneral` | [–](#setup-py) | [–](#ruby-gem) | [–](#maven) | [–](#cpan-meta-2) | [–](#nuget) | [–](#pubspec) | [–](#cabal) | [–](#typst) | [–](#quarto) | [–](#github) | [∅](#figshare) `defined_type_name` | [–](#bio-tools) | [–](#leiningen) | [–](#octave) | [–](#publiccode-08) | [–](#swmath) | [–](#spdx-23) | [∅](#codemeta-2) `@type` | [∅](#dcat-3) `dcterms:type` | [–](#doap) | [∅](#wikidata) `claims.P31[].mainsnak.datavalue.value.id` | [∅](#ris) `TY` | [∅](#endnote) `_0` | [∅](#ro-crate) `@graph[@id=./].@type` | [∅](#croissant) `@type` | [∅](#dublin-core) `dcterms:type \| dc:type[]` | [–](#debian) | [∅](#mods) `typeOfResource[]` | [∅](#vivo-18) `@type` | [–](#spase-261) | [∅](#iso-19115-1-2014) `metadataScope[].resourceScope` |
-| `author.name` |  | [+](#crossref) `author[].name` | [+](#arxiv) `author[].name` | [+](#cff-preferred) `authors[].name` |  |  |  |  |  |  |  |  |  | [+](#datacite) `creators[].name` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `author.name` |  | [+](#crossref) `author[].name` | [+](#arxiv) `author[].name` | [+](#cff-preferred) `authors[].name` |  |  |  |  |  |  |  |  |  | [≈](#datacite) `creators[].name` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `author.resourceType` |  |  |  |  |  |  |  |  |  |  |  |  |  | [+](#datacite) `creators[].nameType` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `contributor.name` |  |  |  |  |  |  |  |  |  |  |  |  |  | [+](#datacite) `contributors[].name` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `contributor.resourceType` |  |  |  |  |  |  |  |  |  |  |  |  |  | [+](#datacite) `contributors[].nameType` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
@@ -100,7 +100,7 @@ How CodeMeta's 3.1 crosswalks map 34 terms in 45 formats, read from the reviewed
 | `volume` |  | [+](#crossref) `volume` |  | [+](#cff-preferred) `volume` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `issue` |  | [+](#crossref) `issue` |  | [+](#cff-preferred) `issue` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `pagination` |  | [+](#crossref) `page \| article-number` |  | [+](#cff-preferred) `start + end` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `preferredCitation` | [+](#cff-120) `preferred-citation` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `preferredCitation` | ✓ `preferred-citation` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `arxivId` |  |  | [+](#arxiv) `link[rel=alternate].href \| id` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `primaryCategory` |  |  | [+](#arxiv) `primary_category.term` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `relatedDoi` |  |  | [+](#arxiv) `doi \| link[title=doi].href` |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
@@ -121,7 +121,6 @@ How CodeMeta's 3.1 crosswalks map 34 terms in 45 formats, read from the reviewed
 - `swhid` (scope): crosswalk cell `identifiers / person.orcid / doi` → `identifiers[type=swh].value`. The cell lists identifiers / person.orcid / doi; a SWHID is the swh entry of identifiers.
 - `publisher` (no field): no crosswalk cell → no path. The cell is empty; CFF has publisher only inside references[] and preferred-citation, which describe other works.
 - `resourceType` (no term): no crosswalk cell → `type`. CodeMeta has no term for the resource type; CFF states its resource type in the top-level type key.
-- `preferredCitation` (added): no crosswalk cell → `preferred-citation`. CFF 1.2.0 stores the separate preferred reference in preferred-citation.
 
 ### crossref
 
@@ -386,7 +385,7 @@ How CodeMeta's 3.1 crosswalks map 34 terms in 45 formats, read from the reviewed
 - `datePublished` (scope): crosswalk cell `publicationYear` → `dates[dateType=Issued].date | publicationYear`. The cell says publicationYear, 'The year when the data was or will be made publicly available' (DataCite 4.6, property 5), which is right but only a year; a date of dateType Issued, 'The date that the resource is published or distributed' (appendix 1), gives the day, so the path reads it first, as bolognese's writers do.
 - `publisher` (notation): crosswalk cell `publisher` → `publisher.name | publisher`. The cell says publisher, the XML element; the REST API returns the name as a string by default, and an object with a name key (since schema 4.5) only when the request has publisher=true.
 - `resourceType` (no term): no crosswalk cell → `types.resourceTypeGeneral`. DataCite requires types.resourceTypeGeneral; CodeMeta has no term for it.
-- `author.name` (added): no crosswalk cell → `creators[].name`. The DataCite creator name holds the full personal or organizational name.
+- `author.name` (notation): crosswalk cell `creatorName` → `creators[].name`. The cell says creatorName, the XML element; in the REST JSON each creator's full personal or organizational name is its name key.
 - `author.resourceType` (added): no crosswalk cell → `creators[].nameType`. DataCite distinguishes Personal and Organizational creators with nameType.
 - `contributor.name` (added): no crosswalk cell → `contributors[].name`. The DataCite contributor name holds the full personal or organizational name.
 - `contributor.resourceType` (added): no crosswalk cell → `contributors[].nameType`. DataCite distinguishes Personal and Organizational contributors with nameType.

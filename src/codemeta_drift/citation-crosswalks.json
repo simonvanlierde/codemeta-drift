@@ -443,7 +443,9 @@
       "format": "datacite",
       "term": "author.name",
       "path": "creators[].name",
-      "reason": "the DataCite creator name holds the full personal or organizational name"
+      "cell": "creatorName",
+      "reason": "the cell says creatorName, the XML element; in the REST JSON each creator's full personal or organizational name is its name key",
+      "kind": "notation"
     },
     {
       "format": "datacite",
@@ -467,6 +469,7 @@
       "format": "datacite",
       "term": "url",
       "path": "url",
+      "cell": "",
       "reason": "DataCite REST gives the resulting landing page URL"
     },
     {
@@ -485,6 +488,7 @@
       "format": "cff-1.2.0",
       "term": "preferredCitation",
       "path": "preferred-citation",
+      "cell": "preferred-citation",
       "reason": "CFF 1.2.0 stores the separate preferred reference in preferred-citation"
     }
   ]

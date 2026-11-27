@@ -195,20 +195,20 @@ def test_counts_for_the_crosswalks(mapping: dict):
     found = [c["status"] for c in coverage(mapping)["cells"] if c["crosswalk"]]
     expected = {
         "3.1": {
-            "as-is": 114,
+            "as-is": 115,
             "scope": 40,
-            "notation": 79,
+            "notation": 80,
             "corrected": 74,
-            "added": 109,
+            "added": 110,
             "no field": 219,
             "no term": 11,
         },
         "4.0": {
-            "as-is": 123,
+            "as-is": 124,
             "scope": 42,
-            "notation": 79,
+            "notation": 80,
             "corrected": 82,
-            "added": 110,
+            "added": 111,
             "no field": 237,
             "no term": 11,
         },
@@ -218,8 +218,10 @@ def test_counts_for_the_crosswalks(mapping: dict):
 
 def test_readme_figures_match_the_counts():
     mapping = json.loads((ROOT / f"examples/mapping-{latest_tag()}.json").read_text("utf-8"))
-    # resourceType has no CodeMeta property row, so no crosswalk could have its cell.
-    cells = [c for c in coverage(mapping)["cells"] if c["crosswalk"] and c["term"] not in NO_PROPERTY]
+    # The README counts the base terms but resourceType, which has no CodeMeta property row for a cell.
+    cells = [
+        c for c in coverage(mapping)["cells"] if c["crosswalk"] and c["term"] in TERMS and c["term"] not in NO_PROPERTY
+    ]
     count = Counter(c["status"] for c in cells)
     null_corrected = sum(c["status"] == "corrected" and c["path"] is None for c in cells)
     text = " ".join((ROOT / "README.md").read_text("utf-8").split())
@@ -256,7 +258,7 @@ def test_cli_writes_json(mapping: dict, example: Path, capsys: pytest.CaptureFix
     assert main(["hub", "coverage", str(example), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["codemeta_tag"] == mapping["codemeta_tag"]
-    assert len(data["cells"]) == sum(r["format"] != "codemeta" for r in mapping["rows"])
+    assert len(data["cells"]) == {"3.1": 879, "4.0": 917}[mapping["codemeta_tag"]]
     assert "unreviewed" not in data  # only with --codemeta
 
 

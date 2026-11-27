@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import quote
 
 from codemeta_drift.checks import table_rows
-from codemeta_drift.export import CITATION_TERMS, KINDS, PATH, SCHEMA_VERSION, TERMS, formats
+from codemeta_drift.export import ALL_TERMS, KINDS, PATH, SCHEMA_VERSION, formats
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
 # w3id.org redirects this base to the coverage page, so the identifiers outlive its hosting.
@@ -60,7 +60,7 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
             not isinstance(row["format"], str)
             or row["format"] not in allowed_formats
             or not isinstance(row["term"], str)
-            or (row["term"] not in TERMS and row["term"] not in CITATION_TERMS)
+            or row["term"] not in ALL_TERMS
             or not isinstance(row["source"], str)
             or not re.fullmatch(r"(crosswalk:crosswalks/[^@]+\.csv@[^@\s]+|curated:\S.*)", row["source"])
             or (row["path"] is not None and (not isinstance(row["path"], str) or not PATH.fullmatch(row["path"])))
@@ -187,10 +187,10 @@ def crosswalk(mapping: dict[str, Any], files: Mapping[str, str], fmt: str) -> st
         msg = f"unknown format {fmt!r}"
         raise UsageError(msg)
     paths = {
-        TERMS[row["term"]]: row["path"] or ""
+        ALL_TERMS[row["term"]]: row["path"] or ""
         for row in rows
         if row["format"] == fmt
-        and row["term"] in TERMS
+        and ALL_TERMS.get(row["term"])
         and row["term"] != "swhid"
         and not row["term"].startswith("contributor.")
     }

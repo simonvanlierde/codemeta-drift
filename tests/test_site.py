@@ -86,7 +86,8 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert next(c for c in data["coverage"]["cells"] if c["term"] == "resourceType")["line"] is None
     properties = data["coverage"]["properties"]
     assert properties["author.@id"] == "schema:Person identifier"
-    assert properties["author.name"] == properties["contributor.name"] == "schema:Person name"
+    assert properties["author.name"] == "schema:Person name"
+    assert properties["contributor.name"] is None
     assert properties["url"] == "schema:Thing url"
     assert properties["arxivId"] is None
     # The SSSOM file the page publishes is the one its own mapping_set_id names.
