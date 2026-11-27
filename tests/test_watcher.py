@@ -166,9 +166,9 @@ def test_a_backtick_in_a_schema_path_keeps_the_code_span_closed():
     assert "- npm: unmapped ``a`@x`` (new" in plan["body"]
 
 
-@pytest.mark.parametrize("source", ["tag \n", "tag\n", "tag v1\ntag v2\n", ""])
+@pytest.mark.parametrize("source", ["tag \n", "tag\n", "tag v1\ntag v2\n", "", "commit x\n"])
 def test_pin_tag_needs_exactly_one_tag_line_with_a_value(source: str):
-    with pytest.raises(ValueError, match="exactly one tag line"):
+    with pytest.raises(ValueError, match="MAPPING_SOURCE must contain exactly one tag line"):
         pin_tag(source)
 
 
@@ -237,8 +237,5 @@ def test_unequal_format_sets_are_refused():
         schema_changes([], {"pep621": {}}, {"cargo": {}})
 
 
-def test_pin_tag_needs_exactly_one_tag_line():
+def test_pin_tag_reads_the_tag_among_other_lines():
     assert pin_tag("commit x\ntag v1.2.3\n") == "v1.2.3"
-    for source in ("commit x\n", "tag v1\ntag v2\n"):
-        with pytest.raises(ValueError, match="MAPPING_SOURCE must contain exactly one tag line"):
-            pin_tag(source)

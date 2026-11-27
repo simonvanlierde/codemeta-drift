@@ -48,29 +48,6 @@ def test_pair_rejects_missing_format(mapping: dict, fmt: str):
         pair_rows(mapping, fmt, "cargo")
 
 
-@pytest.mark.parametrize("change", ["version", "duplicate", "path", "type", "source", "rows", "generator", "kind"])
-def test_mapping_rejects_invalid_input(mapping: dict, change: str):
-    data = mapping
-    if change == "version":
-        data["schema_version"] = "2.0"
-    elif change == "duplicate":
-        data["rows"].append(data["rows"][0])
-    elif change == "path":
-        data["rows"][0]["path"] = "authors[][]"
-    elif change == "type":
-        data["rows"][0]["format"] = 3
-    elif change == "source":
-        del data["rows"][0]["source"]
-    elif change == "generator":
-        data["generator"] = {"name": 1, "version": None}
-    elif change == "kind":
-        data["rows"][0]["kind"] = "bogus"
-    else:
-        data["rows"] = None
-    with pytest.raises(ValueError, match="mapping"):
-        validate_mapping(data)
-
-
 def test_coverage_of_a_row_with_an_unknown_kind_exits_3(
     mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ):
@@ -254,7 +231,12 @@ def test_a_row_from_a_newer_minor_says_to_upgrade(mapping: dict):
     mapping["rows"][0]["format"] = "future-format"
     with pytest.raises(ValueError, match=r"row 1 \(schema_version 1\.99 is newer than this build's 1\.\d+; upgrade"):
         validate_mapping(mapping)
-    mapping["schema_version"] = "1.0"
+
+
+@pytest.mark.parametrize("version", ["1.0", SCHEMA_VERSION])
+def test_a_row_from_an_older_or_the_current_minor_is_not_called_newer(mapping: dict, version: str):
+    mapping["schema_version"] = version
+    mapping["rows"][0]["format"] = "future-format"
     with pytest.raises(ValueError, match=r"row 1$"):
         validate_mapping(mapping)
 
@@ -348,6 +330,14 @@ def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
 
 
 DAMAGE = {
+    "version": lambda d: d.update(schema_version="2.0"),
+    "duplicate": lambda d: d["rows"].append(d["rows"][0]),
+    "path": lambda d: d["rows"][0].update(path="authors[][]"),
+    "type": lambda d: d["rows"][0].update(format=3),
+    "source": lambda d: d["rows"][0].pop("source"),
+    "generator": lambda d: d.update(generator={"name": 1, "version": None}),
+    "kind": lambda d: d["rows"][0].update(kind="bogus"),
+    "rows": lambda d: d.update(rows=None),
     "no-tag": lambda d: d.pop("codemeta_tag"),
     "empty-tag": lambda d: d.update(codemeta_tag=""),
     "no-generator": lambda d: d.update(generator=None),
@@ -379,10 +369,3 @@ def test_a_row_with_an_https_see_also_is_accepted(mapping: dict):
     mapping["rows"][0]["see_also"] = "https://example.org/x"
     mapping["rows"][0]["comment"] = "why"
     validate_mapping(mapping)
-
-
-def test_the_current_schema_version_is_not_called_newer(mapping: dict):
-    mapping["schema_version"] = SCHEMA_VERSION
-    mapping["rows"][0]["format"] = "future-format"
-    with pytest.raises(ValueError, match=r"row 1$"):
-        validate_mapping(mapping)
