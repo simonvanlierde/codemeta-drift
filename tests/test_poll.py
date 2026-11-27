@@ -68,6 +68,9 @@ def test_poll_uses_current_schemas_and_only_latest_codemeta_tag(upstream: str):
     plans = poll({"rows": []}, before, fetch)
     importer = [plan for plan in plans if plan["title"].startswith("Review Zenodo importer")]
     assert len(importer) == 1
+    assert all(set(plan) == {"repo", "title", "body"} for plan in plans)
+    assert importer[0]["repo"] == "simonvanlierde/codemeta-drift"
+    assert "Zenodo" in importer[0]["body"]
     assert importer[0]["title"].endswith("missing" if upstream == "deleted" else "b" * 40)
     assert any(plan["title"] == "Update mapping pin to v0.4.0" for plan in plans)
     created = []
@@ -114,6 +117,7 @@ def test_poll_flags_stale_pinned_hash_at_the_right_tag():
     responses.update({API + zenodo["repo"] + "/contents/" + p: {"sha": d} for p, d in zenodo["files"].items()})
     plans = poll({"rows": []}, before, responses.__getitem__)
     assert [plan["title"] for plan in plans] == ["Update mapping pin hash for mapping-local.json at v0.4.0"]
+    assert set(plans[0]) == {"repo", "title", "body"}
     assert plans[0]["repo"] == "simonvanlierde/citesync"
     assert "mapping-local.json" in plans[0]["body"]
     assert "mapping.schema.json" not in plans[0]["body"]
@@ -140,6 +144,8 @@ def test_a_pinned_file_missing_at_the_tag_is_an_issue_not_a_crash():
         "Update mapping pin hash for mapping.schema.json at v0.5.0",
     ]
     assert "src/codemeta_drift/mapping-vectors.json" in plans[0]["body"]
+    assert all(set(plan) == {"repo", "title", "body"} for plan in plans)
+    assert {plan["repo"] for plan in plans} == {"simonvanlierde/citesync"}
 
 
 def test_a_malformed_pin_line_becomes_a_draft_and_the_other_lines_still_run():
@@ -155,6 +161,8 @@ def test_a_malformed_pin_line_becomes_a_draft_and_the_other_lines_still_run():
         "Malformed MAPPING_SOURCE line in citesync: sha256 ghi",
     ]
     assert "`sha256 abc local.json`" in plans[0]["body"]
+    assert all(set(plan) == {"repo", "title", "body"} for plan in plans)
+    assert {plan["repo"] for plan in plans} == {"simonvanlierde/citesync"}
 
 
 def test_publisher_fetches_closed_titles_and_publishes_once():
@@ -162,14 +170,12 @@ def test_publisher_fetches_closed_titles_and_publishes_once():
     created = []
 
     def create(plan: dict[str, str]) -> None:
-        created.append(plan)
-        existing[plan["repo"]].add(plan["title"])
+        created.append(plan)  # not added to existing: publish itself must remember a title within one run
 
     plans = [
         {"repo": "simonvanlierde/codemeta-drift", "title": title, "body": "review"}
         for title in ("closed", "new", "new")
     ]
-    publish(plans, existing.__getitem__, create)
     publish(plans, existing.__getitem__, create)
     assert [plan["title"] for plan in created] == ["new"]
 

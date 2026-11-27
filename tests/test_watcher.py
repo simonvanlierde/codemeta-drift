@@ -239,3 +239,27 @@ def test_unequal_format_sets_are_refused():
 
 def test_pin_tag_reads_the_tag_among_other_lines():
     assert pin_tag("commit x\ntag v1.2.3\n") == "v1.2.3"
+
+
+def test_schema_paths_keep_siblings_of_a_recursive_ref_and_of_list_items():
+    """A looped branch is skipped, not the rest; item paths join the property paths instead of replacing them."""
+    schema = {
+        "$defs": {
+            "person": {
+                "properties": {
+                    "name": {},
+                    "parent": {"$ref": "#/$defs/person", "allOf": [{"properties": {"extra": {}}}]},
+                }
+            }
+        },
+        "properties": {
+            "authors": {"type": "array", "properties": {"count": {}}, "items": {"$ref": "#/$defs/person"}},
+        },
+    }
+    assert schema_paths(schema) == {
+        "authors",
+        "authors.count",
+        "authors[].name",
+        "authors[].parent",
+        "authors[].parent.extra",
+    }

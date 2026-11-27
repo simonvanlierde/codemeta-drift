@@ -3,13 +3,14 @@ import io
 import json
 from collections.abc import Callable
 from pathlib import Path
+from urllib.parse import quote
 
 import pytest
 import yaml
 
 from codemeta_drift.cli import main
 from codemeta_drift.export import SCHEMA_VERSION, curated_tags
-from codemeta_drift.hub import pair_rows, sssom, validate_mapping
+from codemeta_drift.hub import pair_rows, spokes, sssom, validate_mapping
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -371,4 +372,33 @@ def test_each_single_flaw_in_a_mapping_is_rejected(mapping: dict, damage: Callab
 def test_a_row_with_an_https_see_also_is_accepted(mapping: dict):
     mapping["rows"][0]["see_also"] = "https://example.org/x"
     mapping["rows"][0]["comment"] = "why"
+    validate_mapping(mapping)
+
+
+def test_sssom_encodes_every_path_and_term_and_appends_a_comment(mapping: dict):
+    """Term and path are fully percent-encoded, slashes included; the comment follows the source after a semicolon."""
+    mapping["rows"][0]["comment"] = "why"
+    text = sssom(mapping)
+    got = list(
+        csv.DictReader(
+            io.StringIO("\n".join(line for line in text.splitlines() if not line.startswith("#"))), delimiter="\t"
+        )
+    )
+    expected = [
+        (
+            f"term:{quote(row['term'], safe='')}",
+            f"field:{row['format']}/{quote(row['path'], safe='')}",
+            row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
+        )
+        for row in spokes(mapping)
+        if row["path"] is not None
+    ]
+    assert [(r["subject_id"], r["object_id"], r["comment"]) for r in got] == expected
+    assert any("%2F" in r["object_id"] for r in got)
+    assert "field:cff-1.2.0/authors%5B%5D.family-names" in {r["object_id"] for r in got}
+    assert mapping["rows"][0]["source"] + "; why" in {r["comment"] for r in got}
+
+
+def test_a_row_with_only_the_four_required_keys_is_accepted(mapping: dict):
+    mapping["rows"][0] = {key: mapping["rows"][0][key] for key in ("format", "term", "path", "source")}
     validate_mapping(mapping)
