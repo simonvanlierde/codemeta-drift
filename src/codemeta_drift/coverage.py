@@ -152,7 +152,7 @@ def coverage(mapping: dict[str, Any]) -> dict[str, Any]:
     terms = [*TERMS, *(term for term in CITATION_TERMS if term in extra)]
     cells = []
     for fmt in columns(mapping):
-        parents = {term: rows[fmt, term]["path"] for term in ("author", "contributor") if (fmt, term) in rows}
+        parents = {term: rows[fmt, term]["path"] for term in PEOPLE if (fmt, term) in rows}
         for term in terms:
             row = rows.get((fmt, term))
             if row is None:

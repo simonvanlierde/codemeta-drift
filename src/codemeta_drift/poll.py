@@ -17,7 +17,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from codemeta_drift.checks import code_span
 from codemeta_drift.conformance import SCHEMA_FILES
-from codemeta_drift.export import curated_tags, latest_tag
+from codemeta_drift.export import curated_tags, latest_tag, tag_key
 from codemeta_drift.watcher import issue_plans, pin_tag, schema_changes
 
 API = "https://api.github.com/repos/"
@@ -150,7 +150,7 @@ def poll(
     tags = [tag["name"] for tag in fetch(API + "codemeta/codemeta/tags?per_page=100")]
     stable = [tag for tag in tags if re.fullmatch(r"v?[0-9]+(?:\.[0-9]+){1,2}", tag)]
     if stable:
-        name = max(stable, key=lambda tag: tuple(map(int, tag.removeprefix("v").split("."))))
+        name = max(stable, key=lambda tag: tag_key(tag.removeprefix("v")))
         if name not in curated_tags():
             plans.append(
                 {
