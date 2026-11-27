@@ -9,14 +9,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Upgrade
 
-- `hub sssom` rows now run from the format's field to the CodeMeta term, as in CodeMeta's SSSOM
-  methodology. The `field:` id moves to `subject_id` and `format:` to `subject_source`, and
-  `subject_source_version` becomes `object_source_version`, beside a new `object_source` (CodeMeta's
-  context at the tag); both are empty for a hub term. `object_id` is the property CodeMeta's
-  context gives the term (`author.givenName` is `schema:givenName`,
-  `preferredCitation` is `codemeta:referencePublication`), or `term:` where CodeMeta has no
-  term (`swhid`, `resourceType`, the person `@id`s). A reader that took the hub term from `subject_id` reads
-  `object_label`. See [the crosswalk hub](docs/crosswalk-hub.md).
+- **Breaking:** `hub sssom` rows now run from the format's field to the CodeMeta term, as in CodeMeta's SSSOM
+  methodology, so every row's `subject_id` and `object_id` swap. In 0.9.0, `subject_id` held the `term:` id,
+  `object_id` the `field:` id, `object_source` `format:<fmt>` and `subject_source_version` the tag. Now
+  `subject_id` holds the `field:` id and `subject_source` `format:<fmt>`. `object_id` holds the property
+  CodeMeta's context gives the term (`url` is `schema:url`, `preferredCitation` is
+  `codemeta:referencePublication`), or the hub's `term:` id for terms with no CodeMeta property, and every person
+  sub-term, such as `swhid`, `resourceType`, `author.givenName` and `contributor.@id`. `object_source` holds
+  CodeMeta's context IRI at the tag and `object_source_version` the tag; both are empty on a `term:` row. A reader
+  that took the hub term from `subject_id` reads `object_label`. Regenerate stored SSSOM files with
+  `codemeta-drift hub sssom` rather than joining them with 0.9.0 output. The predicates change too (see Changed).
+  See [the crosswalk hub](docs/crosswalk-hub.md).
 - Update the hub CLI when pinning a 1.10 mapping. Older versions reject the new format and term
   IDs. See [mapping compatibility](docs/mapping-export.md#compatibility).
 

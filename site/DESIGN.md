@@ -61,7 +61,8 @@ Don't add inline script or style, another host, or a mark whose meaning lives on
 `data.json` is this page's own data, written by `build.py`, and can change with the page. Read the
 mapping export or the SSSOM files instead; those are the contract.
 
-The SSSOM export's identifiers resolve on this page: `#term/<term>`, `#field/<format>/<path>` and
+The SSSOM export's subject (`field:`) and `term:` identifiers resolve on this page; its `schema:` and
+`codemeta:` objects resolve at schema.org and CodeMeta. `#term/<term>`, `#field/<format>/<path>` and
 `#format/<format>` choose the first matching cell and scroll to it. codemeta.json has no row, so
 its field ids open the first cell of their row's term; the Go spoke's one id has no cell. Below 1360px the detail panel
 sticks to the foot of the screen. The format column stays put at every width.
