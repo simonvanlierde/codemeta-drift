@@ -47,9 +47,10 @@ and term:
 - 110 are blank although the format has the field.
 - 212 are for a term the format has no field for.
 
-The matrix has a 19th column, `resourceType`. It has no CodeMeta property, so no crosswalk has a
-cell for it. CodeMeta has no crosswalk at all for `pyproject.toml`, `typst.toml`, Quarto
-extensions, Composer, RIS, EndNote, RO-Crate or Croissant.
+The matrix also has a `resourceType` column, which has no CodeMeta property, so no crosswalk has a
+cell for it, and a column for each reviewed citation field. CodeMeta has no crosswalk at all for
+`pyproject.toml`, `typst.toml`, Quarto extensions, Composer, RIS, EndNote, RO-Crate, Croissant,
+the Crossref and arXiv APIs, or a CFF preferred citation.
 
 The [coverage page](https://simonvanlierde.com/codemeta-drift/) gives the reason for each
 correction and checks CodeMeta's main branch each week. It also lists the 10 crosswalks I haven't
