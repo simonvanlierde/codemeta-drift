@@ -38,16 +38,31 @@ alternatives, order and selectors.
 metadata block and explicit CURIE prefixes. It covers the 45 formats in the 4.0 JSON export and
 `gomod`. The Go spoke has only `codeRepository`, corresponding to the `module` directive.
 
-All predicates are `skos:relatedMatch`: matching paths do not make the fields mean the same.
-Examples are name components stored in one string, SPDX identifiers stored as URLs, and Go module paths.
+Each row runs from a format's field (the subject) to a CodeMeta term (the object), the direction
+CodeMeta's [SSSOM methodology](sssom-compatibility.md#compare-with-codemetas-methodology) uses.
+`subject_label` holds the path as the export writes it, and `object_label` the hub term.
+
+A row is `skos:exactMatch` only where one of CodeMeta's own SSSOM sheets marks the same field
+`exact_match`; `see_also` then links that sheet. So far that is 10 DataCite rows. If the export's
+path for such a row changes, the row goes back to `skos:relatedMatch` until someone checks it
+against the sheet again. Every other row is `skos:relatedMatch`: matching paths do not make the fields
+mean the same. Examples are name components stored in one string, SPDX identifiers stored as URLs,
+and Go module paths.
 
 | Prefix | Holds | Example |
 | --- | --- | --- |
-| `term:` | The hub's terms from the JSON export, including compound person paths and `swhid`. They are not CodeMeta vocabulary. | `term:author.givenName` |
 | `field:` | A format and its complete path, percent-encoded | `field:cargo/package.name` |
-| `format:` | The format itself | `format:cargo` |
+| `schema:` | A CodeMeta term, at the schema.org IRI CodeMeta's context gives it | `schema:name` |
+| `codemeta:` | A person sub-term, as CodeMeta's methodology writes it: the person, a slash, the property | `codemeta:author/givenName` |
+| `term:` | A hub term CodeMeta has no term for: `swhid`, `resourceType` and the person `@id`s | `term:swhid` |
+| `format:` | The format itself, in `subject_source` | `format:cargo` |
 
-All three expand under `https://w3id.org/codemeta-drift/`, which redirects to the
+`schema:` and `codemeta:` take the prefixes of CodeMeta's context at the export's tag: from 4.0,
+`https://schema.org/` and `https://w3id.org/codemeta/terms/`; before it, `http://schema.org/` and
+`https://codemeta.github.io/terms/`. A `codemeta:` person sub-term names a hierarchy, not a term
+CodeMeta defines.
+
+`field:`, `term:` and `format:` expand under `https://w3id.org/codemeta-drift/`, which redirects to the
 [coverage page](https://simonvanlierde.com/codemeta-drift/). The page opens the matching cell:
 `field:cargo/package.name` is <https://w3id.org/codemeta-drift/#field/cargo/package.name>.
 

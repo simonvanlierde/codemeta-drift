@@ -81,7 +81,7 @@ def test_coverage_of_a_row_with_an_unknown_kind_exits_3(
     assert "invalid or unsupported mapping row 1" in capsys.readouterr().err
 
 
-def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict):
+def test_sssom_header_names_the_set_and_its_prefixes(mapping: dict):
     text = sssom(mapping)
     # The metadata block is YAML behind "# ", as SSSOM readers parse it.
     header = yaml.safe_load("\n".join(line[2:] for line in text.splitlines() if line.startswith("#")))
@@ -103,12 +103,18 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict)
             "orcid": "https://orcid.org/",
             "skos": "http://www.w3.org/2004/02/skos/core#",
             "semapv": "https://w3id.org/semapv/vocab/",
+            # CodeMeta's own context prefixes at the tag: 4.0 moved both.
+            **(
+                {"schema": "http://schema.org/", "codemeta": "https://codemeta.github.io/terms/"}
+                if mapping["codemeta_tag"] == "3.1"
+                else {"schema": "https://schema.org/", "codemeta": "https://w3id.org/codemeta/terms/"}
+            ),
         },
     }
     assert "may need conversion" in header["mapping_set_description"]
     # Counted from the rows, with Go's spoke, so a new format can't leave the number stale.
     formats = {"3.1": 44, "4.0": 46}[mapping["codemeta_tag"]]
-    assert f"and {formats} metadata formats" in header["mapping_set_description"]
+    assert f"from {formats} metadata formats" in header["mapping_set_description"]
 
 
 def test_sssom_header_keeps_a_one_dot_zero_version_a_string(mapping: dict):
@@ -118,7 +124,7 @@ def test_sssom_header_keeps_a_one_dot_zero_version_a_string(mapping: dict):
     assert header["mapping_set_version"] == "1.0"
 
 
-def test_sssom_rows_use_curie_identifiers_and_conservative_predicates(mapping: dict):
+def test_sssom_rows_run_from_format_fields_to_codemeta_terms(mapping: dict):
     text = sssom(mapping)
     rows = list(
         csv.DictReader(
@@ -173,13 +179,65 @@ def test_sssom_rows_use_curie_identifiers_and_conservative_predicates(mapping: d
     }
     if mapping["codemeta_tag"] != "3.1":
         expected_formats |= {"format:gitlab", "format:code-json-2.0"}
-    assert {row["object_source"] for row in rows} == expected_formats
+    assert {row["subject_source"] for row in rows} == expected_formats
     for row in rows:
         assert row["mapping_justification"] == "semapv:ManualMappingCuration"
-        assert row["predicate_id"] == "skos:relatedMatch"
-        assert row["subject_id"].startswith("term:")
-    go = [row for row in rows if row["object_source"] == "format:gomod"]
-    assert [row["object_id"] for row in go] == ["field:gomod/module"]
+        assert row["subject_id"].startswith(f"field:{row['subject_source'].removeprefix('format:')}/")
+        assert row["object_id"].split(":")[0] in {"schema", "codemeta", "term"}
+        exact = row["predicate_id"] == "skos:exactMatch"
+        assert exact or row["predicate_id"] == "skos:relatedMatch"
+        assert exact == (row["see_also"] != ""), "an exactMatch row names its evidence"
+    go = [row for row in rows if row["subject_source"] == "format:gomod"]
+    assert [(row["subject_id"], row["object_id"]) for row in go] == [("field:gomod/module", "schema:codeRepository")]
+
+
+def _rows(mapping: dict, fmt: str) -> dict[str, dict[str, str]]:
+    text = "\n".join(line for line in sssom(mapping).splitlines() if not line.startswith("#"))
+    rows = csv.DictReader(io.StringIO(text), delimiter="\t")
+    return {row["object_label"]: row for row in rows if row["subject_source"] == f"format:{fmt}"}
+
+
+def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
+    """Subjects are format fields and objects CodeMeta terms, with a slash between a person and its sub-term.
+
+    exactMatch only where CodeMeta's DataCite sheet marks the same field exact_match; a hub term only where
+    CodeMeta has none.
+    """
+    rows = _rows(mapping, "datacite")
+    exact = {
+        "name": "schema:name",
+        "version": "schema:version",
+        "author": "schema:author",
+        "author.givenName": "codemeta:author/givenName",
+        "author.familyName": "codemeta:author/familyName",
+        "contributor": "schema:contributor",
+        "contributor.givenName": "codemeta:contributor/givenName",
+        "contributor.familyName": "codemeta:contributor/familyName",
+        "identifier": "schema:identifier",
+        "keywords": "schema:keywords",
+    }
+    related = {
+        "author.@id": "term:author.%40id",
+        "contributor.@id": "term:contributor.%40id",
+        "license": "schema:license",
+        "swhid": "term:swhid",
+        "codeRepository": "schema:codeRepository",
+        "description": "schema:description",
+        "datePublished": "schema:datePublished",
+        "publisher": "schema:publisher",
+        "resourceType": "term:resourceType",
+    }
+    assert {term: row["object_id"] for term, row in rows.items()} == exact | related
+    assert {term for term, row in rows.items() if row["predicate_id"] == "skos:exactMatch"} == exact.keys()
+    assert "/datacite/" in rows["version"]["see_also"]
+    assert rows["author.givenName"]["subject_id"] == "field:datacite/creators%5B%5D.givenName"
+    assert rows["author.givenName"]["subject_label"] == "creators[].givenName"
+
+
+def test_sssom_exact_match_lapses_when_the_checked_path_changes(mapping: dict):
+    row = next(r for r in mapping["rows"] if (r["format"], r["term"]) == ("datacite", "version"))
+    row["path"] = "versions[].version"
+    assert _rows(mapping, "datacite")["version"]["predicate_id"] == "skos:relatedMatch"
 
 
 def test_sssom_prefixes_have_distinct_uri_namespaces(mapping: dict):

@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import quote
 
 from codemeta_drift.checks import table_rows
-from codemeta_drift.export import KINDS, PATH, SCHEMA_VERSION, TERMS, formats
+from codemeta_drift.export import KINDS, NO_PROPERTY, PATH, SCHEMA_VERSION, TERMS, formats, tag_key
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
 # w3id.org redirects this base to the coverage page, so the identifiers outlive its hosting.
@@ -22,6 +22,41 @@ class UsageError(ValueError):
 
 CREATOR = "orcid:0009-0006-6953-909X"
 """The curator of the mapping set, as in CITATION.cff."""
+
+SHEETS = {
+    "datacite": "https://github.com/codemeta/codemeta/blob/5f192575310181535e83ea6259d156723775ad86"
+    "/crosswalks-sssom/datacite/datacite-codemeta-mappings.csv",
+}
+"""CodeMeta's own SSSOM sheets, from its sssom-methodology branch, by format."""
+EXACT = {
+    ("datacite", "name"): "titles[].title",
+    ("datacite", "version"): "version",
+    ("datacite", "author"): "creators[]",
+    ("datacite", "author.givenName"): "creators[].givenName",
+    ("datacite", "author.familyName"): "creators[].familyName",
+    ("datacite", "contributor"): "contributors[]",
+    ("datacite", "contributor.givenName"): "contributors[].givenName",
+    ("datacite", "contributor.familyName"): "contributors[].familyName",
+    ("datacite", "identifier"): "doi",
+    ("datacite", "keywords"): "subjects[].subject",
+}
+"""The rows the format's sheet marks exact_match for the same field, with the path that was checked against it."""
+
+
+def evidence(row: Mapping[str, Any]) -> str:
+    """The sheet behind an exactMatch row, or "" when none covers the row's current path."""
+    return SHEETS[row["format"]] if EXACT.get((row["format"], row["term"])) == row["path"] else ""
+
+
+def codemeta_id(term: str) -> str:
+    """The object id CodeMeta's SSSOM methodology gives a hub term, or the hub's own id where CodeMeta has no term.
+
+    A property is ``schema:`` (every hub term's property is schema.org's); a person sub-term is ``codemeta:`` with a
+    slash after the person, as upstream writes ``author/name``.
+    """
+    if term not in TERMS or term == "swhid" or term in NO_PROPERTY or term.endswith(".@id"):
+        return f"term:{quote(term, safe='')}"
+    return f"codemeta:{term.replace('.', '/')}" if "." in term else f"schema:{term}"
 
 
 def validate_mapping(data: Any) -> None:  # noqa: ANN401
@@ -117,21 +152,27 @@ def table(rows: Iterable[Mapping[str, str]], columns: list[str], delimiter: str 
 
 
 def sssom(mapping: dict[str, Any]) -> str:
-    """SSSOM 1.0 TSV spokes with explicit CURIEs and conservative relatedMatch predicates.
+    """SSSOM 1.0 TSV spokes from format fields to CodeMeta terms, as CodeMeta's SSSOM methodology sets them out.
 
-    The hub identifies complete field paths, including person sub-terms and swhid, in its own
-    namespace. It does not invent CodeMeta vocabulary terms for these compound correspondences.
+    A subject keeps the field's complete path, selectors and alternatives included, so it opens its coverage cell.
+    Predicates are relatedMatch unless ``EXACT`` holds evidence for that field.
     """
     rows = spokes(mapping)
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
     count = len({row["format"] for row in rows})
+    # CodeMeta's context prefixes: 4.0 moved schema.org to https and its own terms to w3id.
+    schema, codemeta = (
+        ("https://schema.org/", "https://w3id.org/codemeta/terms/")
+        if tag_key(tag) >= (4, 0)
+        else ("http://schema.org/", "https://codemeta.github.io/terms/")
+    )
     metadata = (
         f"# mapping_set_id: {BASE}spokes-{tag}.sssom.tsv\n"
         f"# mapping_set_version: '{version}'\n"
         f"# mapping_set_title: codemeta-drift crosswalk hub spokes for CodeMeta {tag}\n"
-        "# mapping_set_description: Field correspondences between codemeta-drift's hub terms"
-        " (named after CodeMeta's terms where CodeMeta has one)"
-        f" and {count} metadata formats, from the reviewed mapping export, which starts from CodeMeta's crosswalks"
+        f"# mapping_set_description: Field correspondences from {count} metadata formats to CodeMeta's terms"
+        " (codemeta-drift's hub terms where CodeMeta has none),"
+        " from the reviewed mapping export, which starts from CodeMeta's crosswalks"
         " (Apache-2.0, the CodeMeta contributors). The paths correspond; their values may need conversion.\n"
         f"# mapping_provider: {REPO}\n"
         "# creator_id:\n"
@@ -147,15 +188,20 @@ def sssom(mapping: dict[str, Any]) -> str:
         "#   orcid: https://orcid.org/\n"
         "#   skos: http://www.w3.org/2004/02/skos/core#\n"
         "#   semapv: https://w3id.org/semapv/vocab/\n"
+        f"#   schema: {schema}\n"
+        f"#   codemeta: {codemeta}\n"
     )
     mappings = [
         {
-            "subject_id": f"term:{quote(row['term'], safe='')}",
-            "predicate_id": "skos:relatedMatch",
-            "object_id": f"field:{row['format']}/{quote(row['path'], safe='')}",
+            "subject_id": f"field:{row['format']}/{quote(row['path'], safe='')}",
+            "subject_label": row["path"],
+            "predicate_id": "skos:exactMatch" if evidence(row) else "skos:relatedMatch",
+            "object_id": codemeta_id(row["term"]),
+            "object_label": row["term"],
             "mapping_justification": "semapv:ManualMappingCuration",
-            "object_source": f"format:{row['format']}",
-            "subject_source_version": mapping["codemeta_tag"],
+            "subject_source": f"format:{row['format']}",
+            "object_source_version": mapping["codemeta_tag"],
+            "see_also": evidence(row),
             "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
         }
         for row in rows
@@ -165,11 +211,14 @@ def sssom(mapping: dict[str, Any]) -> str:
         mappings,
         [
             "subject_id",
+            "subject_label",
             "predicate_id",
             "object_id",
+            "object_label",
             "mapping_justification",
-            "object_source",
-            "subject_source_version",
+            "subject_source",
+            "object_source_version",
+            "see_also",
             "comment",
         ],
         "\t",

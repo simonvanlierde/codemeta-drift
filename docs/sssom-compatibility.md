@@ -5,8 +5,8 @@ description: "Validate the hub's SSSOM export with the reference tool, and how i
 # SSSOM validation and CodeMeta compatibility
 
 The [hub](crosswalk-hub.md) writes an SSSOM (Simple Standard for Sharing Ontological Mappings) table
-of field correspondences. Its identifiers sit under `https://w3id.org/codemeta-drift/`, and every
-relation is `skos:relatedMatch`.
+of field correspondences, from format fields to CodeMeta terms. A relation is `skos:exactMatch`
+where CodeMeta's own sheet marks the same field `exact_match`, and `skos:relatedMatch` otherwise.
 
 ## Validate an export
 
@@ -41,19 +41,24 @@ contains a CSV authoring sheet and separate YAML metadata.
 | Aspect | CodeMeta methodology | This hub |
 | --- | --- | --- |
 | Input | CSV authoring sheet and separate YAML metadata | Validated reviewed mapping JSON |
-| Direction and identifiers | Source vocabulary terms to CodeMeta terms; hierarchy uses `/` | Local hub terms to format paths, including arrays, filters and alternatives |
-| Relationships | Curator selects exact, close, broader, narrower or part-of relationships | Every exported relation is `skos:relatedMatch` |
+| Direction and identifiers | Source vocabulary terms to CodeMeta terms; hierarchy uses `/` | The same direction: format fields to CodeMeta terms, `/` between a person and its sub-term. A subject keeps the format's complete path, with arrays, filters and alternatives |
+| Relationships | Curator selects exact, close, broader, narrower or part-of relationships | `skos:exactMatch` where CodeMeta's sheet marks the same field `exact_match`; `skos:relatedMatch` otherwise |
 | Combined fields | A formula extension describes how source terms combine | Paths identify fields; parsers and normalization handle values elsewhere |
 | Mapping-set metadata | Template includes date, description, provider, license and a proposed w3id | Set id, title, description, version, curator ORCID, provider, Apache-2.0 license and explicit CURIE map, all under the w3id base `https://w3id.org/codemeta-drift/` |
 
-The hub output cannot replace the upstream authoring sheet without translation and review. Its local
-hub terms are not CodeMeta vocabulary identifiers, even when a row is inverted.
+The hub output cannot replace the upstream authoring sheet without translation and review. Its
+DataCite subjects are the DataCite REST API's JSON keys, such as `creators[].givenName`, where
+CodeMeta's DataCite sheet names the elements of the
+[kernel 4.6 XML schema](https://schema.datacite.org/meta/kernel-4.6/metadata.xsd), such as `givenName`.
+Where CodeMeta has no term (`swhid`, `resourceType`, the person `@id`s), the object stays a hub term.
 
 ## Open points
 
-1. Review a small overlapping crosswalk with the CodeMeta maintainers, and agree how the hub's
-   compound terms and format paths map to their identifiers and hierarchy.
-2. Give a stronger relation or a combined-field rule only with evidence for that row.
+1. Agree with the CodeMeta maintainers how a hierarchical CodeMeta term such as `author/name`
+   expands to an IRI, and which identifiers to use for fields with no CodeMeta term.
+2. Check the DataCite rows where this hub and CodeMeta's sheet differ, such as `publicationYear` for
+   `datePublished`, and the Zenodo and BibTeX sheets, before giving those rows a stronger relation.
+3. Give a stronger relation or a combined-field rule only with evidence for that row.
 
 [CodeMeta #487](https://github.com/codemeta/codemeta/issues/487) discusses separating crosswalk
 maintenance. It has not adopted this hub or agreed to replace the existing methodology. The CSV

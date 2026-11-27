@@ -7,6 +7,22 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Upgrade
+
+- `hub sssom` rows now run from the format's field to the CodeMeta term, as in CodeMeta's SSSOM
+  methodology. The `field:` id moves to `subject_id` and `format:` to `subject_source`, and
+  `subject_source_version` becomes `object_source_version`. `object_id` is `schema:<term>`,
+  `codemeta:<person>/<sub-term>` (such as `codemeta:author/givenName`), or `term:` where CodeMeta has no
+  term (`swhid`, `resourceType`, the person `@id`s). A reader that took the hub term from `subject_id` reads
+  `object_label`. See [the crosswalk hub](docs/crosswalk-hub.md).
+
+### Changed
+
+- `hub sssom` writes `skos:exactMatch` for the 10 DataCite rows that CodeMeta's DataCite SSSOM sheet marks
+  `exact_match` for the same field, and links the sheet in `see_also`. If the export's path changes, the
+  row goes back to `skos:relatedMatch`. The rows also gain `subject_label` (the path) and `object_label`
+  (the hub term), and the header gains CodeMeta's `schema` and `codemeta` prefixes for the tag. Refs #55.
+
 ## [0.9.0] - 2026-11-26
 
 ### Upgrade

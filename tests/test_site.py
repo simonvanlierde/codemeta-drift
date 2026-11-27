@@ -196,7 +196,7 @@ def test_out_that_is_a_symlink_is_a_usage_error(tmp_path: Path):
 
 
 def test_every_codemeta_field_id_opens_a_term(tmp_path: Path):
-    """The SSSOM export's codemeta object ids resolve on the page: codemeta has no cells, so through data's hub."""
+    """The SSSOM export's codemeta subject ids resolve on the page: codemeta has no cells, so through data's hub."""
     out = tmp_path / "site"
     assert build(out).returncode == 0
     tags = json.loads((out / "data.json").read_text("utf-8"))["tags"]
@@ -204,11 +204,11 @@ def test_every_codemeta_field_id_opens_a_term(tmp_path: Path):
         name = "data.json" if tag == tags[-1] else f"data-{tag}.json"
         data = json.loads((out / name).read_text("utf-8"))
         spokes = (out / f"spokes-{tag}.sssom.tsv").read_text("utf-8")
-        pairs = re.findall(r"^term:(\S+)\t\S+\tfield:codemeta/(\S+)\t", spokes, re.MULTILINE)
+        pairs = re.findall(r"^field:codemeta/(\S+)\t[^\t]*\t\S+\t\S+\t(\S+)\t", spokes, re.MULTILINE)
         assert len(pairs) > 10
         # The first row of each path names its term: identifier's path is swhid's too.
         expected = {}
-        for term, path in pairs:
+        for path, term in pairs:
             expected.setdefault(unquote(path), unquote(term))
         assert data["hub"] == expected
         assert data["hub"]["identifier"] == "identifier"
@@ -216,7 +216,7 @@ def test_every_codemeta_field_id_opens_a_term(tmp_path: Path):
 
 
 def test_every_spoke_field_id_opens_a_cell(tmp_path: Path):
-    """Every other format's SSSOM object id names a coverage cell; gomod's module path has none (crosswalk-hub.md)."""
+    """Every other format's SSSOM subject id names a coverage cell; gomod's module path has none (crosswalk-hub.md)."""
     out = tmp_path / "site"
     assert build(out).returncode == 0
     tags = json.loads((out / "data.json").read_text("utf-8"))["tags"]
@@ -224,7 +224,7 @@ def test_every_spoke_field_id_opens_a_cell(tmp_path: Path):
         name = "data.json" if tag == tags[-1] else f"data-{tag}.json"
         cells = {(c["format"], c["path"]) for c in json.loads((out / name).read_text("utf-8"))["coverage"]["cells"]}
         spokes = (out / f"spokes-{tag}.sssom.tsv").read_text("utf-8")
-        ids = set(re.findall(r"\tfield:(?!codemeta/)([^/\s]+)/(\S+)\t", spokes))
+        ids = set(re.findall(r"^field:(?!codemeta/)([^/\s]+)/(\S+)\t", spokes, re.MULTILINE))
         assert any(fmt == "ro-crate" for fmt, _ in ids)
         assert {(f, unquote(p)) for f, p in ids} - cells == {("gomod", "module")}
 
