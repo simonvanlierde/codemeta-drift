@@ -33,3 +33,13 @@ test("codemeta field ids are looked up through hubTerm with the shown release's 
   assert.match(source, /^function follow\(hub\) \{/m);
   assert.match(source, /const \{ coverage, hub, unreviewed, upstream \} = tag === newest \? latest : \{ \.\.\.\(await load\(`data-\$\{tag\}\.json`\)\)/);
 });
+
+test("the route distinguishes an absent citation row from a null path", () => {
+  assert.match(source, /const path = paths\.get\(.*\);\n\s*if \(path\).*\n\s*const gap = path === null \? `no usable .* path` : "no reviewed path";/);
+});
+
+test("the unreviewed group draws only its base terms and pads to the tally column", () => {
+  assert.match(source, /const base = data\.terms\.filter\(\(term\) => unreviewed\.cells\.some\(\(c\) => c\.term === term\)\);\n\s*table\.append\(group\(base, unreviewed\.formats, [^\n]*pad: data\.terms\.length - base\.length \}\)\);/);
+  assert.match(source, /colspan: String\(terms\.length \+ pad \+ 2\)/);
+  assert.match(source, /if \(pad\) row\.append\(el\("td", \{ colspan: String\(pad\) \}\)\);\n\s*row\.append\(el\("td", \{ class: "tally" \}/);
+});

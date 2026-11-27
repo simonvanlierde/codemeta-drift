@@ -47,9 +47,10 @@ and term:
 - 110 are blank although the format has the field.
 - 212 are for a term the format has no field for.
 
-The matrix has a 19th column, `resourceType`. It has no CodeMeta property, so no crosswalk has a
-cell for it. CodeMeta has no crosswalk at all for `pyproject.toml`, `typst.toml`, Quarto
-extensions, Composer, RIS, EndNote, RO-Crate or Croissant.
+The matrix also has a `resourceType` column, which has no CodeMeta property, so no crosswalk has a
+cell for it, and a column for each reviewed citation field. CodeMeta has no crosswalk at all for
+`pyproject.toml`, `typst.toml`, Quarto extensions, Composer, RIS, EndNote, RO-Crate, Croissant,
+the Crossref and arXiv APIs, or a CFF preferred citation.
 
 The [coverage page](https://simonvanlierde.com/codemeta-drift/) gives the reason for each
 correction and checks CodeMeta's main branch each week. It also lists the 10 crosswalks I haven't
@@ -86,7 +87,7 @@ lists the finding codes, the other exit codes and the `--json` output.
 uvx codemeta-drift export codemeta --tag 4.0 --out mapping-4.0.json
 ```
 
-The export gives the field path for each term in 45 formats, with the reason for each cell I
+The export gives the field paths for terms in 48 formats, with the reason for each cell I
 corrected by hand. It does not convert values. Only `3.1` and `4.0` have reviewed mappings. The
 [mapping export guide](https://github.com/simonvanlierde/codemeta-drift/blob/main/docs/mapping-export.md)
 holds the contract, and the

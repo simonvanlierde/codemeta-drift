@@ -126,6 +126,8 @@ def test_a_cell_gives_the_same_path_at_every_tag():
 
 # Formats with a place for the publisher and the resource type; every other format has a null row.
 PUBLISHER = {
+    "crossref",
+    "cff-preferred",
     "codemeta",
     "codemeta-2",
     "bibtex",
@@ -145,6 +147,8 @@ PUBLISHER = {
     "iso-19115-1-2014",
 }
 RESOURCE_TYPE = {
+    "crossref",
+    "cff-preferred",
     "codemeta",
     "codemeta-2",
     "cff-1.2.0",
@@ -428,6 +432,13 @@ def test_example_null_rows():
         | {("iso-19115-1-2014", t) for t in ("swhid", "codeRepository")}
         | {("spase-2.6.1", t) for t in ("author.@id", "license", "swhid", "keywords", *contributor[1:])}
         | {("gitlab", "version"), ("code-json-2.0", "author")}
+        | {(fmt, t) for fmt in ("arxiv", "cff-preferred") for t in contributor}
+        | {
+            (fmt, t)
+            for fmt in ("crossref", "arxiv")
+            for t in ("version", "license", "swhid", "codeRepository", "keywords")
+        }
+        | {("arxiv", t) for t in ("author.givenName", "author.familyName", "author.@id", "identifier")}
     )
 
 

@@ -24,7 +24,7 @@ from typing import Any
 from codemeta_drift.checks import check
 from codemeta_drift.cli import READ_ERRORS, read_ref
 from codemeta_drift.coverage import coverage, unreviewed, upstream
-from codemeta_drift.export import NO_PROPERTY, TERMS, crosswalk_rows, curated_tags
+from codemeta_drift.export import ALL_TERMS, NO_PROPERTY, crosswalk_rows, curated_tags
 from codemeta_drift.hub import sssom
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -63,7 +63,12 @@ def add_lines(files: dict[str, str], cells: list[dict[str, Any]]) -> None:
             continue
         if path not in rows:
             rows[path] = crosswalk_rows(files, path)
-        cell["line"] = rows[path].get(TERMS[cell["term"]], (None,))[0]
+        cell["line"] = rows[path].get(ALL_TERMS[cell["term"]], (None,))[0]
+
+
+# Display-only property labels: contributor.name is a Person name, but joining it would pair it with
+# DataCite's creatorName cell, which names the creator only.
+SHOWN = {"contributor.name": ("schema:Person", "name")}
 
 
 def matrix(mapping: dict[str, Any], files: dict[str, str] | None) -> dict[str, Any]:
@@ -71,7 +76,10 @@ def matrix(mapping: dict[str, Any], files: dict[str, str] | None) -> dict[str, A
     data = coverage(mapping)
     data["schema_version"] = mapping["schema_version"]
     # A term names where a CodeMeta property sits (author.@id is a Person's identifier).
-    data["properties"] = {t: None if t in NO_PROPERTY else " ".join(TERMS[t]) for t in data["terms"]}
+    data["properties"] = {
+        term: " ".join(key) if (key := ALL_TERMS[term] or SHOWN.get(term)) and term not in NO_PROPERTY else None
+        for term in data["terms"]
+    }
     others = None
     if files is not None:
         others = unreviewed(files, mapping)

@@ -85,7 +85,7 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict)
     }
     assert "may need conversion" in header["mapping_set_description"]
     # Counted from the rows, with Go's spoke, so a new format can't leave the number stale.
-    formats = {"3.1": 44, "4.0": 46}[mapping["codemeta_tag"]]
+    formats = len({row["format"] for row in mapping["rows"]}) + 1
     assert f"and {formats} metadata formats" in header["mapping_set_description"]
 
 
@@ -106,6 +106,9 @@ def test_sssom_rows_use_curie_identifiers_and_conservative_predicates(mapping: d
     expected_formats = {
         "format:cff-1.2.0",
         "format:codemeta",
+        "format:crossref",
+        "format:arxiv",
+        "format:cff-preferred",
         "format:zenodo",
         "format:pep621",
         "format:cargo",

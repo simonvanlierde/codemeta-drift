@@ -85,13 +85,7 @@ jobs:
       # Project-owned, not from the template: one committed export per CodeMeta tag that has a
       # curated file, plus their checksums, so a consumer can pin one without a CodeMeta checkout.
       - name: collect the mapping exports
-        run: |
-          mkdir export
-          for c in src/codemeta_drift/curated-*.json; do
-            tag=${c##*/curated-}
-            cp "examples/mapping-$tag" export/
-          done
-          cd export && sha256sum mapping-*.json >SHA256SUMS
+        run: bash .github/scripts/collect-mapping-exports.sh export
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
