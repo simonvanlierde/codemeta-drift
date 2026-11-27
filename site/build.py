@@ -66,13 +66,19 @@ def add_lines(files: dict[str, str], cells: list[dict[str, Any]]) -> None:
         cell["line"] = rows[path].get(ALL_TERMS[cell["term"]], (None,))[0]
 
 
+# Display-only property labels: contributor.name is a Person name, but joining it would pair it with
+# DataCite's creatorName cell, which names the creator only.
+SHOWN = {"contributor.name": ("schema:Person", "name")}
+
+
 def matrix(mapping: dict[str, Any], files: dict[str, str] | None) -> dict[str, Any]:
     """One tag's page data; ``files`` is CodeMeta at that tag, or None without a clone."""
     data = coverage(mapping)
     data["schema_version"] = mapping["schema_version"]
     # A term names where a CodeMeta property sits (author.@id is a Person's identifier).
     data["properties"] = {
-        term: " ".join(key) if (key := ALL_TERMS[term]) and term not in NO_PROPERTY else None for term in data["terms"]
+        term: " ".join(key) if (key := ALL_TERMS[term] or SHOWN.get(term)) and term not in NO_PROPERTY else None
+        for term in data["terms"]
     }
     others = None
     if files is not None:
