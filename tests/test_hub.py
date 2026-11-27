@@ -9,8 +9,8 @@ import pytest
 import yaml
 
 from codemeta_drift.cli import main
-from codemeta_drift.export import SCHEMA_VERSION, curated_tags
-from codemeta_drift.hub import pair_rows, spokes, sssom, validate_mapping
+from codemeta_drift.export import ALL_TERMS, SCHEMA_VERSION, curated_tags
+from codemeta_drift.hub import PREDICATES, codemeta_id, pair_rows, spokes, sssom, validate_mapping
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -60,7 +60,14 @@ def test_coverage_of_a_row_with_an_unknown_kind_exits_3(
     assert "invalid or unsupported mapping row 1" in capsys.readouterr().err
 
 
-def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict):
+# CodeMeta's context prefixes at each tag: 4.0 moved schema.org to https and its own terms to w3id.
+CONTEXT_PREFIXES = {
+    "3.1": {"schema": "http://schema.org/", "codemeta": "https://codemeta.github.io/terms/"},
+    "4.0": {"schema": "https://schema.org/", "codemeta": "https://w3id.org/codemeta/terms/"},
+}
+
+
+def test_sssom_header_names_the_set_and_its_prefixes(mapping: dict):
     text = sssom(mapping)
     # The metadata block is YAML behind "# ", as SSSOM readers parse it.
     header = yaml.safe_load("\n".join(line[2:] for line in text.splitlines() if line.startswith("#")))
@@ -82,12 +89,13 @@ def test_sssom_uses_curie_identifiers_and_conservative_predicates(mapping: dict)
             "orcid": "https://orcid.org/",
             "skos": "http://www.w3.org/2004/02/skos/core#",
             "semapv": "https://w3id.org/semapv/vocab/",
+            **CONTEXT_PREFIXES[mapping["codemeta_tag"]],
         },
     }
     assert "may need conversion" in header["mapping_set_description"]
     # Counted from the rows, with Go's spoke, so a new format can't leave the number stale.
     formats = len({row["format"] for row in mapping["rows"]}) + 1
-    assert f"and {formats} metadata formats" in header["mapping_set_description"]
+    assert f"from {formats} metadata formats" in header["mapping_set_description"]
 
 
 def test_sssom_header_keeps_a_one_dot_zero_version_a_string(mapping: dict):
@@ -97,7 +105,7 @@ def test_sssom_header_keeps_a_one_dot_zero_version_a_string(mapping: dict):
     assert header["mapping_set_version"] == "1.0"
 
 
-def test_sssom_rows_use_curie_identifiers_and_conservative_predicates(mapping: dict):
+def test_sssom_rows_run_from_format_fields_to_codemeta_terms(mapping: dict):
     text = sssom(mapping)
     rows = list(
         csv.DictReader(
@@ -155,13 +163,159 @@ def test_sssom_rows_use_curie_identifiers_and_conservative_predicates(mapping: d
     }
     if mapping["codemeta_tag"] != "3.1":
         expected_formats |= {"format:gitlab", "format:code-json-2.0"}
-    assert {row["object_source"] for row in rows} == expected_formats
+    assert {row["subject_source"] for row in rows} == expected_formats
     for row in rows:
         assert row["mapping_justification"] == "semapv:ManualMappingCuration"
-        assert row["predicate_id"] == "skos:relatedMatch"
-        assert row["subject_id"].startswith("term:")
-    go = [row for row in rows if row["object_source"] == "format:gomod"]
-    assert [row["object_id"] for row in go] == ["field:gomod/module"]
+        assert row["subject_id"].startswith(f"field:{row['subject_source'].removeprefix('format:')}/")
+        hub_term = row["object_id"].startswith("term:")
+        assert hub_term or row["object_id"].startswith(("schema:", "codemeta:"))
+        context = "" if hub_term else f"https://w3id.org/codemeta/{mapping['codemeta_tag']}"
+        assert (row["object_source"], row["object_source_version"] != "") == (context, not hub_term)
+        related = row["predicate_id"] == "skos:relatedMatch"
+        assert related or row["predicate_id"] in {"skos:exactMatch", "skos:closeMatch", "skos:broadMatch"}
+        assert related == (row["see_also"] == ""), "a row with a stronger predicate names its evidence"
+    go = [row for row in rows if row["subject_source"] == "format:gomod"]
+    assert [(row["subject_id"], row["object_id"]) for row in go] == [("field:gomod/module", "schema:codeRepository")]
+
+
+def _rows(mapping: dict, fmt: str) -> dict[str, dict[str, str]]:
+    text = "\n".join(line for line in sssom(mapping).splitlines() if not line.startswith("#"))
+    rows = csv.DictReader(io.StringIO(text), delimiter="\t")
+    return {row["object_label"]: row for row in rows if row["subject_source"] == f"format:{fmt}"}
+
+
+def _predicates(rows: dict[str, dict[str, str]]) -> dict[str, set[str]]:
+    """The terms under each predicate other than relatedMatch."""
+    out: dict[str, set[str]] = {}
+    for term, row in rows.items():
+        if row["predicate_id"] != "skos:relatedMatch":
+            out.setdefault(row["predicate_id"], set()).add(term)
+    return out
+
+
+def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
+    """Subjects are format fields and objects CodeMeta terms; a person sub-term's object is its hub term.
+
+    exactMatch or closeMatch only where CodeMeta's DataCite sheet relates the same field so; a hub term where
+    CodeMeta has no property, or for a person sub-term.
+    """
+    rows = _rows(mapping, "datacite")
+    exact = {
+        "name": "schema:name",
+        "version": "schema:version",
+        "author": "schema:author",
+        "author.givenName": "term:author.givenName",
+        "author.familyName": "term:author.familyName",
+        "contributor": "schema:contributor",
+        "contributor.givenName": "term:contributor.givenName",
+        "contributor.familyName": "term:contributor.familyName",
+        "identifier": "schema:identifier",
+        "keywords": "schema:keywords",
+    }
+    related = {
+        "author.@id": "term:author.%40id",
+        "contributor.@id": "term:contributor.%40id",
+        "license": "schema:license",
+        "swhid": "term:swhid",
+        "codeRepository": "schema:codeRepository",
+        "description": "schema:description",
+        "datePublished": "schema:datePublished",
+        "publisher": "schema:publisher",
+        "resourceType": "term:resourceType",
+        # Citation terms: a property where the property table has one, else the hub's own id.
+        "author.name": "term:author.name",
+        "url": "schema:url",
+        "contributor.name": "term:contributor.name",
+        "author.resourceType": "term:author.resourceType",
+        "contributor.resourceType": "term:contributor.resourceType",
+        "isVersionOf": "term:isVersionOf",
+        "hasVersion": "term:hasVersion",
+    }
+    assert {term: row["object_id"] for term, row in rows.items()} == exact | related
+    assert _predicates(rows) == {
+        "skos:exactMatch": exact.keys(),
+        # The sheet's close_match rows: Rights, Publisher and creatorName.
+        "skos:closeMatch": {"license", "publisher", "author.name"},
+    }
+    assert "/datacite/" in rows["version"]["see_also"]
+    assert rows["license"]["see_also"] == rows["version"]["see_also"]
+    assert rows["author.givenName"]["subject_id"] == "field:datacite/creators%5B%5D.givenName"
+    assert rows["author.givenName"]["subject_label"] == "creators[].givenName"
+    # The comment column is the row's source, then its comment when it has one.
+    source = {r["term"]: r for r in mapping["rows"] if r["format"] == "datacite"}
+    assert rows["version"]["comment"] == "crosswalk:crosswalks/DataCite.csv@" + mapping["codemeta_tag"]
+    assert (
+        rows["identifier"]["comment"]
+        == f"{source['identifier']['source']}; doi is a bare DOI, without https://doi.org/."
+    )
+
+
+@pytest.mark.parametrize(
+    ("fmt", "expected"),
+    [
+        # The hub reads .zenodo.json, whose keys are those of the record's metadata object in Zenodo's REST API,
+        # the sheet's metadata/...; license is the id the API nests in license.id.
+        (
+            "zenodo",
+            {
+                "skos:exactMatch": {"name", "version", "license", "description", "keywords", "datePublished"},
+                # metadata/doi more_specific_than identifier.
+                "skos:broadMatch": {"identifier"},
+            },
+        ),
+        (
+            "bibtex",
+            {"skos:exactMatch": {"author", "license", "description", "publisher"}, "skos:broadMatch": {"identifier"}},
+        ),
+        ("swmath", {"skos:exactMatch": {"name", "codeRepository", "description", "keywords"}}),
+    ],
+)
+def test_sssom_rows_take_the_relation_of_codemetas_sheet(mapping: dict, fmt: str, expected: dict[str, set[str]]):
+    rows = _rows(mapping, fmt)
+    assert _predicates(rows) == expected
+    assert {row["see_also"] for row in rows.values() if row["see_also"]} == {
+        f"https://github.com/codemeta/codemeta/blob/5f192575310181535e83ea6259d156723775ad86/crosswalks-sssom/{fmt}/"
+        + ("swmath-codemeta-mapping.csv" if fmt == "swmath" else f"{fmt}-codemeta-mappings.csv")
+    }
+
+
+def test_sssom_part_of_is_a_close_match_only_on_the_joined_path(mapping: dict):
+    """The sheet's year and month are part_of datePublished, joined $(year)+$(month); the hub reads date | year."""
+    assert _rows(mapping, "bibtex")["datePublished"]["predicate_id"] == "skos:relatedMatch"
+    row = next(r for r in mapping["rows"] if (r["format"], r["term"]) == ("bibtex", "datePublished"))
+    row["path"] = "year + month"
+    assert _rows(mapping, "bibtex")["datePublished"]["predicate_id"] == "skos:closeMatch"
+
+
+def test_sssom_reads_more_specific_than_as_the_broader_object():
+    """A source term more specific than the CodeMeta term has it as a broader concept: skos:broadMatch."""
+    assert PREDICATES["more_specific_than"] == "skos:broadMatch"
+    assert PREDICATES["more_generic_than"] == "skos:narrowMatch"
+
+
+def test_sssom_objects_are_terms_of_the_tags_context(mapping: dict):
+    """A schema: or codemeta: object is a term CodeMeta's context defines, not an IRI the hub made up."""
+    tag = mapping["codemeta_tag"]
+    context = json.loads((ROOT / f"tests/fixtures/{tag}/codemeta.jsonld").read_text("utf-8"))["@context"]
+    ids = {value["@id"] if isinstance(value, dict) else value for value in context.values()}
+    text = "\n".join(line for line in sssom(mapping).splitlines() if not line.startswith("#"))
+    objects = {row["object_id"] for row in csv.DictReader(io.StringIO(text), delimiter="\t")}
+    assert {o for o in objects if not o.startswith("term:")} <= ids
+
+
+def test_every_hub_term_has_its_own_object():
+    """Joining spokes on object_id gives the same pairs as joining them on term."""
+    assert len({codemeta_id(term) for term in ALL_TERMS}) == len(ALL_TERMS)
+
+
+def test_a_citation_term_on_a_codemeta_property_gets_its_codemeta_id(mapping: dict):
+    assert _rows(mapping, "cff-1.2.0")["preferredCitation"]["object_id"] == "codemeta:referencePublication"
+
+
+def test_sssom_exact_match_lapses_when_the_checked_path_changes(mapping: dict):
+    row = next(r for r in mapping["rows"] if (r["format"], r["term"]) == ("datacite", "version"))
+    row["path"] = "versions[].version"
+    assert _rows(mapping, "datacite")["version"]["predicate_id"] == "skos:relatedMatch"
 
 
 def test_sssom_prefixes_have_distinct_uri_namespaces(mapping: dict):
@@ -376,7 +530,7 @@ def test_a_row_with_an_https_see_also_is_accepted(mapping: dict):
 
 
 def test_sssom_encodes_every_path_and_term_and_appends_a_comment(mapping: dict):
-    """Term and path are fully percent-encoded, slashes included; the comment follows the source after a semicolon."""
+    """Path and hub term are percent-encoded, slashes included; the comment follows the source after a semicolon."""
     mapping["rows"][0]["comment"] = "why"
     text = sssom(mapping)
     got = list(
@@ -386,16 +540,17 @@ def test_sssom_encodes_every_path_and_term_and_appends_a_comment(mapping: dict):
     )
     expected = [
         (
-            f"term:{quote(row['term'], safe='')}",
             f"field:{row['format']}/{quote(row['path'], safe='')}",
+            codemeta_id(row["term"]),
             row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
         )
         for row in spokes(mapping)
         if row["path"] is not None
     ]
     assert [(r["subject_id"], r["object_id"], r["comment"]) for r in got] == expected
-    assert any("%2F" in r["object_id"] for r in got)
-    assert "field:cff-1.2.0/authors%5B%5D.family-names" in {r["object_id"] for r in got}
+    assert any("%2F" in r["subject_id"] for r in got)
+    assert "field:cff-1.2.0/authors%5B%5D.family-names" in {r["subject_id"] for r in got}
+    assert "term:author.%40id" in {r["object_id"] for r in got}
     assert mapping["rows"][0]["source"] + "; why" in {r["comment"] for r in got}
 
 

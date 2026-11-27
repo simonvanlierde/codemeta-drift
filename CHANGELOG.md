@@ -9,6 +9,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Upgrade
 
+- **Breaking:** `hub sssom` rows now run from the format's field to the CodeMeta term, as in CodeMeta's SSSOM
+  methodology, so every row's `subject_id` and `object_id` swap. In 0.9.0, `subject_id` held the `term:` id,
+  `object_id` the `field:` id, `object_source` `format:<fmt>` and `subject_source_version` the tag. Now
+  `subject_id` holds the `field:` id and `subject_source` `format:<fmt>`. `object_id` holds the property
+  CodeMeta's context gives the term (`url` is `schema:url`, `preferredCitation` is
+  `codemeta:referencePublication`), or the hub's `term:` id for terms with no CodeMeta property, and every person
+  sub-term, such as `swhid`, `resourceType`, `author.givenName` and `contributor.@id`. `object_source` holds
+  CodeMeta's context IRI at the tag and `object_source_version` the tag; both are empty on a `term:` row. A reader
+  that took the hub term from `subject_id` reads `object_label`. Regenerate stored SSSOM files with
+  `codemeta-drift hub sssom` rather than joining them with 0.9.0 output. The predicates change too (see Changed).
+  See [the crosswalk hub](docs/crosswalk-hub.md).
 - Update the hub CLI when pinning a 1.10 mapping. Older versions reject the new format and term
   IDs. See [mapping compatibility](docs/mapping-export.md#compatibility).
 
@@ -19,6 +30,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - A citation field with a CodeMeta property (`url`, `author.name`, `preferredCitation`) joins that
   property's crosswalk cell, so coverage and `hub crosswalk` read CFF's `preferred-citation` as
   written and DataCite's `creatorName` as notation.
+
+### Changed
+
+- `hub sssom` gives 29 rows the relation CodeMeta's DataCite, Zenodo, BibTeX and swMATH SSSOM sheets give the
+  field the hub reads: `skos:exactMatch`, `skos:closeMatch` or `skos:broadMatch` (13 DataCite, 7 Zenodo, 5 BibTeX
+  and 4 swMATH rows), and links the sheet in `see_also`. A sheet's `more_specific_than` is `skos:broadMatch`, and
+  `part_of` is `skos:closeMatch` only on a ` + ` path that joins its parts. If the export's path changes, the
+  row goes back to `skos:relatedMatch`. The rows also gain `subject_label` (the path) and `object_label`
+  (the hub term), and the header gains CodeMeta's `schema` and `codemeta` prefixes for the tag. Refs #55.
 
 ## [0.9.0] - 2026-11-26
 
