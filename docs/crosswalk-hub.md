@@ -38,16 +38,41 @@ alternatives, order and selectors.
 metadata block and explicit CURIE prefixes. It covers the 48 formats in the 4.0 JSON export and
 `gomod`. The Go spoke has only `codeRepository`, corresponding to the `module` directive.
 
-All predicates are `skos:relatedMatch`: matching paths do not make the fields mean the same.
-Examples are name components stored in one string, SPDX identifiers stored as URLs, and Go module paths.
+Each row runs from a format's field (the subject) to a CodeMeta term (the object), the direction
+CodeMeta's [SSSOM methodology](sssom-compatibility.md#compare-with-codemetas-methodology) uses.
+`subject_label` holds the path as the export writes it, and `object_label` the hub term, such as
+`version` for the object `schema:version`. A CodeMeta term's `object_source` is CodeMeta's
+context at the export's tag, such as `https://w3id.org/codemeta/4.0`; a hub term has none.
+
+A row gets a stronger predicate than `skos:relatedMatch` only where one of CodeMeta's own SSSOM sheets
+(DataCite, Zenodo, BibTeX and swMATH) relates the field the hub reads to that CodeMeta term; `see_also`
+then links that sheet. The sheet's `exact_match` becomes `skos:exactMatch`, `close_match`
+`skos:closeMatch`, and `more_specific_than` `skos:broadMatch`, as
+[the comparison with CodeMeta's methodology](sssom-compatibility.md#relations) sets out. That covers 29
+rows: 13 DataCite, 7 Zenodo, 5 BibTeX and 4 swMATH. If the export's path for such a row changes, the row
+goes back to `skos:relatedMatch` until someone checks it against the sheet again. Every other row is
+`skos:relatedMatch`: matching paths do not make the fields mean the same. Examples are name components
+stored in one string, SPDX identifiers stored as URLs, and Go module paths.
 
 | Prefix | Holds | Example |
 | --- | --- | --- |
-| `term:` | The hub's terms from the JSON export, including compound person paths and `swhid`. They are not CodeMeta vocabulary. | `term:author.givenName` |
 | `field:` | A format and its complete path, percent-encoded | `field:cargo/package.name` |
-| `format:` | The format itself | `format:cargo` |
+| `schema:` | A CodeMeta term, at the schema.org IRI CodeMeta's context gives it | `schema:name`, `schema:author` |
+| `codemeta:` | A term CodeMeta's context defines itself, for the citation term `preferredCitation` | `codemeta:referencePublication` |
+| `term:` | A hub term: terms with no CodeMeta property, and every person sub-term, such as `swhid`, `resourceType`, `author.givenName` and `contributor.@id` | `term:swhid`, `term:author.givenName` |
+| `format:` | The format itself, in `subject_source` | `format:cargo` |
 
-All three expand under `https://w3id.org/codemeta-drift/`, which redirects to the
+A person sub-term keeps its `term:` id because its property is shared: `author.givenName` and
+`contributor.givenName` are both schema.org's `givenName`, and `author.name` is the software's `name`.
+So every hub term has its own object, and joining spokes on `object_id` gives the same pairs as `hub pair`.
+The hub keeps these ids until CodeMeta says how such a term expands to an IRI
+([open point 1](sssom-compatibility.md#open-points)).
+
+`schema:` and `codemeta:` take the prefixes of CodeMeta's context at the export's tag: `https://schema.org/`
+and `https://w3id.org/codemeta/terms/` from 4.0, `http://schema.org/` and `https://codemeta.github.io/terms/`
+before it.
+
+`field:`, `term:` and `format:` expand under `https://w3id.org/codemeta-drift/`, which redirects to the
 [coverage page](https://simonvanlierde.com/codemeta-drift/). The page opens the matching cell:
 `field:cargo/package.name` is <https://w3id.org/codemeta-drift/#field/cargo/package.name>.
 

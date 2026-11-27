@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import quote
 
 from codemeta_drift.checks import table_rows
-from codemeta_drift.export import ALL_TERMS, KINDS, PATH, SCHEMA_VERSION, formats
+from codemeta_drift.export import ALL_TERMS, KINDS, NO_PROPERTY, PATH, SCHEMA_VERSION, formats, tag_key
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
 # w3id.org redirects this base to the coverage page, so the identifiers outlive its hosting.
@@ -22,6 +22,86 @@ class UsageError(ValueError):
 
 CREATOR = "orcid:0009-0006-6953-909X"
 """The curator of the mapping set, as in CITATION.cff."""
+
+SHEET = "https://github.com/codemeta/codemeta/blob/5f192575310181535e83ea6259d156723775ad86/crosswalks-sssom/"
+SHEETS = {
+    "datacite": f"{SHEET}datacite/datacite-codemeta-mappings.csv",
+    "zenodo": f"{SHEET}zenodo/zenodo-codemeta-mappings.csv",
+    "bibtex": f"{SHEET}bibtex/bibtex-codemeta-mappings.csv",
+    "swmath": f"{SHEET}swmath/swmath-codemeta-mapping.csv",
+}
+"""CodeMeta's own SSSOM sheets, from its sssom-methodology branch, by format."""
+
+PREDICATES = {
+    "exact_match": "skos:exactMatch",
+    "close_match": "skos:closeMatch",
+    # The source term is narrower, so the CodeMeta term is its broader match (skos:narrower would invert it).
+    "more_specific_than": "skos:broadMatch",
+    "more_generic_than": "skos:narrowMatch",
+    # Its EVIDENCE path is the sheet's combined_mapping joined with " + ", so one part alone stays related.
+    "part_of": "skos:closeMatch",
+}
+"""The SKOS mapping predicate for each relation in a sheet's type_relation column."""
+
+EVIDENCE = {
+    ("datacite", "name", "titles[].title"): "exact_match",
+    ("datacite", "version", "version"): "exact_match",
+    ("datacite", "author", "creators[]"): "exact_match",
+    ("datacite", "author.givenName", "creators[].givenName"): "exact_match",
+    ("datacite", "author.familyName", "creators[].familyName"): "exact_match",
+    ("datacite", "contributor", "contributors[]"): "exact_match",
+    ("datacite", "contributor.givenName", "contributors[].givenName"): "exact_match",
+    ("datacite", "contributor.familyName", "contributors[].familyName"): "exact_match",
+    ("datacite", "identifier", "doi"): "exact_match",
+    ("datacite", "keywords", "subjects[].subject"): "exact_match",
+    ("datacite", "license", "rightsList[].rightsUri"): "close_match",
+    ("datacite", "publisher", "publisher.name | publisher"): "close_match",
+    ("datacite", "author.name", "creators[].name"): "close_match",
+    # The sheet names Zenodo REST API record keys (metadata/title); .zenodo.json holds that metadata object,
+    # with the licence id the API nests in metadata/license/id.
+    ("zenodo", "name", "title"): "exact_match",
+    ("zenodo", "version", "version"): "exact_match",
+    ("zenodo", "license", "license"): "exact_match",
+    ("zenodo", "identifier", "doi"): "more_specific_than",
+    ("zenodo", "description", "description"): "exact_match",
+    ("zenodo", "keywords", "keywords"): "exact_match",
+    ("zenodo", "datePublished", "publication_date"): "exact_match",
+    ("bibtex", "author", "author"): "exact_match",
+    ("bibtex", "license", "license"): "exact_match",
+    ("bibtex", "identifier", "doi"): "more_specific_than",
+    ("bibtex", "description", "abstract"): "exact_match",
+    ("bibtex", "datePublished", "year + month"): "part_of",
+    ("bibtex", "publisher", "publisher"): "exact_match",
+    ("swmath", "name", "name"): "exact_match",
+    ("swmath", "codeRepository", "source_code"): "exact_match",
+    ("swmath", "description", "description"): "exact_match",
+    ("swmath", "keywords", "keywords"): "exact_match",
+}
+"""The relation the format's sheet gives the field the hub reads, by format, term and the path checked against it."""
+
+
+def relation(row: Mapping[str, Any]) -> str:
+    """The sheet's relation for the row's current path, or "" when no sheet covers that path."""
+    return EVIDENCE.get((row["format"], row["term"], row["path"]), "")
+
+
+CODEMETA_PROPERTIES = {"referencePublication"}
+"""The properties CodeMeta's context defines itself; every other hub property is schema.org's there."""
+
+
+def codemeta_id(term: str) -> str:
+    """The CodeMeta term's IRI as CodeMeta's context gives it, or the hub's own id where CodeMeta has no term.
+
+    Every person sub-term keeps its hub id (``author.givenName`` is ``term:author.givenName``), since its property
+    is shared with other terms (``contributor.givenName``, or ``name`` for ``author.name``) and CodeMeta has no IRI
+    for the path yet. A citation term with a property row is that property (``preferredCitation`` is
+    ``codemeta:referencePublication``). Every hub term gets its own object, and a test checks every ``schema:`` and
+    ``codemeta:`` object against the context at each tag.
+    """
+    key = ALL_TERMS[term]
+    if key is None or term == "swhid" or term in NO_PROPERTY or "." in term:
+        return f"term:{quote(term, safe='')}"
+    return f"{'codemeta' if key[1] in CODEMETA_PROPERTIES else 'schema'}:{key[1]}"
 
 
 def validate_mapping(data: Any) -> None:  # noqa: ANN401
@@ -117,21 +197,25 @@ def table(rows: Iterable[Mapping[str, str]], columns: list[str], delimiter: str 
 
 
 def sssom(mapping: dict[str, Any]) -> str:
-    """SSSOM 1.0 TSV spokes with explicit CURIEs and conservative relatedMatch predicates.
+    """SSSOM 1.0 TSV spokes from format fields to CodeMeta terms, as CodeMeta's SSSOM methodology sets them out.
 
-    The hub identifies complete field paths, including person sub-terms and swhid, in its own
-    namespace. It does not invent CodeMeta vocabulary terms for these compound correspondences.
+    A subject keeps the field's complete path, selectors and alternatives included, so it opens its coverage cell.
+    Predicates are relatedMatch unless ``EVIDENCE`` holds the sheet's relation for that field.
     """
     rows = spokes(mapping)
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
     count = len({row["format"] for row in rows})
+    # CodeMeta's context prefixes: 4.0 moved schema.org to https and its own terms to w3id.
+    new = tag_key(tag) >= (4, 0)
+    schema = "https://schema.org/" if new else "http://schema.org/"
+    codemeta = "https://w3id.org/codemeta/terms/" if new else "https://codemeta.github.io/terms/"
     metadata = (
         f"# mapping_set_id: {BASE}spokes-{tag}.sssom.tsv\n"
         f"# mapping_set_version: '{version}'\n"
         f"# mapping_set_title: codemeta-drift crosswalk hub spokes for CodeMeta {tag}\n"
-        "# mapping_set_description: Field correspondences between codemeta-drift's hub terms"
-        " (named after CodeMeta's terms where CodeMeta has one)"
-        f" and {count} metadata formats, from the reviewed mapping export, which starts from CodeMeta's crosswalks"
+        f"# mapping_set_description: Field correspondences from {count} metadata formats to CodeMeta's terms"
+        " (codemeta-drift's hub terms where CodeMeta has none),"
+        " from the reviewed mapping export, which starts from CodeMeta's crosswalks"
         " (Apache-2.0, the CodeMeta contributors). The paths correspond; their values may need conversion.\n"
         f"# mapping_provider: {REPO}\n"
         "# creator_id:\n"
@@ -147,33 +231,47 @@ def sssom(mapping: dict[str, Any]) -> str:
         "#   orcid: https://orcid.org/\n"
         "#   skos: http://www.w3.org/2004/02/skos/core#\n"
         "#   semapv: https://w3id.org/semapv/vocab/\n"
+        f"#   schema: {schema}\n"
+        f"#   codemeta: {codemeta}\n"
     )
-    mappings = [
-        {
-            "subject_id": f"term:{quote(row['term'], safe='')}",
-            "predicate_id": "skos:relatedMatch",
-            "object_id": f"field:{row['format']}/{quote(row['path'], safe='')}",
-            "mapping_justification": "semapv:ManualMappingCuration",
-            "object_source": f"format:{row['format']}",
-            "subject_source_version": mapping["codemeta_tag"],
-            "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
-        }
-        for row in rows
-        if row["path"] is not None
-    ]
+    mappings = [_sssom_row(row, tag) for row in rows if row["path"] is not None]
     return metadata + table(
         mappings,
         [
             "subject_id",
+            "subject_label",
             "predicate_id",
             "object_id",
+            "object_label",
             "mapping_justification",
+            "subject_source",
             "object_source",
-            "subject_source_version",
+            "object_source_version",
+            "see_also",
             "comment",
         ],
         "\t",
     )
+
+
+def _sssom_row(row: Mapping[str, Any], tag: str) -> dict[str, str]:
+    """One spoke row: the field as subject, the CodeMeta term (or hub term) as object."""
+    found, obj = relation(row), codemeta_id(row["term"])
+    # Only a CodeMeta term comes from CodeMeta's context; a hub term has no source to version.
+    hub_term = obj.startswith("term:")
+    return {
+        "subject_id": f"field:{row['format']}/{quote(row['path'], safe='')}",
+        "subject_label": row["path"],
+        "predicate_id": PREDICATES[found] if found else "skos:relatedMatch",
+        "object_id": obj,
+        "object_label": row["term"],
+        "mapping_justification": "semapv:ManualMappingCuration",
+        "subject_source": f"format:{row['format']}",
+        "object_source": "" if hub_term else f"https://w3id.org/codemeta/{tag}",
+        "object_source_version": "" if hub_term else tag,
+        "see_also": SHEETS[row["format"]] if found else "",
+        "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
+    }
 
 
 def crosswalk(mapping: dict[str, Any], files: Mapping[str, str], fmt: str) -> str:
