@@ -44,13 +44,15 @@ CodeMeta's [SSSOM methodology](sssom-compatibility.md#compare-with-codemetas-met
 `author.givenName` for the object `schema:givenName`. A CodeMeta term's `object_source` is CodeMeta's
 context at the export's tag, such as `https://w3id.org/codemeta/4.0`; a hub term has none.
 
-A row is `skos:exactMatch` only where one of CodeMeta's own SSSOM sheets marks it `exact_match` and
-the hub reads the same field; `see_also` then links that sheet. So far that is 10 of the 14 DataCite
-rows the sheet covers. If the export's
-path for such a row changes, the row goes back to `skos:relatedMatch` until someone checks it
-against the sheet again. Every other row is `skos:relatedMatch`: matching paths do not make the fields
-mean the same. Examples are name components stored in one string, SPDX identifiers stored as URLs,
-and Go module paths.
+A row gets a stronger predicate than `skos:relatedMatch` only where one of CodeMeta's own SSSOM sheets
+(DataCite, Zenodo, BibTeX and swMATH) relates the field the hub reads to that CodeMeta term; `see_also`
+then links that sheet. The sheet's `exact_match` becomes `skos:exactMatch`, `close_match`
+`skos:closeMatch`, and `more_specific_than` `skos:broadMatch`, as
+[the comparison with CodeMeta's methodology](sssom-compatibility.md#relations) sets out. That covers 29
+rows: 13 DataCite, 7 Zenodo, 5 BibTeX and 4 swMATH. If the export's path for such a row changes, the row
+goes back to `skos:relatedMatch` until someone checks it against the sheet again. Every other row is
+`skos:relatedMatch`: matching paths do not make the fields mean the same. Examples are name components
+stored in one string, SPDX identifiers stored as URLs, and Go module paths.
 
 | Prefix | Holds | Example |
 | --- | --- | --- |

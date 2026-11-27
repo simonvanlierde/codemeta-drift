@@ -23,29 +23,66 @@ class UsageError(ValueError):
 CREATOR = "orcid:0009-0006-6953-909X"
 """The curator of the mapping set, as in CITATION.cff."""
 
+SHEET = "https://github.com/codemeta/codemeta/blob/5f192575310181535e83ea6259d156723775ad86/crosswalks-sssom/"
 SHEETS = {
-    "datacite": "https://github.com/codemeta/codemeta/blob/5f192575310181535e83ea6259d156723775ad86"
-    "/crosswalks-sssom/datacite/datacite-codemeta-mappings.csv",
+    "datacite": f"{SHEET}datacite/datacite-codemeta-mappings.csv",
+    "zenodo": f"{SHEET}zenodo/zenodo-codemeta-mappings.csv",
+    "bibtex": f"{SHEET}bibtex/bibtex-codemeta-mappings.csv",
+    "swmath": f"{SHEET}swmath/swmath-codemeta-mapping.csv",
 }
 """CodeMeta's own SSSOM sheets, from its sssom-methodology branch, by format."""
-EXACT = {
-    ("datacite", "name"): "titles[].title",
-    ("datacite", "version"): "version",
-    ("datacite", "author"): "creators[]",
-    ("datacite", "author.givenName"): "creators[].givenName",
-    ("datacite", "author.familyName"): "creators[].familyName",
-    ("datacite", "contributor"): "contributors[]",
-    ("datacite", "contributor.givenName"): "contributors[].givenName",
-    ("datacite", "contributor.familyName"): "contributors[].familyName",
-    ("datacite", "identifier"): "doi",
-    ("datacite", "keywords"): "subjects[].subject",
+
+PREDICATES = {
+    "exact_match": "skos:exactMatch",
+    "close_match": "skos:closeMatch",
+    # The source term is narrower, so the CodeMeta term is its broader match (skos:narrower would invert it).
+    "more_specific_than": "skos:broadMatch",
+    "more_generic_than": "skos:narrowMatch",
+    # Its EVIDENCE path is the sheet's combined_mapping joined with " + ", so one part alone stays related.
+    "part_of": "skos:closeMatch",
 }
-"""The rows the format's sheet marks exact_match for the same field, with the path that was checked against it."""
+"""The SKOS mapping predicate for each relation in a sheet's type_relation column."""
+
+EVIDENCE = {
+    ("datacite", "name", "titles[].title"): "exact_match",
+    ("datacite", "version", "version"): "exact_match",
+    ("datacite", "author", "creators[]"): "exact_match",
+    ("datacite", "author.givenName", "creators[].givenName"): "exact_match",
+    ("datacite", "author.familyName", "creators[].familyName"): "exact_match",
+    ("datacite", "contributor", "contributors[]"): "exact_match",
+    ("datacite", "contributor.givenName", "contributors[].givenName"): "exact_match",
+    ("datacite", "contributor.familyName", "contributors[].familyName"): "exact_match",
+    ("datacite", "identifier", "doi"): "exact_match",
+    ("datacite", "keywords", "subjects[].subject"): "exact_match",
+    ("datacite", "license", "rightsList[].rightsUri"): "close_match",
+    ("datacite", "publisher", "publisher.name | publisher"): "close_match",
+    ("datacite", "author.name", "creators[].name"): "close_match",
+    # The sheet names Zenodo REST API record keys (metadata/title); .zenodo.json holds that metadata object,
+    # with the licence id the API nests in metadata/license/id.
+    ("zenodo", "name", "title"): "exact_match",
+    ("zenodo", "version", "version"): "exact_match",
+    ("zenodo", "license", "license"): "exact_match",
+    ("zenodo", "identifier", "doi"): "more_specific_than",
+    ("zenodo", "description", "description"): "exact_match",
+    ("zenodo", "keywords", "keywords"): "exact_match",
+    ("zenodo", "datePublished", "publication_date"): "exact_match",
+    ("bibtex", "author", "author"): "exact_match",
+    ("bibtex", "license", "license"): "exact_match",
+    ("bibtex", "identifier", "doi"): "more_specific_than",
+    ("bibtex", "description", "abstract"): "exact_match",
+    ("bibtex", "datePublished", "year + month"): "part_of",
+    ("bibtex", "publisher", "publisher"): "exact_match",
+    ("swmath", "name", "name"): "exact_match",
+    ("swmath", "codeRepository", "source_code"): "exact_match",
+    ("swmath", "description", "description"): "exact_match",
+    ("swmath", "keywords", "keywords"): "exact_match",
+}
+"""The relation the format's sheet gives the field the hub reads, by format, term and the path checked against it."""
 
 
-def evidence(row: Mapping[str, Any]) -> str:
-    """The sheet behind an exactMatch row, or "" when none covers the row's current path."""
-    return SHEETS[row["format"]] if EXACT.get((row["format"], row["term"])) == row["path"] else ""
+def relation(row: Mapping[str, Any]) -> str:
+    """The sheet's relation for the row's current path, or "" when no sheet covers that path."""
+    return EVIDENCE.get((row["format"], row["term"], row["path"]), "")
 
 
 CODEMETA_PROPERTIES = {"referencePublication"}
@@ -161,7 +198,7 @@ def sssom(mapping: dict[str, Any]) -> str:
     """SSSOM 1.0 TSV spokes from format fields to CodeMeta terms, as CodeMeta's SSSOM methodology sets them out.
 
     A subject keeps the field's complete path, selectors and alternatives included, so it opens its coverage cell.
-    Predicates are relatedMatch unless ``EXACT`` holds evidence for that field.
+    Predicates are relatedMatch unless ``EVIDENCE`` holds the sheet's relation for that field.
     """
     rows = spokes(mapping)
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
@@ -199,7 +236,7 @@ def sssom(mapping: dict[str, Any]) -> str:
         {
             "subject_id": f"field:{row['format']}/{quote(row['path'], safe='')}",
             "subject_label": row["path"],
-            "predicate_id": "skos:exactMatch" if evidence(row) else "skos:relatedMatch",
+            "predicate_id": PREDICATES[relation(row)] if relation(row) else "skos:relatedMatch",
             "object_id": codemeta_id(row["term"]),
             "object_label": row["term"],
             "mapping_justification": "semapv:ManualMappingCuration",
@@ -207,7 +244,7 @@ def sssom(mapping: dict[str, Any]) -> str:
             # Only a CodeMeta term comes from CodeMeta's context; a hub term has no source to version.
             "object_source": "" if codemeta_id(row["term"]).startswith("term:") else f"https://w3id.org/codemeta/{tag}",
             "object_source_version": "" if codemeta_id(row["term"]).startswith("term:") else tag,
-            "see_also": evidence(row),
+            "see_also": SHEETS[row["format"]] if relation(row) else "",
             "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
         }
         for row in rows

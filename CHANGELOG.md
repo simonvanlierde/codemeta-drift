@@ -30,8 +30,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- `hub sssom` writes `skos:exactMatch` for the 10 of 14 DataCite rows that CodeMeta's DataCite SSSOM sheet marks
-  `exact_match` where the hub reads the same field, and links the sheet in `see_also`. If the export's path changes, the
+- `hub sssom` gives 29 rows the relation CodeMeta's DataCite, Zenodo, BibTeX and swMATH SSSOM sheets give the
+  field the hub reads: `skos:exactMatch`, `skos:closeMatch` or `skos:broadMatch` (13 DataCite, 7 Zenodo, 5 BibTeX
+  and 4 swMATH rows), and links the sheet in `see_also`. A sheet's `more_specific_than` is `skos:broadMatch`, and
+  `part_of` is `skos:closeMatch` only on a ` + ` path that joins its parts. If the export's path changes, the
   row goes back to `skos:relatedMatch`. The rows also gain `subject_label` (the path) and `object_label`
   (the hub term), and the header gains CodeMeta's `schema` and `codemeta` prefixes for the tag. Refs #55.
 

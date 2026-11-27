@@ -9,7 +9,7 @@ import yaml
 
 from codemeta_drift.cli import main
 from codemeta_drift.export import SCHEMA_VERSION, curated_tags
-from codemeta_drift.hub import pair_rows, sssom, validate_mapping
+from codemeta_drift.hub import PREDICATES, pair_rows, sssom, validate_mapping
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -167,9 +167,9 @@ def test_sssom_rows_run_from_format_fields_to_codemeta_terms(mapping: dict):
         assert hub_term or row["object_id"].startswith(("schema:", "codemeta:"))
         context = "" if hub_term else f"https://w3id.org/codemeta/{mapping['codemeta_tag']}"
         assert (row["object_source"], row["object_source_version"] != "") == (context, not hub_term)
-        exact = row["predicate_id"] == "skos:exactMatch"
-        assert exact or row["predicate_id"] == "skos:relatedMatch"
-        assert exact == (row["see_also"] != ""), "an exactMatch row names its evidence"
+        related = row["predicate_id"] == "skos:relatedMatch"
+        assert related or row["predicate_id"] in {"skos:exactMatch", "skos:closeMatch", "skos:broadMatch"}
+        assert related == (row["see_also"] == ""), "a row with a stronger predicate names its evidence"
     go = [row for row in rows if row["subject_source"] == "format:gomod"]
     assert [(row["subject_id"], row["object_id"]) for row in go] == [("field:gomod/module", "schema:codeRepository")]
 
@@ -180,11 +180,20 @@ def _rows(mapping: dict, fmt: str) -> dict[str, dict[str, str]]:
     return {row["object_label"]: row for row in rows if row["subject_source"] == f"format:{fmt}"}
 
 
+def _predicates(rows: dict[str, dict[str, str]]) -> dict[str, set[str]]:
+    """The terms under each predicate other than relatedMatch."""
+    out: dict[str, set[str]] = {}
+    for term, row in rows.items():
+        if row["predicate_id"] != "skos:relatedMatch":
+            out.setdefault(row["predicate_id"], set()).add(term)
+    return out
+
+
 def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
     """Subjects are format fields and objects CodeMeta terms; a person sub-term's object is its own property.
 
-    exactMatch only where CodeMeta's DataCite sheet marks the same field exact_match; a hub term only where
-    CodeMeta has none.
+    exactMatch or closeMatch only where CodeMeta's DataCite sheet relates the same field so; a hub term only
+    where CodeMeta has none.
     """
     rows = _rows(mapping, "datacite")
     exact = {
@@ -219,10 +228,58 @@ def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
         "hasVersion": "term:hasVersion",
     }
     assert {term: row["object_id"] for term, row in rows.items()} == exact | related
-    assert {term for term, row in rows.items() if row["predicate_id"] == "skos:exactMatch"} == exact.keys()
+    assert _predicates(rows) == {
+        "skos:exactMatch": exact.keys(),
+        # The sheet's close_match rows: Rights, Publisher and creatorName.
+        "skos:closeMatch": {"license", "publisher", "author.name"},
+    }
     assert "/datacite/" in rows["version"]["see_also"]
+    assert rows["license"]["see_also"] == rows["version"]["see_also"]
     assert rows["author.givenName"]["subject_id"] == "field:datacite/creators%5B%5D.givenName"
     assert rows["author.givenName"]["subject_label"] == "creators[].givenName"
+
+
+@pytest.mark.parametrize(
+    ("fmt", "expected"),
+    [
+        # The hub reads .zenodo.json, whose keys are those of the record's metadata object in Zenodo's REST API,
+        # the sheet's metadata/...; license is the id the API nests in license.id.
+        (
+            "zenodo",
+            {
+                "skos:exactMatch": {"name", "version", "license", "description", "keywords", "datePublished"},
+                # metadata/doi more_specific_than identifier.
+                "skos:broadMatch": {"identifier"},
+            },
+        ),
+        (
+            "bibtex",
+            {"skos:exactMatch": {"author", "license", "description", "publisher"}, "skos:broadMatch": {"identifier"}},
+        ),
+        ("swmath", {"skos:exactMatch": {"name", "codeRepository", "description", "keywords"}}),
+    ],
+)
+def test_sssom_rows_take_the_relation_of_codemetas_sheet(mapping: dict, fmt: str, expected: dict[str, set[str]]):
+    rows = _rows(mapping, fmt)
+    assert _predicates(rows) == expected
+    assert {row["see_also"] for row in rows.values() if row["see_also"]} == {
+        f"https://github.com/codemeta/codemeta/blob/5f192575310181535e83ea6259d156723775ad86/crosswalks-sssom/{fmt}/"
+        + ("swmath-codemeta-mapping.csv" if fmt == "swmath" else f"{fmt}-codemeta-mappings.csv")
+    }
+
+
+def test_sssom_part_of_is_a_close_match_only_on_the_joined_path(mapping: dict):
+    """The sheet's year and month are part_of datePublished, joined $(year)+$(month); the hub reads date | year."""
+    assert _rows(mapping, "bibtex")["datePublished"]["predicate_id"] == "skos:relatedMatch"
+    row = next(r for r in mapping["rows"] if (r["format"], r["term"]) == ("bibtex", "datePublished"))
+    row["path"] = "year + month"
+    assert _rows(mapping, "bibtex")["datePublished"]["predicate_id"] == "skos:closeMatch"
+
+
+def test_sssom_reads_more_specific_than_as_the_broader_object():
+    """A source term more specific than the CodeMeta term has it as a broader concept: skos:broadMatch."""
+    assert PREDICATES["more_specific_than"] == "skos:broadMatch"
+    assert PREDICATES["more_generic_than"] == "skos:narrowMatch"
 
 
 def test_sssom_objects_are_terms_of_the_tags_context(mapping: dict):
