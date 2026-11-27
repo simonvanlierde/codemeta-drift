@@ -174,7 +174,9 @@ def test_a_kind_on_a_cell_the_crosswalk_leaves_empty_is_refused():
     """status() reads a kind only off a non-empty cell, so the coverage page would show it as added."""
     files = read_dir(ROOT / "tests/fixtures/4.0")
     row = {"format": "cargo", "term": "description", "path": "package.description", "cell": "", "reason": "r"}
-    with pytest.raises(ValueError, match="cargo description row has kind 'scope', but its cell is empty"):
+    with pytest.raises(
+        ValueError, match=r"^curated-4\.0\.json: the cargo description row has kind 'scope', but its cell is empty$"
+    ):
         build_rows(files, "4.0", [row | {"kind": "scope"}])
 
 
