@@ -53,7 +53,7 @@ the source of truth for values.
   the scroll region's label says it to screen readers.
 - **Route.** Three columns: the source path, the CodeMeta term in a box, the target path, joined by short
   rules. A missing end is italic red with a dashed rule. On a phone the three stack. A checkbox, on by
-  default, hides the terms neither format has.
+  default, hides the terms neither format has a path for.
 - **Copy.** Plain and specific. Upstream state names the commit and date it was read from.
 
 Don't add inline script or style, another host, or a mark whose meaning lives only in colour.

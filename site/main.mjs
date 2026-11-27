@@ -75,13 +75,15 @@ function matrix(data, unreviewed, onPick) {
   }
   if (!unreviewed) return;
   const shapes = el("span", {}, "Not reviewed yet. A mark shows only what CodeMeta's cell holds, and the last column counts path cells.");
-  table.append(group(data.terms, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed" }));
+  // Unreviewed crosswalks have cells for the base terms only; a spacer keeps their tally under "as written".
+  const base = data.terms.filter((term) => unreviewed.cells.some((c) => c.term === term));
+  table.append(group(base, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed", pad: data.terms.length - base.length }));
 }
 
 // One tbody: an optional group label row, then a row per format with a button per term and a tally.
-function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
+function group(terms, formats, data, onPick, { legend, tally, note = "", pad = 0 }) {
   const body = el("tbody");
-  if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
+  if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + pad + 2) }, legend)));
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
   for (const { format, label: name, status } of formats) {
     const row = el("tr", {}, el("th", { scope: "row" }, name, status ? el("span", { class: "why" }, status) : null));
@@ -103,6 +105,7 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
       }
       row.append(td);
     }
+    if (pad) row.append(el("td", { colspan: String(pad) }));
     row.append(el("td", { class: "tally" }, ...tally(own, data.statuses)));
     body.append(row);
   }
