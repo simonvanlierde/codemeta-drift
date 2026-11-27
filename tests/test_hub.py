@@ -103,12 +103,8 @@ def test_sssom_header_names_the_set_and_its_prefixes(mapping: dict):
             "orcid": "https://orcid.org/",
             "skos": "http://www.w3.org/2004/02/skos/core#",
             "semapv": "https://w3id.org/semapv/vocab/",
-            # CodeMeta's own context prefixes at the tag: 4.0 moved both.
-            **(
-                {"schema": "http://schema.org/", "codemeta": "https://codemeta.github.io/terms/"}
-                if mapping["codemeta_tag"] == "3.1"
-                else {"schema": "https://schema.org/", "codemeta": "https://w3id.org/codemeta/terms/"}
-            ),
+            # CodeMeta's context prefix at the tag: 4.0 moved schema.org to https.
+            "schema": "http://schema.org/" if mapping["codemeta_tag"] == "3.1" else "https://schema.org/",
         },
     }
     assert "may need conversion" in header["mapping_set_description"]
@@ -183,7 +179,10 @@ def test_sssom_rows_run_from_format_fields_to_codemeta_terms(mapping: dict):
     for row in rows:
         assert row["mapping_justification"] == "semapv:ManualMappingCuration"
         assert row["subject_id"].startswith(f"field:{row['subject_source'].removeprefix('format:')}/")
-        assert row["object_id"].split(":")[0] in {"schema", "codemeta", "term"}
+        hub_term = row["object_id"].startswith("term:")
+        assert hub_term or row["object_id"].startswith("schema:")
+        context = "" if hub_term else f"https://w3id.org/codemeta/{mapping['codemeta_tag']}"
+        assert (row["object_source"], row["object_source_version"] != "") == (context, not hub_term)
         exact = row["predicate_id"] == "skos:exactMatch"
         assert exact or row["predicate_id"] == "skos:relatedMatch"
         assert exact == (row["see_also"] != ""), "an exactMatch row names its evidence"
@@ -198,7 +197,7 @@ def _rows(mapping: dict, fmt: str) -> dict[str, dict[str, str]]:
 
 
 def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
-    """Subjects are format fields and objects CodeMeta terms, with a slash between a person and its sub-term.
+    """Subjects are format fields and objects CodeMeta terms; a person sub-term's object is its own property.
 
     exactMatch only where CodeMeta's DataCite sheet marks the same field exact_match; a hub term only where
     CodeMeta has none.
@@ -208,11 +207,11 @@ def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
         "name": "schema:name",
         "version": "schema:version",
         "author": "schema:author",
-        "author.givenName": "codemeta:author/givenName",
-        "author.familyName": "codemeta:author/familyName",
+        "author.givenName": "schema:givenName",
+        "author.familyName": "schema:familyName",
         "contributor": "schema:contributor",
-        "contributor.givenName": "codemeta:contributor/givenName",
-        "contributor.familyName": "codemeta:contributor/familyName",
+        "contributor.givenName": "schema:givenName",
+        "contributor.familyName": "schema:familyName",
         "identifier": "schema:identifier",
         "keywords": "schema:keywords",
     }
@@ -232,6 +231,16 @@ def test_sssom_datacite_rows_follow_codemetas_sssom_methodology(mapping: dict):
     assert "/datacite/" in rows["version"]["see_also"]
     assert rows["author.givenName"]["subject_id"] == "field:datacite/creators%5B%5D.givenName"
     assert rows["author.givenName"]["subject_label"] == "creators[].givenName"
+
+
+def test_sssom_objects_are_terms_of_the_tags_context(mapping: dict):
+    """A schema: object is a term CodeMeta's context maps to schema.org, not an IRI the hub made up."""
+    tag = mapping["codemeta_tag"]
+    context = json.loads((ROOT / f"tests/fixtures/{tag}/codemeta.jsonld").read_text("utf-8"))["@context"]
+    ids = {value["@id"] if isinstance(value, dict) else value for value in context.values()}
+    text = "\n".join(line for line in sssom(mapping).splitlines() if not line.startswith("#"))
+    objects = {row["object_id"] for row in csv.DictReader(io.StringIO(text), delimiter="\t")}
+    assert {o for o in objects if not o.startswith("term:")} <= ids
 
 
 def test_sssom_exact_match_lapses_when_the_checked_path_changes(mapping: dict):

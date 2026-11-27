@@ -49,14 +49,14 @@ def evidence(row: Mapping[str, Any]) -> str:
 
 
 def codemeta_id(term: str) -> str:
-    """The object id CodeMeta's SSSOM methodology gives a hub term, or the hub's own id where CodeMeta has no term.
+    """The CodeMeta term's IRI as CodeMeta's context gives it, or the hub's own id where CodeMeta has no term.
 
-    A property is ``schema:`` (every hub term's property is schema.org's); a person sub-term is ``codemeta:`` with a
-    slash after the person, as upstream writes ``author/name``.
+    A person sub-term is its own property (``author.givenName`` is ``schema:givenName``). Every hub property is
+    schema.org's in CodeMeta's context; a test checks that against the context at each tag.
     """
-    if term not in TERMS or term == "swhid" or term in NO_PROPERTY or term.endswith(".@id"):
+    if term == "swhid" or term in NO_PROPERTY or term.endswith(".@id"):
         return f"term:{quote(term, safe='')}"
-    return f"codemeta:{term.replace('.', '/')}" if "." in term else f"schema:{term}"
+    return f"schema:{TERMS[term][1]}"
 
 
 def validate_mapping(data: Any) -> None:  # noqa: ANN401
@@ -160,12 +160,8 @@ def sssom(mapping: dict[str, Any]) -> str:
     rows = spokes(mapping)
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
     count = len({row["format"] for row in rows})
-    # CodeMeta's context prefixes: 4.0 moved schema.org to https and its own terms to w3id.
-    schema, codemeta = (
-        ("https://schema.org/", "https://w3id.org/codemeta/terms/")
-        if tag_key(tag) >= (4, 0)
-        else ("http://schema.org/", "https://codemeta.github.io/terms/")
-    )
+    # CodeMeta's context prefix: 4.0 moved schema.org to https.
+    schema = "https://schema.org/" if tag_key(tag) >= (4, 0) else "http://schema.org/"
     metadata = (
         f"# mapping_set_id: {BASE}spokes-{tag}.sssom.tsv\n"
         f"# mapping_set_version: '{version}'\n"
@@ -189,7 +185,6 @@ def sssom(mapping: dict[str, Any]) -> str:
         "#   skos: http://www.w3.org/2004/02/skos/core#\n"
         "#   semapv: https://w3id.org/semapv/vocab/\n"
         f"#   schema: {schema}\n"
-        f"#   codemeta: {codemeta}\n"
     )
     mappings = [
         {
@@ -200,7 +195,11 @@ def sssom(mapping: dict[str, Any]) -> str:
             "object_label": row["term"],
             "mapping_justification": "semapv:ManualMappingCuration",
             "subject_source": f"format:{row['format']}",
-            "object_source_version": mapping["codemeta_tag"],
+            # Only a CodeMeta term comes from CodeMeta's context; a hub term has no source to version.
+            "object_source": f"https://w3id.org/codemeta/{tag}"
+            if codemeta_id(row["term"]).startswith("schema:")
+            else "",
+            "object_source_version": tag if codemeta_id(row["term"]).startswith("schema:") else "",
             "see_also": evidence(row),
             "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
         }
@@ -217,6 +216,7 @@ def sssom(mapping: dict[str, Any]) -> str:
             "object_label",
             "mapping_justification",
             "subject_source",
+            "object_source",
             "object_source_version",
             "see_also",
             "comment",

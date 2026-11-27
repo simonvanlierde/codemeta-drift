@@ -40,10 +40,13 @@ metadata block and explicit CURIE prefixes. It covers the 45 formats in the 4.0 
 
 Each row runs from a format's field (the subject) to a CodeMeta term (the object), the direction
 CodeMeta's [SSSOM methodology](sssom-compatibility.md#compare-with-codemetas-methodology) uses.
-`subject_label` holds the path as the export writes it, and `object_label` the hub term.
+`subject_label` holds the path as the export writes it, and `object_label` the hub term, such as
+`author.givenName` for the object `schema:givenName`. A CodeMeta term's `object_source` is CodeMeta's
+context at the export's tag, such as `https://w3id.org/codemeta/4.0`; a hub term has none.
 
-A row is `skos:exactMatch` only where one of CodeMeta's own SSSOM sheets marks the same field
-`exact_match`; `see_also` then links that sheet. So far that is 10 DataCite rows. If the export's
+A row is `skos:exactMatch` only where one of CodeMeta's own SSSOM sheets marks it `exact_match` and
+the hub reads the same field; `see_also` then links that sheet. So far that is 10 of the 14 DataCite
+rows the sheet covers. If the export's
 path for such a row changes, the row goes back to `skos:relatedMatch` until someone checks it
 against the sheet again. Every other row is `skos:relatedMatch`: matching paths do not make the fields
 mean the same. Examples are name components stored in one string, SPDX identifiers stored as URLs,
@@ -52,15 +55,12 @@ and Go module paths.
 | Prefix | Holds | Example |
 | --- | --- | --- |
 | `field:` | A format and its complete path, percent-encoded | `field:cargo/package.name` |
-| `schema:` | A CodeMeta term, at the schema.org IRI CodeMeta's context gives it | `schema:name` |
-| `codemeta:` | A person sub-term, as CodeMeta's methodology writes it: the person, a slash, the property | `codemeta:author/givenName` |
+| `schema:` | A CodeMeta term, at the schema.org IRI CodeMeta's context gives it. A person sub-term is its own property | `schema:name`, `schema:givenName` |
 | `term:` | A hub term CodeMeta has no term for: `swhid`, `resourceType` and the person `@id`s | `term:swhid` |
 | `format:` | The format itself, in `subject_source` | `format:cargo` |
 
-`schema:` and `codemeta:` take the prefixes of CodeMeta's context at the export's tag: from 4.0,
-`https://schema.org/` and `https://w3id.org/codemeta/terms/`; before it, `http://schema.org/` and
-`https://codemeta.github.io/terms/`. A `codemeta:` person sub-term names a hierarchy, not a term
-CodeMeta defines.
+`schema:` takes the prefix of CodeMeta's context at the export's tag: `https://schema.org/` from 4.0,
+`http://schema.org/` before it.
 
 `field:`, `term:` and `format:` expand under `https://w3id.org/codemeta-drift/`, which redirects to the
 [coverage page](https://simonvanlierde.com/codemeta-drift/). The page opens the matching cell:

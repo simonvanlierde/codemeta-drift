@@ -6,7 +6,8 @@ description: "Validate the hub's SSSOM export with the reference tool, and how i
 
 The [hub](crosswalk-hub.md) writes an SSSOM (Simple Standard for Sharing Ontological Mappings) table
 of field correspondences, from format fields to CodeMeta terms. A relation is `skos:exactMatch`
-where CodeMeta's own sheet marks the same field `exact_match`, and `skos:relatedMatch` otherwise.
+where CodeMeta's own sheet marks it `exact_match` and the hub reads the same field (10 of 14 DataCite
+rows), and `skos:relatedMatch` otherwise.
 
 ## Validate an export
 
@@ -41,8 +42,8 @@ contains a CSV authoring sheet and separate YAML metadata.
 | Aspect | CodeMeta methodology | This hub |
 | --- | --- | --- |
 | Input | CSV authoring sheet and separate YAML metadata | Validated reviewed mapping JSON |
-| Direction and identifiers | Source vocabulary terms to CodeMeta terms; hierarchy uses `/` | The same direction: format fields to CodeMeta terms, `/` between a person and its sub-term. A subject keeps the format's complete path, with arrays, filters and alternatives |
-| Relationships | Curator selects exact, close, broader, narrower or part-of relationships | `skos:exactMatch` where CodeMeta's sheet marks the same field `exact_match`; `skos:relatedMatch` otherwise |
+| Direction and identifiers | Source vocabulary terms to CodeMeta terms; hierarchy uses `/` | The same direction: format fields to CodeMeta terms. A person sub-term's object is its own property, with the person in `object_label`. A subject keeps the format's complete path, with arrays, filters and alternatives |
+| Relationships | Curator selects exact, close, broader, narrower or part-of relationships | `skos:exactMatch` where CodeMeta's sheet marks it `exact_match` and the hub reads the same field (10 of 14 DataCite rows); `skos:relatedMatch` otherwise |
 | Combined fields | A formula extension describes how source terms combine | Paths identify fields; parsers and normalization handle values elsewhere |
 | Mapping-set metadata | Template includes date, description, provider, license and a proposed w3id | Set id, title, description, version, curator ORCID, provider, Apache-2.0 license and explicit CURIE map, all under the w3id base `https://w3id.org/codemeta-drift/` |
 
