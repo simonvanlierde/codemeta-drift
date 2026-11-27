@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import quote
 
 from codemeta_drift.checks import table_rows
-from codemeta_drift.export import KINDS, NO_PROPERTY, PATH, SCHEMA_VERSION, TERMS, formats, tag_key
+from codemeta_drift.export import ALL_TERMS, KINDS, NO_PROPERTY, PATH, SCHEMA_VERSION, formats, tag_key
 
 REPO = "https://github.com/simonvanlierde/codemeta-drift/"
 # w3id.org redirects this base to the coverage page, so the identifiers outlive its hosting.
@@ -48,15 +48,21 @@ def evidence(row: Mapping[str, Any]) -> str:
     return SHEETS[row["format"]] if EXACT.get((row["format"], row["term"])) == row["path"] else ""
 
 
+CODEMETA_PROPERTIES = {"referencePublication"}
+"""The properties CodeMeta's context defines itself; every other hub property is schema.org's there."""
+
+
 def codemeta_id(term: str) -> str:
     """The CodeMeta term's IRI as CodeMeta's context gives it, or the hub's own id where CodeMeta has no term.
 
-    A person sub-term is its own property (``author.givenName`` is ``schema:givenName``). Every hub property is
-    schema.org's in CodeMeta's context; a test checks that against the context at each tag.
+    A person sub-term is its own property (``author.givenName`` is ``schema:givenName``), and a citation term with
+    a property row is that property (``preferredCitation`` is ``codemeta:referencePublication``). A test checks
+    every object against the context at each tag.
     """
-    if term == "swhid" or term in NO_PROPERTY or term.endswith(".@id"):
+    key = ALL_TERMS[term]
+    if key is None or term == "swhid" or term in NO_PROPERTY or term.endswith(".@id"):
         return f"term:{quote(term, safe='')}"
-    return f"schema:{TERMS[term][1]}"
+    return f"{'codemeta' if key[1] in CODEMETA_PROPERTIES else 'schema'}:{key[1]}"
 
 
 def validate_mapping(data: Any) -> None:  # noqa: ANN401
@@ -95,7 +101,7 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
             not isinstance(row["format"], str)
             or row["format"] not in allowed_formats
             or not isinstance(row["term"], str)
-            or row["term"] not in TERMS
+            or row["term"] not in ALL_TERMS
             or not isinstance(row["source"], str)
             or not re.fullmatch(r"(crosswalk:crosswalks/[^@]+\.csv@[^@\s]+|curated:\S.*)", row["source"])
             or (row["path"] is not None and (not isinstance(row["path"], str) or not PATH.fullmatch(row["path"])))
@@ -160,8 +166,10 @@ def sssom(mapping: dict[str, Any]) -> str:
     rows = spokes(mapping)
     tag, version = mapping["codemeta_tag"], mapping["generator"]["version"]
     count = len({row["format"] for row in rows})
-    # CodeMeta's context prefix: 4.0 moved schema.org to https.
-    schema = "https://schema.org/" if tag_key(tag) >= (4, 0) else "http://schema.org/"
+    # CodeMeta's context prefixes: 4.0 moved schema.org to https and its own terms to w3id.
+    new = tag_key(tag) >= (4, 0)
+    schema = "https://schema.org/" if new else "http://schema.org/"
+    codemeta = "https://w3id.org/codemeta/terms/" if new else "https://codemeta.github.io/terms/"
     metadata = (
         f"# mapping_set_id: {BASE}spokes-{tag}.sssom.tsv\n"
         f"# mapping_set_version: '{version}'\n"
@@ -185,6 +193,7 @@ def sssom(mapping: dict[str, Any]) -> str:
         "#   skos: http://www.w3.org/2004/02/skos/core#\n"
         "#   semapv: https://w3id.org/semapv/vocab/\n"
         f"#   schema: {schema}\n"
+        f"#   codemeta: {codemeta}\n"
     )
     mappings = [
         {
@@ -196,10 +205,8 @@ def sssom(mapping: dict[str, Any]) -> str:
             "mapping_justification": "semapv:ManualMappingCuration",
             "subject_source": f"format:{row['format']}",
             # Only a CodeMeta term comes from CodeMeta's context; a hub term has no source to version.
-            "object_source": f"https://w3id.org/codemeta/{tag}"
-            if codemeta_id(row["term"]).startswith("schema:")
-            else "",
-            "object_source_version": tag if codemeta_id(row["term"]).startswith("schema:") else "",
+            "object_source": "" if codemeta_id(row["term"]).startswith("term:") else f"https://w3id.org/codemeta/{tag}",
+            "object_source_version": "" if codemeta_id(row["term"]).startswith("term:") else tag,
             "see_also": evidence(row),
             "comment": row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
         }
@@ -236,9 +243,12 @@ def crosswalk(mapping: dict[str, Any], files: Mapping[str, str], fmt: str) -> st
         msg = f"unknown format {fmt!r}"
         raise UsageError(msg)
     paths = {
-        TERMS[row["term"]]: row["path"] or ""
+        ALL_TERMS[row["term"]]: row["path"] or ""
         for row in rows
-        if row["format"] == fmt and row["term"] != "swhid" and not row["term"].startswith("contributor.")
+        if row["format"] == fmt
+        and ALL_TERMS.get(row["term"])
+        and row["term"] != "swhid"
+        and not row["term"].startswith("contributor.")
     }
     return table(
         [{"Property": row[1], fmt: paths.get((row[0], row[1]), "")} for _, row in table_rows(files)], ["Property", fmt]

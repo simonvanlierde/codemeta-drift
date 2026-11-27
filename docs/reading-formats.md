@@ -113,6 +113,10 @@ copyright-format licence names to SPDX ids (`Expat` is `MIT`), and cut an
   only `PersonID`, an id in another document; no path follows it. `PublicationInfo.Authors` is one
   string of `Family, Given` names separated by semicolons: split it. Dates are xsd:dateTime; keep
   the date.
+- **arXiv.** The tree is one Atom `entry` of the arXiv API feed, with local names: `arxiv:doi`
+  is `doi`, `arxiv:primary_category` is `primary_category`. Unlike Maven and MODS, an attribute is
+  a plain key, so `link[rel=alternate].href` reads a link's `href`. `author` and `link` are lists
+  even when the entry has one; every other element is a single value.
 
 ### MODS
 

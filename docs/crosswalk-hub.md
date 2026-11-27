@@ -35,7 +35,7 @@ alternatives, order and selectors.
 
 `sssom` writes an SSSOM (Simple Standard for Sharing Ontological Mappings)
 [1.0 TSV](https://mapping-commons.github.io/sssom/1.0/spec-formats-tsv/) table with an embedded
-metadata block and explicit CURIE prefixes. It covers the 45 formats in the 4.0 JSON export and
+metadata block and explicit CURIE prefixes. It covers the 48 formats in the 4.0 JSON export and
 `gomod`. The Go spoke has only `codeRepository`, corresponding to the `module` directive.
 
 Each row runs from a format's field (the subject) to a CodeMeta term (the object), the direction
@@ -56,11 +56,13 @@ and Go module paths.
 | --- | --- | --- |
 | `field:` | A format and its complete path, percent-encoded | `field:cargo/package.name` |
 | `schema:` | A CodeMeta term, at the schema.org IRI CodeMeta's context gives it. A person sub-term is its own property | `schema:name`, `schema:givenName` |
-| `term:` | A hub term CodeMeta has no term for: `swhid`, `resourceType` and the person `@id`s | `term:swhid` |
+| `codemeta:` | A term CodeMeta's context defines itself, for the citation term `preferredCitation` | `codemeta:referencePublication` |
+| `term:` | A hub term CodeMeta has no term for: `swhid`, `resourceType`, the person `@id`s and the citation terms with no property | `term:swhid` |
 | `format:` | The format itself, in `subject_source` | `format:cargo` |
 
-`schema:` takes the prefix of CodeMeta's context at the export's tag: `https://schema.org/` from 4.0,
-`http://schema.org/` before it.
+`schema:` and `codemeta:` take the prefixes of CodeMeta's context at the export's tag: `https://schema.org/`
+and `https://w3id.org/codemeta/terms/` from 4.0, `http://schema.org/` and `https://codemeta.github.io/terms/`
+before it.
 
 `field:`, `term:` and `format:` expand under `https://w3id.org/codemeta-drift/`, which redirects to the
 [coverage page](https://simonvanlierde.com/codemeta-drift/). The page opens the matching cell:

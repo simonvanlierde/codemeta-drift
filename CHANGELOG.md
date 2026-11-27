@@ -12,17 +12,28 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `hub sssom` rows now run from the format's field to the CodeMeta term, as in CodeMeta's SSSOM
   methodology. The `field:` id moves to `subject_id` and `format:` to `subject_source`, and
   `subject_source_version` becomes `object_source_version`, beside a new `object_source` (CodeMeta's
-  context at the tag); both are empty for a hub term. `object_id` is the schema.org property CodeMeta's
-  context gives the term (`author.givenName` is `schema:givenName`), or `term:` where CodeMeta has no
+  context at the tag); both are empty for a hub term. `object_id` is the property CodeMeta's
+  context gives the term (`author.givenName` is `schema:givenName`,
+  `preferredCitation` is `codemeta:referencePublication`), or `term:` where CodeMeta has no
   term (`swhid`, `resourceType`, the person `@id`s). A reader that took the hub term from `subject_id` reads
   `object_label`. See [the crosswalk hub](docs/crosswalk-hub.md).
+- Update the hub CLI when pinning a 1.10 mapping. Older versions reject the new format and term
+  IDs. See [mapping compatibility](docs/mapping-export.md#compatibility).
+
+### Added
+
+- Both mapping exports now include Crossref REST, arXiv Atom and CFF preferred citations, along
+  with selected citation fields for DataCite. See [mapping terms](docs/mapping-export.md#terms).
+- A citation field with a CodeMeta property (`url`, `author.name`, `preferredCitation`) joins that
+  property's crosswalk cell, so coverage and `hub crosswalk` read CFF's `preferred-citation` as
+  written and DataCite's `creatorName` as notation.
 
 ### Changed
 
 - `hub sssom` writes `skos:exactMatch` for the 10 of 14 DataCite rows that CodeMeta's DataCite SSSOM sheet marks
   `exact_match` where the hub reads the same field, and links the sheet in `see_also`. If the export's path changes, the
   row goes back to `skos:relatedMatch`. The rows also gain `subject_label` (the path) and `object_label`
-  (the hub term), and the header gains CodeMeta's `schema` prefix for the tag. Refs #55.
+  (the hub term), and the header gains CodeMeta's `schema` and `codemeta` prefixes for the tag. Refs #55.
 
 ## [0.9.0] - 2026-11-26
 

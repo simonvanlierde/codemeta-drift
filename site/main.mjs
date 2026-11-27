@@ -12,7 +12,7 @@ document.documentElement.classList.add("js");
 
 // Citation files first, then package manifests; the matrix rows follow this order.
 const LABELS = {
-  "cff-1.2.0": "CFF 1.2.0", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
+  "cff-1.2.0": "CFF 1.2.0", "cff-preferred": "CFF preferred citation", crossref: "Crossref REST API", arxiv: "arXiv Atom", zenodo: "Zenodo", datacite: "DataCite", bibtex: "BibTeX", "codemeta-2": "CodeMeta 2.0",
   github: "GitHub API", figshare: "Figshare", swmath: "swMATH", wikidata: "Wikidata", ris: "RIS", endnote: "EndNote tagged", gitlab: "GitLab API", "code-json-2.0": "code.json 2.0", "ro-crate": "RO-Crate", croissant: "Croissant", "dublin-core": "Dublin Core", "iso-19115-1-2014": "ISO 19115-1", "spase-2.6.1": "SPASE 2.6.1", "vivo-1.8": "VIVO 1.8", "mods": "MODS", "bio-tools": "bio.tools",
   "dcat-3": "DCAT 3", doap: "DOAP", "spdx-2.3": "SPDX 2.3", pep621: "pyproject.toml", "pkg-info": "Python PKG-INFO",
   "setup-py": "setup.py", cargo: "Cargo", npm: "npm", composer: "Composer composer.json", "r-description": "R DESCRIPTION", julia: "Julia Project.toml",
@@ -75,13 +75,15 @@ function matrix(data, unreviewed, onPick) {
   }
   if (!unreviewed) return;
   const shapes = el("span", {}, "Not reviewed yet. A mark shows only what CodeMeta's cell holds, and the last column counts path cells.");
-  table.append(group(data.terms, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed" }));
+  // Unreviewed crosswalks have cells for the base terms only; a spacer keeps their tally under "as written".
+  const base = data.terms.filter((term) => unreviewed.cells.some((c) => c.term === term));
+  table.append(group(base, unreviewed.formats, unreviewed, onPick, { legend: shapes, tally: pathTally, note: ", not reviewed", pad: data.terms.length - base.length }));
 }
 
 // One tbody: an optional group label row, then a row per format with a button per term and a tally.
-function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
+function group(terms, formats, data, onPick, { legend, tally, note = "", pad = 0 }) {
   const body = el("tbody");
-  if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + 2) }, legend)));
+  if (legend) body.append(el("tr", { class: "group" }, el("th", { scope: "rowgroup", colspan: String(terms.length + pad + 2) }, legend)));
   const byKey = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c]));
   for (const { format, label: name, status } of formats) {
     const row = el("tr", {}, el("th", { scope: "row" }, name, status ? el("span", { class: "why" }, status) : null));
@@ -103,6 +105,7 @@ function group(terms, formats, data, onPick, { legend, tally, note = "" }) {
       }
       row.append(td);
     }
+    if (pad) row.append(el("td", { colspan: String(pad) }));
     row.append(el("td", { class: "tally" }, ...tally(own, data.statuses)));
     body.append(row);
   }
@@ -162,6 +165,7 @@ const pathTally = (cells, statuses) => [
 
 function detail(statuses, formats, coverage, upstream) {
   const reviewed = coverage.statuses;
+  const withCrosswalk = crosswalkFormats(coverage.cells);
   const box = document.getElementById("detail");
   const hint = box.firstElementChild;
   const changes = new Map((upstream?.cells ?? []).map((c) => [`${c.format} ${c.term}`, c]));
@@ -180,7 +184,7 @@ function detail(statuses, formats, coverage, upstream) {
       ["CodeMeta's cell", cell.crosswalk
         ? el("span", {}, cellWords(cell) ?? code(was),
           cell.line ? el("span", {}, " in ", source(coverage.codemeta_tag, cell.crosswalk, cell.line)) : null)
-        : cellWords(cell)],
+        : withCrosswalk.has(cell.format) ? "no upstream cell reviewed for this term" : cellWords(cell)],
       ["Path to use", cell.path ? code(cell.path) : cell.status in reviewed ? "none" : "none yet: crosswalk not reviewed"],
     ];
     if (cell.reason) rows.push(["Why", linked(cell.reason)]);
@@ -270,7 +274,9 @@ function route(data) {
   const paths = new Map(data.cells.map((c) => [`${c.format} ${c.term}`, c.path]));
   const end = (fmt, term) => {
     const path = paths.get(`${fmt} ${term}`);
-    return path ? el("span", { class: "stop" }, code(path)) : el("span", { class: "stop gap" }, `no ${label(fmt)} field`);
+    if (path) return el("span", { class: "stop" }, code(path));
+    const gap = path === null ? `no usable ${label(fmt)} path` : "no reviewed path";
+    return el("span", { class: "stop gap" }, gap);
   };
   const hide = document.getElementById("hide-none");
   const draw = () => {

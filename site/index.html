@@ -82,11 +82,12 @@
 
   <section role="tabpanel" id="panel-route" aria-labelledby="tab-route" hidden>
     <p class="hint">Pick two formats to see which of their fields hold the same CodeMeta term.
-      A broken end means that format has no field for the term. Values can still need converting.</p>
+      A broken end means that format has no field for the term, or no reviewed path for it yet.
+      Values can still need converting.</p>
     <div class="pickers">
       <label>From <select id="from"></select></label>
       <label>To <select id="to"></select></label>
-      <label class="check"><input type="checkbox" id="hide-none" checked> Hide terms neither format has</label>
+      <label class="check"><input type="checkbox" id="hide-none" checked> Hide terms neither format has a path for</label>
     </div>
     <ol id="route-list" class="route"></ol>
   </section>
