@@ -1,13 +1,14 @@
 import csv
 import io
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 import yaml
 
 from codemeta_drift.cli import main
-from codemeta_drift.export import curated_tags
+from codemeta_drift.export import SCHEMA_VERSION, curated_tags
 from codemeta_drift.hub import pair_rows, sssom, validate_mapping
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,29 +46,6 @@ def test_go_spoke_only_has_repository_correspondence(mapping: dict):
 def test_pair_rejects_missing_format(mapping: dict, fmt: str):
     with pytest.raises(ValueError, match="format"):
         pair_rows(mapping, fmt, "cargo")
-
-
-@pytest.mark.parametrize("change", ["version", "duplicate", "path", "type", "source", "rows", "generator", "kind"])
-def test_mapping_rejects_invalid_input(mapping: dict, change: str):
-    data = mapping
-    if change == "version":
-        data["schema_version"] = "2.0"
-    elif change == "duplicate":
-        data["rows"].append(data["rows"][0])
-    elif change == "path":
-        data["rows"][0]["path"] = "authors[][]"
-    elif change == "type":
-        data["rows"][0]["format"] = 3
-    elif change == "source":
-        del data["rows"][0]["source"]
-    elif change == "generator":
-        data["generator"] = {"name": 1, "version": None}
-    elif change == "kind":
-        data["rows"][0]["kind"] = "bogus"
-    else:
-        data["rows"] = None
-    with pytest.raises(ValueError, match="mapping"):
-        validate_mapping(data)
 
 
 def test_coverage_of_a_row_with_an_unknown_kind_exits_3(
@@ -253,7 +231,12 @@ def test_a_row_from_a_newer_minor_says_to_upgrade(mapping: dict):
     mapping["rows"][0]["format"] = "future-format"
     with pytest.raises(ValueError, match=r"row 1 \(schema_version 1\.99 is newer than this build's 1\.\d+; upgrade"):
         validate_mapping(mapping)
-    mapping["schema_version"] = "1.0"
+
+
+@pytest.mark.parametrize("version", ["1.0", SCHEMA_VERSION])
+def test_a_row_from_an_older_or_the_current_minor_is_not_called_newer(mapping: dict, version: str):
+    mapping["schema_version"] = version
+    mapping["rows"][0]["format"] = "future-format"
     with pytest.raises(ValueError, match=r"row 1$"):
         validate_mapping(mapping)
 
@@ -344,3 +327,45 @@ def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
     mapping["codemeta_tag"] = tag
     with pytest.raises(ValueError, match="codemeta_tag"):
         validate_mapping(mapping)
+
+
+DAMAGE = {
+    "version": lambda d: d.update(schema_version="2.0"),
+    "duplicate": lambda d: d["rows"].append(d["rows"][0]),
+    "path": lambda d: d["rows"][0].update(path="authors[][]"),
+    "type": lambda d: d["rows"][0].update(format=3),
+    "source": lambda d: d["rows"][0].pop("source"),
+    "generator": lambda d: d.update(generator={"name": 1, "version": None}),
+    "kind": lambda d: d["rows"][0].update(kind="bogus"),
+    "rows": lambda d: d.update(rows=None),
+    "no-tag": lambda d: d.pop("codemeta_tag"),
+    "empty-tag": lambda d: d.update(codemeta_tag=""),
+    "no-generator": lambda d: d.update(generator=None),
+    "empty-generator-name": lambda d: d["generator"].update(name=""),
+    "generator-version-not-string": lambda d: d["generator"].update(version=1),
+    "rows-not-list": lambda d: d.update(rows={}),
+    "row-not-object": lambda d: d["rows"].insert(0, "row"),
+    "row-missing-term": lambda d: d["rows"][0].pop("term"),
+    "unknown-format": lambda d: d["rows"][0].update(format="nonesuch"),
+    "term-not-string": lambda d: d["rows"][0].update(term=None),
+    "unknown-term": lambda d: d["rows"][0].update(term="nonesuch"),
+    "source-not-string": lambda d: d["rows"][0].update(source=7),
+    "source-bad-pattern": lambda d: d["rows"][0].update(source="elsewhere"),
+    "comment-not-string": lambda d: d["rows"][0].update(comment=7),
+    "see-also-not-string": lambda d: d["rows"][0].update(see_also=7),
+    "see-also-not-https": lambda d: d["rows"][0].update(see_also="http://example.org"),
+    "path-not-string": lambda d: d["rows"][0].update(path=7),
+}
+
+
+@pytest.mark.parametrize("damage", DAMAGE.values(), ids=DAMAGE.keys())
+def test_each_single_flaw_in_a_mapping_is_rejected(mapping: dict, damage: Callable[[dict], object]):
+    damage(mapping)
+    with pytest.raises(ValueError, match="mapping"):
+        validate_mapping(mapping)
+
+
+def test_a_row_with_an_https_see_also_is_accepted(mapping: dict):
+    mapping["rows"][0]["see_also"] = "https://example.org/x"
+    mapping["rows"][0]["comment"] = "why"
+    validate_mapping(mapping)

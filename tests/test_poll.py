@@ -11,6 +11,7 @@ from http.client import HTTPMessage
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError
+from urllib.parse import quote
 from urllib.request import Request
 
 import pytest
@@ -220,13 +221,17 @@ def test_zenodo_importer_source_contract(*, live: bool):
         assert len(result["sha"]) == 40
 
 
-def _sources(pin: str, tags: list[str]) -> tuple[dict[str, Any], Callable[[str], Any]]:
-    """The `before` snapshots and a fetch that serves unchanged schemas, the given pin file and CodeMeta tags."""
+def _sources(pin: str, tags: list[str], cff_tag: str = "1.2.0") -> tuple[dict[str, Any], Callable[[str], Any]]:
+    """The `before` snapshots and a fetch that serves unchanged schemas, the given pin file and CodeMeta tags.
+
+    A `cff_tag` with a slash is only served at its quoted raw URL, since the tag is one path segment.
+    """
     before = {fmt: {"properties": {}} for fmt in SCHEMA_FILES}
     before["zenodo"] = json.loads((Path(__file__).parent / "fixtures/schemas/zenodo.json").read_text())
     zenodo = before["zenodo"]["x-source"]
+    cff_raw = "https://raw.githubusercontent.com/citation-file-format/citation-file-format/" + quote(cff_tag, safe="")
     responses = {
-        API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": "1.2.0"},
+        API + "citation-file-format/citation-file-format/releases/latest": {"tag_name": cff_tag},
         API + "composer/composer/releases/latest": {"tag_name": "2.11.2"},
         API + "simonvanlierde/codemeta-drift/releases/latest": {"tag_name": "v0.4.0"},
         API + "simonvanlierde/citesync/contents/src/citesync/MAPPING_SOURCE": {
@@ -234,9 +239,7 @@ def _sources(pin: str, tags: list[str]) -> tuple[dict[str, Any], Callable[[str],
         },
         API + "codemeta/codemeta/tags?per_page=100": [{"name": tag} for tag in tags],
         **{url: {"properties": {}} for url in SCHEMA_URLS.values()},
-        "https://raw.githubusercontent.com/citation-file-format/citation-file-format/1.2.0/schema.json": {
-            "properties": {}
-        },
+        cff_raw + "/schema.json": {"properties": {}},
         "https://raw.githubusercontent.com/composer/composer/2.11.2/res/composer-schema.json": {"properties": {}},
         **{API + zenodo["repo"] + "/contents/" + p: {"sha": d} for p, d in zenodo["files"].items()},
     }
@@ -398,3 +401,28 @@ def test_a_pinned_file_the_contents_api_sends_without_content_is_an_error():
 def test_poll_fetches_every_tracked_schema():
     """Each schema snapshot has an upstream source, so poll's before and after cover the same formats."""
     assert {*SCHEMA_URLS, *RELEASED_SCHEMAS, "zenodo"} == SCHEMA_FILES.keys()
+
+
+def test_a_tag_with_a_slash_is_quoted_in_every_url_that_carries_it():
+    seen = []
+
+    def fetch(target: str) -> Any:  # noqa: ANN401 - parsed JSON
+        seen.append(target)
+        raise HTTPError(target, 404, "Not Found", Message(), None)
+
+    runner.stale_pin_hashes("sha256 abc local.json a.json\n", "release/1", fetch)
+    assert seen == [API + "simonvanlierde/codemeta-drift/contents/a.json?ref=release%2F1"]
+
+
+def _poll_with_codemeta_tags(tags: list[str]) -> list[dict[str, str]]:
+    before, fetch = _sources("tag v0.4.0\n", tags, cff_tag="release/1")
+    return poll({"rows": []}, before, fetch)
+
+
+def test_the_newest_codemeta_tag_is_the_highest_number_with_an_optional_v():
+    plans = _poll_with_codemeta_tags(["v3.9", "v3.10", "V99.0", "99", "4.0.0.1", "v3.2-rc1"])
+    assert [(p["title"], p["body"]) for p in plans] == [
+        ("Review CodeMeta tag v3.10", "CodeMeta tag `v3.10` has no curated export. Review its terms and crosswalks.")
+    ]
+    assert [p["title"] for p in _poll_with_codemeta_tags(["99.0", "v3.10"])] == ["Review CodeMeta tag 99.0"]
+    assert _poll_with_codemeta_tags(["not-a-tag"]) == []
