@@ -21,7 +21,7 @@
       "required": ["name", "version"],
       "properties": {
         "name": { "type": "string", "minLength": 1 },
-        "version": { "type": "string", "minLength": 1 }
+        "version": { "type": "string", "minLength": 1, "pattern": "^[0-9A-Za-z.+!_-]+$" }
       }
     },
     "context_terms": {

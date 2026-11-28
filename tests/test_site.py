@@ -50,6 +50,7 @@ def test_og_card_rows_match_the_coverage():
 
 def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     out = tmp_path / "site"
+    before = datetime.now(UTC).date().isoformat()
     assert build(out, "--codemeta", str(repo)).returncode == 0
     data = json.loads((out / "data.json").read_text("utf-8"))
     assert data["coverage"]["codemeta_tag"] == "4.0"
@@ -61,7 +62,7 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert data["upstream"]["cells"] == []
     assert len(data["upstream"]["commit"]) == 40
     # The header's "checked" day is the build's, not main's last commit's.
-    assert data["upstream"]["checked"] == datetime.now(UTC).date().isoformat()
+    assert data["upstream"]["checked"] in {before, datetime.now(UTC).date().isoformat()}
     # The crosswalks nobody reviewed are read at the export's tag.
     assert data["unreviewed"]["codemeta_tag"] == "4.0"
     assert {fmt["format"] for fmt in data["unreviewed"]["formats"]} == {
@@ -91,6 +92,18 @@ def test_build_writes_the_page_and_upstream_data(tmp_path: Path, repo: Path):
     assert not any(c["term"] == "contributor.name" and c["crosswalk"] for c in data["coverage"]["cells"])
     assert properties["url"] == "schema:Thing url"
     assert properties["arxivId"] is None
+    # The headline counts what needed() in site/fragment.mjs keeps: the base terms' crosswalk cells for a field.
+    assert data["coverage"]["base_terms"] == list(TERMS)
+    base = set(data["coverage"]["base_terms"])
+    fields = [
+        c["status"]
+        for c in data["coverage"]["cells"]
+        if c["term"] in base and c["crosswalk"] and c["status"] not in {"no field", "no term"}
+    ]
+    readme = " ".join((ROOT / "README.md").read_text("utf-8").split())
+    figures = re.findall(r"- (\d+) (?:can be used|name the right|are right by|are wrong|are blank)", readme)
+    assert len(figures) == 5
+    assert (fields.count("as-is"), len(fields)) == (int(figures[0]), sum(map(int, figures)))
     # The SSSOM file the page publishes is the one its own mapping_set_id names.
     tsv = (out / "spokes-4.0.sssom.tsv").read_text("utf-8")
     assert tsv.startswith("# mapping_set_id: https://w3id.org/codemeta-drift/spokes-4.0.sssom.tsv\n")

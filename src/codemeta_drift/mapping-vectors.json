@@ -1970,6 +1970,55 @@
    ]
   },
   {
+   "name": "arXiv parser: one Atom entry with local names, attributes as plain keys, author and link as lists",
+   "path": "link[rel=alternate].href | id",
+   "raw_input": {
+    "format": "arxiv",
+    "text": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:arxiv=\"http://arxiv.org/schemas/atom\">\n  <title>arXiv Query: id_list=2611.00042</title>\n  <entry>\n    <id>http://arxiv.org/abs/2611.00042v2</id>\n    <updated>2026-11-12T09:30:00Z</updated>\n    <published>2026-11-03T17:00:00Z</published>\n    <title>Crack Patterns in Glazed Ceramics</title>\n    <summary>Readings from the psychoceramics lab.</summary>\n    <author>\n      <name>Josiah Carberry</name>\n    </author>\n    <author>\n      <name>Ada Lovelace</name>\n    </author>\n    <arxiv:doi>10.5555/carberry.cracks</arxiv:doi>\n    <link title=\"doi\" href=\"https://doi.org/10.5555/carberry.cracks\" rel=\"related\"/>\n    <link href=\"https://arxiv.org/abs/2611.00042v2\" rel=\"alternate\" type=\"text/html\"/>\n    <link title=\"pdf\" href=\"https://arxiv.org/pdf/2611.00042v2\" rel=\"related\" type=\"application/pdf\"/>\n    <arxiv:primary_category term=\"cs.DL\" scheme=\"http://arxiv.org/schemas/atom\"/>\n  </entry>\n</feed>\n"
+   },
+   "document": {
+    "id": "http://arxiv.org/abs/2611.00042v2",
+    "updated": "2026-11-12T09:30:00Z",
+    "published": "2026-11-03T17:00:00Z",
+    "title": "Crack Patterns in Glazed Ceramics",
+    "summary": "Readings from the psychoceramics lab.",
+    "author": [
+     {
+      "name": "Josiah Carberry"
+     },
+     {
+      "name": "Ada Lovelace"
+     }
+    ],
+    "doi": "10.5555/carberry.cracks",
+    "link": [
+     {
+      "title": "doi",
+      "href": "https://doi.org/10.5555/carberry.cracks",
+      "rel": "related"
+     },
+     {
+      "href": "https://arxiv.org/abs/2611.00042v2",
+      "rel": "alternate",
+      "type": "text/html"
+     },
+     {
+      "title": "pdf",
+      "href": "https://arxiv.org/pdf/2611.00042v2",
+      "rel": "related",
+      "type": "application/pdf"
+     }
+    ],
+    "primary_category": {
+     "term": "cs.DL",
+     "scheme": "http://arxiv.org/schemas/atom"
+    }
+   },
+   "expected": [
+    "https://arxiv.org/abs/2611.00042v2"
+   ]
+  },
+  {
    "name": "Composer: licence array keeps every option",
    "path": "license",
    "document": {

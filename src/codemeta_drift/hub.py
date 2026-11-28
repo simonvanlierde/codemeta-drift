@@ -122,8 +122,12 @@ def validate_mapping(data: Any) -> None:  # noqa: ANN401
     ):
         msg = "mapping needs codemeta_tag, generator name/version and rows"
         raise ValueError(msg)
-    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*", data["codemeta_tag"]):
-        msg = "mapping codemeta_tag must be a numeric version"
+    # The SSSOM header writes the version raw into YAML, so a newline or quote must not reach it.
+    checks = (
+        (data["codemeta_tag"], r"[0-9]+(?:\.[0-9]+)*", "mapping codemeta_tag must be a numeric version"),
+        (generator["version"], r"[0-9A-Za-z.+!_-]+", "mapping generator.version must be a version string"),
+    )
+    if msg := next((msg for value, pattern, msg in checks if not re.fullmatch(pattern, value)), None):
         raise ValueError(msg)
     allowed_formats = formats(data["codemeta_tag"])
     # A newer minor may add formats or relax a pattern this build does not know.

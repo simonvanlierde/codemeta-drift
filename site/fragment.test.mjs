@@ -214,16 +214,19 @@ test("the tab stop is the first cell, and moves off a cell a filter hides", () =
   assert.equal(tabStop([false, false], 0), -1);
 });
 
-test("the headline counts each status it names, crosswalk cells for a field only", () => {
+test("the headline counts each status it names, crosswalk cells for a base term's field only", () => {
+  const base = new Set(["name"]);
   const cells = [
     ...["as-is", "as-is", "corrected", "notation", "notation", "notation", "scope", "scope", "scope", "scope", "added"]
-      .map((status, i) => ({ format: i % 2 ? "a" : "b", status, crosswalk: "x.csv" })),
-    { format: "a", status: "no field", crosswalk: "x.csv" },
-    { format: "a", status: "no term", crosswalk: "x.csv" },
-    { format: "c", status: "added", crosswalk: null },
+      .map((status, i) => ({ format: i % 2 ? "a" : "b", term: "name", status, crosswalk: "x.csv" })),
+    { format: "a", term: "name", status: "no field", crosswalk: "x.csv" },
+    { format: "a", term: "name", status: "no term", crosswalk: "x.csv" },
+    { format: "c", term: "name", status: "added", crosswalk: null },
+    // A citation cell exists only where reviewed, so it would change the figures with each review.
+    { format: "a", term: "url", status: "added", crosswalk: "x.csv" },
   ];
-  assert.equal(needed(cells).length, 11);
-  const { asIs, of, formats, parts } = scoreCaption(cells);
+  assert.equal(needed(cells, base).length, 11);
+  const { asIs, of, formats, parts } = scoreCaption(cells, base);
   assert.deepEqual([asIs, of, formats], [2, 11, 2]);
   assert.deepEqual(parts.map(([mark, words]) => `${mark}${words.split(" ")[0]}`), ["✎ 1", "≈ 3", "⊂ 4", "+ 1"]);
 });

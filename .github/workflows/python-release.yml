@@ -282,8 +282,11 @@ jobs:
               [ "$attempt" -lt 3 ] && sleep 10 || exit 1
             done
           done
-          gh attestation verify "$sdist" --repo "$GH_REPO" --bundle "$sdist.sbom.intoto.jsonl" \
-            --predicate-type https://cyclonedx.org/bom --signer-workflow "$GH_REPO/.github/workflows/python-release.yml"
+          for attempt in 1 2 3; do
+            gh attestation verify "$sdist" --repo "$GH_REPO" --bundle "$sdist.sbom.intoto.jsonl" \
+              --predicate-type https://cyclonedx.org/bom --signer-workflow "$GH_REPO/.github/workflows/python-release.yml" && break
+            [ "$attempt" -lt 3 ] && sleep 10 || exit 1
+          done
           printf '\nThe SBOM lists the dependency versions this release was tested with, not what an install will resolve.\n' >>../notes/notes.md
           # Only "release not found" means there is none: another error (a rate limit, a 5xx) stops the job.
           if ! state=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>&1); then

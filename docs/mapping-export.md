@@ -173,7 +173,8 @@ Pass the value at the `cff-1.2.0` `preferredCitation` path, the `preferred-citat
 ### Terms
 
 `author` and `contributor` each have the person sub-terms `.givenName`, `.familyName` and `.@id`
-(the ORCID), as in `contributor.givenName`.
+(the ORCID), as in `contributor.givenName`, and `.name` and `.resourceType` where a citation
+mapping reviews them.
 
 | Term | Meaning | Term | Meaning |
 | --- | --- | --- | --- |
@@ -255,8 +256,8 @@ A path is a list of steps joined by `.`. A step is a key, optionally followed by
 has `path`, `document` and `expected`: the values the path resolves to, in document order, from the
 first alternative with a value. Run every case through your resolver. Its `schema_version` is the
 schema whose grammar the cases need. A case with `raw_input` also tests parsing: its `format` names
-the parser (`pkg-info`, `ro-crate`, `croissant`, `oai_dc`, `debian-control`, `mods`, `vivo`, `spase`
-or `iso-19115-3`), and its `text` is the source file. Parse the text, compare the tree to
+the parser (`pkg-info`, `ro-crate`, `croissant`, `oai_dc`, `debian-control`, `mods`, `vivo`, `spase`,
+`iso-19115-3` or `arxiv`), and its `text` is the source file. Parse the text, compare the tree to
 `document`, then resolve `path`. A consumer that doesn't read that format, or doesn't know the name,
 skips the parse and still resolves `path`. This package's tests don't frame the `vivo` Turtle.
 

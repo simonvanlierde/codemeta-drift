@@ -16,6 +16,7 @@ keywords = [ # citesync compares this list to keywords in CITATION.cff
   "JSON-LD",
   "SSSOM",
   "schema drift",
+  "citation",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
