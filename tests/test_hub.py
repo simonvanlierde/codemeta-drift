@@ -3,14 +3,13 @@ import io
 import json
 from collections.abc import Callable
 from pathlib import Path
-from urllib.parse import quote
 
 import pytest
 import yaml
 
 from codemeta_drift.cli import main
 from codemeta_drift.export import ALL_TERMS, SCHEMA_VERSION, curated_tags
-from codemeta_drift.hub import PREDICATES, codemeta_id, pair_rows, spokes, sssom, validate_mapping
+from codemeta_drift.hub import PREDICATES, codemeta_id, pair_rows, sssom, validate_mapping
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -531,27 +530,34 @@ def test_a_row_with_an_https_see_also_is_accepted(mapping: dict):
 
 def test_sssom_encodes_every_path_and_term_and_appends_a_comment(mapping: dict):
     """Path and hub term are percent-encoded, slashes included; the comment follows the source after a semicolon."""
-    mapping["rows"][0]["comment"] = "why"
+    mapping["rows"] = [
+        {
+            "format": "cff-1.2.0",
+            "term": "author.familyName",
+            "path": "authors[].family-names",
+            "source": "curated:family",
+            "comment": "why",
+        },
+        {"format": "cff-1.2.0", "term": "author.@id", "path": "authors[].orcid", "source": "curated:orcid"},
+        {"format": "ro-crate", "term": "name", "path": "@graph[@id=./].name", "source": "curated:root"},
+    ]
+    validate_mapping(mapping)
     text = sssom(mapping)
     got = list(
         csv.DictReader(
             io.StringIO("\n".join(line for line in text.splitlines() if not line.startswith("#"))), delimiter="\t"
         )
     )
-    expected = [
+    assert [(r["subject_id"], r["object_id"], r["comment"]) for r in got] == [
+        ("field:cff-1.2.0/authors%5B%5D.family-names", "term:author.familyName", "curated:family; why"),
+        ("field:cff-1.2.0/authors%5B%5D.orcid", "term:author.%40id", "curated:orcid"),
+        ("field:ro-crate/%40graph%5B%40id%3D.%2F%5D.name", "schema:name", "curated:root"),
         (
-            f"field:{row['format']}/{quote(row['path'], safe='')}",
-            codemeta_id(row["term"]),
-            row["source"] + (f"; {row['comment']}" if row.get("comment") else ""),
-        )
-        for row in spokes(mapping)
-        if row["path"] is not None
+            "field:gomod/module",
+            "schema:codeRepository",
+            "curated:go.mod's module directive is a module path, not a repository URL",
+        ),
     ]
-    assert [(r["subject_id"], r["object_id"], r["comment"]) for r in got] == expected
-    assert any("%2F" in r["subject_id"] for r in got)
-    assert "field:cff-1.2.0/authors%5B%5D.family-names" in {r["subject_id"] for r in got}
-    assert "term:author.%40id" in {r["object_id"] for r in got}
-    assert mapping["rows"][0]["source"] + "; why" in {r["comment"] for r in got}
 
 
 def test_a_row_with_only_the_four_required_keys_is_accepted(mapping: dict):

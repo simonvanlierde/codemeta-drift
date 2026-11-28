@@ -176,7 +176,7 @@ def test_publisher_fetches_closed_titles_and_publishes_once():
         {"repo": "simonvanlierde/codemeta-drift", "title": title, "body": "review"}
         for title in ("closed", "new", "new")
     ]
-    publish(plans, existing.__getitem__, create)
+    publish(plans, lambda repo: set(existing[repo]), create)
     assert [plan["title"] for plan in created] == ["new"]
 
 
