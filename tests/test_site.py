@@ -327,3 +327,10 @@ def test_docs_and_page_describe_the_same_card():
         return found[1]
 
     assert alt("docs-overrides/main.html") == alt("site/index.html")
+
+
+def test_development_docs_name_every_mutated_module():
+    mutated = tomllib.loads((ROOT / "pyproject.toml").read_text("utf-8"))["tool"]["mutmut"]["only_mutate"]
+    docs = (ROOT / "docs/development.md").read_text("utf-8").partition("## Mutation tests")[2]
+    sentence = docs.partition(".\n")[0]
+    assert re.findall(r"`(\w+\.py)`", sentence) == sorted(Path(m).name for m in mutated)

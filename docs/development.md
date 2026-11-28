@@ -93,7 +93,7 @@ local poll. A local `--publish` run uses `gh` credentials and must not run besid
 
 ## Mutation tests
 
-`just mutation` tests modified copies of `checks.py`, `export.py`, `conformance.py` and `paths.py`.
+`just mutation` tests modified copies of `checks.py`, `cli.py`, `conformance.py`, `coverage.py`, `export.py` and `paths.py`.
 It fails when the tests miss a changed behaviour.
 List a mutation that cannot alter behaviour, with its reason, in [`tests/mutation-baseline.txt`](https://github.com/simonvanlierde/codemeta-drift/blob/main/tests/mutation-baseline.txt).
 The command also fails when tests catch a listed mutation.
