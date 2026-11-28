@@ -526,3 +526,40 @@ def test_a_row_with_an_https_see_also_is_accepted(mapping: dict):
     mapping["rows"][0]["see_also"] = "https://example.org/x"
     mapping["rows"][0]["comment"] = "why"
     validate_mapping(mapping)
+
+
+def test_sssom_encodes_every_path_and_term_and_appends_a_comment(mapping: dict):
+    """Path and hub term are percent-encoded, slashes included; the comment follows the source after a semicolon."""
+    mapping["rows"] = [
+        {
+            "format": "cff-1.2.0",
+            "term": "author.familyName",
+            "path": "authors[].family-names",
+            "source": "curated:family",
+            "comment": "why",
+        },
+        {"format": "cff-1.2.0", "term": "author.@id", "path": "authors[].orcid", "source": "curated:orcid"},
+        {"format": "ro-crate", "term": "name", "path": "@graph[@id=./].name", "source": "curated:root"},
+    ]
+    validate_mapping(mapping)
+    text = sssom(mapping)
+    got = list(
+        csv.DictReader(
+            io.StringIO("\n".join(line for line in text.splitlines() if not line.startswith("#"))), delimiter="\t"
+        )
+    )
+    assert [(r["subject_id"], r["object_id"], r["comment"]) for r in got] == [
+        ("field:cff-1.2.0/authors%5B%5D.family-names", "term:author.familyName", "curated:family; why"),
+        ("field:cff-1.2.0/authors%5B%5D.orcid", "term:author.%40id", "curated:orcid"),
+        ("field:ro-crate/%40graph%5B%40id%3D.%2F%5D.name", "schema:name", "curated:root"),
+        (
+            "field:gomod/module",
+            "schema:codeRepository",
+            "curated:go.mod's module directive is a module path, not a repository URL",
+        ),
+    ]
+
+
+def test_a_row_with_only_the_four_required_keys_is_accepted(mapping: dict):
+    mapping["rows"][0] = {key: mapping["rows"][0][key] for key in ("format", "term", "path", "source")}
+    validate_mapping(mapping)
