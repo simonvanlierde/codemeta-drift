@@ -511,6 +511,18 @@
     },
     {
       "format": "codemeta",
+      "term": "author.resourceType",
+      "path": "author[].@type",
+      "reason": "a CodeMeta author states Person or Organization in @type"
+    },
+    {
+      "format": "codemeta",
+      "term": "contributor.resourceType",
+      "path": "contributor[].@type",
+      "reason": "a CodeMeta contributor states Person or Organization in @type"
+    },
+    {
+      "format": "codemeta",
       "term": "preferredCitation",
       "path": "referencePublication",
       "reason": "codemeta.json's own property"

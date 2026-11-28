@@ -375,9 +375,23 @@
     },
     {
       "format": "codemeta",
+      "term": "author.resourceType",
+      "path": "author[].@type",
+      "source": "curated:a CodeMeta author states Person or Organization in @type",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "codemeta",
       "term": "contributor.name",
       "path": "contributor[].name",
       "source": "curated:codemeta.json's own property",
+      "crosswalk_cell": null
+    },
+    {
+      "format": "codemeta",
+      "term": "contributor.resourceType",
+      "path": "contributor[].@type",
+      "source": "curated:a CodeMeta contributor states Person or Organization in @type",
       "crosswalk_cell": null
     },
     {

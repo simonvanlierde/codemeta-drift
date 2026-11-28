@@ -40,8 +40,9 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   written and DataCite's `creatorName` as notation.
 - `hub pair` and `hub crosswalk` gain the citation rows, so `hub pair --from crossref --to cff-preferred`
   joins `containerTitle`, `volume`, `issue` and `pagination`.
-- The `codemeta` format has rows for `url`, `author.name`, `contributor.name` and `preferredCitation`
-  (`referencePublication`), so `hub pair --to codemeta` keeps them.
+- The `codemeta` format has rows for `url`, `author.name`, `contributor.name`, the person
+  `resourceType` terms (`@type`) and `preferredCitation` (`referencePublication`), so
+  `hub pair --to codemeta` keeps them.
 - `mapping-vectors.json` has an arXiv Atom entry as a `raw_input` case.
 
 ### Changed

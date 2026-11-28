@@ -211,6 +211,8 @@ def test_pair_joins_citation_rows(mapping: dict):
     assert by_term["containerTitle"]["target"] == "journal | collection-title"
     to_codemeta = {row["term"]: row["target"] for row in pair_rows(mapping, "crossref", "codemeta")}
     assert (to_codemeta["url"], to_codemeta["author.name"]) == ("url", "author[].name")
+    datacite = {row["term"]: row["target"] for row in pair_rows(mapping, "datacite", "codemeta")}
+    assert datacite["author.resourceType"] == "author[].@type"
 
 
 def _predicates(rows: dict[str, dict[str, str]]) -> dict[str, set[str]]:
