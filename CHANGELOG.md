@@ -19,9 +19,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   CodeMeta's context IRI at the tag and `object_source_version` the tag; both are empty on a `term:` row. A reader
   that took the hub term from `subject_id` reads `object_label`. Regenerate stored SSSOM files with
   `codemeta-drift hub sssom` rather than joining them with 0.9.0 output. The predicates change too (see Changed).
-  See [the crosswalk hub](docs/crosswalk-hub.md).
+  The columns also change order, so read them by header name. See [the crosswalk hub](docs/crosswalk-hub.md).
 - Update the hub CLI when pinning a 1.10 mapping. Older versions reject the new format and term
   IDs. See [mapping compatibility](docs/mapping-export.md#compatibility).
+- Mapping schema 1.10 adds the formats `crossref`, `arxiv` and `cff-preferred`, and the citation terms. A
+  citation term has rows only where a mapping was reviewed, so a missing row is not an error. Check only the
+  formats you read. See [format ids](docs/mapping-export.md#format-ids) and [terms](docs/mapping-export.md#terms).
+- `hub coverage --json` and the page's `data.json` list the reviewed citation terms in `terms` after the base
+  terms, and a citation cell's `crosswalk` is null where CodeMeta has no property for it. `no field` now means
+  the review found no usable path. Read `terms` and `statuses` instead of assuming 19 columns.
+- A mapping's `generator.version` must be a version string (letters, digits and `.+!_-`). The hub refuses
+  any other with exit 3, as it would otherwise reach the SSSOM header unescaped.
 
 ### Added
 
@@ -30,6 +38,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - A citation field with a CodeMeta property (`url`, `author.name`, `preferredCitation`) joins that
   property's crosswalk cell, so coverage and `hub crosswalk` read CFF's `preferred-citation` as
   written and DataCite's `creatorName` as notation.
+- `hub pair` and `hub crosswalk` gain the citation rows, so `hub pair --from crossref --to cff-preferred`
+  joins `containerTitle`, `volume`, `issue` and `pagination`.
+- The `codemeta` format has rows for `url`, `author.name`, `contributor.name` and `preferredCitation`
+  (`referencePublication`), so `hub pair --to codemeta` keeps them.
+- `mapping-vectors.json` has an arXiv Atom entry as a `raw_input` case.
 
 ### Changed
 
@@ -39,6 +52,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `part_of` is `skos:closeMatch` only on a ` + ` path that joins its parts. If the export's path changes, the
   row goes back to `skos:relatedMatch`. The rows also gain `subject_label` (the path) and `object_label`
   (the hub term), and the header gains CodeMeta's `schema` and `codemeta` prefixes for the tag. Refs #55.
+- The page headline and each row's tally count the base terms only, as the README does, so a reviewed
+  citation column no longer changes them.
+- Coverage pages say their citation columns come from the reviewed rows, not CodeMeta's crosswalks.
+
+### Fixed
+
+- The upstream check calls a changed citation cell `changed`, never `fixed`: the curated row is what
+  exports a citation term, so it can't go.
+- On CodeMeta's main branch, where the property table lists `name` three times, a crosswalk's `name` rows
+  still join the software's and a person's name when their neighbouring rows match one table row each.
 
 ## [0.9.0] - 2026-11-26
 

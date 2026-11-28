@@ -45,7 +45,9 @@
     <figure class="score" id="score"></figure>
   </div>
   <noscript><p class="note">This page needs JavaScript to draw the matrix. The documentation has
-    <a href="https://simonvanlierde.com/codemeta-drift/docs/coverage/">the same matrix for each release</a>.</p></noscript>
+    <a href="https://simonvanlierde.com/codemeta-drift/docs/coverage/">the same matrix for each release</a>.
+    An SSSOM subject id that links here is explained in
+    <a href="https://simonvanlierde.com/codemeta-drift/docs/crosswalk-hub/">the crosswalk hub docs</a>.</p></noscript>
 
   <div class="tabs" id="tabs" role="tablist" aria-label="Views">
     <button type="button" role="tab" id="tab-matrix" aria-controls="panel-matrix" aria-selected="true">Matrix</button>
@@ -64,6 +66,8 @@
         <code>author.@id</code> is an author's ORCID. <code>identifier</code> here means the software's DOI,
         a narrower reading than CodeMeta's, which takes any identifier. <code>swhid</code> is this page's own
         column: CodeMeta keeps a Software Heritage identifier in <code>identifier</code>.</p>
+      <p>A blank cell means the export has no row for that format and term. The citation columns have rows
+        only where a mapping was reviewed.</p>
       <p id="counts-note" hidden></p>
       <div id="key"></div>
     </details>

@@ -7,7 +7,6 @@ codemeta_drift.export.x_cell_finding__mutmut_27  same as derive_3
 codemeta_drift.conformance.x_branches__mutmut_38  a missing pointer part as None or {} both give a schema with no keys
 codemeta_drift.conformance.x_branches__mutmut_40  same as _38: get() without a default returns None
 codemeta_drift.conformance.x_branches__mutmut_52  an invalid pointer target as None or {} cannot resolve any field
-codemeta_drift.export.x_crosswalk_rows__mutmut_35  the default is read only for a name the table lacks, and neither "" nor "XXXX" is "schema:Thing"
 codemeta_drift.cli.x_json_report__mutmut_4  json.dumps reads ensure_ascii as a truth value, so None is False
 codemeta_drift.cli.x_export_main__mutmut_60  same as json_report_4
 codemeta_drift.cli.x_hub_parser__mutmut_19  add_subparsers' parser_class defaults to the parent's class, JsonParser

@@ -490,6 +490,30 @@
       "path": "preferred-citation",
       "cell": "preferred-citation",
       "reason": "CFF 1.2.0 stores the separate preferred reference in preferred-citation"
+    },
+    {
+      "format": "codemeta",
+      "term": "url",
+      "path": "url",
+      "reason": "codemeta.json's own property"
+    },
+    {
+      "format": "codemeta",
+      "term": "author.name",
+      "path": "author[].name",
+      "reason": "codemeta.json's own property"
+    },
+    {
+      "format": "codemeta",
+      "term": "contributor.name",
+      "path": "contributor[].name",
+      "reason": "codemeta.json's own property"
+    },
+    {
+      "format": "codemeta",
+      "term": "preferredCitation",
+      "path": "referencePublication",
+      "reason": "codemeta.json's own property"
     }
   ]
 }

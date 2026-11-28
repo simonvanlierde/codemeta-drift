@@ -68,10 +68,12 @@ function matrix(data, unreviewed, onPick) {
   const formats = [...data.formats].sort((a, b) => rank(a) - rank(b)).map((format) => ({ format, label: label(format) }));
   const { own, added } = splitByCrosswalk(formats, data.cells);
   const legend = (unreviewed || added.length) && el("span", {}, "Reviewed crosswalks. Choose a changed cell to see why.");
-  table.append(group(data.terms, own, data, onPick, { legend, tally: usableTally }));
+  const counted = new Set(data.base_terms);
+  const tally = (cells) => usableTally(cells, counted);
+  table.append(group(data.terms, own, data, onPick, { legend, tally }));
   if (added.length) {
     const none = el("span", {}, "No CodeMeta crosswalk. The reviewed mapping adds these formats.");
-    table.append(group(data.terms, added, data, onPick, { legend: none, tally: usableTally }));
+    table.append(group(data.terms, added, data, onPick, { legend: none, tally }));
   }
   if (!unreviewed) return;
   const shapes = el("span", {}, "Not reviewed yet. A mark shows only what CodeMeta's cell holds, and the last column counts path cells.");
@@ -150,9 +152,9 @@ function roving(table) {
   });
 }
 
-const usableTally = (cells) => {
+const usableTally = (cells, base) => {
   if (!cells[0]?.crosswalk) return ["–", el("span", { class: "vh" }, " no CodeMeta crosswalk")];
-  const fields = needed(cells);
+  const fields = needed(cells, base);
   return [`${fields.filter((c) => c.status === "as-is").length} of ${fields.length}`, el("span", { class: "vh" }, " usable as written")];
 };
 
@@ -391,9 +393,10 @@ function follow(hub) {
 
 // The headline: of the crosswalk cells for a field the format has, how many work as written, as a figure and a bar.
 function score(data) {
-  const fields = needed(data.cells);
+  const base = new Set(data.base_terms);
+  const fields = needed(data.cells, base);
   const count = (status) => fields.filter((c) => c.status === status).length;
-  const { asIs, of, formats, parts } = scoreCaption(data.cells);
+  const { asIs, of, formats, parts } = scoreCaption(data.cells, base);
   const bar = el("div", { class: "bar", "aria-hidden": "true" });
   for (const status of Object.keys(data.statuses).filter((s) => s !== "no field" && s !== "no term")) {
     const part = el("span", { class: `s-${status}` });

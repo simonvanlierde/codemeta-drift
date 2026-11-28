@@ -10,7 +10,7 @@ One matrix per CodeMeta tag: [4.0](coverage-4.0.md) and [3.1](coverage-3.1.md). 
 ## What the counts cover
 
 At CodeMeta 4.0, the 19 base columns are 18 CodeMeta properties and `resourceType`, which has
-none. The reviewed citation fields add columns where they have a curated path. I reviewed 36 of CodeMeta's 46 crosswalks.
-The page shows 47 of the export's 48 formats (`codemeta.json` has no row), 11 of them with no
+none. The reviewed citation fields add columns where they have a curated path. I reviewed 36 of
+CodeMeta's 46 crosswalks. The page shows 47 of the export's 48 formats (`codemeta.json` has no row), 11 of them with no
 CodeMeta crosswalk. The README's 648 cells are 36 crosswalks times 18 columns. The page's
 filters count all 917 cells.

@@ -1,9 +1,12 @@
+import hashlib
 import os
 import subprocess
 from pathlib import Path
 
 import pytest
 import yaml
+
+from codemeta_drift.export import curated_tags
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -152,3 +155,14 @@ def test_the_pypi_check_retries_and_times_out():
     workflow = (ROOT / ".github/workflows/python-release.yml").read_text("utf-8")
     [line] = [line for line in workflow.splitlines() if "https://pypi.org/pypi/" in line]
     assert "--retry 3 --retry-all-errors --max-time 30" in line
+
+
+def test_the_release_exports_are_the_examples_with_their_checksums(tmp_path: Path):
+    out = tmp_path / "export"
+    subprocess.run(["bash", ".github/scripts/collect-mapping-exports.sh", str(out)], cwd=ROOT, check=True)
+    names = [f"mapping-{tag}.json" for tag in curated_tags()]
+    assert sorted(p.name for p in out.iterdir()) == sorted([*names, "SHA256SUMS"])
+    for name in names:
+        assert (out / name).read_bytes() == (ROOT / "examples" / name).read_bytes()
+    sums = {f"{hashlib.sha256((out / name).read_bytes()).hexdigest()}  {name}" for name in names}
+    assert set((out / "SHA256SUMS").read_text("utf-8").splitlines()) == sums

@@ -126,12 +126,14 @@ export function matrixKey(event, cells, at) {
 export const tabStop = (shown, current) => (current >= 0 && shown[current] ? current : shown.indexOf(true));
 
 // The crosswalk cells a person had to judge: not 'no field', and not 'no term', which no crosswalk can have.
-// The tally and the headline count these.
-export const needed = (cells) => cells.filter((c) => c.crosswalk && c.status !== "no field" && c.status !== "no term");
+// The tally and the headline count these, for the base terms (a Set) only: citation columns have cells only where
+// reviewed, so counting them would make the figures depend on which reviews exist.
+export const needed = (cells, base) =>
+  cells.filter((c) => base.has(c.term) && c.crosswalk && c.status !== "no field" && c.status !== "no term");
 
 // The headline's figures, and its caption after the figure as [mark, words] pairs; the marks are for the eye only.
-export function scoreCaption(cells) {
-  const fields = needed(cells);
+export function scoreCaption(cells, base) {
+  const fields = needed(cells, base);
   const n = (status) => fields.filter((c) => c.status === status).length;
   return {
     asIs: n("as-is"),

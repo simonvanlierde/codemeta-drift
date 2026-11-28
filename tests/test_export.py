@@ -87,20 +87,23 @@ def test_third_repeat_and_one_column_rows():
 
 def test_property_counts_that_differ_get_no_cell():
     files = read_dir(FIXTURE)
-    # The Thing row is gone, so the Person row is first: its neighbours differ, and it must not join as Thing.
+    # The Thing row is gone, so the Person row is first: it must not join as Thing, but its own neighbours match.
     text = files[CFF].replace("identifier,identifiers / person.orcid / doi\n", "")
     cells = crosswalk_cells({**files, CFF: text}, CFF)
-    assert not {k for k in cells if k[1] == "identifier"}
+    assert {k: v for k, v in cells.items() if k[1] == "identifier"} == {
+        ("schema:Person", "identifier"): "person.orcid / identifiers / doi"
+    }
     assert cells[("schema:Person", "givenName")] == "person.given-names"
 
 
-def test_a_first_thing_row_with_its_neighbours_joins_when_counts_differ():
+def test_each_row_with_its_neighbours_joins_when_counts_differ():
     files = read_dir(FIXTURE)
     # CodeMeta's main branch: the table gains a ContactPoint name row the crosswalks lack.
     files["properties_description.csv"] += "schema:ContactPoint,name,Text,The name of the contact point\n"
     cells = crosswalk_cells(files, CFF)
     assert cells[("schema:Thing", "name")] == "title"
-    assert ("schema:Person", "name") not in cells
+    assert cells[("schema:Person", "name")] == "entity.name"
+    assert ("schema:ContactPoint", "name") not in cells
 
 
 def test_the_first_thing_row_joins_when_a_later_row_is_missing():
@@ -141,12 +144,18 @@ def test_neighbours_stops_at_both_ends(names: list[str], k: int, pair: tuple[str
     [
         "Property,X\nid,i\nname,n\ndate,d\n",  # only the row before matches
         "Property,X\ndate,d\nname,n\nurl,u\n",  # only the row after matches
-        "Property,X\nname,n\ndate,d\nid,i\nname,m\nurl,u\nname,o\n",  # a later occurrence has the neighbours
+        "Property,X\nid,i\nname,n\nurl,u\nid,i\nname,m\nurl,u\nname,o\n",  # two occurrences have the neighbours
     ],
 )
-def test_a_first_thing_row_without_both_neighbours_gets_no_cell(crosswalk: str):
+def test_a_thing_row_without_one_neighbour_match_gets_no_cell(crosswalk: str):
     files = {"properties_description.csv": TABLE, "crosswalks/X.csv": crosswalk}
     assert ("schema:Thing", "name") not in crosswalk_cells(files, "crosswalks/X.csv")
+
+
+def test_a_later_occurrence_with_the_neighbours_joins():
+    crosswalk = "Property,X\nname,n\ndate,d\nid,i\nname,m\nurl,u\nname,o\n"
+    files = {"properties_description.csv": TABLE, "crosswalks/X.csv": crosswalk}
+    assert crosswalk_cells(files, "crosswalks/X.csv")[("schema:Thing", "name")] == "m"
 
 
 def test_a_first_thing_row_at_the_edge_gets_no_cell():
@@ -263,7 +272,7 @@ def test_prose_and_empty_cells_without_a_curated_row_are_refused():
         f"CELL_PROSE {CFF}: license: prose cell 'license / license-url', and no curated row",
         "CELL_EMPTY crosswalks/Cargo.csv: description: empty cell, no curated row",
     ]
-    assert len(rows) == 896
+    assert len(rows) == 900
 
 
 def test_curated_row_that_repeats_the_cell_is_refused():
@@ -555,14 +564,11 @@ def test_the_guide_defines_every_citation_term():
 
 
 def test_format_lists_match_the_formats():
-    """The schema's format description, the docs' row order and the site's labels each list every format."""
+    """The schema's format description and the docs' row order each list every format; test_site checks the labels."""
     described = SCHEMA["$defs"]["row"]["properties"]["format"]["description"]
     listed = described.removeprefix("Stable format id: ").split(". ")[0].split(", ")
     docs = " ".join((ROOT / "docs/mapping-export.md").read_text("utf-8").split())
     order = re.search(r"in the order (`.*?`), and within a format", docs)
     assert order
-    labels = re.search(r"const LABELS = \{(.*?)\n\};", (ROOT / "site/main.mjs").read_text("utf-8"), re.DOTALL)
-    assert labels
     assert listed == list(FORMATS)
     assert re.findall(r"`([a-z0-9.-]+)`", order[1]) == list(FORMATS)
-    assert set(re.findall(r'"?([a-z0-9.-]+)"?: "', labels[1])) == set(FORMATS) - {"codemeta"}

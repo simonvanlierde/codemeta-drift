@@ -73,6 +73,9 @@ def test_docs_page_is_generated_from_the_example(tag: str):
     example = json.loads((ROOT / f"examples/mapping-{tag}.json").read_text("utf-8"))
     page = (ROOT / f"docs/coverage-{tag}.md").read_text("utf-8")
     assert page == markdown(example, read_dir(ROOT / "tests/fixtures" / tag))
+    # The citation columns come from the reviewed rows, not CodeMeta's crosswalks.
+    n = len(coverage(example)["terms"])
+    assert f"How CodeMeta's {tag} crosswalks and the reviewed citation fields map {n} terms in " in page
 
 
 def test_unreviewed_lists_every_other_crosswalk_by_shape(mapping: dict, tag_files: Path):
@@ -281,6 +284,18 @@ def test_upstream_reports_unmatched_changed_and_fixed_cells(mapping: dict, tag_f
         ("zenodo", "version"): "unmatched",
         ("cff-1.2.0", "name"): "changed",  # an as-is cell that changes is never "fixed"
     }
+
+
+def test_a_citation_cell_that_gives_the_path_is_changed_not_fixed(mapping: dict, tag_files: Path):
+    files = read_dir(tag_files)
+    datacite = "crosswalks/DataCite.csv"
+    assert "\nurl,\n" in files[datacite]
+    files[datacite] = files[datacite].replace("\nurl,\n", "\nurl,url\n", 1)
+    cargo = "crosswalks/Cargo.csv"
+    files[cargo] = files[cargo].replace("keywords,package.keyword", "keywords,package.keywords")
+    found = {(c["format"], c["term"]): c["state"] for c in upstream(files, mapping)}
+    # The curated row is what exports a citation term, so it can never go.
+    assert found == {("datacite", "url"): "changed", ("cargo", "keywords"): "fixed"}
 
 
 @pytest.mark.parametrize(

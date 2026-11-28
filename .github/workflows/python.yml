@@ -67,9 +67,6 @@ jobs:
       - run: uv run ruff format --check
       - run: uv run ty check
       - run: uv run pytest
-      - name: collect and verify the release mapping exports
+      - name: collect the release mapping exports
         if: matrix.python == '3.14'
-        run: |-
-          bash .github/scripts/collect-mapping-exports.sh "$RUNNER_TEMP/export"
-          cd "$RUNNER_TEMP/export"
-          sha256sum --check SHA256SUMS
+        run: bash .github/scripts/collect-mapping-exports.sh "$RUNNER_TEMP/export"

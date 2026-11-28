@@ -2,8 +2,9 @@
 
 A row reads its crosswalk cell when the cell is a path in the export's grammar. Every other row
 (a prose cell, an empty one, a wrong one, or a format with no crosswalk) comes from
-``curated-<tag>.json``, which gives the path and the reason. A cell that is not a path and has no
-curated row is refused, never guessed.
+``curated-<tag>.json``, which gives the path and the reason; the citation rows every tag shares
+come from ``citation-crosswalks.json``. A cell that is not a path and has no curated row is refused,
+never guessed.
 """
 
 import json
@@ -68,6 +69,9 @@ CITATION_TERMS: dict[str, tuple[str, str] | None] = {
     "hasVersion": None,
 }
 """Citation terms, exported only where a curated row reviews them, and the property table row of their cell, if any."""
+DISPLAY_ONLY = {"contributor.name": ("schema:Person", "name")}
+"""Property labels the page shows for a citation term ``CITATION_TERMS`` leaves unjoined: contributor.name is a
+Person name, but joining it would pair it with DataCite's creatorName cell, which names the creator only."""
 ALL_TERMS = TERMS | CITATION_TERMS
 """Every term an export row may have, and its property table row (None for a citation term with none)."""
 PEOPLE = ("author", "contributor")
@@ -174,10 +178,10 @@ def crosswalk_rows(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str, 
     The crosswalk has no type column, so a property listed under two types (``identifier`` under
     Thing and Person) is matched by its n-th occurrence in each file, never by line number. A
     property whose count differs between the files gets no cell, since the match would be a guess,
-    with one exception: when the table lists it first under ``schema:Thing`` and the crosswalk's
-    first occurrence has the same rows before and after it as the table's first, that one row joins.
-    On CodeMeta's main branch the table has a third ``name`` row (``schema:ContactPoint``) that
-    the crosswalks lack, and the software's own ``name`` still joins.
+    with one exception: an occurrence joins a table row when the names just before and after it
+    (none missing) match those of exactly one of the property's table rows, and of no other of its
+    occurrences in the crosswalk. On CodeMeta's main branch the table has a third ``name`` row
+    (``schema:ContactPoint``) that the crosswalks lack, and the software's and a person's ``name`` still join.
     """
     table = [(row[0], row[1]) for _, row in table_rows(files)]
     parents: dict[str, list[str]] = {}
@@ -185,16 +189,19 @@ def crosswalk_rows(files: Mapping[str, str], crosswalk: str) -> dict[tuple[str, 
         parents.setdefault(name, []).append(parent)
     rows = [(line, row[0], row[1] if len(row) > 1 else "") for line, row in csv_rows(files[crosswalk])[1:]]
     counts = Counter(name for _, name, _ in rows)
+    names, table_names = [n for _, n, _ in rows], [n for _, n in table]
+    pairs = Counter((n, neighbours(names, i)) for i, n in enumerate(names))
+    table_pairs = {(n, neighbours(table_names, k)): table[k][0] for k, n in enumerate(table_names)}
+    table_counts = Counter((n, neighbours(table_names, k)) for k, n in enumerate(table_names))
     seen: Counter[str] = Counter()
     cells = {}
     for i, (line, name, cell) in enumerate(rows):
         if counts[name] == len(parents.get(name, ())):
             cells[(parents[name][seen[name]], name)] = (line, cell)
-        elif seen[name] == 0 and parents.get(name, [""])[0] == "schema:Thing":
-            at = next(k for k, (_, n) in enumerate(table) if n == name)
-            pair = neighbours([n for _, n, _ in rows], i)
-            if None not in pair and pair == neighbours([n for _, n in table], at):
-                cells[("schema:Thing", name)] = (line, cell)
+        elif name in parents:
+            key = (name, neighbours(names, i))
+            if None not in key[1] and pairs[key] == 1 and table_counts[key] == 1:
+                cells[(table_pairs[key], name)] = (line, cell)
         seen[name] += 1
     return cells
 

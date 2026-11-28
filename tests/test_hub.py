@@ -183,6 +183,36 @@ def _rows(mapping: dict, fmt: str) -> dict[str, dict[str, str]]:
     return {row["object_label"]: row for row in rows if row["subject_source"] == f"format:{fmt}"}
 
 
+@pytest.mark.parametrize(
+    ("fmt", "term", "subject_id", "object_id"),
+    [
+        ("crossref", "author.@id", "field:crossref/author%5B%5D.ORCID", "term:author.%40id"),
+        ("crossref", "pagination", "field:crossref/page%20%7C%20article-number", "term:pagination"),
+        ("arxiv", "arxivId", "field:arxiv/link%5Brel%3Dalternate%5D.href%20%7C%20id", "term:arxivId"),
+        ("arxiv", "primaryCategory", "field:arxiv/primary_category.term", "term:primaryCategory"),
+        (
+            "cff-preferred",
+            "identifier",
+            "field:cff-preferred/doi%20%7C%20identifiers%5Btype%3Ddoi%5D.value",
+            "schema:identifier",
+        ),
+        ("cff-preferred", "pagination", "field:cff-preferred/start%20%2B%20end", "term:pagination"),
+        ("codemeta", "url", "field:codemeta/url", "schema:url"),
+    ],
+)
+def test_sssom_citation_rows(mapping: dict, fmt: str, term: str, subject_id: str, object_id: str):
+    row = _rows(mapping, fmt)[term]
+    assert (row["subject_id"], row["object_id"], row["predicate_id"]) == (subject_id, object_id, "skos:relatedMatch")
+
+
+def test_pair_joins_citation_rows(mapping: dict):
+    by_term = {row["term"]: row for row in pair_rows(mapping, "crossref", "cff-preferred")}
+    assert by_term["pagination"] == {"term": "pagination", "source": "page | article-number", "target": "start + end"}
+    assert by_term["containerTitle"]["target"] == "journal | collection-title"
+    to_codemeta = {row["term"]: row["target"] for row in pair_rows(mapping, "crossref", "codemeta")}
+    assert (to_codemeta["url"], to_codemeta["author.name"]) == ("url", "author[].name")
+
+
 def _predicates(rows: dict[str, dict[str, str]]) -> dict[str, set[str]]:
     """The terms under each predicate other than relatedMatch."""
     out: dict[str, set[str]] = {}
@@ -479,6 +509,18 @@ def test_mapping_rejects_a_format_before_its_first_tag(mapping: dict, fmt: str):
         validate_mapping(mapping)
 
 
+def test_sssom_of_a_mapping_with_a_newline_in_its_version_exits_3(
+    mapping: dict, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+):
+    mapping["generator"]["version"] = "0.10.0\n# license: x"
+    path = tmp_path / "mapping.json"
+    path.write_text(json.dumps(mapping), "utf-8")
+    assert main(["hub", "sssom", str(path)]) == 3
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "generator.version must be a version string" in captured.err
+
+
 @pytest.mark.parametrize("tag", ["main", "v4.0", "4..0", "--help", "4.0\n", "\u0664.\u0660"])
 def test_mapping_rejects_non_numeric_tags(mapping: dict, tag: str):
     mapping["codemeta_tag"] = tag
@@ -500,6 +542,7 @@ DAMAGE = {
     "no-generator": lambda d: d.update(generator=None),
     "empty-generator-name": lambda d: d["generator"].update(name=""),
     "generator-version-not-string": lambda d: d["generator"].update(version=1),
+    "generator-version-newline": lambda d: d["generator"].update(version="1.0'\nlicense: x"),
     "rows-not-list": lambda d: d.update(rows={}),
     "row-not-object": lambda d: d["rows"].insert(0, "row"),
     "row-missing-term": lambda d: d["rows"][0].pop("term"),

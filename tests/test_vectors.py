@@ -485,3 +485,44 @@ def test_curated_iso_rows_read_the_vector_document(tag: str) -> None:
     assert resolve(document, cells["name"]) == ["carberry-notes"]
     assert resolve(document, cells["version"]) == ["1.4.0"]
     assert resolve(document, cells["description"]) == ["Keeps lab notes next to the code that produced them."]
+
+
+ARXIV_LISTS = {"author", "link"}
+"""The entry's elements docs/reading-formats.md reads as lists even when the entry has one."""
+
+
+def read_arxiv(node: ET.Element) -> Any:  # noqa: ANN401 - a string or a tree
+    """An Atom element as docs/reading-formats.md reads arXiv: local names, attributes as plain keys."""
+    if not len(node):
+        return dict(node.attrib) if node.attrib else (node.text or "").strip()
+    tree: dict[str, Any] = {}
+    for child in node:
+        key = child.tag.rpartition("}")[2]
+        if key in ARXIV_LISTS:
+            tree.setdefault(key, []).append(read_arxiv(child))
+        else:
+            tree[key] = read_arxiv(child)
+    return tree
+
+
+def test_arxiv_parser_vector_matches_the_reading_rules() -> None:
+    case = raw_case("arxiv")
+    root = ET.fromstring(case["raw_input"]["text"].encode())  # noqa: S314 - the vectors ship in this package
+    assert read_arxiv(next(root.iter("{http://www.w3.org/2005/Atom}entry"))) == case["document"]
+
+
+def test_arxiv_citation_rows_read_the_vector_document() -> None:
+    rows = json.loads(PACKAGE.joinpath("citation-crosswalks.json").read_text("utf-8"))["rows"]
+    paths = {r["term"]: r["path"] for r in rows if r["format"] == "arxiv" and r["path"] is not None}
+    document = raw_case("arxiv")["document"]
+    expected = {
+        "name": ["Crack Patterns in Glazed Ceramics"],
+        "author": document["author"],
+        "author.name": ["Josiah Carberry", "Ada Lovelace"],
+        "description": ["Readings from the psychoceramics lab."],
+        "datePublished": ["2026-11-03T17:00:00Z"],
+        "arxivId": ["https://arxiv.org/abs/2611.00042v2"],
+        "primaryCategory": ["cs.DL"],
+        "relatedDoi": ["10.5555/carberry.cracks"],
+    }
+    assert {t: resolve(document, p) for t, p in paths.items()} == expected
