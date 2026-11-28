@@ -1,4 +1,5 @@
 import json
+import re
 from collections.abc import Callable
 from pathlib import Path
 
@@ -6,6 +7,7 @@ import pytest
 
 from codemeta_drift.checks import VALID_EXAMPLES, Finding, check, code_span, csv_rows
 
+ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path(__file__).parent / "fixtures"
 
 CONTEXT = {
@@ -376,3 +378,10 @@ def test_seeded_drift_in_the_4_0_release_is_found(
 )
 def test_code_span_fences_past_every_backtick_run(text: str, span: str):
     assert code_span(text) == span
+
+
+def test_docs_list_every_finding_code_of_checks():
+    section = (ROOT / "docs/checks.md").read_text("utf-8").partition("## Every check")[2].partition("\n## ")[0]
+    documented = set(re.findall(r"^\| `([A-Z_]+)` \|", section, re.MULTILINE))
+    source = (ROOT / "src/codemeta_drift/checks.py").read_text("utf-8")
+    assert documented == set(re.findall(r'"([A-Z][A-Z_]{5,})"', source))
